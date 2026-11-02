@@ -35,7 +35,6 @@ import { rootTerritoryId } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
 import {
   ENTITY_DETAIL_SCROLL_CONTAINER_ID,
-  ENTITY_DETAIL_SCROLLBAR_ID,
   handleDeleteEntityError,
   usedInSectionId,
 } from "utils/deleteEntityConflict";
@@ -547,8 +546,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     <EntityWritesContext.Provider value={writes}>
       {entity && (
         <CustomScrollbar
-          scrollerId={ENTITY_DETAIL_SCROLLBAR_ID}
-          elementId={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
+          id={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
           customStyle={{
             // necessary to scroll until the bottom of the page; the Detail box
             // holds its tab strip in the same height, a host of its own keeps

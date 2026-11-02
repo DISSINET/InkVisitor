@@ -795,14 +795,9 @@ export const StatementListBox: React.FC = () => {
             // ref={contentRef}
             >
               <CustomScrollbar
-                scrollerId="Statements"
-                elementId="Statements-box-table"
+                id="Statements-box-table"
                 contentWidth={tableWidth}
-                customStyle={{
-                  display: "flex",
-                  flexShrink: 0,
-                  height: "100%",
-                }}
+                customStyle={{ flexShrink: 0 }}
               >
                 <StyledTableWrapper $isListMode={displayMode === StatementListDisplayMode.LIST}>
                   {isListNonEmpty && (

@@ -1,47 +1,39 @@
-import Scrollbar from "react-scrollbars-custom";
 import styled from "styled-components";
 
-/** Thumb colors only (Annotator-style grays); track stays transparent — no fixed width/radius. */
-export const StyledScrollbar = styled(Scrollbar)`
-  .ScrollbarsCustom-Wrapper {
-    .ScrollbarsCustom-Scroller {
-      .ScrollbarsCustom-Content {
-        padding-right: 0.1rem !important;
-      }
-    }
+interface StyledScrollbar {
+  $width?: number;
+  $height?: number;
+  $noScrollX: boolean;
+  $noScrollY: boolean;
+}
+/**
+ * Native scrolling with a thin gray thumb on a transparent track. Browsers that
+ * know `scrollbar-color` ignore `::-webkit-scrollbar`, so the pseudo-elements
+ * only style Safari.
+ */
+export const StyledScrollbar = styled.div<StyledScrollbar>`
+  /* scroll targets measure offsetTop against this element */
+  position: relative;
+  width: ${({ $width }) => ($width !== undefined ? `${$width}px` : "100%")};
+  height: ${({ $height }) => ($height !== undefined ? `${$height}px` : "100%")};
+  overflow-x: ${({ $noScrollX }) => ($noScrollX ? "hidden" : "auto")};
+  overflow-y: ${({ $noScrollY }) => ($noScrollY ? "hidden" : "auto")};
+
+  @supports (scrollbar-color: auto) {
+    scrollbar-width: thin;
+    scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
   }
 
-  .ScrollbarsCustom-Track {
-    background: transparent !important;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
   }
-
-  /* Vertical: inset thumb width (matches library’s thin track). */
-  .ScrollbarsCustom-TrackY .ScrollbarsCustom-ThumbY {
-    width: 80% !important;
-    margin-left: 0.1rem !important;
+  &::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.color.gray[500]};
+    border-radius: ${({ theme }) => theme.borderRadius["full"]};
   }
-
-  /*
-   * Horizontal: width is set in px by the library — do not set width here.
-   * Mirror the vertical look with height: 80% + top offset (same idea as width + margin on Y).
-   */
-  .ScrollbarsCustom-TrackX .ScrollbarsCustom-ThumbX {
-    height: 80% !important;
-    top: 10% !important;
-  }
-
-  .ScrollbarsCustom-ThumbY,
-  .ScrollbarsCustom-ThumbX {
-    background-color: ${({ theme }) => theme.color.gray[500]} !important;
-    transition: background-color 0.5s ease;
-  }
-
-  .ScrollbarsCustom-TrackY:hover .ScrollbarsCustom-ThumbY,
-  .ScrollbarsCustom-TrackY:active .ScrollbarsCustom-ThumbY,
-  .ScrollbarsCustom-TrackX:hover .ScrollbarsCustom-ThumbX,
-  .ScrollbarsCustom-TrackX:active .ScrollbarsCustom-ThumbX,
-  .ScrollbarsCustom-ThumbY:hover,
-  .ScrollbarsCustom-ThumbX:hover {
-    background-color: ${({ theme }) => theme.color.gray[700]} !important;
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: ${({ theme }) => theme.color.gray[700]};
   }
 `;

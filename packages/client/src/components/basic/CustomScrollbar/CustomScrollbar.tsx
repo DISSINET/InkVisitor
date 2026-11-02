@@ -2,8 +2,8 @@ import React from "react";
 import { StyledScrollbar } from "./CustomScrollbarStyles";
 
 interface CustomScrollbar {
-  scrollerId?: string;
-  elementId?: string;
+  /** id of the scrolling element, for callers that `scrollTo` it */
+  id?: string;
   contentWidth?: number;
   contentHeight?: number;
   customStyle?: React.CSSProperties;
@@ -13,8 +13,7 @@ interface CustomScrollbar {
   noScrollY?: boolean;
 }
 export const CustomScrollbar: React.FC<CustomScrollbar> = ({
-  scrollerId,
-  elementId,
+  id,
   contentWidth,
   contentHeight,
   customStyle,
@@ -22,33 +21,14 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
   noScrollX = false,
   noScrollY = false,
 }) => {
-  // Necessary for scrollTo functionality
-  if (elementId && scrollerId) {
-    const parentDiv = document.getElementById(scrollerId);
-    if (parentDiv) {
-      const descendantDiv = parentDiv.querySelector(
-        ".ScrollbarsCustom-Scroller"
-      );
-      if (descendantDiv) {
-        descendantDiv.id = elementId;
-      }
-    }
-  }
-
   return (
     <StyledScrollbar
-      id={scrollerId}
-      disableTracksWidthCompensation={false}
-      removeTrackXWhenNotUsed={true}
-      removeTrackYWhenNotUsed={true}
-      permanentTracks={false}
-      style={{
-        width: contentWidth ?? "100%",
-        height: contentHeight ?? "100%",
-        ...customStyle,
-      }}
-      noScrollX={noScrollX}
-      noScrollY={noScrollY}
+      id={id}
+      $width={contentWidth}
+      $height={contentHeight}
+      $noScrollX={noScrollX}
+      $noScrollY={noScrollY}
+      style={customStyle}
     >
       {children}
     </StyledScrollbar>

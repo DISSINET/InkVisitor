@@ -42,9 +42,7 @@ export interface DeleteEntityConflict {
   message: string;
 }
 
-/** CustomScrollbar wrapper id of the entity detail (`scrollerId`). */
-export const ENTITY_DETAIL_SCROLLBAR_ID = "entity-detail-scrollbar";
-/** Scrollable entity-detail container id (CustomScrollbar `elementId`). */
+/** Scrollable entity-detail container id (CustomScrollbar `id`). */
 export const ENTITY_DETAIL_SCROLL_CONTAINER_ID = "entity-detail-box-content";
 /** Id of an entity's "Used in" section — per entity so a scroll waits for the right detail. */
 export const usedInSectionId = (entityId: string) =>
