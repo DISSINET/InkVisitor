@@ -9,7 +9,6 @@ export const StyledContent = styled.div`
   padding-left: 0.6rem;
   background-color: ${({ theme }) => theme.color["white"]};
   padding-bottom: 1rem;
-  overflow: auto;
 `;
 
 export const StyledHeader = styled.div`

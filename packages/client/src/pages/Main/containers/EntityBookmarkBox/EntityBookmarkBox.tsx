@@ -3,6 +3,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CustomScrollbar,
   CancelButton,
   Input,
   Loader,
@@ -185,92 +186,94 @@ export const EntityBookmarkBox: React.FC = () => {
   });
 
   return (
-    <StyledContent>
-      <StyledHeader>
-        <Button
-          key="add"
-          icon={<IcoPlusBold />}
-          color="primary"
-          inverted
-          label="bookmark folder"
-          onClick={() => clickNewBookmarFolderkHandle()}
-          size={ButtonSize.Medium}
+    <CustomScrollbar>
+      <StyledContent>
+        <StyledHeader>
+          <Button
+            key="add"
+            icon={<IcoPlusBold />}
+            color="primary"
+            inverted
+            label="bookmark folder"
+            onClick={() => clickNewBookmarFolderkHandle()}
+            size={ButtonSize.Medium}
+          />
+        </StyledHeader>
+        {bookmarkFolders && (
+          <StyledFolderList>
+            {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder, key: number) => {
+              const open = openedFolders.includes(bookmarkFolder.id);
+              const empty = bookmarkFolder.entities.length === 0;
+
+              return (
+                <EntityBookmarkFolder
+                  key={key}
+                  bookmarkFolder={bookmarkFolder}
+                  open={open}
+                  empty={empty}
+                  getBookmarksCopy={getBookmarksCopy}
+                  startEditingFolder={startEditingFolder}
+                  askRemoveFolder={askRemoveFolder}
+                  openedFolders={openedFolders}
+                  setOpenedFolders={setOpenedFolders}
+                />
+              );
+            })}
+          </StyledFolderList>
+        )}
+        <Loader show={isFetching} />
+
+        <Modal
+          key="bookmark-folder-modal"
+          showModal={isFolderModalOpen}
+          onClose={closeFolderModal}
+          onEnterPress={submitFolderModal}
+          width={350}
+        >
+          <ModalHeader title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"} />
+          <ModalContent>
+            <ModalInputForm alignLeft>
+              <ModalInputLabel>new label:</ModalInputLabel>
+              <ModalInputWrap>
+                <Input
+                  labelSpaceNoWrap
+                  placeholder=""
+                  onChangeFn={(newName: string) => setEditingFolderName(newName)}
+                  value={editingFolderName}
+                  changeOnType
+                  autoFocus
+                  width="full"
+                />
+              </ModalInputWrap>
+            </ModalInputForm>
+          </ModalContent>
+
+          <ModalFooter>
+            <ButtonGroup>
+              <CancelButton key="cancel" onClick={closeFolderModal} />
+
+              <Button
+                key="submit"
+                label={isEditMode ? "Submit" : "Create"}
+                color="info"
+                onClick={submitFolderModal}
+                disabled={!editedFolderIsValid}
+              />
+            </ButtonGroup>
+          </ModalFooter>
+          <Loader show={createFolderMutation.isPending || acceptEditingFolderMutation.isPending} />
+        </Modal>
+
+        <Submit
+          title={`Remove Bookmark folder ${removingFolderName}`}
+          text={`Do you really want to remove Bookmark folder ${removingFolderName}?`}
+          show={removingFolder != false}
+          onSubmit={() => acceptRemoveFolderMutation.mutate()}
+          onCancel={() => cancelRemoveFolder()}
+          loading={acceptRemoveFolderMutation.isPending}
         />
-      </StyledHeader>
-      {bookmarkFolders && (
-        <StyledFolderList>
-          {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder, key: number) => {
-            const open = openedFolders.includes(bookmarkFolder.id);
-            const empty = bookmarkFolder.entities.length === 0;
-
-            return (
-              <EntityBookmarkFolder
-                key={key}
-                bookmarkFolder={bookmarkFolder}
-                open={open}
-                empty={empty}
-                getBookmarksCopy={getBookmarksCopy}
-                startEditingFolder={startEditingFolder}
-                askRemoveFolder={askRemoveFolder}
-                openedFolders={openedFolders}
-                setOpenedFolders={setOpenedFolders}
-              />
-            );
-          })}
-        </StyledFolderList>
-      )}
-      <Loader show={isFetching} />
-
-      <Modal
-        key="bookmark-folder-modal"
-        showModal={isFolderModalOpen}
-        onClose={closeFolderModal}
-        onEnterPress={submitFolderModal}
-        width={350}
-      >
-        <ModalHeader title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"} />
-        <ModalContent>
-          <ModalInputForm alignLeft>
-            <ModalInputLabel>new label:</ModalInputLabel>
-            <ModalInputWrap>
-              <Input
-                labelSpaceNoWrap
-                placeholder=""
-                onChangeFn={(newName: string) => setEditingFolderName(newName)}
-                value={editingFolderName}
-                changeOnType
-                autoFocus
-                width="full"
-              />
-            </ModalInputWrap>
-          </ModalInputForm>
-        </ModalContent>
-
-        <ModalFooter>
-          <ButtonGroup>
-            <CancelButton key="cancel" onClick={closeFolderModal} />
-
-            <Button
-              key="submit"
-              label={isEditMode ? "Submit" : "Create"}
-              color="info"
-              onClick={submitFolderModal}
-              disabled={!editedFolderIsValid}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-        <Loader show={createFolderMutation.isPending || acceptEditingFolderMutation.isPending} />
-      </Modal>
-
-      <Submit
-        title={`Remove Bookmark folder ${removingFolderName}`}
-        text={`Do you really want to remove Bookmark folder ${removingFolderName}?`}
-        show={removingFolder != false}
-        onSubmit={() => acceptRemoveFolderMutation.mutate()}
-        onCancel={() => cancelRemoveFolder()}
-        loading={acceptRemoveFolderMutation.isPending}
-      />
-    </StyledContent>
+      </StyledContent>
+    </CustomScrollbar>
   );
 };
 
