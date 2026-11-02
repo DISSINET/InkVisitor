@@ -276,7 +276,7 @@ export const TerritoryTreeBox: React.FC = () => {
           )}
 
           {firstPanelExpanded && (
-            <CustomScrollbar scrollerId="Territories" elementId="Territories-box-content">
+            <CustomScrollbar id="Territories-box-content">
               <StyledTreeWrapper
               // id="Territories-box-content"
               >

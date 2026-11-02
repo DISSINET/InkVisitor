@@ -183,7 +183,7 @@ describe("scrollToUsedInSection", () => {
     const scrollTo = addScrollContainer();
     addUsedInSection("e1");
     scrollToUsedInSection("e1");
-    // jsdom reports offsetTop as 0; asserting the scroll happened is the point
+    // jsdom lays nothing out, so every rect is 0; asserting the scroll happened is the point
     expect(scrollTo).toHaveBeenCalledWith({ behavior: "smooth", top: 0 });
   });
 

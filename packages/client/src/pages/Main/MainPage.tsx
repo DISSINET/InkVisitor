@@ -887,6 +887,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getAnnotatorBoxHeight()}
           heightVarKey="annotator"
           label="Annotator"
+          // the annotator scrolls its own text, and its pixel size lags the panel
+          // while it is resized, which would flash a scrollbar on the box
+          disableScroll
           headerComponent={annotatorHeader}
           // Document identity fills the free header space; the caption and the
           // panel button stay visible, so the header content yields, not them.

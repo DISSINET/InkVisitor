@@ -1,4 +1,15 @@
+// the component file directly, since the components index imports this file back
+import { CustomScrollbar } from "components/basic/CustomScrollbar/CustomScrollbar";
 import styled from "styled-components";
+
+interface StyledDetailScroller {
+  $hasOwnHost: boolean;
+}
+// necessary to scroll until the bottom of the page; the Detail box holds its
+// tab strip in the same height, a host of its own keeps its tabs outside
+export const StyledDetailScroller = styled(CustomScrollbar)<StyledDetailScroller>`
+  height: ${({ $hasOwnHost }) => ($hasOwnHost ? "100%" : "calc(100% - 2.5rem)")};
+`;
 
 interface StyledDetailWrapper {}
 export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`

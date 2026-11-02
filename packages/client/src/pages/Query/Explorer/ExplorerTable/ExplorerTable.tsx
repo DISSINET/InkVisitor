@@ -17,6 +17,7 @@ import { Loader } from "components";
 import { CMetaProp } from "constructors";
 
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
+import { SCROLLBAR_SIZE } from "Theme/constants";
 import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import {
@@ -530,10 +531,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
         {/* The column the header and the body stack in. It has to be the flex
             container of both, since the body takes the height the header leaves
-            and react-window sizes the rows to that. */}
+            and react-window sizes the rows to that. It is wider than the
+            table by the list's vertical scrollbar, which takes layout width,
+            so the rows keep the header's full width. */}
         <div
           style={{
-            width: widthTable,
+            width: widthTable + SCROLLBAR_SIZE,
             minWidth: "100%",
             display: "flex",
             flexDirection: "column",

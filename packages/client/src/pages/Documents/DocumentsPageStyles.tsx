@@ -1,27 +1,5 @@
 import styled, { css } from "styled-components";
-import { StyledScrollbar } from "components/basic/CustomScrollbar/CustomScrollbarStyles";
 import { IcoDownload, IcoFileText } from "Theme/icons";
-
-/**
- * Documents grid can scroll on both axes; the library’s gutter margin/padding can break horizontal extent.
- * Neutralize that here only (shared CustomScrollbar stays unchanged) and hide the *native* overflow
- * scrollbar on the scroller so only the custom tracks show.
- */
-export const DocumentsStyledScrollbar = styled(StyledScrollbar)`
-  .ScrollbarsCustom-Scroller {
-    margin-right: 0 !important;
-    margin-bottom: 0 !important;
-    padding-right: 0 !important;
-    padding-bottom: 0 !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    &::-webkit-scrollbar {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-  }
-`;
 
 /**
  * Box body. The table is as wide as its columns need and sits in the middle of

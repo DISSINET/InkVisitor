@@ -1,3 +1,5 @@
+// the component file directly, since the components index imports this file back
+import { CustomScrollbar } from "components/basic/CustomScrollbar/CustomScrollbar";
 import styled from "styled-components";
 
 export const StyledStatementListBox = styled.div`
@@ -38,17 +40,22 @@ export const StyledActionLabel = styled.div`
   text-overflow: ellipsis;
 `;
 
+export const StyledTableScroller = styled(CustomScrollbar)`
+  flex-shrink: 0;
+`;
+
 interface StyledTableWrapper {
   $isListMode?: boolean;
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  /* a wide list-mode table overflows into the box's scroller, whose
+     horizontal bar stays at the bottom of the box however long the list is */
+  overflow-x: ${({ $isListMode }) => ($isListMode ? "visible" : "hidden")};
   flex-shrink: 0;
   padding-right: 0.1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledEmptyState = styled.div`
