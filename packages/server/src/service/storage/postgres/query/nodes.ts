@@ -1,7 +1,9 @@
 import { Query } from "@inkvisitor/shared/types/query";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { Params, ident } from "../sql";
+import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edges";
 
@@ -24,9 +26,9 @@ export function inputWhere(input: Input, p: Params): string {
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);
   }
-  // entities carry `labels`, not `label`, so this matches nothing; RethinkDB filters the same field
-  if (label) {
-    where.push(`e.label = ${p.add(label)}`);
+  const text = nodeLabel(label);
+  if (text) {
+    where.push(labelMatch(p, labelPattern(text, "", "")));
   }
   return where.length ? where.join(" AND ") : "TRUE";
 }

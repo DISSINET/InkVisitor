@@ -2,10 +2,12 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExploreResolvers } from "../../types";
 import { collect, propPaths } from "../provision";
 import { Params, arr, ident, indexHolds } from "../sql";
+import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
 import SearchNode, { ID_ORDER, Input, inputWhere } from "./nodes";
 
@@ -48,8 +50,8 @@ export default class SearchEdge implements Query.IEdge {
   /**
    * Explicit target-id set, resolved in prepare(): for a pinned target the
    * pinned entityId plus its toggle-driven expansion; for an unpinned node
-   * the entities matching its status constraint. Null when the target is
-   * neither pinned nor status-constrained.
+   * the entities matching its status and label constraints. Null when the
+   * target is neither pinned nor constrained.
    */
   protected targetEntityIds: string[] | null = null;
 
@@ -74,14 +76,17 @@ export default class SearchEdge implements Query.IEdge {
   /** resolves the target set; the node evaluator calls it before run() */
   async prepare(conn: Conn): Promise<void> {
     const entityId = this.node.params.entityId;
-    // the status narrows an empty target only: a pinned entity is the target itself, whatever its status
+    // status and label narrow an empty target only: a pinned entity is the target itself, whatever its status
     const statuses = this.node.params.entityStatuses ?? [];
+    const label = nodeLabel(this.node.params.label);
     this.descendantIds = null;
 
     if (!entityId) {
-      // resolved into an id set so every predicate applies it through targetIds()
-      this.targetEntityIds =
-        statuses.length && !this.checksUnpinnedTargetStatusInRun() ? await this.statusTargetIds(conn, statuses) : null;
+      // resolved into an id set so every predicate applies it through targetIds(); the relation
+      // edges check statuses per relation but have no such check for a label, so a label takes
+      // the statuses into the id set with it
+      const constrained = !!label || (statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun());
+      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, statuses, label) : null;
       return;
     }
 
@@ -96,14 +101,27 @@ export default class SearchEdge implements Query.IEdge {
     }
   }
 
-  /** ids of entities carrying one of `statuses`, narrowed by the node's classes, else by the classes the edge's target can hold */
-  private async statusTargetIds(conn: Conn, statuses: EntityEnums.Status[]): Promise<string[]> {
+  /**
+   * ids of entities carrying one of `statuses` (any when empty) and matching `label`, narrowed by
+   * the node's classes, else by the classes the edge's target can hold
+   */
+  private async constrainedTargetIds(
+    conn: Conn,
+    statuses: EntityEnums.Status[],
+    label: string | undefined
+  ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
-    const where = [`e.status = ${anyOf(p, statuses)}`];
+    const where: string[] = [];
+    if (statuses.length) {
+      where.push(`e.status = ${anyOf(p, statuses)}`);
+    }
     if (classes.length) {
       where.push(`e.class = ${anyOf(p, classes)}`);
+    }
+    if (label) {
+      where.push(labelMatch(p, labelPattern(label, "", "")));
     }
     const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
     return res.rows.map((row: { id: string }) => row.id);
@@ -112,7 +130,7 @@ export default class SearchEdge implements Query.IEdge {
   /**
    * Target-id set for the predicates to match against, null when the target
    * is unconstrained. A pinned target always contains the pinned id; a
-   * status-constrained one may be empty, which run() treats as "matches
+   * constrained one may be empty, which run() treats as "matches
    * nothing". Falls back to the raw params.entityId when prepare() has not run.
    */
   targetIds(): string[] | null {
@@ -157,7 +175,7 @@ export default class SearchEdge implements Query.IEdge {
   /** ids of the input rows matching this edge */
   async run(conn: Conn, input: Input): Promise<string[]> {
     const targets = this.targetIds();
-    // a status constraint no entity meets: the edge matches nothing, as ReQL intersecting with an empty set
+    // a constraint no entity meets: the edge matches nothing, as ReQL intersecting with an empty set
     if (targets && !targets.length) {
       return [];
     }

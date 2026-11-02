@@ -7,7 +7,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
+import { Button, Checkbox, IconWithTooltip, Input, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { useTheme } from "styled-components";
@@ -338,7 +338,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             <FilterPopover
               label="filters"
               title="Node filters"
-              count={node.params.entityStatuses?.length ?? 0}
+              count={
+                (node.params.entityStatuses?.length ?? 0) + (node.params.label?.trim() ? 1 : 0)
+              }
               tooltipLabel="filters for the entities of this node"
               width="26rem"
               onClear={() => {
@@ -346,9 +348,33 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   type: QueryActionType.updateNodeStatuses,
                   payload: { nodeId: node.id, newEntityStatuses: [] },
                 });
+                dispatch({
+                  type: QueryActionType.updateNodeLabel,
+                  payload: { nodeId: node.id, newLabel: "" },
+                });
               }}
             >
               <StyledForm>
+                <StyledRow>
+                  <StyledRowHeader>label</StyledRowHeader>
+                  <StyledRowControl>
+                    {/* matched anywhere in any of the entity's labels, as the
+                        Explorer label filter matches */}
+                    <Input
+                      width="full"
+                      value={node.params.label ?? ""}
+                      placeholder="any label"
+                      changeOnType
+                      clearable
+                      onChangeFn={(newLabel: string) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeLabel,
+                          payload: { nodeId: node.id, newLabel },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
                 <StyledRow>
                   <StyledRowHeader>status</StyledRowHeader>
                   <StyledRowControl>

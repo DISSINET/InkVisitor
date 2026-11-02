@@ -21,3 +21,12 @@ export function prepareLabel(label: string): [string, string, string] {
 
   return [label, leftWildcard, rightWildcard];
 }
+
+/**
+ * The label a query builder node is narrowed by, matched like the Explorer
+ * label filter: anywhere in any of the entity's labels, `*` markers ignored.
+ * @returns the text to match without anchors, undefined when there is none
+ */
+export function nodeLabel(label: string | undefined): string | undefined {
+  return prepareLabel(label?.trim() ?? "")[0] || undefined;
+}
