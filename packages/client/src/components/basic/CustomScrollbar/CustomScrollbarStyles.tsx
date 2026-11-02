@@ -26,17 +26,35 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
     scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
   }
 
+  /* the transparent thumb border is the gap around an 8px thumb, and the track
+     margin keeps the thumb clear of the box ends */
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 12px;
+    height: 12px;
     background: transparent;
   }
   &::-webkit-scrollbar-corner {
     background: transparent;
   }
+  &::-webkit-scrollbar-track:vertical {
+    margin: 10px 0;
+  }
+  &::-webkit-scrollbar-track:horizontal {
+    margin: 0 10px;
+  }
   &::-webkit-scrollbar-thumb {
     background-color: ${({ theme }) => theme.color.gray[500]};
+    background-clip: padding-box;
+    border: 0 solid transparent;
     border-radius: ${({ theme }) => theme.borderRadius["full"]};
+  }
+  &::-webkit-scrollbar-thumb:vertical {
+    border-left-width: 2px;
+    border-right-width: 2px;
+  }
+  &::-webkit-scrollbar-thumb:horizontal {
+    border-top-width: 2px;
+    border-bottom-width: 2px;
   }
   &::-webkit-scrollbar-thumb:hover {
     background-color: ${({ theme }) => theme.color.gray[700]};
