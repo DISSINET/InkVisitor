@@ -1,5 +1,11 @@
 import styled from "styled-components";
 
+// the background sits outside the scroller so it also covers the scrollbar
+export const StyledBoxContent = styled.div`
+  height: 100%;
+  background-color: ${({ theme }) => theme.color["white"]};
+`;
+
 export const StyledContent = styled.div`
   min-height: 100%;
   display: flex;
@@ -7,7 +13,6 @@ export const StyledContent = styled.div`
   align-items: start;
   padding-top: 0.3rem;
   padding-left: 0.6rem;
-  background-color: ${({ theme }) => theme.color["white"]};
   padding-bottom: 1rem;
 `;
 
