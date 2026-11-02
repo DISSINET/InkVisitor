@@ -44,11 +44,12 @@ interface StyledTableWrapper {
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  /* a wide list-mode table overflows into the box's scroller, whose
+     horizontal bar stays at the bottom of the box however long the list is */
+  overflow-x: ${({ $isListMode }) => ($isListMode ? "visible" : "hidden")};
   flex-shrink: 0;
   padding-right: 0.1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledEmptyState = styled.div`
