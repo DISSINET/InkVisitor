@@ -2,9 +2,7 @@ import styled from "styled-components";
 
 export const StyledBoxContent = styled.div`
   display: block;
-  overflow: auto;
   height: 100%;
-  padding-bottom: 0.8rem;
   background-color: ${({ theme }) => theme.color["white"]};
 `;
 
@@ -15,6 +13,7 @@ export const StyledTemplateSection = styled.div`
   margin-top: 0.3rem;
   gap: 0.5rem;
   padding-left: 0.6rem;
+  padding-bottom: 0.8rem;
 `;
 export const StyledTemplateSectionHeader = styled.div`
   display: flex;

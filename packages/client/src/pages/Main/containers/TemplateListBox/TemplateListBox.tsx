@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseUser, IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Input, Loader } from "components";
+import { Button, CustomScrollbar, Input, Loader } from "components";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 
 import Dropdown, { EntityTag } from "components/advanced";
@@ -169,118 +169,120 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
 
   return (
     <StyledBoxContent>
-      <StyledTemplateSection>
-        <StyledTemplateSectionHeader>
-          {userRole !== UserEnums.Role.Viewer && (
+      <CustomScrollbar>
+        <StyledTemplateSection>
+          <StyledTemplateSectionHeader>
+            {userRole !== UserEnums.Role.Viewer && (
+              <Button
+                key="add-template"
+                icon={<IcoPlusBold size={14} />}
+                color="primary"
+                inverted
+                label={widthTooNarrow ? "" : "template"}
+                tooltipLabel={widthTooNarrow ? "new template" : ""}
+                size={ButtonSize.Medium}
+                onClick={() => {
+                  handleAskCreateTemplate();
+                }}
+              />
+            )}
             <Button
-              key="add-template"
-              icon={<IcoPlusBold size={14} />}
-              color="primary"
-              inverted
-              label={widthTooNarrow ? "" : "template"}
-              tooltipLabel={widthTooNarrow ? "new template" : ""}
+              icon={<IcoStar size={14} />}
+              color={onlyStarred ? "warning" : "greyer"}
+              inverted={!onlyStarred}
               size={ButtonSize.Medium}
-              onClick={() => {
-                handleAskCreateTemplate();
-              }}
+              onClick={() => setOnlyStarred(!onlyStarred)}
+              tooltipLabel="starred templates"
             />
-          )}
-          <Button
-            icon={<IcoStar size={14} />}
-            color={onlyStarred ? "warning" : "greyer"}
-            inverted={!onlyStarred}
-            size={ButtonSize.Medium}
-            onClick={() => setOnlyStarred(!onlyStarred)}
-            tooltipLabel="starred templates"
-          />
-          <StyledTemplateControl>
-            <Input
-              value={filterByLabel}
-              onChangeFn={(newType: string) => setFilterByLabel(newType)}
-              changeOnType
-              width="full"
-              placeholder="filter by label"
-              autoFocus
-              clearable
-            />
-          </StyledTemplateControl>
-        </StyledTemplateSectionHeader>
+            <StyledTemplateControl>
+              <Input
+                value={filterByLabel}
+                onChangeFn={(newType: string) => setFilterByLabel(newType)}
+                changeOnType
+                width="full"
+                placeholder="filter by label"
+                autoFocus
+                clearable
+              />
+            </StyledTemplateControl>
+          </StyledTemplateSectionHeader>
 
-        <StyledTemplateFilter>
-          <StyledTemplateControl>
-            <Dropdown.Single.Entity
-              value={filterByClass}
-              options={
-                widthTooNarrow
-                  ? allEntityOptions.map((c) => {
-                      return {
-                        value: c.value,
-                        label: c.value,
-                      };
-                    })
-                  : allEntityOptions
-              }
-              onChange={(selectedOption) => {
-                setFilterByClass(selectedOption || EntityEnums.Extension.Any);
-              }}
-              width="full"
-              tooltipLabel="entity class"
-              isClearable={filterByClass !== EntityEnums.Extension.Any}
-              disableTooltip={!widthTooNarrow}
-            />
-          </StyledTemplateControl>
-          <StyledTemplateControl>
-            <Dropdown.Single.Basic
-              value={order}
-              options={templateOrderOptions}
-              onChange={(newOrder) => setOrder(newOrder)}
-              icon={<IcoSort />}
-              tooltipLabel="order"
-              width="full"
-              disableTyping
-            />
-          </StyledTemplateControl>
-        </StyledTemplateFilter>
-        <StyledTemplateSectionList>
-          {templatesData &&
-            templatesData.map((templateEntity, ti) => {
-              const isStarred = starredTemplateIds.has(templateEntity.id);
-              return (
-                <React.Fragment key={templateEntity.id + ti}>
-                  <EntityTag
-                    entity={templateEntity}
-                    fullWidth
-                    tooltipPosition="left"
-                    isFavorited={isStarred}
-                    button={
-                      <StyledStarButtonWrap>
-                        <Button
-                          tooltipLabel={isStarred ? "unstar template" : "star template"}
-                          icon={<IcoStar />}
-                          color={isStarred ? "warning" : "grey"}
-                          inverted
-                          shape="sharp"
-                          onClick={() => toggleStar(templateEntity.id)}
-                        />
-                        {userRole !== UserEnums.Role.Viewer && (
+          <StyledTemplateFilter>
+            <StyledTemplateControl>
+              <Dropdown.Single.Entity
+                value={filterByClass}
+                options={
+                  widthTooNarrow
+                    ? allEntityOptions.map((c) => {
+                        return {
+                          value: c.value,
+                          label: c.value,
+                        };
+                      })
+                    : allEntityOptions
+                }
+                onChange={(selectedOption) => {
+                  setFilterByClass(selectedOption || EntityEnums.Extension.Any);
+                }}
+                width="full"
+                tooltipLabel="entity class"
+                isClearable={filterByClass !== EntityEnums.Extension.Any}
+                disableTooltip={!widthTooNarrow}
+              />
+            </StyledTemplateControl>
+            <StyledTemplateControl>
+              <Dropdown.Single.Basic
+                value={order}
+                options={templateOrderOptions}
+                onChange={(newOrder) => setOrder(newOrder)}
+                icon={<IcoSort />}
+                tooltipLabel="order"
+                width="full"
+                disableTyping
+              />
+            </StyledTemplateControl>
+          </StyledTemplateFilter>
+          <StyledTemplateSectionList>
+            {templatesData &&
+              templatesData.map((templateEntity, ti) => {
+                const isStarred = starredTemplateIds.has(templateEntity.id);
+                return (
+                  <React.Fragment key={templateEntity.id + ti}>
+                    <EntityTag
+                      entity={templateEntity}
+                      fullWidth
+                      tooltipPosition="left"
+                      isFavorited={isStarred}
+                      button={
+                        <StyledStarButtonWrap>
                           <Button
-                            tooltipLabel="delete template"
-                            icon={<IcoTrashSimple />}
-                            color="plain"
+                            tooltipLabel={isStarred ? "unstar template" : "star template"}
+                            icon={<IcoStar />}
+                            color={isStarred ? "warning" : "grey"}
                             inverted
                             shape="sharp"
-                            onClick={() => handleAskRemoveTemplate(templateEntity.id)}
+                            onClick={() => toggleStar(templateEntity.id)}
                           />
-                        )}
-                      </StyledStarButtonWrap>
-                    }
-                  />
-                </React.Fragment>
-              );
-            })}
-          <Loader show={isFetchingTemplates} size={40} />
-        </StyledTemplateSectionList>
-      </StyledTemplateSection>
+                          {userRole !== UserEnums.Role.Viewer && (
+                            <Button
+                              tooltipLabel="delete template"
+                              icon={<IcoTrashSimple />}
+                              color="plain"
+                              inverted
+                              shape="sharp"
+                              onClick={() => handleAskRemoveTemplate(templateEntity.id)}
+                            />
+                          )}
+                        </StyledStarButtonWrap>
+                      }
+                    />
+                  </React.Fragment>
+                );
+              })}
+            <Loader show={isFetchingTemplates} size={40} />
+          </StyledTemplateSectionList>
+        </StyledTemplateSection>
+      </CustomScrollbar>
 
       <TemplateListCreateModal
         showCreateModal={showCreateModal}
