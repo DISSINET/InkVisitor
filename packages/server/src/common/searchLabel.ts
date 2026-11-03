@@ -26,10 +26,11 @@ export function prepareLabel(label: string): [string, string, string] {
  * The label a query builder node is narrowed by, matched as the main search box
  * matches what is typed into it: entity search's word-by-word match with a
  * trailing `*` always on, so "gi" finds "given name". A leading `*` lifts the
- * word-start anchor as well.
+ * word-start anchor as well. The text is regex-escaped, as the search box's
+ * labelOrId is, so "(" or "c++" match literally.
  * @returns prepareLabel's parts, undefined when no text is left to match
  */
 export function nodeLabel(label: string | undefined): [string, string, string] | undefined {
   const [text, left] = prepareLabel(label?.trim() ?? "");
-  return text ? [text, left, ""] : undefined;
+  return text ? [text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), left, ""] : undefined;
 }

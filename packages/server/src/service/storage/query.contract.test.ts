@@ -313,6 +313,10 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept], label: "sta" })).toEqual(["c-2", "c-3"]);
     expect(await explore({ entityClasses: [C.Concept], label: "tar" })).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept], label: "*bjec" })).toEqual(["c-3", "c-4"]);
+    // regex characters match literally
+    expect(await explore({ label: "(city" })).toEqual(["l-1"]);
+    expect(await explore({ label: "pr.gue" })).toEqual([]);
+    expect(await explore({ label: "c++" })).toEqual([]);
     // nothing left to match once the wildcard markers are stripped
     expect(await explore({ entityClasses: [C.Concept], label: "*" })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
   });
