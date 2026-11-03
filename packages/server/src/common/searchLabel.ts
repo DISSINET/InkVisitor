@@ -1,9 +1,11 @@
 /**
  * Splits the wildcard markers off a search label: a leading `*` drops the start
- * anchor, a trailing `*` the end anchor.
+ * anchor, a trailing `*` the end anchor. A run of whitespace becomes one space,
+ * since the patterns read every space as a word boundary.
  * @returns [label without the markers, left anchor, right anchor]
  */
 export function prepareLabel(label: string): [string, string, string] {
+  label = label.replace(/\s+/g, " ");
   let leftWildcard = "^",
     rightWildcard = "$";
 

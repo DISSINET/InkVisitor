@@ -196,6 +196,9 @@ describe("entity search", () => {
     expect(await search({ labelOrId: "(city)" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "(city" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "star" })).toEqual(["c-2", "c-3"]);
+    // a run of spaces separates two words as one space does
+    expect(await search({ labelOrId: "blue  star*" })).toEqual(["c-2"]);
+    expect(await search({ label: "blue \t star" })).toEqual(["c-2"]);
   });
 
   // RethinkDB returns ["p-1"]: its filter skips p-2, which has no `labels`
@@ -311,6 +314,7 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept], label: "star" })).toEqual(["c-2", "c-3"]);
     expect(await explore({ entityClasses: [C.Concept], label: " ETOILE " })).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept], label: "sta" })).toEqual(["c-2", "c-3"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "blue  sta" })).toEqual(["c-2"]);
     expect(await explore({ entityClasses: [C.Concept], label: "tar" })).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept], label: "*bjec" })).toEqual(["c-3", "c-4"]);
     // regex characters match literally
