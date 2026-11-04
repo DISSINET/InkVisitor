@@ -26,7 +26,7 @@ export const flattenOptions = <O extends DropdownItem>(
 };
 
 // case- and accent-insensitive, so "volapuk" finds "Volapük"
-const foldText = (text: string) =>
+export const foldText = (text: string) =>
   text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 /* matches the label or the value, so a language is found by its ISO code
