@@ -362,6 +362,14 @@ export default Router()
           throw new PermissionDeniedError("entity cannot be restored");
         }
 
+        // the territory of a statement or the parent of a territory may have
+        // been deleted since the snapshot was taken
+        const snapshotData = snapshot.data as { territory?: { territoryId?: string }; parent?: { territoryId?: string } | false } | undefined;
+        const territoryId = snapshotData?.territory?.territoryId || (snapshotData?.parent || undefined)?.territoryId;
+        if (territoryId && !(await findEntityById(request.db, territoryId))) {
+          throw new TerritoryDoesNotExits(`territory ${territoryId} was not found`, territoryId);
+        }
+
         await request.db.lock();
 
         const saved = await restoration.save(request.db.connection);

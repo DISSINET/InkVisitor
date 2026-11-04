@@ -2,7 +2,7 @@ import "ts-jest";
 import { ResponseStats } from "./response";
 import { IRequestStats } from "@inkvisitor/shared/types/request-stats";
 import Acl from "@middlewares/acl";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 import { newMockRequest } from "@modules/common.test";

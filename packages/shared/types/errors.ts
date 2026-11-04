@@ -310,6 +310,25 @@ class InternalServerError extends CustomError {
 }
 
 /**
+ * GeocodingEngineUnconfiguredError will be thrown by the geocoding proxy when the deployment has no engine address
+ */
+class GeocodingEngineUnconfiguredError extends CustomError {
+  public static code = 503;
+  public static title = "Geocoding engine not configured";
+  public static message = "No geocoding engine is configured for this deployment.";
+}
+
+/**
+ * GeocodingEngineError will be thrown by the geocoding proxy when the engine is unreachable or refuses the server's key
+ */
+class GeocodingEngineError extends CustomError {
+  public static code = 502;
+  public static title = "Geocoding engine error";
+  public static message = "The geocoding engine did not respond.";
+  loggable = true;
+}
+
+/**
  * UnauthorizedError will be thrown during request, which does not contain authorization data (without jwt token)
  */
 class UnauthorizedError extends CustomError {
@@ -342,11 +361,7 @@ class InvalidDeleteError extends CustomError {
  * from its own detail, so the client shows just the plain error message with
  * no navigation toast.
  */
-export type InvalidDeleteConflictType =
-  | "entity"
-  | "document"
-  | "reference"
-  | "attachedDocument";
+export type InvalidDeleteConflictType = "entity" | "document" | "reference" | "attachedDocument";
 
 /**
  * Shape carried by InvalidDeleteError.withData() when an entity cannot be
@@ -532,11 +547,23 @@ class HtmlResponseError extends CustomError {
   public static message = "This may indicate a service overload or missing database index.";
 }
 
+// raised by the reverse proxy in front of the API, which answers with an HTML
+// page, so the client recognizes it by status code alone
+class RequestTooLargeError extends CustomError {
+  public static readonly TYPE = "RequestTooLargeError";
+  public static code = 413;
+  public static title = "Request too large";
+  public static message =
+    "The server refused the request because it exceeds its size limit. Please contact the project owner.";
+}
+
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
   PermissionDeniedError,
   InternalServerError,
+  GeocodingEngineUnconfiguredError,
+  GeocodingEngineError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
@@ -566,6 +593,7 @@ const allErrors: Record<string, any> = {
   NetworkError,
   TimeoutError,
   HtmlResponseError,
+  RequestTooLargeError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,
@@ -597,6 +625,8 @@ export {
   UnauthorizedError,
   PermissionDeniedError,
   InternalServerError,
+  GeocodingEngineUnconfiguredError,
+  GeocodingEngineError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
@@ -626,6 +656,7 @@ export {
   NetworkError,
   TimeoutError,
   HtmlResponseError,
+  RequestTooLargeError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   PasswordResetHashError,

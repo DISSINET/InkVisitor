@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/stats/aggregate",
+    "body": {
+      "fromDate": 1924992000000,
+      "toDate": 1546300800000
+    }
+  },
+  "response": {
+    "status": 500,
+    "contentType": "application/json",
+    "body": {
+      "error": "Error",
+      "message": "fromDate must be before toDate",
+      "result": false
+    }
+  }
+}

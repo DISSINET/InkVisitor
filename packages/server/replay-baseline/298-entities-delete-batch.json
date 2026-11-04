@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/entities",
+    "body": {
+      "entityIds": [
+        "rp-o",
+        "rp-g",
+        "rp-missing"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "rp-g": true,
+        "rp-missing": {
+          "log": "entity with id rp-missing does not exist",
+          "loggable": false,
+          "name": "EntityDoesNotExist",
+          "title": "Missing entity"
+        },
+        "rp-o": true
+      },
+      "result": false
+    }
+  }
+}

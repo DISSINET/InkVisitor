@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/saved-queries/sq-missing",
+    "body": {
+      "name": "x"
+    }
+  },
+  "response": {
+    "status": 404,
+    "contentType": "application/json",
+    "body": {
+      "error": "NotFound",
+      "message": "saved query sq-missing not found",
+      "result": false
+    }
+  }
+}

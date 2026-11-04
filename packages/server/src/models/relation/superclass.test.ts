@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { newMockRequest } from "@modules/common.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";

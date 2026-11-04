@@ -6,7 +6,7 @@ import {
   IStatementAction,
   IStatementData,
 } from "@inkvisitor/shared/types";
-import { excludedSuggesterEntities } from "Theme/constants";
+import { excludedSuggesterEntities, STATEMENT_EDITOR_SCROLLER_ID } from "Theme/constants";
 import { AttributeIcon, BundleButtonGroup, Button, ButtonGroup } from "components";
 import Dropdown, {
   ElvlButtonGroup,
@@ -242,10 +242,10 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
   useEffect(() => {
     if (isDragging) {
       dispatch(setDraggedActantRow({ category: DraggedPropRowCategory.ACTION }));
-      const boxContentEditor = document.getElementById(`box-content-editor`);
+      const editorScroller = document.getElementById(STATEMENT_EDITOR_SCROLLER_ID);
       const actionTable = document.getElementById(`action-section`);
-      if (boxContentEditor) {
-        boxContentEditor.scrollTo({
+      if (editorScroller) {
+        editorScroller.scrollTo({
           behavior: "smooth",
           top: actionTable ? actionTable.offsetTop - 30 : 0,
         });

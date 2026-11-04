@@ -1,0 +1,26 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "language",
+        "from": null,
+        "to": "lat"
+      },
+      "entityIds": [
+        "rp-c"
+      ]
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

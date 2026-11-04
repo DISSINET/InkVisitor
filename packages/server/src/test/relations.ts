@@ -1,7 +1,7 @@
 import { getRelationClass } from "@models/factory";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 /**
  * Saves one relation of the given type between two entities, for suites that
@@ -15,7 +15,7 @@ import { Connection } from "rethinkdb-ts";
  * @param entityIds the pair, in the order the relation type defines
  */
 export const saveRelationFixture = async (
-  conn: Connection,
+  conn: Conn,
   type: RelationEnums.Type,
   entityIds: [string, string]
 ): Promise<void> => {

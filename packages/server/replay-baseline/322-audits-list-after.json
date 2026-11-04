@@ -1,0 +1,36 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/audits?from=2019-01-01"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "auditScope": "document",
+        "changes": {
+          "additions": [],
+          "changes": [],
+          "removals": [
+            {
+              "anchor": "p12",
+              "occurrence": 0
+            },
+            {
+              "anchor": "l1",
+              "occurrence": 1
+            }
+          ]
+        },
+        "date": "<datetime>",
+        "id": "<uuid-11>",
+        "modelId": "doc-replay",
+        "type": "anchor_delete",
+        "user": "1"
+      },
+      "result": true
+    }
+  }
+}

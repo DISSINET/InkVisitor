@@ -1,0 +1,52 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?label=Minda"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p1",
+        "labels": [
+          "Minda, the priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": {
+            "order": 2,
+            "territoryId": "T0"
+          }
+        },
+        "detail": "",
+        "id": "t1",
+        "labels": [
+          "priest Minda and their stories"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

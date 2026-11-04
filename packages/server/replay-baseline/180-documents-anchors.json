@@ -1,0 +1,15 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/documents/doc-replay/anchors?entityId=p1&index=0"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": "Minda",
+      "result": true
+    }
+  }
+}

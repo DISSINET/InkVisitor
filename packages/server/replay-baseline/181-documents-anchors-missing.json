@@ -1,0 +1,15 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/documents/doc-replay/anchors?entityId=zzz&index=0"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": "",
+      "result": true
+    }
+  }
+}

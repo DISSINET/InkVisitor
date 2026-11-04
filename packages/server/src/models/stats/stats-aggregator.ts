@@ -1,12 +1,12 @@
-import { r as rethink, Connection, RDatum } from "rethinkdb-ts";
+import { Conn, storage } from "@service/storage";
 import { EventType, Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 import Audit from "@models/audit/audit";
 import { MaterializedStats, IMaterializedStats } from "./materialized-stats";
 
 export class StatsAggregator {
-  private db: Connection;
+  private db: Conn;
 
-  constructor(db: Connection) {
+  constructor(db: Conn) {
     this.db = db;
   }
 
@@ -20,7 +20,6 @@ export class StatsAggregator {
     eventTypes: EventType[],
     aggregateBy: Aggregation
   ): Promise<IMaterializedStats[]> {
-    const timeBucket = this.getTimeBucketFunction(timeUnit);
     // Snap the lower bound back to the start of its bucket so the whole bucket
     // is recomputed (bulkInsert replaces rows, so a partial bucket would
     // otherwise overwrite the full one). The upper bound stays at midnight,
@@ -31,26 +30,14 @@ export class StatsAggregator {
     // Always group by event type so each materialized row holds the count for a
     // single event type. For USER aggregation we additionally group by the user
     // dimension; for ACTIVITY_TYPE the event type itself is the aggregation key.
-    const baseQuery = rethink
-      .table(Audit.table)
-      .between(fromDateTruncated, toDateTruncated, {
-        index: "date",
-      })
-      .filter((doc: RDatum) => rethink.expr(eventTypes).contains(doc("type")));
-
-    const groupedQuery =
-      aggregateBy === Aggregation.ACTIVITY_TYPE
-        ? baseQuery.group(timeBucket, (doc: RDatum) => doc("type"))
-        : baseQuery.group(
-            timeBucket,
-            (doc: RDatum) => doc("type"),
-            (doc: RDatum) => doc(aggregateBy)
-          );
-
-    const aggregatedData = (await groupedQuery.count().run(this.db)) as unknown as {
-      group: string[];
-      reduction: number;
-    }[];
+    const aggregatedData = await storage.audits.countByBucket(this.db, {
+      from: fromDateTruncated,
+      to: toDateTruncated,
+      eventTypes,
+      timeUnit,
+      groupBy:
+        aggregateBy === Aggregation.ACTIVITY_TYPE ? ["type"] : ["type", aggregateBy],
+    });
 
     return StatsAggregator.mapGroupedAuditsToStats(aggregatedData, aggregateBy);
   }
@@ -121,30 +108,6 @@ export class StatsAggregator {
       } catch (error) {
         console.error(`Error aggregating ${timeUnit} data:`, error);
       }
-    }
-  }
-
-  /**
-   * Gets the time bucket function for a specific time unit
-   */
-  private getTimeBucketFunction(timeUnit: TimeUnit) {
-    switch (timeUnit) {
-      case TimeUnit.DAY:
-        return (doc: RDatum) => doc("date").toISO8601().slice(0, 10);
-      case TimeUnit.WEEK:
-        return (doc: RDatum) => {
-          const date = doc("date");
-          return date
-            .sub(date.dayOfWeek().sub(1).mul(86400))
-            .toISO8601()
-            .slice(0, 10);
-        };
-      case TimeUnit.MONTH:
-        return (doc: RDatum) => doc("date").toISO8601().slice(0, 7);
-      case TimeUnit.YEAR:
-        return (doc: RDatum) => doc("date").toISO8601().slice(0, 4);
-      default:
-        throw new Error("Invalid time unit");
     }
   }
 

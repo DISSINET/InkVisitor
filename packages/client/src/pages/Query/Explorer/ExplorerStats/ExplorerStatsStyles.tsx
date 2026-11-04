@@ -67,13 +67,15 @@ export const StyledFieldLabel = styled.div`
   color: ${({ theme }) => theme.color.black};
 `;
 
+// the legend is drawn inside the chart's height and wraps to several rows with
+// many users, so a shorter chart leaves the bars no room
 export const StyledChartWrapper = styled.div`
+  flex-shrink: 0;
   width: 100%;
-  height: 22rem;
-  min-height: 16rem;
+  height: 25rem;
 `;
 
 export const StyledTableWrapper = styled.div`
+  flex-shrink: 0;
   width: 100%;
-  height: 18rem;
 `;

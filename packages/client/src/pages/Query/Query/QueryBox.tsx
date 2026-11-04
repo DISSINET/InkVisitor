@@ -28,7 +28,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
 }) => {
   const theme = useTheme();
   const gridWeight = useMemo<number>(() => {
-    let maxNodeDepth = 1;
+    let maxNodeDepth = 0;
 
     const traverse = (node: Query.INode, depth: number) => {
       maxNodeDepth = Math.max(maxNodeDepth, depth);

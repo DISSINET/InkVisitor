@@ -1,0 +1,28 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "pos",
+        "concept": {
+          "from": null,
+          "to": ""
+        }
+      },
+      "entityIds": [
+        "rp-c"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "changes.concept.to and changes.action.to must name a part of speech",
+      "result": false
+    }
+  }
+}

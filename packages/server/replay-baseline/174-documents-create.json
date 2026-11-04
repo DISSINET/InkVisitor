@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/documents",
+    "body": {
+      "content": "<p1>Minda</p1> went to <l1>Brno</l1> and met <p12>someone</p12> near <l1>Brno</l1>.",
+      "id": "doc-replay",
+      "title": "Replay doc"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

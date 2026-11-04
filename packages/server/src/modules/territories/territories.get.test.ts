@@ -1,6 +1,6 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@inkvisitor/shared/types/errors";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { createEntity, deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import request from "supertest";
@@ -56,12 +56,20 @@ describe("Territories get query", function () {
         id: testTerritoryId,
       });
       await createEntity(db, territory);
+      const otherTerritoryId = `other-${Math.random()}`;
+      await createEntity(
+        db,
+        new Territory({
+          id: otherTerritoryId,
+          data: { parent: { territoryId: testTerritoryId, order: 0 } },
+        })
+      );
 
       const statement1 = new Statement({
         id: linkedStatementId,
         data: new StatementData({
           territory: {
-            territoryId: "some random",
+            territoryId: otherTerritoryId,
             order: 1,
           },
         }),

@@ -8,6 +8,10 @@ export const wildCardChar = "*";
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];
 export const scrollOverscanCount = 10;
+// thickness of every scrollbar the global style draws in Chrome and Safari
+export const SCROLLBAR_SIZE = 11;
+// the statement editor's scroller, which a dragged row scrolls to its table
+export const STATEMENT_EDITOR_SCROLLER_ID = "statement-editor-scroller";
 
 // layout
 export const heightHeader = 70;

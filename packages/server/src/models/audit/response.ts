@@ -1,4 +1,4 @@
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { IAudit, IResponseAudit, AuditScope } from "@inkvisitor/shared/types";
 import Audit from "./audit";
 
@@ -13,7 +13,7 @@ export class ResponseAudit implements IResponseAudit {
     this.modelId = entityId;
   }
 
-  async prepare(db: Connection, relationsLimit = 10): Promise<void> {
+  async prepare(db: Conn, relationsLimit = 10): Promise<void> {
     this.last = await Audit.getLastNForEntity(db, this.modelId, 10);
     if (this.last.length) {
       const firstEntity = await Audit.getFirstForEntity(db, this.modelId);
@@ -40,7 +40,7 @@ export class ResponseDocumentAudit implements IResponseAudit {
     this.modelId = documentId;
   }
 
-  async prepare(db: Connection, noAudits = 5): Promise<void> {
+  async prepare(db: Conn, noAudits = 5): Promise<void> {
     this.last = await Audit.getLastNForDocument(db, this.modelId, noAudits);
     if (this.last.length) {
       const firstDoc = await Audit.getFirstForDocument(db, this.modelId);

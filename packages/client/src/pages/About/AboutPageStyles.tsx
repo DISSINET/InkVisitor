@@ -57,7 +57,7 @@ export const StyledSubTitle = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
 `;
 export const StyledHeader = styled.div`
-  font-family: Muni;
+  font-family: ${({ theme }) => theme.fontFamily["heading"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
   color: ${({ theme }) => theme.color["primary"]};
   padding: ${({ theme }) => `0 0 ${theme.space[2]} ${theme.space[3]}`};

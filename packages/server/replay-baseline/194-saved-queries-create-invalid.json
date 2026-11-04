@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/saved-queries",
+    "body": {
+      "data": {
+        "query": null
+      },
+      "name": "Broken",
+      "shared": false
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "name and data.query have to be set",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "O",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "id": "rp-o",
+      "labels": [
+        "replay object"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "O",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "rp-o",
+        "labels": [
+          "replay object"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

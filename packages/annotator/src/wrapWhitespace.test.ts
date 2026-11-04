@@ -20,6 +20,7 @@ function setup(value: string): Annotator {
   canvas.style.height = "600px";
   document.body.appendChild(canvas);
   const a = new Annotator(canvas, "");
+  a.setParagraphIndent(false); // wrap geometry without the first-line indent
   a.setMode(EditMode.RAW);
   a.onReplaceText(value);
   a.text.updateCharsAtLine(MAXLEN);

@@ -7,7 +7,8 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
+import { useOrderedLanguageDict } from "hooks/react-query";
+import { Button, Checkbox, IconWithTooltip, Input, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { useTheme } from "styled-components";
@@ -18,8 +19,17 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { countNodeFilters } from "../utils";
+import { FilterPopover } from "../../FilterPopover/FilterPopover";
+import {
+  StyledForm,
+  StyledRow,
+  StyledRowControl,
+  StyledRowHeader,
+} from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
+import { NodeFilterMatches } from "./NodeFilterMatches";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledExpansionCountButton,
@@ -107,6 +117,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       : "";
 
   const entityId = node.params.entityId;
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   const { data: dataEntity } = useQuery({
     queryKey: ["entity", "query-grid-node", entityId],
@@ -324,31 +335,97 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />
           )}
-          {/* the root node's own status is filtered in the floating search
-              container (Explore status filter), so the picker is offered only
-              on edge targets */}
+          {/* the root node's own status is filtered in the Filters panel of the
+              search rows (Explore status filter), so the node filters are
+              offered only on edge targets */}
           {!isRoot && !node.params.entityId && (
-            <Dropdown.Single.Basic
-              // params.entityStatuses is a list on purpose - the backend
-              // matches any status in it, so the picker can become multi later
-              value={node.params.entityStatuses?.[0] ?? null}
-              placeholder="any status"
-              tooltipLabel="entity status"
-              isClearable
-              width={110}
-              options={entityStatusDict.map((status) => ({
-                value: status.value,
-                label: status.label,
-              }))}
-              onChange={(newValue) => {
-                dispatch({
-                  type: QueryActionType.updateNodeStatuses,
-                  payload: {
-                    nodeId: node.id,
-                    newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                  },
-                });
-              }}
+            <FilterPopover
+              label="filters"
+              title="Node filters"
+              count={countNodeFilters(node.params)}
+              tooltipLabel="filters for the entities of this node"
+              width="26rem"
+              onClear={() =>
+                dispatch({ type: QueryActionType.clearNodeFilters, payload: { nodeId: node.id } })
+              }
+            >
+              <StyledForm>
+                <StyledRow>
+                  <StyledRowHeader>label</StyledRowHeader>
+                  <StyledRowControl>
+                    {/* matched from the start of a word, as the main search box matches */}
+                    <Input
+                      width="full"
+                      value={node.params.label ?? ""}
+                      placeholder="any label"
+                      changeOnType
+                      clearable
+                      onChangeFn={(newLabel: string) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeLabel,
+                          payload: { nodeId: node.id, newLabel },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>status</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Single.Basic
+                      // params.entityStatuses is a list on purpose - the backend
+                      // matches any status in it, so the picker can become multi later
+                      value={node.params.entityStatuses?.[0] ?? null}
+                      placeholder="any status"
+                      isClearable
+                      width="full"
+                      options={entityStatusDict.map((status) => ({
+                        value: status.value,
+                        label: status.label,
+                      }))}
+                      onChange={(newValue) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeStatuses,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                          },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>language</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Single.Basic
+                      value={node.params.entityLanguages?.[0] ?? null}
+                      placeholder="any language"
+                      isClearable
+                      width="full"
+                      options={orderedLanguageDict}
+                      onChange={(newValue) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeLanguages,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityLanguages: newValue
+                              ? [newValue as EntityEnums.Language]
+                              : [],
+                          },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+              </StyledForm>
+            </FilterPopover>
+          )}
+          {!isRoot && !node.params.entityId && countNodeFilters(node.params) > 0 && (
+            <NodeFilterMatches
+              node={node}
+              edgeType={edgeType}
+              onOpenEntityInDetail={onOpenEntityInDetail}
             />
           )}
           {paramEntityId && (

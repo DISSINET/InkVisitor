@@ -461,17 +461,21 @@ export const StyledScrollColumn = styled.div`
   width: 4rem;
   height: 16rem;
   overflow-y: auto;
-  scrollbar-width: thin;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space["px"]};
 
+  /* a narrower take on the global scrollbar, a 4px thumb in a 6px strip.
+     Chrome ignores the pseudo-elements once scrollbar-width is set, so that
+     applies only in Firefox */
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+  }
   &::-webkit-scrollbar {
     width: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.color["gray"][400]};
-    border-radius: ${({ theme }) => theme.borderRadius["full"]};
+    border-width: 1px;
   }
 `;
 

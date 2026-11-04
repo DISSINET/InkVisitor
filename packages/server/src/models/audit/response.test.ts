@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean } from "@modules/common.test";
 import { AuditScope } from "@inkvisitor/shared/types";
 import { deleteAudits } from "@service/shorthands";
@@ -9,6 +9,7 @@ function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
   const id = Math.random().toFixed();
   const a = new Audit({
     modelId: forEntityId,
+    user: "1",
     auditScope: AuditScope.Entity,
     date: date,
   });

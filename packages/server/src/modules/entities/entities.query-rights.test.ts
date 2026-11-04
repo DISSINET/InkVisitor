@@ -1,4 +1,4 @@
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
 import { createMockTree } from "@modules/common.test";
@@ -8,7 +8,6 @@ import Resource from "@models/resource/resource";
 import Concept from "@models/concept/concept";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 import treeCache from "@service/treeCache";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 
@@ -71,7 +70,7 @@ describe("entities query - per-row rights", () => {
   });
 
   afterAll(async () => {
-    await rethink.table("users").getAll(editorId).delete().run(db.connection);
+    await storage.users.deleteMany(db.connection, [editorId]);
     await db.close();
     await pool.end();
   });

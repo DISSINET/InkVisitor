@@ -1,4 +1,6 @@
-// Regular imports - no lazy loading
+// Regular imports. The geocoding page is deliberately absent: it is loaded
+// lazily in app.tsx, and re-exporting it here would pull it back into every
+// bundle that imports any other page from this barrel.
 import { AboutPage } from "pages/About/AboutPage";
 import AclPage from "pages/Acl/AclPage";
 import ActivatePage from "pages/Activate/ActivatePage";

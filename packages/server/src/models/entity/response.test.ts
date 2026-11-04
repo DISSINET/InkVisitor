@@ -18,7 +18,7 @@ import {
 } from "@inkvisitor/shared/types/response-detail";
 import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { prepareEntity } from "./entity.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Document from "@models/document/document";
 import Resource from "@models/resource/resource";
 import Territory from "@models/territory/territory";
@@ -585,6 +585,7 @@ describe("models/entity/response", function () {
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
+      await new Territory({ id: "T0" }).save(db.connection);
       await territory1.save(db.connection);
       await territory2.save(db.connection);
       // entityWithDoc must exist before the documents are preprocessed so that

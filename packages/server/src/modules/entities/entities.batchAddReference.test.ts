@@ -1,14 +1,12 @@
 import "ts-jest";
 import { apiPath } from "@common/constants";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { findEntityById } from "@service/shorthands";
-import Audit from "@models/audit/audit";
-import { RDatum, r } from "rethinkdb-ts";
 
 // A V is an endpoint: the value added to one entity of a batch is not the value
 // added to the next. The route therefore takes a label and mints a V per entity
@@ -123,31 +121,25 @@ describe("Entities batchAddReference", function () {
         entity.labels = [`${entity.id}-label`];
         return { ...entity };
       });
-      await r.table(Entity.table).insert(entities).run(db.connection);
+      await storage.entities.insert(db.connection, entities);
       const ids = entities.map((entity) => entity.id);
 
       const res = await addReference(ids, resource.id, "fol. 3v");
 
       expect(res.status).toEqual(200);
       expect(res.body.message).toContain(`${count}/${count}`);
-      const valueIds: string[] = await r
-        .table(Entity.table)
-        .getAll(r.args(ids))
-        .map((entity: RDatum) => entity("references")(0)("value"))
-        .run(db.connection);
+      const valueIds = (await storage.entities.getMany(db.connection, ids)).map(
+        (entity) => entity.references[0].value
+      );
       expect(new Set(valueIds).size).toEqual(count);
-      const values: number = await r
-        .table(Entity.table)
-        .getAll(r.args(valueIds))
-        .filter({ class: EntityEnums.Class.Value })
-        .count()
-        .run(db.connection);
+      const values = (await storage.entities.getMany(db.connection, valueIds)).filter(
+        (entity) => entity.class === EntityEnums.Class.Value
+      ).length;
       expect(values).toEqual(count);
-      const audited: number = await r
-        .table(Audit.table)
-        .filter((audit: RDatum) => r.expr([...ids, ...valueIds]).contains(audit("modelId")))
-        .count()
-        .run(db.connection);
+      const auditedIds = new Set([...ids, ...valueIds]);
+      const audited = (await storage.audits.all(db.connection)).filter((audit) =>
+        auditedIds.has(audit.modelId)
+      ).length;
       expect(audited).toEqual(2 * count);
     });
   });
@@ -163,11 +155,9 @@ describe("Entities batchAddReference", function () {
       expect(res.body.result).toBe(false);
       expect(res.body.message).toContain("cannot use template in entity instance");
       expect((await findEntityById(db, target.id)).references).toEqual([]);
-      const minted: number = await r
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Value, labels: ["f. 1r"] })
-        .count()
-        .run(db.connection);
+      const minted = (await storage.entities.byClass(db.connection, EntityEnums.Class.Value)).filter(
+        (entity) => entity.labels.includes("f. 1r")
+      ).length;
       expect(minted).toEqual(0);
     });
   });

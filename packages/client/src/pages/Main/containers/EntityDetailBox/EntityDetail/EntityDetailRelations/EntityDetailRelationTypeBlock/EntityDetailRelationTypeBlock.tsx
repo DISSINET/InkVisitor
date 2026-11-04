@@ -159,6 +159,17 @@ export const EntityDetailRelationTypeBlock: React.FC<
     Relation.IRelation[]
   >([]);
 
+  // in the order the rows are shown, so a pasted list keeps the relation order
+  const relatedEntityIds = useMemo(() => {
+    if (!isMultiple) {
+      return [];
+    }
+    const ids = currentRelations.flatMap((relation) =>
+      relation.entityIds.filter((entityId) => entityId !== entity.id)
+    );
+    return [...new Set(ids)];
+  }, [currentRelations, isMultiple, entity.id]);
+
   const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
     setCurrentRelations((prevRelations) =>
       update(prevRelations, {
@@ -198,6 +209,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           relationType={relationType}
           graphOpen={graphOpen}
           handleOpenGraph={handleOpenGraph}
+          copyUuids={relatedEntityIds}
         />
 
         {/* Values column */}

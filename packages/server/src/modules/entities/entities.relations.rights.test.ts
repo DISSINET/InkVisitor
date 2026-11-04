@@ -1,12 +1,12 @@
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { seedAcl } from "@modules/common.test";
 import User from "@models/user/user";
 import Concept from "@models/concept/concept";
 import Superclass from "@models/relation/superclass";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 import defaultAcl from "../../../../database/datasets/default/acl_permissions.json";
 
 /**
@@ -34,7 +34,7 @@ describe("entities/:entityId/relations - rights", () => {
     const seeded = (defaultAcl as Array<Record<string, unknown>>).filter(
       (row) => row.controller === "entities" && row.route === ":entityId/relations"
     );
-    await rethink.table("acl_permissions").insert(seeded).run(db.connection);
+    await seedAcl(db, seeded);
 
     await dog.save(db.connection);
     await animal.save(db.connection);
@@ -53,9 +53,9 @@ describe("entities/:entityId/relations - rights", () => {
   });
 
   afterAll(async () => {
-    await rethink.table("users").getAll(editorId, viewerId).delete().run(db.connection);
-    await rethink.table("relations").get(superclass.id).delete().run(db.connection);
-    await rethink.table("entities").getAll(dog.id, animal.id).delete().run(db.connection);
+    await storage.users.deleteMany(db.connection, [editorId, viewerId]);
+    await storage.relations.delete(db.connection, superclass.id);
+    await storage.entities.deleteMany(db.connection, [dog.id, animal.id]);
     await db.close();
     await pool.end();
   });

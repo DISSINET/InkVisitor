@@ -1,0 +1,47 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "C",
+      "data": {
+        "pos": ""
+      },
+      "detail": "",
+      "id": "rp-ce",
+      "labels": [
+        "editor concept"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "rp-ce",
+        "labels": [
+          "editor concept"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

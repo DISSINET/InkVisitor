@@ -35,7 +35,7 @@ export const Default = () => (
 export const MultiSelect = () => (
   <BaseDropdown
     width={280}
-    isMulti
+    multi
     options={classOptions}
     value={[classOptions[0], classOptions[3]]}
     onChange={() => {}}

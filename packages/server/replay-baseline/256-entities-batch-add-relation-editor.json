@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities/batchAddRelation",
+    "body": {
+      "entityIds": [
+        "rp-ce"
+      ],
+      "relationType": "SCL",
+      "targetEntityId": "c2"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

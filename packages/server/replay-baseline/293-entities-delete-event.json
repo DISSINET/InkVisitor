@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/entities/rp-e"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "rp-e": true
+      },
+      "result": true
+    }
+  }
+}

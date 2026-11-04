@@ -4,7 +4,8 @@ import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGrou
 import { AuditTable } from "./AuditTable/AuditTable";
 import { RelationAuditTable } from "./AuditTable/RelationAuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
-import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
+import { CopyUuidsButton } from "./CopyUuidsButton/CopyUuidsButton";
+import DocumentModalView from "./DocumentModal/DocumentModalView";
 import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
@@ -64,8 +65,9 @@ export {
   AuditTable,
   RelationAuditTable,
   BreadcrumbItem,
+  CopyUuidsButton,
   DocumentTitle,
-  DocumentModalEdit,
+  DocumentModalView,
   DocumentModalExport,
   ElvlButtonGroup,
   EmptyEntityTag,

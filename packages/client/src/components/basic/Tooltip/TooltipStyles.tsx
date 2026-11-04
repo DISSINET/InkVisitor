@@ -71,6 +71,12 @@ interface StyledContent {
   $tagGroup?: boolean;
   $color: keyof ThemeColor;
 }
+/* the container's flex item: min-width 0 lets it shrink to the container's
+   max-width, where a single-line child (a DocumentTitle) ellipsizes */
+export const StyledContentColumn = styled.div`
+  min-width: 0;
+`;
+
 export const StyledContent = styled.div<StyledContent>`
   margin: ${({ theme, $tagGroup }) =>
     `${theme.space[2]} ${$tagGroup ? theme.space[2] : theme.space[3]}`};

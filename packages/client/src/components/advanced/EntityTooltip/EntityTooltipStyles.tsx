@@ -18,6 +18,8 @@ export const StyledBold = styled.span`
 `;
 
 export const StyledDetail = styled.div`
+  /* a flex item of the row: shrinks to the tooltip's width, where a DocumentTitle ellipsizes */
+  min-width: 0;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   display: flex;
   flex-direction: column;

@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../../server";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";

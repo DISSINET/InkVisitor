@@ -1,0 +1,26 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/users",
+    "body": {
+      "bookmarks": [],
+      "email": "owner2@example.com",
+      "id": "u-replay-owner",
+      "name": "replayowner",
+      "options": {},
+      "rights": [],
+      "role": "owner",
+      "storedTerritories": []
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "only an owner can create an owner",
+      "result": false
+    }
+  }
+}

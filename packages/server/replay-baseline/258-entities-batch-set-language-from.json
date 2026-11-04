@@ -1,0 +1,26 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "language",
+        "from": "eng",
+        "to": "lat"
+      },
+      "entityIds": [
+        "rp-ce",
+        "rp-l"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Updated 2/2 entities",
+      "result": true
+    }
+  }
+}

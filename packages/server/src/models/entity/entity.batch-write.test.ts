@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import Entity from "./entity";

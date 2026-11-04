@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/batch-move?ids=rp-s",
+    "body": {
+      "territoryId": "nope"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "TerritoryDoesNotExits",
+      "message": "territory nope was not found",
+      "result": false
+    }
+  }
+}

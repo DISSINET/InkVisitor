@@ -1,5 +1,5 @@
-import { r } from "rethinkdb-ts";
-import { connectAdmin, getTestDbName } from "./db";
+import { storage } from "../service/storage";
+import { getTestDbName } from "./db";
 
 /**
  * Jest globalTeardown. Drops the ephemeral test database created in
@@ -14,16 +14,9 @@ export default async function globalTeardown(): Promise<void> {
     return;
   }
 
-  let conn;
   try {
-    conn = await connectAdmin();
+    await storage.dropDatabase(dbName);
   } catch {
     return;
-  }
-
-  try {
-    await r.dbDrop(dbName).run(conn).catch(() => undefined);
-  } finally {
-    await conn.close();
   }
 }

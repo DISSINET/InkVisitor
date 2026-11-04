@@ -42,9 +42,7 @@ export interface DeleteEntityConflict {
   message: string;
 }
 
-/** CustomScrollbar wrapper id of the entity detail (`scrollerId`). */
-export const ENTITY_DETAIL_SCROLLBAR_ID = "entity-detail-scrollbar";
-/** Scrollable entity-detail container id (CustomScrollbar `elementId`). */
+/** Scrollable entity-detail container id (CustomScrollbar `id`). */
 export const ENTITY_DETAIL_SCROLL_CONTAINER_ID = "entity-detail-box-content";
 /** Id of an entity's "Used in" section — per entity so a scroll waits for the right detail. */
 export const usedInSectionId = (entityId: string) =>
@@ -61,7 +59,13 @@ export const scrollToUsedInSection = (entityId: string): void => {
     const container = document.getElementById(ENTITY_DETAIL_SCROLL_CONTAINER_ID);
     const section = document.getElementById(usedInSectionId(entityId));
     if (container && section) {
-      container.scrollTo({ behavior: "smooth", top: section.offsetTop });
+      // the section header, so the section's top padding scrolls out of view
+      const target = section.firstElementChild ?? section;
+      const top =
+        container.scrollTop +
+        target.getBoundingClientRect().top -
+        container.getBoundingClientRect().top;
+      container.scrollTo({ behavior: "smooth", top });
     } else if (attempts++ < 30) {
       setTimeout(tick, 100);
     }

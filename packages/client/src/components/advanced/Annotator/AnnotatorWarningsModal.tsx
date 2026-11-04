@@ -1,7 +1,7 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { TOOLBAR_ICON_SIZE } from "./AnnotatorToolbar/AnnotatorToolbarStyles";
-import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import { WARNING_ANCHOR_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
@@ -11,8 +11,11 @@ import { FaScissors } from "react-icons/fa6";
 import { TbAnchor } from "react-icons/tb";
 import { ButtonSize } from "types";
 import {
+  StyledWarningActions,
   StyledWarningInfo,
   StyledWarningKind,
+  StyledWarningMain,
+  StyledWarningParagraph,
   StyledWarningRow,
   StyledWarningsList,
   StyledWarningsListHeader,
@@ -84,7 +87,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   const { data: anchorEntities, isFetching: isFetchingEntities } = useEntitiesQuery(
     WARNING_ANCHOR_ENTITIES_KEY,
     anchorIds,
-    { enabled: open },
+    { enabled: open }
   );
 
   const entityMap = useMemo(() => {
@@ -117,50 +120,64 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <Button
-                  icon={<TbAnchor />}
-                  size={ButtonSize.Large}
-                  color="success"
-                  inverted
-                  noBorder
-                  shape="rounded-md"
-                  tooltipLabel="scroll to anchor in text (RAW mode)"
-                  onClick={() => {
-                    onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
-                    // Close so the (now RAW-mode, scrolled) text is visible.
-                    onOpenChange(false);
-                  }}
-                />
-                <StyledWarningInfo>
-                  <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
-                  {isFetchingEntities && !entityMap[anchor.tagName] ? (
-                    <Loader size={12} show noBackground />
-                  ) : (
-                    <EntityTagById
-                      entityId={anchor.tagName}
-                      entity={entityMap[anchor.tagName]}
-                      disableToast
-                      fullWidth
-                      disableTooltip={false}
-                      disableDoubleClick={false}
-                    />
-                  )}
-                </StyledWarningInfo>
-                <ButtonGroup>
+                <StyledWarningMain>
+                  <StyledWarningKind>
+                    {kindLabel(anchor.type)}
+                    {anchor.paragraphNumber !== undefined && (
+                      <StyledWarningParagraph>
+                        · paragraph {anchor.paragraphNumber}
+                      </StyledWarningParagraph>
+                    )}
+                  </StyledWarningKind>
+                  <StyledWarningInfo>
+                    {isFetchingEntities && !entityMap[anchor.tagName] ? (
+                      <Loader size={12} show noBackground />
+                    ) : (
+                      <EntityTagById
+                        entityId={anchor.tagName}
+                        entity={entityMap[anchor.tagName]}
+                        disableToast
+                        fullWidth
+                        disableTooltip={false}
+                        disableDoubleClick={false}
+                      />
+                    )}
+                  </StyledWarningInfo>
+                </StyledWarningMain>
+                <StyledWarningActions>
                   <Button
-                    icon={<FaScissors />}
+                    icon={<TbAnchor />}
+                    label="locate"
+                    color="primary"
+                    inverted
+                    noBackground
+                    noBorder
+                    textRegular
+                    tooltipLabel="scroll to anchor in text (RAW mode)"
+                    onClick={() => {
+                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
+                      // Close so the (now RAW-mode, scrolled) text is visible.
+                      onOpenChange(false);
+                    }}
+                  />
+                  <Button
+                    icon={<FaScissors size="0.8em" />}
                     label="remove"
-                    color="success"
+                    color="danger"
+                    inverted
+                    noBackground
+                    noBorder
+                    textRegular
                     tooltipLabel="unlink broken anchor"
                     onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
                   />
-                </ButtonGroup>
+                </StyledWarningActions>
               </StyledWarningRow>
             ))}
           </StyledWarningsList>
         </ModalContent>
         <ModalFooter note="Anchors must have matching opening and closing tags">
-          <Button label="close" color="primary" inverted onClick={() => onOpenChange(false)} />
+          <Button label="Close" color="primary" inverted onClick={() => onOpenChange(false)} />
         </ModalFooter>
       </Modal>
     </>

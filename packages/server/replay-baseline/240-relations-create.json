@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/relations",
+    "body": {
+      "entityIds": [
+        "rp-c",
+        "c3"
+      ],
+      "id": "rp-rel-1",
+      "order": 1,
+      "type": "SCL"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

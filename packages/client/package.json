@@ -1,6 +1,6 @@
 {
   "name": "dissinet.ddb.client",
-  "version": "1.6.1",
+  "version": "1.6.3",
   "description": "",
   "main": "index.js",
   "engines": {
@@ -12,6 +12,7 @@
     "preinstall": "npx only-allow pnpm",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
@@ -25,6 +26,7 @@
     "build:data-import-persecutio": "vite build --mode data-import-persecutio",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
     "rebuild:annotator": "bash scripts/rebuild-annotator.sh"
   },
   "author": "",
@@ -42,6 +44,7 @@
     "d3-axis-for-react": "^1.1.1",
     "immutability-helper": "^3.1.1",
     "jszip": "^3.10.1",
+    "maplibre-gl": "^6.6.0",
     "prismjs": "^1.30.0",
     "react": "^19.2.6",
     "react-dnd": "^16.0.1",
@@ -54,8 +57,6 @@
     "react-redux": "^9.3.0",
     "react-router": "^7.15.1",
     "react-router-dom": "^7.15.1",
-    "react-scrollbars-custom": "^4.1.1",
-    "react-select": "^5.10.2",
     "react-simple-code-editor": "^0.14.1",
     "react-spinners": "^0.17.0",
     "react-table": "^7.8.0",
@@ -66,9 +67,12 @@
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
     "styled-components": "^6.4.1",
+    "terra-draw": "1.37.0",
+    "terra-draw-maplibre-gl-adapter": "1.5.0",
     "uuid": "^13.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@redux-devtools/extension": "^3.3.0",
     "@tanstack/react-query-devtools": "^5.100.10",
     "@types/d3": "^7.4.3",
@@ -84,7 +88,6 @@
     "@types/styled-components": "^5.1.36",
     "@vitejs/plugin-react": "^5.2.0",
     "babel-plugin-styled-components": "^2.1.4",
-    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "react-spring": "^10.0.3",
     "socket.io-client": "^4.8.3",

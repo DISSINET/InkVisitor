@@ -236,6 +236,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={statusOptions}
             value={statusOptionSelected}
+            isClearable={!!searchData.status}
             onChange={(selectedOption) => {
               const status =
                 selectedOption === defaultStatusOption.value ? undefined : selectedOption;
@@ -261,9 +262,13 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={languageOptions}
             value={languageOptionSelected}
+            isClearable={searchData.language !== undefined}
             onChange={(selectedOption) => {
+              // clearing reports an empty string
               const language =
-                selectedOption === defaultLanguageOption.value ? undefined : selectedOption;
+                !selectedOption || selectedOption === defaultLanguageOption.value
+                  ? undefined
+                  : selectedOption;
               handleChange({
                 language,
               });
@@ -439,6 +444,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={userOptions}
             value={searchData.createdBy ?? ""}
+            isClearable={!!searchData.createdBy}
             onChange={(value) => {
               handleChange({ createdBy: value || undefined });
               dispatch({
@@ -459,6 +465,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={userOptions}
             value={searchData.updatedBy ?? ""}
+            isClearable={!!searchData.updatedBy}
             onChange={(value) => {
               handleChange({ updatedBy: value || undefined });
               dispatch({

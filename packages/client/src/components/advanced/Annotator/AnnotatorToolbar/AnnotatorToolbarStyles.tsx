@@ -77,3 +77,8 @@ export const StyledDisplayModeButtonIconWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
+
+/** Catches keys on their way out of the go-to-paragraph field without taking a layout box. */
+export const StyledGoToParagraphField = styled.span`
+  display: contents;
+`;

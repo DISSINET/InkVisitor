@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/acls/acl-2"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDoesNotExits",
+      "message": "permission with id acl-2 does not exist",
+      "result": false
+    }
+  }
+}

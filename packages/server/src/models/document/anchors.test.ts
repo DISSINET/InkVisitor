@@ -82,3 +82,25 @@ blahdddddsdsd
     expect(diff.changes).toHaveLength(1);
   });
 });
+
+describe("AnchorsNode.buildAnchorsTree with self-closing tags", () => {
+  test("a self-closing tag inside an anchor neither becomes a node nor closes the anchor", () => {
+    const content = "<e1>text <e2 /> more</e1> after <e3>x</e3>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIdsFromContent(content));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1", "e3"]);
+    expect(tree[0].children).toHaveLength(0);
+    expect(tree[0].content).toEqual("text  more");
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    expect(tree[1].content).toEqual("x");
+  });
+
+  test("a self-closing tag of the same entity leaves the surrounding anchor intact", () => {
+    const content = "<e1>text <e1 /> more</e1>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIdsFromContent(content));
+
+    expect(tree).toHaveLength(1);
+    expect(tree[0].children).toHaveLength(0);
+    expect(tree[0].content).toEqual("text  more");
+  });
+});

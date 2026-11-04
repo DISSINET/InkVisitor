@@ -20,7 +20,7 @@ import {
   ITerritoryProtocol,
   ITerritoryValidation,
 } from "@inkvisitor/shared/types/territory";
-import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
@@ -167,7 +167,7 @@ class Territory extends Entity implements ITerritoryModel {
    * Use this method for doing asynchronous operation/checks before the save operation
    * @param db db connection
    */
-  async beforeSave(db: Connection): Promise<void> {
+  async beforeSave(db: Conn): Promise<void> {
     await super.beforeSave(db);
 
     // fix protocol if creating new T and if protocol is missing
@@ -199,7 +199,7 @@ class Territory extends Entity implements ITerritoryModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(db: Conn | undefined): Promise<boolean> {
     if (this.data.parent) {
       // get count of future siblings and move current territory to last
       // position
@@ -227,7 +227,7 @@ class Territory extends Entity implements ITerritoryModel {
   }
 
   async update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     if (updateData["data"] && (updateData["data"] as any)["parent"]) {
@@ -254,11 +254,7 @@ class Territory extends Entity implements ITerritoryModel {
       });
     }
 
-    const result = await rethink
-      .table(Entity.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
+    const result = await storage.entities.update(db as Conn, this.id, updateData);
 
     cache.delete(entityCacheKey(this.id));
     await treeCache.initialize();
@@ -266,7 +262,7 @@ class Territory extends Entity implements ITerritoryModel {
     return result;
   }
 
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     if (!this.id) {
       throw new InvalidDeleteError(
         "delete called on territory with undefined id"
@@ -286,22 +282,11 @@ class Territory extends Entity implements ITerritoryModel {
   }
 
   async findChilds(
-    db: Connection | undefined,
+    db: Conn | undefined,
     isDeep?: boolean
   ): Promise<Record<number | string, ITerritory>> {
     const getDirectChildren = async (): Promise<ITerritory[]> => {
-      return rethink
-        .table(Territory.table)
-        .filter({
-          class: EntityEnums.Class.Territory,
-        })
-        .filter((territory: RDatum) => {
-          return rethink.and(
-            territory("data")("parent").typeOf().eq("OBJECT"),
-            territory("data")("parent")("territoryId").eq(this.id)
-          );
-        })
-        .run(db);
+      return (await storage.entities.territoryChildren(db as Conn, this.id)) as ITerritory[];
     };
 
     // For non-deep queries, keep the original behavior

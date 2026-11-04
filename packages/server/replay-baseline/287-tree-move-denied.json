@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "PATCH",
+    "path": "/api/tree/rp-t/position",
+    "body": {
+      "newIndex": 0,
+      "parentId": "t1"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

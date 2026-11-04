@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class Antonym
   extends Relation
@@ -19,7 +19,7 @@ export default class Antonym
   }
 
   static async getAntonymForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string
   ): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IAntonym>[] =

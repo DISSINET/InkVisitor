@@ -2,7 +2,7 @@ import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
-import { Toast } from "components";
+import { Loader, Toast } from "components";
 import { Page } from "components/advanced";
 import ErrorBoundary from "components/ErrorBoundary";
 import { useDebounce, useNewVersionCheck } from "hooks";
@@ -22,7 +22,7 @@ import {
   UsersPage,
 } from "pages";
 import { StatsPage } from "pages/Stats/StatsPage";
-import React, { useEffect, useLayoutEffect, useMemo } from "react";
+import React, { Suspense, useEffect, useLayoutEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Helmet } from "react-helmet-async";
@@ -37,6 +37,18 @@ import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
 import { storeRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserRole } from "utils/userStorage";
+
+/**
+ * The geocoding page is the app's only route that carries a map renderer, and
+ * the renderer is larger than the rest of the route put together. Split out so
+ * that weight is fetched by the readers who open the page rather than by every
+ * reader who loads the app.
+ */
+const GeocodingPage = React.lazy(() =>
+  import("pages/Geocoding/GeocodingPage").then((module) => ({
+    default: module.GeocodingPage,
+  })),
+);
 
 const clockPerformance = (
   profilerId: any,
@@ -217,6 +229,16 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/geocoding"
+                      element={
+                        <RequireAuth>
+                          <Suspense fallback={<Loader show />}>
+                            <GeocodingPage />
+                          </Suspense>
                         </RequireAuth>
                       }
                     />

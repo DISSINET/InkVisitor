@@ -1,14 +1,12 @@
 import "ts-jest";
 import { apiPath } from "@common/constants";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams } from "@inkvisitor/shared/types/errors";
-import Audit from "@models/audit/audit";
-import { RDatum, r } from "rethinkdb-ts";
 
 // batchSetAttribute rewrites one attribute across a selection, but only where
 // the attribute applies (pos lives on C and A alone) and only where the current
@@ -204,7 +202,7 @@ describe("Entities batchSetAttribute", function () {
         entity.labels = [`${entity.id}-label`];
         return { ...entity };
       });
-      await r.table(Entity.table).insert(entities).run(db.connection);
+      await storage.entities.insert(db.connection, entities);
       const ids = entities.map((entity) => entity.id);
 
       const res = await setAttribute(ids, {
@@ -215,18 +213,15 @@ describe("Entities batchSetAttribute", function () {
 
       expect(res.status).toEqual(200);
       expect(res.body.message).toContain(`${count}/${count}`);
-      const languages: string[] = await r
-        .table(Entity.table)
-        .getAll(r.args(ids))
-        .getField("language")
-        .run(db.connection);
+      const languages = (await storage.entities.getMany(db.connection, ids)).map(
+        (entity) => entity.language
+      );
       expect(languages).toHaveLength(count);
       expect(new Set(languages)).toEqual(new Set([EntityEnums.Language.Latin]));
-      const audited: number = await r
-        .table(Audit.table)
-        .filter((audit: RDatum) => r.expr(ids).contains(audit("modelId")))
-        .count()
-        .run(db.connection);
+      const auditedIds = new Set(ids);
+      const audited = (await storage.audits.all(db.connection)).filter((audit) =>
+        auditedIds.has(audit.modelId)
+      ).length;
       expect(audited).toEqual(count);
     });
   });
@@ -261,10 +256,11 @@ describe("Entities batchSetAttribute", function () {
       // inserted as is: the generic Entity model makeEntity saves through
       // leaves data out
       const action = { id: `test-bsa-${Math.random().toString()}`, class: EntityEnums.Class.Action };
-      await r
-        .table(Entity.table)
-        .insert({ ...action, labels: [`${action.id}-label`], data: { pos: "", valencies } })
-        .run(db.connection);
+      await storage.entities.insert(db.connection, {
+        ...action,
+        labels: [`${action.id}-label`],
+        data: { pos: "", valencies },
+      });
 
       const res = await setAttribute([action.id], {
         attribute: "pos",

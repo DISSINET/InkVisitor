@@ -1,6 +1,7 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
+import { SCROLLBAR_SIZE } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import { space5, space6 } from "Theme/theme-space-shortcut";
 
@@ -18,7 +19,11 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "500")};
+  /* the ladder is the theme's own — see the note on zIndex there. Read from it
+     rather than written here, because what has to stay under a dialog is
+     decided in the files that draw those things and not in this one */
+  z-index: ${({ theme, $lowerZIndex }) =>
+    $lowerZIndex ? theme.zIndex.modalLower : theme.zIndex.modal};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -68,9 +73,7 @@ export const StyledCard = styled(animated.div)<Card>`
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border: ${({ theme, $noBorder }) =>
-    $noBorder
-      ? "none"
-      : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
+    $noBorder ? "none" : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
   box-shadow: ${({ theme, $noBorder }) => ($noBorder ? theme.boxShadow["high"] : "")};
 `;
 
@@ -106,9 +109,15 @@ export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;
+  $hasClose?: boolean;
 }
 export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* the close icon is absolutely positioned over the header's right edge */
+  padding-right: ${({ theme, $hasClose }) => ($hasClose ? theme.space[8] : 0)};
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};
@@ -132,27 +141,36 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space6} ${space5}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-
-  ${({ $enableScroll, $noPadding }) =>
-    $enableScroll &&
-    !$noPadding &&
-    css`
-      /* Softens the top edge, which a modal with no header has nothing else to
-         frame - the footer's own border already closes off the bottom. The fade
-         is exactly the body's top padding, so at rest it lies over empty space
-         and shows nothing; a row only dissolves once it scrolls into it. */
-      --modal-scroll-fade: ${space6};
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0,
-        #000 var(--modal-scroll-fade)
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0,
-        #000 var(--modal-scroll-fade)
-      );
-    `}
+`;
+// holds the scrolling body plus its edge fades, which must sit outside the
+// scroller to stay put while the rows move under them
+export const StyledCardBodyFrame = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+`;
+interface StyledScrollEdge {
+  $edge: "top" | "bottom";
+}
+export const StyledScrollEdge = styled.div<StyledScrollEdge>`
+  /* The strip is exactly the body's vertical padding, so at rest it lies over
+     empty space and shows nothing; a row only fades once it scrolls into it.
+     It shades from the card's background at the edge to transparent inwards,
+     and stops short of the scrollbar so the thumb stays sharp. */
+  position: absolute;
+  left: 0;
+  right: ${SCROLLBAR_SIZE}px;
+  ${({ $edge }) => $edge}: 0;
+  z-index: 1;
+  height: ${space6};
+  pointer-events: none;
+  background: linear-gradient(
+    to ${({ $edge }) => ($edge === "top" ? "bottom" : "top")},
+    ${({ theme }) => theme.color["gray"][100]},
+    transparent
+  );
 `;
 interface StyledFooter {
   $spaceBetween?: boolean;

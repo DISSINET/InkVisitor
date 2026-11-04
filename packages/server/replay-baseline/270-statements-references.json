@@ -1,0 +1,22 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/references?ids=rp-s&replace=1",
+    "body": [
+      {
+        "id": "rp-ref-1",
+        "resource": "dissinet-resource",
+        "value": "rp-v"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "References replaced",
+      "result": true
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { deleteRelations } from "@service/shorthands";
 import { getRelationClass } from "@models/factory";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";

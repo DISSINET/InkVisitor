@@ -1,0 +1,22 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchAddReference",
+    "body": {
+      "entityIds": [
+        "rp-c"
+      ],
+      "resourceEntityId": "dissinet-resource",
+      "valueEntityId": "rp-tpl"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Updated 0/1 entities. Errors: {\"rp-c\":\"cannot use template in entity instance\"}",
+      "result": false
+    }
+  }
+}

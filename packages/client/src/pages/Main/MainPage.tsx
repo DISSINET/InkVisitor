@@ -161,6 +161,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [territoryId, secondPanelExpanded, dispatch]);
 
+  // A url that names an entity detail asks to see it, whatever state the user
+  // last left the second panel and the detail box in.
+  useEffect(() => {
+    if (!selectedDetailId && detailIdArray.length === 0) {
+      return;
+    }
+    if (!secondPanelExpanded) {
+      // the page is still assembling itself, so no travel - same as above
+      skipTravelForPanelState.current = true;
+      dispatch(setSecondPanelExpanded(true));
+    }
+    if (detailBoxState === DetailBoxState.Minimized) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, []);
+
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
     const prev = prevEditorStateRef.current;
@@ -634,6 +650,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={firstPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["tree", "territory", "user"]}
               isHidden={!firstPanelExpanded}
             />,
@@ -723,6 +740,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </>,
                 statementListOpened && territoryId && (
                   <RefreshBoxButton
+                    key="refresh"
                     queriesToRefresh={["territory", "statement", "user"]}
                     isHidden={false}
                   />
@@ -766,6 +784,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="maximize"
                     dataTestId="maximize-detail-box"
                     tooltipLabel={getMaximizeBtnTooltip()}
                     icon={
@@ -787,6 +806,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="close-all"
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -867,6 +887,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getAnnotatorBoxHeight()}
           heightVarKey="annotator"
           label="Annotator"
+          // the annotator scrolls its own text, and its pixel size lags the panel
+          // while it is resized, which would flash a scrollbar on the box
+          disableScroll
           headerComponent={annotatorHeader}
           // Document identity fills the free header space; the caption and the
           // panel button stay visible, so the header content yields, not them.
@@ -956,10 +979,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={fourthPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["search-templates", "search"]}
               isHidden={!fourthPanelExpanded}
             />,
-            <ToggleFourthPanelBoxButton boxToHide="search" />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="search" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -974,8 +998,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["bookmarks"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="bookmarks" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["bookmarks"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="bookmarks" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -990,8 +1018,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["templates"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="templates" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["templates"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="templates" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}

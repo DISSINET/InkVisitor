@@ -1,0 +1,35 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "T",
+      "data": {
+        "parent": {
+          "order": 1,
+          "territoryId": "T0"
+        }
+      },
+      "detail": "",
+      "id": "rp-te",
+      "labels": [
+        "editor territory"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "entity cannot be created",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "PUT",
+    "path": "/api/entities/rp-c",
+    "body": {
+      "detail": "viewer"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "entity cannot be saved",
+      "result": false
+    }
+  }
+}

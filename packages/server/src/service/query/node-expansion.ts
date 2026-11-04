@@ -1,4 +1,4 @@
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 import {
   ISubordinateExpansionOptions,
@@ -41,7 +41,7 @@ export interface INodeExpansionIds {
  * With both options false no query is issued at all.
  */
 export const getNodeExpansionIds = async (
-  db: Connection,
+  db: Conn,
   entityId: string,
   opts: INodeExpansionOptions
 ): Promise<INodeExpansionIds> => {

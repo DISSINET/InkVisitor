@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batch",
+    "body": {}
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "ids array must be provided",
+      "result": false
+    }
+  }
+}

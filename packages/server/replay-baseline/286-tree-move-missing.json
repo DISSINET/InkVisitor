@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PATCH",
+    "path": "/api/tree/nope/position",
+    "body": {
+      "newIndex": 0,
+      "parentId": "T0"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "TerritoryDoesNotExits",
+      "message": "territory nope does not exist",
+      "result": false
+    }
+  }
+}

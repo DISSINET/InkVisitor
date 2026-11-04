@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
+// the scroller itself, so its background also covers the scrollbar
 export const StyledContent = styled.div`
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: start;

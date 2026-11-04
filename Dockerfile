@@ -1,4 +1,4 @@
-FROM gplane/pnpm:node22-alpine AS build-env
+FROM node:22-alpine AS build-env
 
 RUN apk add tzdata openssl
 RUN npm install -g pnpm@11
@@ -24,13 +24,7 @@ RUN pnpm deploy --legacy --filter=inkvisitor-server --prod /app/out
 RUN mkdir -p /app/out/secret
 RUN openssl req -x509 -newkey rsa:2048 -nodes -out /app/out/secret/cert.pem -keyout /app/out/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
 
-FROM gplane/pnpm:node22-alpine
-
-# The base image sets ENTRYPOINT ["pnpm"]; reset it so the CMD runs directly.
-# The runtime needs no pnpm — the deployed server is plain node, and pnpm would
-# otherwise try (and fail) to verify the deployed "@inkvisitor/shared": "workspace:*"
-# dependency outside of any workspace.
-ENTRYPOINT []
+FROM node:22-alpine
 
 COPY --from=build-env /app/out /app/server
 COPY --from=build-env /app/packages/client/dist /app/client/dist

@@ -20,7 +20,7 @@ export const StyledTemplateSectionHeader = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  padding-right: ${({ theme }) => theme.space[2]};
+  padding-right: ${({ theme }) => theme.space[1]};
   font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   color: ${({ theme }) => theme.color["primary"]};
@@ -49,7 +49,7 @@ export const StyledTemplateFilter = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  padding-right: ${({ theme }) => theme.space[2]};
+  padding-right: ${({ theme }) => theme.space[1]};
 `;
 
 // shares its row with the controls next to it and shrinks with the panel

@@ -1,4 +1,4 @@
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export enum EventTypes {
   BEFORE_ENTITY_DELETE = "BEFORE_ENTITY_DELETE",
@@ -7,7 +7,7 @@ export enum EventTypes {
   AFTER_TERRITORY_UPDATE = "AFTER_TERRITORY_UPDATE",
 }
 
-export type EmitterCb = (db: Connection, entityId: string) => Promise<void>;
+export type EmitterCb = (db: Conn, entityId: string) => Promise<void>;
 
 export type EventMapSingle = { [key in EventTypes]?: EmitterCb };
 

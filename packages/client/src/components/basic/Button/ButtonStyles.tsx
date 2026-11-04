@@ -150,7 +150,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   /* border-radius: ${({ theme }) => theme.borderRadius.xs}; */
   color: ${({ theme, $disabled, $color, $inverted, $textColor }) => {
     if ($disabled) {
-      return theme.color["gray"][500];
+      /* gray 500 is 2.2:1 on the striped fill, which reads as an absent control
+         rather than an unavailable one; the stripes, the cursor and the missing
+         hover are what say it cannot be pressed */
+      return theme.color["gray"][600];
     }
     if ($textColor) {
       return theme.color[$textColor];

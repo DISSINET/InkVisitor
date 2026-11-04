@@ -1,9 +1,9 @@
 import { ITerritory } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export interface ITerritoryModel extends ITerritory {
   findChilds(
-    db: Connection | undefined,
+    db: Conn | undefined,
     isDeep?: boolean
   ): Promise<Record<number | string, ITerritory>>;
 }

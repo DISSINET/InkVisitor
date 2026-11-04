@@ -26,7 +26,7 @@ import {
   IStatementClassification,
   IStatementIdentification,
 } from "@inkvisitor/shared/types/statement";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import EntityWarnings from "./warnings";
@@ -81,7 +81,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * @param conn
    */
   async populateEntitiesMap(
-    conn: Connection
+    conn: Conn
   ): Promise<Record<string, IEntity>> {
     const entities: Record<string, IEntity> = {};
 
@@ -382,7 +382,7 @@ export class ResponseEntityDetail
    * loads casts for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
    * @param conn
    */
-  async processTemplateData(conn: Connection): Promise<void> {
+  async processTemplateData(conn: Conn): Promise<void> {
     const casts = await this.findFromTemplate(conn);
     this.usedAsTemplate = casts.map((c) => c.id);
 

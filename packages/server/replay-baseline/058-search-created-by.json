@@ -1,0 +1,12 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?createdBy=1"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": []
+  }
+}
