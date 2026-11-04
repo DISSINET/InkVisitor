@@ -245,6 +245,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     subordinates: false,
   });
 
+  const [uuidsClearSignal, setUuidsClearSignal] = useState(0);
   const uuidFilterCount = getUuidsFilter(exploreState.filters)?.ids.length ?? 0;
 
   const handleRunSearch = useCallback(() => {
@@ -940,16 +941,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     count={uuidFilterCount}
                     tooltipLabel="keep only the entities with these UUIDs"
                     placement="top-start"
-                    onClear={() =>
+                    onClear={() => {
                       exploreStateDispatch({
                         type: ExploreActionType.setUuidsFilter,
                         payload: { ids: [] },
-                      })
-                    }
+                      });
+                      setUuidsClearSignal((signal) => signal + 1);
+                    }}
                   >
                     <ExplorerTableIdsFilter
                       filters={exploreState.filters}
                       dispatch={exploreStateDispatch}
+                      clearSignal={uuidsClearSignal}
                     />
                   </FilterPopover>
                   <SearchFiltersPopover

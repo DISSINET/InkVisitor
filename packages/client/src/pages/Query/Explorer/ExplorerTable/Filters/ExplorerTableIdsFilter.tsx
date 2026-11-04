@@ -21,13 +21,19 @@ import {
 interface ExplorerTableIdsFilterProps {
   filters: Explore.IExploreSearchFilter[];
   dispatch: React.Dispatch<ExploreAction>;
+  /** bumped by the panel's "clear all", which also drops the typed draft */
+  clearSignal: number;
 }
 
 /**
  * The UUID chip editor; it sits in the UUIDs filter panel and lives as long as
  * the panel is open.
  */
-const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
+const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({
+  filters,
+  dispatch,
+  clearSignal,
+}) => {
   const rowIdsFilter = getUuidsFilter(filters);
   const appliedIds = rowIdsFilter?.ids ?? [];
 
@@ -148,6 +154,17 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   // The draft is flagged invalid only once it can no longer become a valid UUID,
   // so a half-typed UUID stays neutral while junk (e.g. "foo bar") is emphasized.
   const draftInvalid = draft.trim() !== "" && !isViableUuidPrefix(draft.trim());
+
+  // "clear all" lives in the panel header, outside this editor; a draft left in
+  // place would be committed back into the filter when the panel closes
+  const lastClearSignalRef = useRef(clearSignal);
+  useEffect(() => {
+    if (clearSignal !== lastClearSignalRef.current) {
+      lastClearSignalRef.current = clearSignal;
+      setDraft("");
+      setAllSelected(false);
+    }
+  }, [clearSignal]);
 
   // the panel closes by unmounting this editor, with no blur on the way out, so
   // a typed UUID still waiting in the draft is committed here
