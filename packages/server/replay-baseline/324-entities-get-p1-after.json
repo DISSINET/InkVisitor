@@ -1,0 +1,29 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/p1"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "P",
+      "createdAt": "<datetime>",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "id": "p1",
+      "labels": [
+        "Minda, the priest"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "right": "admin",
+      "status": "1"
+    }
+  }
+}

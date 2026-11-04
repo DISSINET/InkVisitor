@@ -9,6 +9,7 @@
 import { Annotator } from "./lib/Annotator";
 import { EditMode, HighlightMode } from "./lib/constants";
 import { drawAnchorMarker } from "./lib/AnchorMarker";
+import Highlighter from "./lib/Highlighter";
 
 jest.mock("./lib/AnchorMarker", () => ({
   // Return a plausible bounding box keyed off the draw coords so the recorded
@@ -269,5 +270,48 @@ describe("anchor markers during anchor resize (#2885)", () => {
     const kinds = markerMock.mock.calls.map((c) => c[3]);
     expect(kinds).toContain("start");
     expect(kinds).toContain("end");
+  });
+});
+
+// The active territory's FOCUS wash dims everything outside its span. With
+// several spans of one territory the washes would stack over the whole text, so
+// the wash is drawn only when the territory is anchored exactly once.
+describe("Active territory FOCUS wash", () => {
+  const focusSchemas = () => [
+    { mode: HighlightMode.FOCUS, style: { color: "#2079DF", opacity: 0.1 } },
+    anchorSchema,
+  ];
+
+  const drawnFocusCount = (text: string): number => {
+    const drawSpy = jest.spyOn(Highlighter.prototype, "draw");
+    const a = mk(text);
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => focusSchemas());
+    drawSpy.mockClear();
+    a.draw();
+    const count = drawSpy.mock.contexts.filter(
+      (h: unknown) => (h as Highlighter).hlMode === HighlightMode.FOCUS
+    ).length;
+    drawSpy.mockRestore();
+    return count;
+  };
+
+  test("a territory anchored once draws the wash", () => {
+    expect(drawnFocusCount("foo <T1>bar</T1> baz")).toBe(1);
+  });
+
+  test("a territory anchored twice draws no wash but keeps its markers", () => {
+    expect(drawnFocusCount("<T1>foo</T1> bar <T1>baz</T1>")).toBe(0);
+    const kinds = markerMock.mock.calls.map((c) => c[3]);
+    expect(kinds.filter((k) => k === "start")).toHaveLength(2);
+  });
+
+  test("an unpaired opening tag before the anchor drops the wash", () => {
+    // Pairing by index would span from the stray opening tag to the real close.
+    expect(drawnFocusCount("<T1>foo bar <T1>baz</T1>")).toBe(0);
+  });
+
+  test("an unpaired closing tag drops the wash", () => {
+    expect(drawnFocusCount("foo</T1> bar <T1>baz</T1>")).toBe(0);
   });
 });

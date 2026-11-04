@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
 
 // Query Builder box buttons: compact result-expansion checkboxes (#2969),
 // grouped as a single ButtonGroup item next to "run search".
@@ -63,4 +64,58 @@ export const StyledExpansionCount = styled.span<StyledExpansionCount>`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   line-height: 1.2;
+`;
+
+export const StyledCloseEditorIcon = styled(IcoCloseVsc)`
+  transform: scale(1.3);
+`;
+
+export const StyledCloseAllIcon = styled(IcoCloseAll)`
+  transform: scale(1.3);
+`;
+
+export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
+  transform: rotate(270deg);
+`;
+
+// The query tree scrolls on its own above the search rows, which stay in place
+// at the bottom of the Query Builder box.
+export const StyledQueryScroller = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+`;
+
+export const StyledSearchRows = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+`;
+
+export const StyledSearchRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  & + & {
+    border-top: 1px dashed ${({ theme }) => theme.color["gray"][300]};
+  }
+`;
+
+export const StyledSearchRowCaption = styled.span`
+  flex-shrink: 0;
+  width: 11rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+export const StyledSearchRowSpacer = styled.div`
+  flex: 1;
 `;

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?class=nope"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "invalid 'class' value",
+      "result": false
+    }
+  }
+}

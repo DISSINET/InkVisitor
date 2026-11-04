@@ -2,7 +2,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class Actant2Semantics
   extends Relation
@@ -20,7 +20,7 @@ export default class Actant2Semantics
   }
 
   static async getActant2SemanticsForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IActant2Semantics>[]> {
@@ -46,7 +46,7 @@ export default class Actant2Semantics
   }
 
   static async getActant2SemanticsInverseConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IActant2Semantics[]> {

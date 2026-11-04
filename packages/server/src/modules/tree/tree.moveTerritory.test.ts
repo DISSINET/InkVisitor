@@ -4,7 +4,7 @@ import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { ITerritory } from "@inkvisitor/shared/types";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import {
   deleteAudits,
   deleteEntities,

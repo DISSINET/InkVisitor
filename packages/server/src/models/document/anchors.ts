@@ -61,6 +61,8 @@ export class AnchorsNode implements IAnchorsNode {
       // Extract only the tag name (first word before any attributes or spaces)
       const tag = tagContent.split(/\s+/)[0];
       const isClosingTag = content[match.index + 1] === "/";
+      // <e1 /> spans no text, so it neither opens nor closes an anchor
+      const isSelfClosing = !isClosingTag && match[0].endsWith("/>");
 
       // Add text content between tags to the parent node
       if (match.index > lastIndex) {
@@ -70,7 +72,7 @@ export class AnchorsNode implements IAnchorsNode {
         }
       }
 
-      if (!isClosingTag) {
+      if (!isClosingTag && !isSelfClosing) {
         // Open tag: Create a new node for the tag
         let anchorClass: EntityEnums.Class | undefined;
         for (const classType of Object.keys(entityIds)) {
@@ -92,7 +94,7 @@ export class AnchorsNode implements IAnchorsNode {
           // Push the new node onto the stack (start processing its children)
           nodeStack.push(newNode);
         }
-      } else {
+      } else if (isClosingTag) {
         // Close tag: Pop the node off the stack
         const closedNode = nodeStack.pop();
 

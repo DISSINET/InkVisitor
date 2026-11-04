@@ -4,7 +4,7 @@ import request from "supertest";
 import { createAgentWithUserId, AuthAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import User from "@models/user/user";
 import { UserEnums } from "@inkvisitor/shared/enums";

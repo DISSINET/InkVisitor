@@ -12,10 +12,9 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { IResponseEntity } from "@inkvisitor/shared/types";
-import { IcoCaretDown } from "Theme/icons";
+import { IcoCaretDown, IcoCloseCg } from "Theme/icons";
 import { EntityTag } from "components/advanced";
 import React, { useState } from "react";
-import { CgClose } from "react-icons/cg";
 import {
   StyledOverflowButton,
   StyledOverflowCount,
@@ -74,7 +73,7 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
         <FloatingPortal id="page-content">
           <StyledOverflowList
             ref={refs.setFloating}
-            style={{ zIndex: 200, ...floatingStyles }}
+            style={floatingStyles}
             {...getFloatingProps()}
           >
             {entities.map((entity) => (
@@ -95,7 +94,7 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
                     unlinkButton={{
                       onClick: () => onClose(entity.id),
                       tooltipLabel: "close tab",
-                      icon: <CgClose />,
+                      icon: <IcoCloseCg />,
                     }}
                   />
                 </StyledOverflowTagWrap>

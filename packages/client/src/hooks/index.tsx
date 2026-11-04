@@ -1,7 +1,16 @@
 import { useContainerDimensions } from "./useContainerDimensions";
 import useDebounce from "./useDebounce";
 import useDebouncedCallback from "./useDebouncedCallback";
+import { DetailPanelRevealProvider, useDetailPanelReveal } from "./useDetailPanelReveal";
 import { useElementSize } from "./useElementSize";
+import {
+  EntityEditingContext,
+  EntityWritesContext,
+  LOCAL_WRITE_RESPONSE,
+  STORED_ENTITY_EDITING,
+  useEntityEditing,
+  useEntityWrites,
+} from "./useEntityEditing";
 import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
@@ -17,7 +26,15 @@ export {
   useKeyPress,
   useKeyLift,
   useContainerDimensions,
+  DetailPanelRevealProvider,
+  useDetailPanelReveal,
   useElementSize,
+  EntityEditingContext,
+  EntityWritesContext,
+  LOCAL_WRITE_RESPONSE,
+  STORED_ENTITY_EDITING,
+  useEntityEditing,
+  useEntityWrites,
   useIsInViewport,
   useSearchParams,
   useDebouncedCallback,
@@ -27,3 +44,4 @@ export {
   useWindowSize,
   useNewVersionCheck,
 };
+export type { EntityEditing, EntityWrites } from "./useEntityEditing";

@@ -114,6 +114,7 @@ export const BatchActionAddReference: React.FC<
                 onPicked={(entity) => setResourceEntity(entity)}
                 placeholder="select resource..."
                 inputWidth="full"
+                disableTemplatesAccept
               />
             )}
           </StyledBatchSection>

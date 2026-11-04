@@ -16,10 +16,10 @@ import {
   ITerritory,
 } from "@inkvisitor/shared/types";
 import { IConceptData } from "@inkvisitor/shared/types/concept";
-import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { useDocumentsQuery, useOrderedLanguageDict } from "hooks/react-query";
+import { useEntityEditing, useEntityWrites } from "hooks";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput } from "components";
 import Dropdown, {
@@ -85,8 +85,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
+  const { offersStoredEntityFeatures } = useEntityEditing();
+  const writes = useEntityWrites();
+
   const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
-    actantMode === "resource",
+    actantMode === "resource" && offersStoredEntityFeatures,
   );
 
   const orderedLanguageDict = useOrderedLanguageDict();
@@ -147,19 +150,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     [entity.class, entity.data.parent?.territoryId],
   );
 
-  const queryClient = useQueryClient();
-
+  // the move dialog moves the territory shown here
   const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) =>
-      await api.entityUpdate(tObject?.territoryId, tObject?.changes),
-    onSuccess: () =>
-      // data: IResponseGeneric,
-      // variables: { territoryId: string; changes: Partial<ITerritory> }
-      {
-        queryClient.invalidateQueries({ queryKey: ["tree"] });
-        queryClient.invalidateQueries({ queryKey: ["territory"] });
-        queryClient.invalidateQueries({ queryKey: ["entity"] });
-      },
+    mutationFn: (tObject: { territoryId: string; changes: Partial<ITerritory> }) =>
+      writes.updateEntity(entity, tObject.changes),
   });
 
   const isTemplateDisabled = useMemo<boolean>(() => {
@@ -218,21 +212,23 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
 
           {/* templates */}
-          <StyledDetailContentRow>
-            <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
-            <StyledDetailContentRowValue>
-              <Dropdown.Single.Basic
-                key={"template-dropdown-" + entity.id}
-                placeholder="select template.."
-                disabled={isTemplateDisabled}
-                width="full"
-                value={null}
-                options={templateOptions}
-                onFocus={onTemplateDropdownFocus}
-                onChange={handleAskForTemplateApply}
-              />
-            </StyledDetailContentRowValue>
-          </StyledDetailContentRow>
+          {offersStoredEntityFeatures && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <Dropdown.Single.Basic
+                  key={"template-dropdown-" + entity.id}
+                  placeholder="select template.."
+                  disabled={isTemplateDisabled}
+                  width="full"
+                  value={null}
+                  options={templateOptions}
+                  onFocus={onTemplateDropdownFocus}
+                  onChange={handleAskForTemplateApply}
+                />
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
 
           {templateApplied && (
             <StyledDetailContentRow>
@@ -616,22 +612,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRow>
 
               {/* document id */}
-              <StyledDetailContentRow>
-                <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
-                <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
-                  <Dropdown.Single.Basic
-                    disabled={!userCanEdit}
-                    value={selectedDocumentOption}
-                    width="full"
-                    options={documentOptions}
-                    placeholder={noDocumentLinkedLabel}
-                    isClearable={userCanEdit}
-                    onChange={(selectedOption) => {
-                      updateDocumentId(selectedOption);
-                    }}
-                  />
-                </StyledDetailContentRowValue>
-              </StyledDetailContentRow>
+              {offersStoredEntityFeatures && (
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
+                    <Dropdown.Single.Basic
+                      disabled={!userCanEdit}
+                      value={selectedDocumentOption}
+                      width="full"
+                      options={documentOptions}
+                      placeholder={noDocumentLinkedLabel}
+                      isClearable={userCanEdit}
+                      onChange={(selectedOption) => {
+                        updateDocumentId(selectedOption);
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+              )}
             </React.Fragment>
           )}
 

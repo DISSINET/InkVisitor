@@ -17,7 +17,7 @@ type LayoutValues = Record<string, number | undefined>;
  * values and from nobody else's; interpolating across owners would animate
  * between two things that were never the same thing.
  */
-export type LayoutOwner = "mainPage" | "explorerPage";
+export type LayoutOwner = "mainPage" | "explorerPage" | "geocodingPage";
 
 /**
  * Springs a family of layout CSS variables towards a target.

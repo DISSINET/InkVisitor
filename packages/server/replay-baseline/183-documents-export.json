@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/documents/export",
+    "body": {
+      "documentId": "doc-replay",
+      "exportedEntities": [
+        "P",
+        "L"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "text/plain"
+  }
+}

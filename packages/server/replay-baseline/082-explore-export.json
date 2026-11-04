@@ -1,0 +1,112 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/query-export",
+    "body": {
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "P"
+          ]
+        },
+        "type": "Entity"
+      },
+      "rowIndices": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "tsvText": "result\tcol-edits\tcol-created\tcol-status\tcol-language\tcol-alt-labels\tcol-pos\tcol-detail\tcol-parent-territory\tcol-logical-type\tcol-class\n(P):Minda, the priest[p1]\tapproved\tEnglish\t\t\t\tdefinite\tPerson\n(P):saint Tiger[p11]\tapproved\tEnglish\t\t\t\tdefinite\tPerson\n(P):another priest, mentioned in a different T[p12]\tapproved\tEnglish\t\t\t\tdefinite\tPerson"
+    }
+  }
+}

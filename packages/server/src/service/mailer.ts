@@ -33,11 +33,12 @@ const INLINE_LOGO_CID = "inkvisitor-logo";
 
 // The Docker image ships only client/dist (vite copies public/ into it), while a
 // local checkout has client/public; cwd is packages/server or the repo root.
+// The logo is a PNG because Gmail and Outlook do not render SVG images.
 function getInlineLogoPath(): string | undefined {
   const candidates = [
-    path.resolve(process.cwd(), "../client/dist/assets/logos/inkvisitor.svg"),
-    path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor.svg"),
-    path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor.svg"),
+    path.resolve(process.cwd(), "../client/dist/assets/logos/inkvisitor-email.png"),
+    path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor-email.png"),
+    path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor-email.png"),
   ];
 
   for (const candidate of candidates) {
@@ -174,7 +175,7 @@ class Mailer {
         attachments: logoPath
           ? [
               {
-                filename: "inkvisitor.svg",
+                filename: "inkvisitor.png",
                 path: logoPath,
                 cid: INLINE_LOGO_CID,
               },

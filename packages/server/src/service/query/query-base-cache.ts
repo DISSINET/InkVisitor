@@ -2,6 +2,9 @@ import { Query } from "@inkvisitor/shared/types/query";
 
 const BASE_QUERY_CACHE_TTL_MS = 5 * 60 * 1000;
 const BASE_QUERY_CACHE_MAX_ENTRIES = 24;
+// a query may return up to QUERY_RUN_OPTIONS.arrayLimit ids; results above this
+// size are not cached, so the cache stays within a few million ids
+const BASE_QUERY_CACHE_MAX_IDS = 100_000;
 
 interface CacheEntry {
   ids: string[];
@@ -41,6 +44,10 @@ export const getCachedBaseIds = (key: string): string[] | null => {
 };
 
 export const setCachedBaseIds = (key: string, ids: string[]): void => {
+  if (ids.length > BASE_QUERY_CACHE_MAX_IDS) {
+    return;
+  }
+
   if (baseQueryResultsCache.size >= BASE_QUERY_CACHE_MAX_ENTRIES) {
     let oldestKey: string | undefined;
     let oldestAt = Infinity;

@@ -1,0 +1,3317 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/query",
+    "body": {
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [
+          {
+            "id": "e1",
+            "logic": "negative",
+            "node": {
+              "edges": [],
+              "id": "n2",
+              "operator": "and",
+              "params": {
+                "entityId": "c3"
+              },
+              "type": "Entity"
+            },
+            "params": {},
+            "type": "R:SCL"
+          }
+        ],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "C"
+          ]
+        },
+        "type": "Entity"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "entities": [
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "in general - who gives advice",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [
+              {
+                "class": "R",
+                "createdAt": "<datetime>",
+                "data": {
+                  "partValueBaseURL": "",
+                  "partValueLabel": "",
+                  "url": "https://dissinet.cz/"
+                },
+                "detail": "",
+                "id": "dissinet-resource",
+                "labels": [
+                  "DISSINET Database (DDB1)"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-ref-values": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "in general - who gives advice",
+                "id": "<uuid-2>",
+                "isTemplate": null,
+                "labels": [
+                  "advisor"
+                ],
+                "language": "eng",
+                "legacyId": "C1449",
+                "notes": [
+                  "Import batch [January2023] 2023-01-21 18:58:21.366042"
+                ],
+                "props": [],
+                "references": [
+                  {
+                    "id": "<uuid-3>",
+                    "resource": "dissinet-resource",
+                    "value": "<uuid-2>"
+                  }
+                ],
+                "status": "1"
+              }
+            ],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "in general - who gives advice",
+            "id": "<uuid-2>",
+            "isTemplate": null,
+            "labels": [
+              "advisor"
+            ],
+            "language": "eng",
+            "legacyId": "C1449",
+            "notes": [
+              "Import batch [January2023] 2023-01-21 18:58:21.366042"
+            ],
+            "props": [],
+            "references": [
+              {
+                "id": "<uuid-3>",
+                "resource": "dissinet-resource",
+                "value": "<uuid-2>"
+              }
+            ],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c-isync-superclass-1",
+                "labels": [
+                  "isync-superclass-1"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-has-isync-1",
+            "labels": [
+              "has-isync-1 (is in syn cloud, but has first SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c-isync-superclass-1",
+                "labels": [
+                  "isync-superclass-1"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-has-isync-2",
+            "labels": [
+              "has-isync-2 (is in syn cloud, but has first SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c-isync-superclass-2",
+                "labels": [
+                  "isync-superclass-2"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-has-isync-3",
+            "labels": [
+              "has-isync-3 (is in syn cloud, but has second SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-has-isync-4",
+            "labels": [
+              "has-isync-4 (is in syn cloud, but without SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-has-sclm-warning",
+            "labels": [
+              "has-sclm-warning"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c-isync-superclass-1",
+                "labels": [
+                  "isync-superclass-1"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-hasnt-isync-1",
+            "labels": [
+              "hasnt-isync-1 (is in syn cloud, has SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c-isync-superclass-1",
+                "labels": [
+                  "isync-superclass-1"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-hasnt-isync-2",
+            "labels": [
+              "hasnt-isync-2 (is in syn cloud, has SCL) "
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-isync-superclass-1",
+            "labels": [
+              "isync-superclass-1"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c-isync-superclass-2",
+            "labels": [
+              "isync-superclass-2"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1",
+            "labels": [
+              "everyhing"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1001",
+                "labels": [
+                  "name"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1000",
+            "labels": [
+              "nickname"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1002",
+                "labels": [
+                  "symbol"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1001",
+            "labels": [
+              "name"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1002",
+            "labels": [
+              "symbol"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1002",
+                "labels": [
+                  "symbol"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1003",
+            "labels": [
+              "religious symbol"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l1200",
+                "labels": [
+                  "DISSINET office"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1102",
+                "labels": [
+                  "room"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1101",
+            "labels": [
+              "office"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c523",
+                "labels": [
+                  "building"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1102",
+            "labels": [
+              "room"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l1200",
+                "labels": [
+                  "DISSINET office"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1104",
+                "labels": [
+                  "university section"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1103",
+            "labels": [
+              "study room"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1104",
+            "labels": [
+              "university section"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l1200",
+                "labels": [
+                  "DISSINET office"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1106",
+                "labels": [
+                  "work-related place"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1107",
+                "labels": [
+                  "event location"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1105",
+            "labels": [
+              "workshop place"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1106",
+            "labels": [
+              "work-related place"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1107",
+            "labels": [
+              "event location"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1108",
+            "labels": [
+              "dog"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1000",
+                "labels": [
+                  "nickname"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c212",
+                "labels": [
+                  "dog"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": [
+              {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 2,
+                    "territoryId": "T0"
+                  }
+                },
+                "detail": "",
+                "id": "t1",
+                "labels": [
+                  "priest Minda and their stories"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ]
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c211",
+            "labels": [
+              "pug"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c211a",
+            "labels": [
+              "mops"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c211b",
+            "labels": [
+              "carlin"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c211c",
+            "labels": [
+              "carlino"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1003",
+                "labels": [
+                  "religious symbol"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c22",
+                "labels": [
+                  "manmal"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c212",
+            "labels": [
+              "dog"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c213",
+            "labels": [
+              "doggie"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c214",
+            "labels": [
+              "hund"
+            ],
+            "language": "de",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c215",
+            "labels": [
+              "dog owner"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c23",
+                "labels": [
+                  "animal"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c22",
+            "labels": [
+              "manmal"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c24",
+                "labels": [
+                  "living being"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c23",
+            "labels": [
+              "animal"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c24",
+            "labels": [
+              "living being"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": [
+              {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 2,
+                    "territoryId": "T0"
+                  }
+                },
+                "detail": "",
+                "id": "t1",
+                "labels": [
+                  "priest Minda and their stories"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ]
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c3",
+            "labels": [
+              "occupation"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c301",
+            "labels": [
+              "unemployment"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "E",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "e1",
+                "labels": [
+                  "a sacrificy of pug"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c32",
+                "labels": [
+                  "religious act"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c31",
+            "labels": [
+              "sacrifice"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c33",
+                "labels": [
+                  "event"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c32",
+            "labels": [
+              "religious act"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c33",
+            "labels": [
+              "event"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l1",
+                "labels": [
+                  "Brno"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l4",
+                "labels": [
+                  "cat town"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c4",
+            "labels": [
+              "city"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c404",
+                "labels": [
+                  "geographical localization"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c401",
+            "labels": [
+              "village"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l10",
+                "labels": [
+                  "South Moravia region"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l6",
+                "labels": [
+                  "Moravia"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l7",
+                "labels": [
+                  "Cat kingdom"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l8",
+                "labels": [
+                  "Czechia"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l9",
+                "labels": [
+                  "Europe"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c404",
+                "labels": [
+                  "geographical localization"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c402",
+            "labels": [
+              "region"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l8",
+                "labels": [
+                  "Czechia"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c404",
+                "labels": [
+                  "geographical localization"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c403",
+            "labels": [
+              "country"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c404",
+            "labels": [
+              "geographical localization"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c42",
+                "labels": [
+                  "religious character"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c44",
+                "labels": [
+                  "morality metaphor"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c45",
+                "labels": [
+                  "force"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              },
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c46",
+                "labels": [
+                  "abstract things"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": [
+              {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 2,
+                    "territoryId": "T0"
+                  }
+                },
+                "detail": "",
+                "id": "t1",
+                "labels": [
+                  "priest Minda and their stories"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ]
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c41",
+            "labels": [
+              "evil"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c42",
+            "labels": [
+              "religious character"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c44",
+            "labels": [
+              "morality metaphor"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c45",
+            "labels": [
+              "force"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c1",
+                "labels": [
+                  "everyhing"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c46",
+            "labels": [
+              "abstract things"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [
+              {
+                "class": "L",
+                "createdAt": "<datetime>",
+                "data": {
+                  "logicalType": "1"
+                },
+                "detail": "",
+                "id": "l5",
+                "labels": [
+                  "Mauw mountain"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [
+              {
+                "class": "C",
+                "createdAt": "<datetime>",
+                "data": {
+                  "pos": ""
+                },
+                "detail": "",
+                "id": "c404",
+                "labels": [
+                  "geographical localization"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c5",
+            "labels": [
+              "mountain"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        }
+      ],
+      "entityIds": [
+        "<uuid-2>",
+        "c-has-isync-1",
+        "c-has-isync-2",
+        "c-has-isync-3",
+        "c-has-isync-4",
+        "c-has-sclm-warning",
+        "c-hasnt-isync-1",
+        "c-hasnt-isync-2",
+        "c-isync-superclass-1",
+        "c-isync-superclass-2",
+        "c1",
+        "c1000",
+        "c1001",
+        "c1002",
+        "c1003",
+        "c1101",
+        "c1102",
+        "c1103",
+        "c1104",
+        "c1105",
+        "c1106",
+        "c1107",
+        "c1108",
+        "c211",
+        "c211a",
+        "c211b",
+        "c211c",
+        "c212",
+        "c213",
+        "c214",
+        "c215",
+        "c22",
+        "c23",
+        "c24",
+        "c3",
+        "c301",
+        "c31",
+        "c32",
+        "c33",
+        "c4",
+        "c401",
+        "c402",
+        "c403",
+        "c404",
+        "c41",
+        "c42",
+        "c44",
+        "c45",
+        "c46",
+        "c5",
+        "c501",
+        "c502",
+        "c503",
+        "c504",
+        "c51",
+        "c52",
+        "c521",
+        "c522",
+        "c523",
+        "c524",
+        "c53",
+        "c54",
+        "c55",
+        "c56",
+        "c57",
+        "c6",
+        "c60",
+        "c61",
+        "c70",
+        "c71",
+        "c80",
+        "c901",
+        "c902",
+        "c903",
+        "c904",
+        "c905",
+        "c906",
+        "c907",
+        "c908"
+      ],
+      "expansion": {
+        "equivalents": 0,
+        "subordinates": 0
+      },
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [
+          {
+            "id": "e1",
+            "logic": "negative",
+            "node": {
+              "edges": [],
+              "id": "n2",
+              "operator": "and",
+              "params": {
+                "entityId": "c3"
+              },
+              "type": "Entity"
+            },
+            "params": {},
+            "type": "R:SCL"
+          }
+        ],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "C"
+          ]
+        },
+        "type": "Entity"
+      },
+      "total": 79
+    }
+  }
+}

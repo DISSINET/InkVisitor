@@ -616,7 +616,7 @@ export default class Keys {
           this.cursor
         );
 
-        if (offsetLeft === -0) {
+        if (offsetLeft === 0) {
           // Reached start of line — jump to end of previous line and stop
           if (this.cursor.xLine <= 0) {
             if (this.cursor.yLine > 0) {
@@ -918,7 +918,9 @@ export default class Keys {
     // - F5
     // - Cmd+R / Ctrl+R (including with Shift, e.g. hard reload)
     // - Cmd+Shift+F (hide browser header)
+    // - every Ctrl+Cmd combo, which macOS keeps for itself (Ctrl+Cmd+F full screen)
     if (
+      (e.ctrlKey && e.metaKey) ||
       // refresh windows
       e.key === "F5" ||
       // refresh mac

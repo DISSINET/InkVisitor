@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/settings/validation_SValency",
+    "body": {
+      "value": false
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

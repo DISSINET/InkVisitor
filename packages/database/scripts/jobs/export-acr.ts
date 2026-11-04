@@ -2,8 +2,9 @@ import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
-import { Db } from "@service/rethink";
-import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { Db } from "@service/storage";
+import { unwrap } from "@service/storage/rethink/conn";
+import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
@@ -14,6 +15,7 @@ import {
   IProp,
   Relation as RelationTypes,
   AuditScope,
+  IUser,
 } from "@inkvisitor/shared/types";
 import * as path from "path";
 import { Connection, r as rethink } from "rethinkdb-ts";
@@ -37,7 +39,7 @@ export async function getEntitiesDataByClass<T>(
   db: Connection,
   entityClass: EntityEnums.Class
 ): Promise<T[]> {
-  const connection = db instanceof Db ? db.connection : db;
+  const connection = db instanceof Db ? unwrap(db.connection) : db;
   return rethink
     .table(Entity.table)
     .getAll(entityClass, { index: DbEnums.Indexes.Class })
@@ -260,15 +262,18 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
 
   let frontier = [...resourceIds];
   while (frontier.length) {
-    const soeRelations = (
+    // a superordinate-entity relation lists the subordinate entity first, so
+    // keeping the frontier at position 0 steps up to the superordinate only
+    const parentIds = (
       await getRelationsWithEntities(
         db,
         frontier,
-        RelationEnums.Type.SuperordinateEntity
+        RelationEnums.Type.SuperordinateEntity,
+        0
       )
-    ).flatMap((rel) => rel.entityIds);
+    ).map((rel) => rel.entityIds[1]);
 
-    frontier = [...new Set(soeRelations)].filter(
+    frontier = [...new Set(parentIds)].filter(
       (entityId) => entityId && !resourceIds.has(entityId)
     );
     frontier.forEach((entityId) => resourceIds.add(entityId));
@@ -458,6 +463,22 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     acc[user.id] = user.name;
     return acc;
   }, {} as Record<string, string>);
+
+  // every audit names its author, which has to be a user of the dataset; an
+  // inactive viewer without email or password keeps the name and cannot log in
+  const authors: IUser[] = [...new Set(audits.map((a) => a.user))].sort().map((id) => ({
+    id,
+    email: "",
+    name: userNames[id] ?? id,
+    role: UserEnums.Role.Viewer,
+    options: { defaultTerritory: "", defaultLanguage: EntityEnums.Language.Empty, searchLanguages: [], workingLanguages: [] },
+    bookmarks: [],
+    storedTerritories: [],
+    rights: [],
+    active: false,
+    verified: false,
+  }));
+  fs.writeFileSync(generator.getPath("users.json"), JSON.stringify(authors, null, 4));
 
   const stats = collectStats({
     entities: exportedEntities,

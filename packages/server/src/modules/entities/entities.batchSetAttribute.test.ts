@@ -1,7 +1,7 @@
 import "ts-jest";
 import { apiPath } from "@common/constants";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
@@ -186,6 +186,91 @@ describe("Entities batchSetAttribute", function () {
       expect(res.status).toEqual(new BadParams("").statusCode());
       expect(res.body.error).toEqual("BadParams");
       expect(await posOf(entity.id)).toEqual(EntityEnums.ConceptPartOfSpeech.Noun);
+    });
+  });
+
+  describe("a selection larger than one write chunk", () => {
+    it("writes every entity and audits each one", async () => {
+      const count = Entity.UPDATE_MANY_CHUNK + 200;
+      const run = Math.random().toString();
+      const entities = Array.from({ length: count }, (_, i) => {
+        const entity = new Entity({
+          id: `test-bsa-bulk-${run}-${i}`,
+          class: EntityEnums.Class.Concept,
+          language: EntityEnums.Language.Empty,
+        });
+        entity.labels = [`${entity.id}-label`];
+        return { ...entity };
+      });
+      await storage.entities.insert(db.connection, entities);
+      const ids = entities.map((entity) => entity.id);
+
+      const res = await setAttribute(ids, {
+        attribute: "language",
+        from: EntityEnums.Language.Empty,
+        to: EntityEnums.Language.Latin,
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.message).toContain(`${count}/${count}`);
+      const languages = (await storage.entities.getMany(db.connection, ids)).map(
+        (entity) => entity.language
+      );
+      expect(languages).toHaveLength(count);
+      expect(new Set(languages)).toEqual(new Set([EntityEnums.Language.Latin]));
+      const auditedIds = new Set(ids);
+      const audited = (await storage.audits.all(db.connection)).filter((audit) =>
+        auditedIds.has(audit.modelId)
+      ).length;
+      expect(audited).toEqual(count);
+    });
+  });
+
+  describe("an entity that links a template", () => {
+    it("is written like any other", async () => {
+      const template = await makeEntity(EntityEnums.Class.Resource, { isTemplate: true });
+      const concept = await makeEntity(EntityEnums.Class.Concept, {
+        language: EntityEnums.Language.Empty,
+        references: [{ id: "ref", resource: template.id, value: "" }],
+      });
+      const plain = await makeEntity(EntityEnums.Class.Concept, {
+        language: EntityEnums.Language.Empty,
+      });
+
+      const res = await setAttribute([concept.id, plain.id], {
+        attribute: "language",
+        from: EntityEnums.Language.Empty,
+        to: EntityEnums.Language.Latin,
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.message).toContain("2/2");
+      expect((await reload(concept.id)).language).toEqual(EntityEnums.Language.Latin);
+      expect((await reload(plain.id)).language).toEqual(EntityEnums.Language.Latin);
+    });
+  });
+
+  describe("part of speech on an Action with more data", () => {
+    it("keeps the other data fields", async () => {
+      const valencies = { s: "subject", a1: "", a2: "" };
+      // inserted as is: the generic Entity model makeEntity saves through
+      // leaves data out
+      const action = { id: `test-bsa-${Math.random().toString()}`, class: EntityEnums.Class.Action };
+      await storage.entities.insert(db.connection, {
+        ...action,
+        labels: [`${action.id}-label`],
+        data: { pos: "", valencies },
+      });
+
+      const res = await setAttribute([action.id], {
+        attribute: "pos",
+        action: { from: "", to: EntityEnums.ActionPartOfSpeech.Verb },
+      });
+
+      expect(res.status).toEqual(200);
+      const data = (await reload(action.id)).data as { pos?: string; valencies?: object };
+      expect(data.pos).toEqual(EntityEnums.ActionPartOfSpeech.Verb);
+      expect(data.valencies).toEqual(valencies);
     });
   });
 

@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class PropertyReciprocal
   extends Relation
@@ -17,7 +17,7 @@ export default class PropertyReciprocal
   }
 
   static async getPropertyReciprocalForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IPropertyReciprocal>[]> {

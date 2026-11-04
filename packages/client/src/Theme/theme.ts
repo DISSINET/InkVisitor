@@ -129,6 +129,8 @@ const theme = {
     warningBorder: "#ffbb00",
 
     tooltipColor: "#fff",
+    // on entity class colours, in both light and dark mode
+    letterIconText: "#fff",
     tooltipBackground: "#000",
     tooltipNodeInfoBackground: "#324185",
     tooltipNodeWarningBackground: "#B78928",
@@ -140,12 +142,9 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
-    // Annotator XML view syntax colours (#3269). Three hue families spread
-    // around the wheel (OKLCH H260 blue, H5 rose, H168 teal-green) so the
-    // roles are told apart by hue at a glance, as in code editors. All hold
-    // >=4.5:1 on white.
-    // Tag names are entity ids, so they run long and repeat on every line;
-    // the blue stays low-chroma to keep that bulk quiet.
+    suggestionSelected: "#CCD5F4", // blue 100
+
+    // Annotator XML view syntax colours
     xmlTag: "#3E639F",
     xmlAttr: "#B93B63",
     // quotes recede but stay punctuation, not an artefact: 4.8:1 on white,
@@ -177,6 +176,33 @@ const theme = {
       "4": "#91cf60",
       "5": "#1a9850",
     },
+
+    /**
+     * One colour per gazetteer
+     */
+    gazetteer: {
+      geonames: "#2b6cb0",
+      nominatim: "#2c7a7b",
+      wikipedia: "#6b46c1",
+      wikidata: "#805ad5",
+      tgn: "#b7791f",
+      whg: "#2f855a",
+      gov: "#c05621",
+      idai: "#975a16",
+      viabundus: "#3182ce",
+      "native-land": "#276749",
+      pleiades: "#9b2c2c",
+      chgis: "#b83280",
+      syriaca: "#553c9a",
+      "hgis-indias": "#7b341e",
+      "sedac-india": "#4a5568",
+      "llm-coords": "#718096",
+    },
+
+    /**
+     * How strong a score is, weakest first.
+     */
+    scoreScale: ["#ccd8f0", "#9aaee0", "#6174c2", "#33447f", "#091034"],
 
     tagBorderColor: {
       // EntityTag status
@@ -225,6 +251,14 @@ const theme = {
     56: "14rem",
     60: "15rem",
     64: "16rem",
+  },
+  // Muni has no lowercase glyphs, so it sets box titles and nothing that has to
+  // be read as a sentence; body is the face the document already inherits from
+  // the global stylesheet, named here for the elements that sit inside a Muni
+  // heading and have to opt back out of it
+  fontFamily: {
+    body: '"Roboto", sans-serif',
+    heading: "Muni",
   },
   fontSize: {
     xxs: "1rem",
@@ -285,6 +319,26 @@ const theme = {
   background: {
     stripes: "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
   },
+  /**
+   * Geocoding stacking order
+   */
+  zIndex: {
+    /** What a mark on the map is, shown under the pointer. */
+    mapCard: 400,
+    /** The whole suggestion card, shown for a mark the pointer is on. */
+    hoverCard: 410,
+    /** Closes a picker when the page behind it is clicked. */
+    pickerBackdrop: 420,
+    /** Opened from a control that may itself be inside the hover card. */
+    picker: 421,
+    /** Modal's own overlay. Nothing above belongs over a dialog. */
+    modal: 500,
+    /**
+     * A modal asked to sit under the page furniture rather than over it.
+     */
+    modalLower: 90,
+  },
+
   boxShadow: {
     normal: "0px 5px 10px hsla(0,0%,0%,0.15)",
     subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
@@ -304,6 +358,7 @@ export type ThemeBorderWidth = typeof theme.borderWidth;
 export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;
 export type ThemeFontSize = typeof theme.fontSize;
+export type ThemeFontFamily = typeof theme.fontFamily;
 export type PingColor = typeof theme.color.ping;
 export type ThemeBorderRadius = typeof theme.borderRadius;
 export default theme;

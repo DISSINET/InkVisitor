@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/users/me",
+    "body": {
+      "bookmarks": [
+        {
+          "entityIds": [
+            "p1",
+            "c2",
+            "rp-c"
+          ],
+          "id": "bf-1",
+          "name": "Replay folder"
+        }
+      ],
+      "storedTerritories": [
+        {
+          "territoryId": "t1"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

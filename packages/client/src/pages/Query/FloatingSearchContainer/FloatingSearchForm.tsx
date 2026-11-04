@@ -12,8 +12,7 @@ import { mergeTokensIntoIds, parseEntityIdsFromText } from "pages/Query/utils";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
-import { MdClose } from "react-icons/md";
-import { IcoChevronDown } from "Theme/icons";
+import { IcoChevronDown, IcoCloseMd } from "Theme/icons";
 import { CoOccurrenceEntityList } from "./CoOccurrenceEntityList";
 import {
   StyledCoOccurrenceBox,
@@ -237,6 +236,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={statusOptions}
             value={statusOptionSelected}
+            isClearable={!!searchData.status}
             onChange={(selectedOption) => {
               const status =
                 selectedOption === defaultStatusOption.value ? undefined : selectedOption;
@@ -262,9 +262,13 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={languageOptions}
             value={languageOptionSelected}
+            isClearable={searchData.language !== undefined}
             onChange={(selectedOption) => {
+              // clearing reports an empty string
               const language =
-                selectedOption === defaultLanguageOption.value ? undefined : selectedOption;
+                !selectedOption || selectedOption === defaultLanguageOption.value
+                  ? undefined
+                  : selectedOption;
               handleChange({
                 language,
               });
@@ -314,7 +318,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
                   aria-label="Clear co-occurrence filter"
                   onClick={() => setCoOccurrenceIds([])}
                 >
-                  <MdClose size={14} />
+                  <IcoCloseMd size={14} />
                 </StyledCoOccurrenceClear>
               </StyledCoOccurrenceSummary>
             )}
@@ -440,6 +444,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={userOptions}
             value={searchData.createdBy ?? ""}
+            isClearable={!!searchData.createdBy}
             onChange={(value) => {
               handleChange({ createdBy: value || undefined });
               dispatch({
@@ -460,6 +465,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             options={userOptions}
             value={searchData.updatedBy ?? ""}
+            isClearable={!!searchData.updatedBy}
             onChange={(value) => {
               handleChange({ updatedBy: value || undefined });
               dispatch({

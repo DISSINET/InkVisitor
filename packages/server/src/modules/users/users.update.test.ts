@@ -5,9 +5,8 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import { successfulGenericResponse } from "../common.test";
 import User from "@models/user/user";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { checkPassword } from "@common/auth";
-import { r } from "rethinkdb-ts";
 import { pool } from "@middlewares/db";
 import {
   createAgentWithUserId,
@@ -105,10 +104,7 @@ describe("Users update", function () {
         .expect(successfulGenericResponse)
         .expect(200);
 
-      const userData = await r
-        .table(User.table)
-        .get(updateUser.id)
-        .run(db.connection);
+      const userData = await storage.users.get(db.connection, updateUser.id);
 
       expect(checkPassword(newPassword, userData?.password || "")).toBeTruthy();
       await db.close();

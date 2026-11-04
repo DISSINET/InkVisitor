@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { createEntity } from "@service/shorthands";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Statement, {
   StatementData,
   StatementTerritory,
@@ -14,6 +14,7 @@ import User from "@models/user/user";
 import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 import Document from "@models/document/document";
+import Territory from "@models/territory/territory";
 
 describe("Users bookmarksGet", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -26,6 +27,7 @@ describe("Users bookmarksGet", function () {
 
   beforeAll(async () => {
     await db.initDb();
+    await createEntity(db, new Territory({ id: "T0" }));
   });
 
   afterAll(async () => {
@@ -65,7 +67,7 @@ describe("Users bookmarksGet", function () {
         new Statement({
           id: testId,
           data: new StatementData({
-            territory: new StatementTerritory({ territoryId: "any" }),
+            territory: new StatementTerritory({ territoryId: "T0" }),
           }),
         })
       );
@@ -104,7 +106,7 @@ describe("Users bookmarksGet", function () {
         new Statement({
           id: statementId,
           data: new StatementData({
-            territory: new StatementTerritory({ territoryId: "any" }),
+            territory: new StatementTerritory({ territoryId: "T0" }),
           }),
         })
       );

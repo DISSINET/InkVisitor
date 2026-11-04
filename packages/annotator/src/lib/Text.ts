@@ -35,6 +35,9 @@ export enum CaretAffinity {
 export class Tag {
   readonly position: number; // raw position in segment text
   readonly closing?: boolean;
+  // `<tag />` or `<tag attr="1"/>`: complete on its own, never part of a pair.
+  // openingTagRegex captures these as opening tags with a trailing "/".
+  readonly selfClosing: boolean;
   // Index of the segment containing this tag. Written by Text.prepareSegments
   // when segment reuse shifts the segment (and its tags) to a new position.
   segmentIndex: number;
@@ -59,6 +62,7 @@ export class Tag {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
+    this.selfClosing = !closing && tag.trimEnd().endsWith("/");
     this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
   }
@@ -218,13 +222,14 @@ export class Segment {
   wrappedFor?: {
     text: string;
     parsed: string;
-    isFirst: boolean;
     mode: EditMode;
     budget: number;
     paragraphIndent: number;
     measurer?: TextMeasurer;
   };
   segmentIndex: number = -1; // index of this segment in the text
+  /** 1-based number among the paragraphs with text; undefined for a blank one. */
+  paragraphNumber?: number;
 
   /**
    * Creates a new Segment from raw text.
@@ -320,6 +325,11 @@ export interface SegmentPosition {
   rawTextIndex: number;
 }
 
+interface TagInSegment {
+  tag: Tag;
+  segment: Segment;
+}
+
 /**
  * Text provides more abstract control over the provided raw text.
  *
@@ -408,9 +418,7 @@ class Text {
   }
 
   /**
-   * Indent applied to a paragraph's first line. Three paragraphs get none:
-   * - the document's first, which has nothing above it to be confused with (the
-   *   same reason typesetting leaves an opening paragraph flush);
+   * Indent applied to a paragraph's first line. Two kinds of paragraph get none:
    * - one whose text already begins with hand-typed indentation — a tab, or a
    *   run of two or more whitespace chars — since some documents were written
    *   with the indent typed in and would otherwise double it. A single leading
@@ -427,12 +435,7 @@ class Text {
     const text = segment.parsed;
     const leadingWs = /^\s+/.exec(text)?.[0];
     const handIndented = leadingWs !== undefined && leadingWs !== " ";
-    if (
-      !this.paragraphIndent ||
-      segment.segmentIndex === 0 ||
-      !text.trim() ||
-      handIndented
-    ) {
+    if (!this.paragraphIndent || !text.trim() || handIndented) {
       return 0;
     }
     return Math.min(
@@ -497,6 +500,33 @@ class Text {
     }
     const segment = this.segmentForLine(absLine);
     return segment && absLine === segment.lineStart ? segment.indent : 0;
+  }
+
+  /**
+   * Number of the paragraph whose first visual line is `absLine` (see
+   * {@link Segment.paragraphNumber}), or undefined on an empty paragraph, a
+   * soft-wrapped continuation line and outside `[0, noLines)`. Paragraphs are
+   * the newline-separated segments, so the number does not depend on the wrap width.
+   */
+  paragraphNumberStartingAt(absLine: number): number | undefined {
+    const segment = this.segmentForLine(absLine);
+    return segment && absLine === segment.lineStart ? segment.paragraphNumber : undefined;
+  }
+
+  /** First visual line of paragraph `paragraphNumber`, or undefined when there is none. */
+  paragraphStartLine(paragraphNumber: number): number | undefined {
+    return this.segments.find((s) => s.paragraphNumber === paragraphNumber)?.lineStart;
+  }
+
+  /** Number of non-empty paragraphs, i.e. the highest {@link Segment.paragraphNumber}. */
+  paragraphCount(): number {
+    for (let i = this.segments.length - 1; i >= 0; i--) {
+      const paragraphNumber = this.segments[i].paragraphNumber;
+      if (paragraphNumber !== undefined) {
+        return paragraphNumber;
+      }
+    }
+    return 0;
   }
 
   /**
@@ -723,12 +753,18 @@ class Text {
       return n;
     };
 
+    let paragraphCount = 0;
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
       segmentIndex++
     ) {
       const segment = this.segments[segmentIndex];
+
+      // Paragraphs are counted on the tag-free text, the way plain-text tools count
+      // them: a line that is empty, tag-only or only whitespace (spaces, tabs, the
+      // \r of a CRLF file) takes no number and does not advance the count.
+      segment.paragraphNumber = segment.parsed.trim() ? ++paragraphCount : undefined;
 
       /* if (
         this.dirtySegment !== undefined &&
@@ -758,7 +794,6 @@ class Text {
         cached &&
         cached.text === text &&
         cached.parsed === segment.parsed &&
-        cached.isFirst === (segment.segmentIndex === 0) &&
         cached.mode === this.mode &&
         cached.budget === maxWidth &&
         cached.paragraphIndent === this.paragraphIndent &&
@@ -910,7 +945,6 @@ class Text {
       segment.wrappedFor = {
         text,
         parsed: segment.parsed,
-        isFirst: segment.segmentIndex === 0,
         mode: this.mode,
         budget: maxWidth,
         paragraphIndent: this.paragraphIndent,
@@ -1935,60 +1969,89 @@ class Text {
   }
 
   /**
-   * Finds the position of a specific tag occurrence.
+   * Counts the opening and closing tags of one name, unpaired ones included.
+   * Self-closing tags are neither.
+   */
+  countTags(tag: string): { opening: number; closing: number } {
+    let opening = 0;
+    let closing = 0;
+    for (const segment of this.segments) {
+      for (const openingTag of segment.openingTags) {
+        if (openingTag.getTagName() === tag && !openingTag.selfClosing) {
+          opening++;
+        }
+      }
+      for (const closingTag of segment.closingTags) {
+        if (closingTag.getTagName() === tag) {
+          closing++;
+        }
+      }
+    }
+    return { opening, closing };
+  }
+
+  /**
+   * Pairs the tags of one name in document order: a closing tag closes the
+   * latest still-open tag of its name before it, as in validateAnchors.
+   * Orphaned and self-closing tags are left out. Pairs are ordered by their
+   * opening tag, so a nested anchor follows the one around it.
+   */
+  private pairTags(tag: string): Array<{ opening: TagInSegment; closing: TagInSegment }> {
+    const pairs: Array<{ opening: TagInSegment; closing: TagInSegment; order: number }> = [];
+    const open: Array<TagInSegment & { order: number }> = [];
+    let order = 0;
+    for (const segment of this.segments) {
+      const tags = [
+        ...segment.openingTags.filter((t) => t.getTagName() === tag && !t.selfClosing),
+        ...segment.closingTags.filter((t) => t.getTagName() === tag),
+      ].sort((a, b) => a.position - b.position);
+      for (const t of tags) {
+        if (!t.closing) {
+          open.push({ tag: t, segment, order: order++ });
+          continue;
+        }
+        const opening = open.pop();
+        if (opening) {
+          pairs.push({ opening, closing: { tag: t, segment }, order: opening.order });
+        }
+      }
+    }
+    return pairs.sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Finds the position of a specific anchor occurrence, counting only paired
+   * tags (see pairTags), so an orphaned tag is never drawn as an anchor.
    *
    * @param tag - The tag name to search for
    * @param index - The occurrence index (0-based, default: 0)
    * @returns Array containing start and end coordinates of the tag, or empty array if not found
    */
   getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
-    let openingTagMatch: { tag: Tag; segment: Segment } | null = null;
-    let closingTagMatch: { tag: Tag; segment: Segment } | null = null;
-
-    let openingTagIndex = 0;
-    let closingTagIndex = 0;
-
-    // Search for the opening tag
-    for (const segment of this.segments) {
-      for (const openingTag of segment.openingTags) {
-        if (openingTag.getTagName() === tag) {
-          if (openingTagIndex === index) {
-            openingTagMatch = { tag: openingTag, segment };
-            break;
-          }
-          openingTagIndex++;
-        }
-      }
-      if (openingTagMatch) break;
-    }
-
-    // Search for the closing tag
-    for (const segment of this.segments) {
-      for (const closingTag of segment.closingTags) {
-        if (closingTag.getTagName() === tag) {
-          if (closingTagIndex === index) {
-            closingTagMatch = { tag: closingTag, segment };
-            break;
-          }
-          closingTagIndex++;
-        }
-      }
-      if (closingTagMatch) break;
-    }
-
-    // Check if both tags were found
-    if (!openingTagMatch || !closingTagMatch) {
+    const pair = this.pairTags(tag)[index];
+    if (!pair) {
       // console.warn(`Tag "${tag}" with occurrence ${occurrence} not found.`);
       return [];
     }
+    return this.pairCoordinates(pair);
+  }
 
+  /**
+   * Finds the anchor whose opening tag starts at absRawIndex in the raw text,
+   * paired as in getTagPosition. Returns an empty array when no paired opening
+   * tag of that name starts there.
+   */
+  getTagPositionAt(tag: string, absRawIndex: number): IAbsCoordinates[] {
+    const pair = this.pairTags(tag).find(
+      (p) => p.opening.tag.getAbsoluteTagPosition(this.segments) === absRawIndex
+    );
+    return pair ? this.pairCoordinates(pair) : [];
+  }
+
+  private pairCoordinates(pair: { opening: TagInSegment; closing: TagInSegment }): IAbsCoordinates[] {
     // Calculate the parsed positions of the opening and closing tags
-    const start = openingTagMatch.segment.findTagParsedPosition(
-      openingTagMatch.tag
-    );
-    const end = closingTagMatch.segment.findTagParsedPosition(
-      closingTagMatch.tag
-    );
+    const start = pair.opening.segment.findTagParsedPosition(pair.opening.tag);
+    const end = pair.closing.segment.findTagParsedPosition(pair.closing.tag);
 
     // Return the coordinates
     return [
@@ -2007,6 +2070,7 @@ class Text {
     segmentIndex: number;
     position: number;
     attributes?: Record<string, string>;
+    paragraphNumber?: number;
   }> {
     const issues: Array<{
       tagName: string;
@@ -2014,65 +2078,57 @@ class Text {
       segmentIndex: number;
       position: number;
       attributes?: Record<string, string>;
+      paragraphNumber?: number;
     }> = [];
 
-    const openingTagsByName = new Map<string, Tag[]>();
-    const closingTagsByName = new Map<string, Tag[]>();
-
-    // Collect all opening and closing tags
+    // Each name's tags in document order: segments are already ordered, and
+    // within a segment opening and closing tags sort by position.
+    const tagsByName = new Map<string, Tag[]>();
     for (const segment of this.segments) {
-      for (const tag of segment.openingTags) {
+      const tags = [
+        ...segment.openingTags.filter((tag) => !tag.selfClosing),
+        ...segment.closingTags,
+      ].sort((a, b) => a.position - b.position);
+      for (const tag of tags) {
         const name = tag.getTagName();
-        if (!openingTagsByName.has(name)) {
-          openingTagsByName.set(name, []);
+        if (!tagsByName.has(name)) {
+          tagsByName.set(name, []);
         }
-        openingTagsByName.get(name)!.push(tag);
-      }
-
-      for (const tag of segment.closingTags) {
-        const name = tag.getTagName();
-        if (!closingTagsByName.has(name)) {
-          closingTagsByName.set(name, []);
-        }
-        closingTagsByName.get(name)!.push(tag);
+        tagsByName.get(name)!.push(tag);
       }
     }
 
-    // Find orphaned opening tags
-    for (const [tagName, openings] of openingTagsByName) {
-      const closings = closingTagsByName.get(tagName) || [];
-      if (openings.length > closings.length) {
-        // More openings than closings - last ones are orphaned
-        for (let i = closings.length; i < openings.length; i++) {
-          const orphan = openings[i];
-          issues.push({
-            tagName,
-            type: 'orphaned-opening',
-            segmentIndex: orphan.segmentIndex,
-            position: orphan.position,
-            attributes: orphan.attributes,
-          });
+    const addIssue = (
+      tag: Tag,
+      type: 'orphaned-opening' | 'orphaned-closing'
+    ) => {
+      issues.push({
+        tagName: tag.getTagName(),
+        type,
+        segmentIndex: tag.segmentIndex,
+        position: tag.position,
+        attributes: tag.attributes,
+        paragraphNumber: this.segments[tag.segmentIndex]?.paragraphNumber,
+      });
+    };
+
+    // A closing tag closes the latest still-open tag of its name before it;
+    // with none open, it is orphaned. Tags left open at the end are orphaned.
+    for (const tags of tagsByName.values()) {
+      const open: Tag[] = [];
+      for (const tag of tags) {
+        if (!tag.closing) {
+          open.push(tag);
+        } else if (!open.pop()) {
+          addIssue(tag, 'orphaned-closing');
         }
       }
+      open.forEach((tag) => addIssue(tag, 'orphaned-opening'));
     }
 
-    // Find orphaned closing tags
-    for (const [tagName, closings] of closingTagsByName) {
-      const openings = openingTagsByName.get(tagName) || [];
-      if (closings.length > openings.length) {
-        // More closings than openings - first ones are orphaned
-        for (let i = openings.length; i < closings.length; i++) {
-          const orphan = closings[i];
-          issues.push({
-            tagName,
-            type: 'orphaned-closing',
-            segmentIndex: orphan.segmentIndex,
-            position: orphan.position,
-            attributes: orphan.attributes,
-          });
-        }
-      }
-    }
+    issues.sort(
+      (a, b) => a.segmentIndex - b.segmentIndex || a.position - b.position
+    );
 
     return issues;
   }

@@ -1,4 +1,5 @@
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -73,6 +74,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     stableSignature,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
+  const queryClient = useQueryClient();
 
   return (
     <>
@@ -166,6 +168,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           }}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);
+            queryClient.invalidateQueries({ queryKey: ["entity"] });
             invalidateExplorerQuery();
           }}
         />

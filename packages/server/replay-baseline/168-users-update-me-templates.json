@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/users/me",
+    "body": {
+      "options": {
+        "defaultLanguage": "eng",
+        "defaultTerritory": "t1",
+        "promotedTemplateClass": "C",
+        "searchLanguages": [
+          "eng"
+        ],
+        "starredTemplates": [
+          "rp-tpl"
+        ],
+        "workingLanguages": [
+          "eng",
+          "lat"
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

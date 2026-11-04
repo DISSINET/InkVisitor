@@ -83,6 +83,7 @@ enum ExploreActionType {
   addColumn,
   removeColumn,
   moveColumn,
+  setColumns,
   setViewMode,
   setStatsParams,
   setOffset,
@@ -116,7 +117,7 @@ const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
   Explore.SearchOption.CoOccurrence,
 ]);
 
-// how many of the filters currently applied belong to the floating search panel
+// how many of the filters currently applied belong to the Filters panel
 // (label and UUID filters have their own controls, so they are not counted here)
 export const countFloatingSearchFilters = (filters: Explore.IExploreSearchFilter[]): number =>
   filters.filter((f) => floatingSearchFilterTypes.has(f.type)).length;
@@ -172,6 +173,18 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       return {
         ...state,
         view: { ...state.view, columns: nextColumns },
+      };
+    }
+
+    // replaces every column at once — used when loading a saved query
+    case ExploreActionType.setColumns: {
+      if (state.view.mode !== Explore.EViewMode.Table) {
+        return state;
+      }
+      const { columns } = action.payload as { columns: Explore.IExploreColumn[] };
+      return {
+        ...state,
+        view: { ...state.view, columns },
       };
     }
 

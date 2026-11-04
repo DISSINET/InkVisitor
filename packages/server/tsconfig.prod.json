@@ -15,6 +15,7 @@
   "exclude": [
     "./src/public/",
     "./src/test/",
+    "./src/replay/",
     "./src/**/*.test.ts",
     "node_modules",
     "dist"

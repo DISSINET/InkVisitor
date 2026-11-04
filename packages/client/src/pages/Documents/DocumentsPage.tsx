@@ -5,7 +5,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Box, Loader, Panel, Submit } from "components";
-import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
+import { DocumentModalView, DocumentModalExport } from "components/advanced";
 import { useDocumentsQuery, useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
@@ -193,17 +193,20 @@ export const DocumentsPage: React.FC = ({}) => {
     [exportedDocumentIds, documents],
   );
 
-  const [editedDocumentId, setEditedDocumentId] = useState<string | false>(false);
+  const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(false);
+  const openedDocumentResource = documentsWithResources.find(
+    (item) => item.document.id === openedDocumentId,
+  )?.resource;
 
-  const handleDocumentEdit = (id: string) => {
-    setEditedDocumentId(id);
+  const handleDocumentOpen = (id: string) => {
+    setOpenedDocumentId(id);
   };
   const handleDocumentExport = (id: string) => {
     setExportedDocumentIds([id]);
   };
 
   const handleModalClose = () => {
-    setEditedDocumentId(false);
+    setOpenedDocumentId(false);
     setExportedDocumentIds(false);
   };
 
@@ -266,7 +269,7 @@ export const DocumentsPage: React.FC = ({}) => {
                           )}
                           selected={selectedDocumentIds.includes(documentId)}
                           onToggleSelected={handleToggleSelected}
-                          handleDocumentEdit={handleDocumentEdit}
+                          handleDocumentOpen={handleDocumentOpen}
                           handleDocumentExport={handleDocumentExport}
                           setDocToDelete={setDocToDelete}
                           updateDocumentMutation={updateDocumentMutation}
@@ -299,8 +302,14 @@ export const DocumentsPage: React.FC = ({}) => {
         </Box>
       </Panel>
 
-      {editedDocumentId && (
-        <DocumentModalEdit documentId={editedDocumentId} onClose={handleModalClose} />
+      {openedDocumentId && (
+        <DocumentModalView
+          documentId={openedDocumentId}
+          onClose={handleModalClose}
+          canEditDocument={canManageDocument(
+            openedDocumentResource ? openedDocumentResource.id : false,
+          )}
+        />
       )}
       {exportedDocuments.length > 0 && (
         <DocumentModalExport documents={exportedDocuments} onClose={handleModalClose} />

@@ -14,9 +14,9 @@ export default function useKeypress(
   const downHandler = useCallback(
     (e: KeyboardEvent) => {
       if (e.key !== targetKey) return;
-      // If ctrlKeyCombo is true, only handle with ctrlKey or metaKey
-      const shouldHandleKeyPress =
-        !ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey));
+      // If ctrlKeyCombo is true, only handle with ctrlKey or metaKey, not both:
+      // macOS keeps Ctrl+Cmd combos for itself (Ctrl+Cmd+F is full screen)
+      const shouldHandleKeyPress = !ctrlKeyCombo || e.ctrlKey !== e.metaKey;
       // If requireShift is true, only handle with shiftKey
       if (!shouldHandleKeyPress) return;
       if (e.shiftKey !== requireShift) return;

@@ -5,6 +5,7 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
 import { cache } from "@service/ttlCache";
+import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
@@ -37,7 +38,7 @@ import {
   validationExpansionKind,
 } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
-import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
 import {
@@ -45,6 +46,15 @@ import {
   expandValidationIds,
   soeIdsForValidation,
 } from "./validation-expansion";
+
+/** `data` without the fields an entity update may not set. */
+function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
+  const allowed: Partial<IEntity> = { ...data };
+  Object.keys(allowed).forEach(
+    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+  );
+  return allowed;
+}
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -101,13 +111,13 @@ export default class Entity implements IEntity, IDbModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(db: Conn | undefined): Promise<boolean> {
     this.createdAt = new Date();
 
-    const result = await rethink
-      .table(Entity.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await storage.entities.insert(db as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -124,7 +134,7 @@ export default class Entity implements IEntity, IDbModel {
    * Use this method for doing asynchronous operation/checks before the save operation
    * @param db db connection
    */
-  async beforeSave(db: Connection): Promise<void> {
+  async beforeSave(db: Conn): Promise<void> {
     if (!this.isTemplate) {
       const linkedEntities = await Entity.findEntitiesByIds(
         db,
@@ -137,7 +147,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   async update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Partial<IEntity>
   ): Promise<WriteResult> {
     // update timestamp
@@ -149,18 +159,88 @@ export default class Entity implements IEntity, IDbModel {
         !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
     );
 
-    const result = await rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    const result = await storage.entities.update(db as Conn, this.id, updateData);
     cache.delete(entityCacheKey(this.id));
     return result;
   }
 
-  async getUsedByEntity(db: Connection): Promise<IEntity[]> {
+  /**
+   * Applies the same update to many entities, one query per chunk of ids so a
+   * large selection stays far below RethinkDB's array size limit.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateMany(
+    db: Conn | undefined,
+    entityIds: string[],
+    updateData: Partial<IEntity>
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const data = allowedEntityData({ ...updateData, updatedAt: new Date() });
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entityIds)) {
+      const result = await storage.entities.updateMany(db as Conn, chunk, data, { returnChanges: true });
+      chunk.forEach((id) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entityIds.filter((id) => written.has(id)),
+      failed: entityIds.filter((id) => !written.has(id)),
+    };
+  }
+
+  /**
+   * Applies its own update to each of many entities, one query per chunk.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateEach(
+    db: Conn | undefined,
+    updates: { id: string; data: Partial<IEntity> }[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const updatedAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(updates)) {
+      const result = await storage.entities.updateEach(
+        db as Conn,
+        chunk.map(({ id, data }) => ({ id, patch: allowedEntityData({ ...data, updatedAt }) })),
+        { returnChanges: true }
+      );
+      chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: updates.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: updates.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  /**
+   * Inserts many new entities, one query per chunk, stamping createdAt as
+   * {@link save} does.
+   * @returns the ids inserted, and the ids that failed
+   */
+  static async saveMany(db: Conn | undefined, entities: Entity[]): Promise<{ written: string[]; failed: string[] }> {
+    const createdAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entities)) {
+      chunk.forEach((entity) => (entity.createdAt = createdAt));
+      const result = await storage.entities.insert(
+        db as Conn,
+        chunk.map((entity) => ({ ...entity })),
+        { returnChanges: true }
+      );
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entities.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: entities.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  static UPDATE_MANY_CHUNK = WRITE_CHUNK;
+
+  async getUsedByEntity(db: Conn): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};
     for (const index of DbEnums.EntityIdReferenceIndexes) {
-      const entities: IEntity[] = await rethink
-        .table(Entity.table)
-        .getAll(this.id, { index })
-        .run(db);
+      const entities = await storage.entities.byIndex(db, index, [this.id]);
 
       for (const entity of entities) {
         out[entity.id] = entity;
@@ -170,7 +250,7 @@ export default class Entity implements IEntity, IDbModel {
     return Object.values(out);
   }
 
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on entity with undefined id"
@@ -183,11 +263,7 @@ export default class Entity implements IEntity, IDbModel {
       await User.removeStoredTerritory(db, this.id);
     }
 
-    const result = await rethink
-      .table(Entity.table)
-      .get(this.id)
-      .delete()
-      .run(db);
+    const result = await storage.entities.delete(db, this.id);
 
     cache.delete(entityCacheKey(this.id));
     return result;
@@ -249,7 +325,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   static async findUsedInProps(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IEntity[]> {
     // Uses the `props.recursive` multi-index (see
@@ -257,10 +333,7 @@ export default class Entity implements IEntity, IDbModel {
     // entityId referenced from props/children up to 3 levels deep.
     // Used to be a full-table .filter() walking the same shape - same
     // result set, but linear in table size and several seconds on prod.
-    return await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.PropsRecursive })
-      .run(db);
+    return storage.entities.byIndex(db as Conn, DbEnums.Indexes.PropsRecursive, [entityId]);
   }
 
   /**
@@ -271,15 +344,12 @@ export default class Entity implements IEntity, IDbModel {
    * @returns list of entities carrying such a reference
    */
   static async findUsedInReferences(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IEntity[]> {
     // Uses the `references.entityIds` multi-index (see
     // packages/database/scripts/import/indexes.ts).
-    return await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.EntityReferences })
-      .run(db);
+    return storage.entities.byIndex(db as Conn, DbEnums.Indexes.EntityReferences, [entityId]);
   }
 
   /**
@@ -383,7 +453,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   static async findEntitiesByIds(
-    con: Connection,
+    con: Conn,
     ids: string[]
   ): Promise<IEntity[]> {
     const uniqueIds = new Set<string>();
@@ -404,10 +474,7 @@ export default class Entity implements IEntity, IDbModel {
       return [];
     }
 
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(rethink.args([...uniqueIds]))
-      .run(con);
+    const data = await storage.entities.getMany(con, [...uniqueIds]);
 
     const byId = new Map<string, IEntity>(
       data.map((entity: IEntity) => [entity.id, entity])
@@ -623,20 +690,21 @@ export default class Entity implements IEntity, IDbModel {
               addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
             } else if (allowedClasses?.length) {
               // class is required
-              let passed = true;
-              for (const pi in eProps) {
-                const p = eProps[pi];
-                const propValueEntity = propValueEs.find(
-                  (e) => e.id === p.value.entityId
-                );
-                if (
-                  propValueEntity &&
-                  acceptedPropTypes.includes(p.type.entityId) &&
-                  !allowedClasses?.includes(propValueEntity.class)
-                ) {
-                  passed = false;
-                }
-              }
+              const valueClass = (p: IProp) =>
+                propValueEs.find((e) => e.id === p.value.entityId)?.class;
+              const passed = propType?.length
+                ? // a named type: every property of it needs a value of an
+                  // allowed class
+                  validProps.every((p) => {
+                    const cls = valueClass(p);
+                    return !cls || allowedClasses.includes(cls);
+                  })
+                : // no type: one property with a value of an allowed class
+                  // is enough
+                  validProps.some((p) => {
+                    const cls = valueClass(p);
+                    return !!cls && allowedClasses.includes(cls);
+                  });
               if (!passed) {
                 addNewValidationWarning(
                   WarningTypeEnums.TVEPV,
@@ -672,7 +740,7 @@ export default class Entity implements IEntity, IDbModel {
    * @returns
    */
   async findUsedInDocuments(
-    conn: Connection
+    conn: Conn
   ): Promise<IResponseUsedInDocument[]> {
     const out: IResponseUsedInDocument[] = [];
     await Promise.all(
@@ -681,15 +749,7 @@ export default class Entity implements IEntity, IDbModel {
       ).map(async (docData) => {
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
-        const resources = await rethink
-          .table(Entity.table)
-          .filter({
-            class: EntityEnums.Class.Resource,
-            data: {
-              documentId: docData.id,
-            },
-          })
-          .run(conn);
+        const resources = await storage.entities.resourcesByDocumentId(conn, docData.id);
 
         const resource = resources.length > 0 ? resources[0] : null;
 
@@ -724,7 +784,7 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  async getEntities(db: Connection): Promise<IEntity[]> {
+  async getEntities(db: Conn): Promise<IEntity[]> {
     return Entity.findEntitiesByIds(db, this.getEntitiesIds());
   }
 
@@ -739,7 +799,7 @@ export default class Entity implements IEntity, IDbModel {
    * @param entities
    */
   static async applyAnchorTexts(
-    conn: Connection,
+    conn: Conn,
     entities: Record<string, IEntity> | IEntity[]
   ): Promise<void> {
     const list = Array.isArray(entities) ? entities : Object.values(entities);
@@ -768,13 +828,8 @@ export default class Entity implements IEntity, IDbModel {
    * @param db
    * @returns
    */
-  async findFromTemplate(db: Connection): Promise<IEntity[]> {
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(this.id, { index: DbEnums.Indexes.EntityUsedTemplate })
-      .run(db);
-
-    return data;
+  async findFromTemplate(db: Conn): Promise<IEntity[]> {
+    return storage.entities.byIndex(db, DbEnums.Indexes.EntityUsedTemplate, [this.id]);
   }
 
   /**

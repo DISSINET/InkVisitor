@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
 export default class Related
@@ -50,7 +50,7 @@ export default class Related
   }
 
   static async getRelatedForwardConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string
   ): Promise<RelationTypes.IRelated[]> {
     const out: RelationTypes.IRelated[] = await Relation.findForEntities(

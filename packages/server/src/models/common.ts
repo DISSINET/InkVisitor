@@ -1,6 +1,6 @@
 import { sanitizeText } from "@common/functions";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult } from "@service/storage";
 
 type GenericObject = { [key: string]: any };
 export type UnknownObject = GenericObject | undefined;
@@ -11,12 +11,12 @@ export interface IModel {
 
 export interface IDbModel extends IModel {
   id: string;
-  save(dbInstance: Connection | undefined): Promise<boolean>;
+  save(dbInstance: Conn | undefined): Promise<boolean>;
   update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult>;
-  delete(dbInstance: Connection): Promise<WriteResult>;
+  delete(dbInstance: Conn): Promise<WriteResult>;
 }
 
 export function fillFlatObject<T>(

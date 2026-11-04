@@ -10,6 +10,7 @@ import {
 } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
+import { EntityImportModal } from "./containers/EntityImportModal/EntityImportModal";
 import { useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
@@ -65,7 +66,7 @@ import { useBoxLayout } from "./hooks/useBoxLayout";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoCode, IcoPlusBold } from "Theme/icons";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -79,6 +80,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     clearAllDetailIds,
     selectedDetailId,
     appendDetailId,
+    appendMultipleDetailIds,
     setStatementId,
     setTerritoryId,
     editorOpened,
@@ -159,6 +161,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [territoryId, secondPanelExpanded, dispatch]);
 
+  // A url that names an entity detail asks to see it, whatever state the user
+  // last left the second panel and the detail box in.
+  useEffect(() => {
+    if (!selectedDetailId && detailIdArray.length === 0) {
+      return;
+    }
+    if (!secondPanelExpanded) {
+      // the page is still assembling itself, so no travel - same as above
+      skipTravelForPanelState.current = true;
+      dispatch(setSecondPanelExpanded(true));
+    }
+    if (detailBoxState === DetailBoxState.Minimized) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, []);
+
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
     const prev = prevEditorStateRef.current;
@@ -219,6 +237,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+  const [showEntityImportModal, setShowEntityImportModal] = useState(false);
 
   // The annotator Box's header content lives in AnnotatorBox (it owns the
   // resource/document data it is built from); this page only owns the Box
@@ -631,6 +650,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={firstPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["tree", "territory", "user"]}
               isHidden={!firstPanelExpanded}
             />,
@@ -720,6 +740,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </>,
                 statementListOpened && territoryId && (
                   <RefreshBoxButton
+                    key="refresh"
                     queriesToRefresh={["territory", "statement", "user"]}
                     isHidden={false}
                   />
@@ -741,16 +762,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 buttons={[
                   <>
                     {userRole !== UserEnums.Role.Viewer && (
-                      <Button
-                        icon={<IcoPlusBold />}
-                        label="entity"
-                        inverted
-                        onClick={() => setShowEntityCreateModal(true)}
-                        tooltipLabel="create new entity"
-                      />
+                      <>
+                        <Button
+                          icon={<IcoPlusBold />}
+                          label="entity"
+                          inverted
+                          onClick={() => setShowEntityCreateModal(true)}
+                          tooltipLabel="create new entity"
+                        />
+                        {/* only owners may import entities */}
+                        {userRole === UserEnums.Role.Owner && (
+                          <Button
+                            icon={<IcoCode />}
+                            label="import"
+                            inverted
+                            onClick={() => setShowEntityImportModal(true)}
+                            tooltipLabel="import entities from JSON"
+                          />
+                        )}
+                      </>
                     )}
                   </>,
                   <IconButton
+                    key="maximize"
                     dataTestId="maximize-detail-box"
                     tooltipLabel={getMaximizeBtnTooltip()}
                     icon={
@@ -772,6 +806,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="close-all"
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -825,6 +860,24 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }}
           />
         )}
+        {showEntityImportModal && (
+          <EntityImportModal
+            closeModal={() => setShowEntityImportModal(false)}
+            onImported={(entities) => {
+              queryClient.invalidateQueries({ queryKey: ["entity"] });
+              if (entities.some((entity) => entity.class === EntityEnums.Class.Territory)) {
+                queryClient.invalidateQueries({ queryKey: ["tree"] });
+              }
+              // Values are not opened in Detail, as after creating one
+              const detailIds = entities
+                .filter((entity) => entity.class !== EntityEnums.Class.Value)
+                .map((entity) => entity.id);
+              if (detailIds.length) {
+                appendMultipleDetailIds(detailIds);
+              }
+            }}
+          />
+        )}
       </Panel>
 
       {/* THIRD PANEL */}
@@ -834,6 +887,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getAnnotatorBoxHeight()}
           heightVarKey="annotator"
           label="Annotator"
+          // the annotator scrolls its own text, and its pixel size lags the panel
+          // while it is resized, which would flash a scrollbar on the box
+          disableScroll
           headerComponent={annotatorHeader}
           // Document identity fills the free header space; the caption and the
           // panel button stay visible, so the header content yields, not them.
@@ -905,7 +961,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
               thirdPanelButton(),
             ]}
           >
-            <MemoizedStatementEditorBox />
+            <MemoizedStatementEditorBox
+              isExpanded={thirdPanelExpanded}
+              isVisible={editorOpened && editorBoxState !== EditorBoxState.Minimized}
+            />
           </Box>
         )}
       </Panel>
@@ -920,10 +979,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={fourthPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["search-templates", "search"]}
               isHidden={!fourthPanelExpanded}
             />,
-            <ToggleFourthPanelBoxButton boxToHide="search" />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="search" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -938,8 +998,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["bookmarks"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="bookmarks" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["bookmarks"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="bookmarks" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -954,8 +1018,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["templates"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="templates" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["templates"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="templates" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}

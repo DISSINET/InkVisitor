@@ -3,10 +3,9 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 import User from "@models/user/user";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { deleteUsers } from "@service/shorthands";
 import { IUser } from "@inkvisitor/shared/types";
-import { r, RDatum } from "rethinkdb-ts";
 
 describe("Users role change", function () {
   const db = new Db();
@@ -38,23 +37,37 @@ describe("Users role change", function () {
     return user;
   };
 
-  const storedRole = async (userId: string): Promise<string> => {
-    const row = await r.table(User.table).get(userId).run(db.connection);
-    return row.role;
+  const storedUser = async (userId: string): Promise<IUser> => {
+    const row = await storage.users.get(db.connection, userId);
+    if (!row) {
+      throw new Error(`user ${userId} is not stored`);
+    }
+    return row;
+  };
+
+  const storedRole = async (userId: string): Promise<string> => (await storedUser(userId)).role;
+
+  // every owner but the acting one becomes an admin, so the acting owner is the last one
+  const demoteOtherOwners = async (): Promise<void> => {
+    const others = (await storage.users.all(db.connection)).filter(
+      (user) => user.role === UserEnums.Role.Owner && user.id !== owner.id
+    );
+    await storage.users.updateMany(
+      db.connection,
+      others.map((user) => user.id),
+      { role: UserEnums.Role.Admin }
+    );
   };
 
   beforeAll(async () => {
     await db.initDb();
-    await r
-      .table("acl_permissions")
-      .insert({
-        id: aclId,
-        controller: "users",
-        method: "PUT",
-        route: ":userId",
-        roles: ["*"],
-      })
-      .run(db.connection);
+    await storage.acl.insert(db.connection, {
+      id: aclId,
+      controller: "users",
+      method: "PUT",
+      route: ":userId",
+      roles: ["*"],
+    });
     for (const user of [owner, admin, viewer]) {
       await user.save(db.connection);
     }
@@ -64,7 +77,7 @@ describe("Users role change", function () {
   });
 
   afterAll(async () => {
-    await r.table("acl_permissions").get(aclId).delete().run(db.connection);
+    await storage.acl.delete(db.connection, aclId);
     await deleteUsers(db);
     await db.close();
     await pool.end();
@@ -143,6 +156,57 @@ describe("Users role change", function () {
     expect(await storedRole(target.id)).toEqual(UserEnums.Role.Owner);
   });
 
+  it("does not let an admin set an owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ password: "taken-over" })
+      .expect(403);
+
+    const row = await storedUser(target.id);
+    expect(row.password).toBeUndefined();
+  });
+
+  it("does not let an admin deactivate an owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ active: false })
+      .expect(403);
+
+    const row = await storedUser(target.id);
+    expect(row.active).toBe(true);
+  });
+
+  it("does not let an admin reset an owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(403);
+
+    const row = await storedUser(target.id);
+    expect(row.password).toBeUndefined();
+  });
+
+  it("lets an owner reset another owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(200);
+  });
+
+  it("lets an admin reset a non-owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Editor);
+
+    await adminAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(200);
+  });
+
   it("lets an owner give up the owner role while another owner remains", async () => {
     const target = await createTarget(UserEnums.Role.Owner);
     const targetAgent = await createAgentWithUserId(target.id);
@@ -163,11 +227,9 @@ describe("Users role change", function () {
       .send({ email, role: UserEnums.Role.Owner })
       .expect(403);
 
-    const stored = await r
-      .table(User.table)
-      .filter({ email })
-      .count()
-      .run(db.connection);
+    const stored = (await storage.users.all(db.connection)).filter(
+      (user) => user.email === email
+    ).length;
     expect(stored).toEqual(0);
   });
 
@@ -179,11 +241,7 @@ describe("Users role change", function () {
   });
 
   it("does not let the last owner give up the owner role", async () => {
-    await r
-      .table(User.table)
-      .filter((user: RDatum<IUser>) => user("role").eq(UserEnums.Role.Owner).and(user("id").ne(owner.id)))
-      .update({ role: UserEnums.Role.Admin })
-      .run(db.connection);
+    await demoteOtherOwners();
 
     await ownerAgent
       .put(`${apiPath}/users/me`)
@@ -191,5 +249,70 @@ describe("Users role change", function () {
       .expect(403);
 
     expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
+  });
+
+  it("does not count an inactive owner as another owner", async () => {
+    await demoteOtherOwners();
+    const inactiveOwner = makeUser(UserEnums.Role.Owner);
+    inactiveOwner.active = false;
+    await inactiveOwner.save(db.connection);
+
+    await ownerAgent
+      .put(`${apiPath}/users/me`)
+      .send({ role: UserEnums.Role.Admin })
+      .expect(403);
+
+    expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
+  });
+
+  it("does not let the last active owner be deactivated", async () => {
+    await demoteOtherOwners();
+
+    await adminAgent
+      .put(`${apiPath}/users/${owner.id}`)
+      .send({ active: false })
+      .expect(403);
+
+    const row = await storedUser(owner.id);
+    expect(row.active).toEqual(true);
+  });
+
+  it("lets an owner deactivate another owner while one stays active", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ active: false })
+      .expect(200);
+
+    const row = await storedUser(target.id);
+    expect(row.active).toEqual(false);
+  });
+
+  it("does not let an admin delete an owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent.delete(`${apiPath}/users/${target.id}`).expect(403);
+
+    const row = await storedUser(target.id);
+    expect(row.deletedAt).toBeUndefined();
+  });
+
+  it("lets an owner delete another owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent.delete(`${apiPath}/users/${target.id}`).expect(200);
+
+    const row = await storedUser(target.id);
+    expect(row.deletedAt).toBeDefined();
+  });
+
+  it("does not let the last active owner be deleted", async () => {
+    await demoteOtherOwners();
+
+    await ownerAgent.delete(`${apiPath}/users/${owner.id}`).expect(403);
+
+    const row = await storedUser(owner.id);
+    expect(row.deletedAt).toBeUndefined();
   });
 });

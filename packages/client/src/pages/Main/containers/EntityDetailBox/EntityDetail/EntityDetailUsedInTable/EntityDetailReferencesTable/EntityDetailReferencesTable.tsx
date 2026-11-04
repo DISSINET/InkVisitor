@@ -3,7 +3,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { IResponseUsedInReference } from "@inkvisitor/shared/types/response-detail";
 import { Button, Table } from "components";
 import { EntityTag } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useDetailPanelReveal, useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { CellProps, Column } from "react-table";
@@ -25,6 +25,7 @@ export const EntityDetailReferencesTable: React.FC<EntityDetailReferencesTable> 
   perPage = 5,
 }) => {
   const { setStatementId, setTerritoryId } = useSearchParams();
+  const { revealEditor } = useDetailPanelReveal();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
@@ -53,6 +54,7 @@ export const EntityDetailReferencesTable: React.FC<EntityDetailReferencesTable> 
                           icon={<FaEdit />}
                           onClick={() => {
                             setStatementId(entity.id);
+                            revealEditor();
                             const territoryId = entity.data.territory?.territoryId;
                             if (!entity.isTemplate && territoryId) {
                               setTerritoryId(territoryId);

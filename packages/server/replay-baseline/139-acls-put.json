@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/acls/acl-1",
+    "body": {
+      "public": false,
+      "roles": [
+        "admin",
+        "editor"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

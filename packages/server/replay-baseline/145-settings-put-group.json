@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/settings/group/validations",
+    "body": [
+      {
+        "id": "validation_NA",
+        "value": false
+      },
+      {
+        "id": "validation_MA",
+        "value": false
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

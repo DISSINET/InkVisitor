@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PATCH",
+    "path": "/api/documents/doc-replay/removeAnchor",
+    "body": {
+      "anchorIndex": 0,
+      "entityId": "l1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

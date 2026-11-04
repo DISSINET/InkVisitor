@@ -18,13 +18,12 @@ import {
 import { apiPath } from "@common/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import app from "../../server";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { findEntityById } from "@service/shorthands";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 
 describe("statements/batch-move", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -170,21 +169,20 @@ describe("statements/batch-move", function () {
       // admin-only (roles: []) one and blocks editors before the handler runs.
       // Open it to all roles - the handler is what enforces territory rights,
       // mirroring entities PUT /:entityId.
-      await rethink
-        .table("acl_permissions")
-        .filter({ controller: "statements", method: "PUT", route: "batch-move" })
-        .delete()
-        .run(db.connection);
-      await rethink
-        .table("acl_permissions")
-        .insert({
+      const stale = (await storage.acl.all(db.connection)).filter(
+      (row) => row.controller === "statements" && row.method === "PUT" && row.route === "batch-move"
+    );
+    await storage.acl.deleteMany(
+      db.connection,
+      stale.map((row) => row.id)
+    );
+      await storage.acl.insert(db.connection, {
           controller: "statements",
           method: "PUT",
           route: "batch-move",
           roles: ["*"],
           public: false,
-        })
-        .run(db.connection);
+        });
 
       await new User({
         id: editorNoTargetId,
@@ -209,11 +207,7 @@ describe("statements/batch-move", function () {
     });
 
     afterAll(async () => {
-      await rethink
-        .table("users")
-        .getAll(editorNoTargetId, editorBothId)
-        .delete()
-        .run(db.connection);
+      await storage.users.deleteMany(db.connection, [editorNoTargetId, editorBothId]);
       await db.close();
     });
 

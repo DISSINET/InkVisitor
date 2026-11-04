@@ -36,6 +36,7 @@ describe("typing at end of wrapped line", () => {
 
   test("space at end of full wrapped line stays trailing; the caret is draw-clamped", () => {
     annotator = new Annotator(mockCanvas, "");
+    annotator.setParagraphIndent(false); // wrap geometry without the first-line indent
     annotator.setMode(EditMode.RAW);
     const charsAtLine = annotator.text.charsAtLine;
     const fill = "x".repeat(charsAtLine);
@@ -58,6 +59,7 @@ describe("typing at end of wrapped line", () => {
 
   test("repeated spaces at a full wrapped line end accumulate trailing, caret clamped", () => {
     annotator = new Annotator(mockCanvas, "");
+    annotator.setParagraphIndent(false); // wrap geometry without the first-line indent
     annotator.setMode(EditMode.RAW);
     const charsAtLine = annotator.text.charsAtLine;
     annotator.onReplaceText("x".repeat(charsAtLine));

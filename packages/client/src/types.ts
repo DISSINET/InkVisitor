@@ -126,8 +126,10 @@ export interface IPage {
     | "customize"
     | "stats"
     | "explorer"
+    | "geocoding"
     | "reset-layout"
-    | "global-validations";
+    | "global-validations"
+    | "global-geocoding";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;

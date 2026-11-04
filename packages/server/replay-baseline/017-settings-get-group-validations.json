@@ -1,0 +1,154 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/settings/group/validations"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "id": "validations",
+        "settings": [
+          {
+            "id": "validation_A1Valency",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_ISYNC",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_A2Valency",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_LM",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVEC",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_SValency",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_AVU",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_DM",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_NA",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_MVAL",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_ANA",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVEPV",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_WA",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_MA",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_NoTerritory",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_PSM",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_AVAL",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_IELVL",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVERE",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVECE",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVEP",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_MAEE",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_VETM",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVER",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_WAC",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_TVEPT",
+            "public": false,
+            "value": true
+          },
+          {
+            "id": "validation_SCLM",
+            "public": false,
+            "value": true
+          }
+        ]
+      },
+      "result": true
+    }
+  }
+}

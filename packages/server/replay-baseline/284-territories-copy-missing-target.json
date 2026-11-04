@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/territories/rp-t/copy",
+    "body": {
+      "targets": [
+        "nope"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "TerritoryDoesNotExits",
+      "message": "one or more target territories(1) not found",
+      "result": false
+    }
+  }
+}

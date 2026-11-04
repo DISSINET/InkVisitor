@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/territories/T0"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "T",
+      "createdAt": "<datetime>",
+      "data": {
+        "parent": false
+      },
+      "detail": "",
+      "entities": {},
+      "id": "T0",
+      "isTemplate": false,
+      "labels": [
+        "root"
+      ],
+      "language": "lat",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "right": "admin",
+      "statements": [],
+      "status": "1"
+    }
+  }
+}

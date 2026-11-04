@@ -2,7 +2,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation, { RelationSaveContext } from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { nonenumerable } from "@common/decorators";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { IRequest } from "../../custom_typings/request";
 
 export default class Synonym
@@ -86,7 +86,7 @@ export default class Synonym
   }
 
   static async getSynonymForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> {

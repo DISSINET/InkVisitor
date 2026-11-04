@@ -178,6 +178,9 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   &:hover {
     border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};
   }
+  &::placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+  }
 `;
 
 export const StyledNumberInputWrapper = styled.div`

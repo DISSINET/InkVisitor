@@ -1,0 +1,62 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/documents/doc-replay/audits"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "auditScope": "document",
+      "first": {
+        "auditScope": "document",
+        "changes": {
+          "additions": [],
+          "changes": [],
+          "removals": [
+            {
+              "anchor": "p12",
+              "occurrence": 0
+            },
+            {
+              "anchor": "l1",
+              "occurrence": 1
+            }
+          ]
+        },
+        "date": "<datetime>",
+        "id": "<uuid-11>",
+        "modelId": "doc-replay",
+        "type": "anchor_delete",
+        "user": "1"
+      },
+      "last": [
+        {
+          "auditScope": "document",
+          "changes": {
+            "additions": [],
+            "changes": [],
+            "removals": [
+              {
+                "anchor": "p12",
+                "occurrence": 0
+              },
+              {
+                "anchor": "l1",
+                "occurrence": 1
+              }
+            ]
+          },
+          "date": "<datetime>",
+          "id": "<uuid-11>",
+          "modelId": "doc-replay",
+          "type": "anchor_delete",
+          "user": "1"
+        }
+      ],
+      "modelId": "doc-replay",
+      "relations": []
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import Superclass from "./superclass";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
@@ -48,7 +48,7 @@ export default class Classification
   }
 
   static async getClassificationForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class,
     maxNestLvl: number,
@@ -110,7 +110,7 @@ export default class Classification
   }
 
   static async getClassificationInverseConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string
   ): Promise<RelationTypes.IClassification[]> {
     const out: RelationTypes.IClassification[] = await Relation.findForEntities(

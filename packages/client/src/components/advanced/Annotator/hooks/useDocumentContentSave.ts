@@ -49,10 +49,10 @@ export const useDocumentContentSave = ({
     }
     updateDocumentMutation.mutate({
       id: documentId,
-      doc: {
-        ...dataDocument,
-        content: annotator.text.value,
-      },
+      // content alone: the server rebuilds anchors and entityIds from it, and
+      // each anchors node repeats its text, so the full document can outgrow
+      // the proxy's request size limit
+      doc: { content: annotator.text.value },
       successMessage,
     });
     return true;

@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/entities/rp-missing",
+    "body": {
+      "detail": "x"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "EntityDoesNotExist",
+      "message": "entity with id rp-missing does not exist",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/batch-move?ids=rp-s",
+    "body": {
+      "territoryId": "rp-t"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "1 statements has been moved under 'replay territory'",
+      "result": true
+    }
+  }
+}

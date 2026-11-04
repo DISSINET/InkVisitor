@@ -1,6 +1,5 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types";
-import { RValue, RTable } from "rethinkdb-ts";
 
 export interface DbSchema {
   users: TableSchema;
@@ -17,32 +16,35 @@ export interface DbSchema {
   savedQueries: TableSchema;
 }
 export interface TableSchema {
-  tableName: RValue<string>;
+  /** physical table name, the same on every backend */
+  tableName: string;
   data?: any;
   dataFilePath?: string;
   transform?: () => void;
-  indexes?: IndexDef[];
 }
 
-/**
- * An index definition carries its name as data and a `build` function that
- * runs `table.indexCreate(name, ...)` against a given table. Keeping the
- * name as data lets ensure-indexes.ts compare against `indexList()` without
- * having to run the factory just to recover the name.
- */
-export interface IndexDef {
-  name: string;
-  build: (table: RTable) => any;
+/** value of a `--name=value` argument */
+export function flag(name: string): string | undefined {
+  const hit = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  return hit ? hit.slice(name.length + 3) : undefined;
+}
+
+/** whether a bare `--name` argument is present */
+export function has(name: string): boolean {
+  return process.argv.includes(`--${name}`);
+}
+
+/** arguments that are not `--flags`; the first one names the env file */
+export function positionals(): string[] {
+  return process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
 }
 
 export function parseArgs(): [datasetId: string, env: string] {
-  const datasetId: string = process.argv[2];
-  const env = process.argv[3];
-
+  const [datasetId, env] = positionals();
   return [datasetId, env];
 }
 
-const [env] = parseArgs();
+const [env] = positionals();
 const envFile = `env/.env${env ? "." + env : ""}`;
 const envData = require("dotenv").config({ path: envFile }).parsed;
 
@@ -56,6 +58,12 @@ export function getEnv(envName: string): string {
   }
 
   throw new Error(`ENV variable '${envName}' is required`);
+}
+
+/** an env value that may be absent or empty */
+export function getEnvOptional(envName: string): string | undefined {
+  const value = envData[envName];
+  return value === undefined || value === "" ? undefined : (value as string);
 }
 
 export const checkRelation = (

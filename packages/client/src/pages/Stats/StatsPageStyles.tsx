@@ -54,14 +54,17 @@ export const StyledDocumentsLayout = styled.div`
   min-height: 0;
   overflow: hidden;
 `;
+// the chart row keeps 25rem: its legend is drawn inside the chart's height and
+// wraps to several rows with many users, so a shorter chart leaves the bars no
+// room; with the table's 15rem, a lower page scrolls
 export const StyledEntitiesLayout = styled.div`
   display: grid;
-  grid-template-rows: auto auto 1fr 1fr;
+  grid-template-rows: auto auto minmax(25rem, 1fr) minmax(15rem, 1fr);
   gap: 1rem;
   width: 100%;
   height: 100%;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
 `;
 
 export const StyledFieldGroup = styled.div`

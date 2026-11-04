@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "PUT",
+    "path": "/api/documents/doc-replay",
+    "body": {
+      "title": "x"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "document cannot be saved",
+      "result": false
+    }
+  }
+}

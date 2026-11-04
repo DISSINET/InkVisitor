@@ -1,10 +1,6 @@
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
 import { BaseDropdown } from "components";
 import React from "react";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface BasicDropdownOption<T> {
   value: T;
@@ -27,6 +23,8 @@ interface BasicDropdown<T = string> {
   options: (BasicDropdownOption<T> | BasicDropdownGroup<T>)[];
   icon?: React.ReactNode;
   placeholder?: string;
+  /** What the control is called, where nothing on screen names it. */
+  ariaLabel?: string;
   tooltipLabel?: string;
   tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
@@ -37,7 +35,6 @@ interface BasicDropdown<T = string> {
   isClearable?: boolean;
 
   noDropDownIndicator?: boolean;
-  loggerId?: string;
 }
 export const BasicDropdown = <T extends string>({
   width,
@@ -46,6 +43,7 @@ export const BasicDropdown = <T extends string>({
   options,
   icon,
   placeholder,
+  ariaLabel,
   tooltipLabel,
   tooltipContent,
   tooltipPosition,
@@ -53,7 +51,6 @@ export const BasicDropdown = <T extends string>({
   disabled,
   onFocus,
   isClearable = false,
-  loggerId,
   noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
   const flatOptions = options.flatMap((option) => ("options" in option ? option.options : option));
@@ -62,19 +59,19 @@ export const BasicDropdown = <T extends string>({
     <BaseDropdown
       width={width}
       value={flatOptions.find((o) => o.value === value) ?? null}
-      isClearable={isClearable}
-      onChange={(value) => onChange((value[0]?.value ?? "") as T)}
+      clearable={isClearable}
+      onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
       options={options}
       placeholder={placeholder}
+      ariaLabel={ariaLabel}
       tooltipLabel={tooltipLabel}
       tooltipContent={tooltipContent}
       tooltipPosition={tooltipPosition}
       icon={icon}
-      noDropDownIndicator={noDropDownIndicator}
-      disableTyping={disableTyping}
+      chevron={!noDropDownIndicator}
+      searchable={!disableTyping}
       disabled={disabled}
       onFocus={onFocus}
-      loggerId={loggerId}
     />
   );
 };

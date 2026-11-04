@@ -1,7 +1,7 @@
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { sessionPool } from "./db";
-import { RethinkSessionStore } from "@service/rethinkSessionStore";
+import { StorageSessionStore } from "@service/sessionStore";
 
 const SESSION_MAX_AGE_MS =
   parseInt(process.env.SESSION_MAX_AGE || "", 10) || 86400000 * 30;
@@ -21,7 +21,7 @@ export const sessionCookieName =
   process.env.SESSION_COOKIE_NAME ||
   `inkvisitor.sid.${process.env.ENV || "default"}`;
 
-export const sessionStore = new RethinkSessionStore(sessionPool);
+export const sessionStore = new StorageSessionStore(sessionPool);
 
 export const sessionMiddleware = session({
   name: sessionCookieName,

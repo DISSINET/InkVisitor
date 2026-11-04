@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/rp-missing/restore",
+    "body": {}
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "AuditDoesNotExist",
+      "message": "cannot restore entity - audit does not exist",
+      "result": false
+    }
+  }
+}

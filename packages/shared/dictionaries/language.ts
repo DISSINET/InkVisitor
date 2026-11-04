@@ -534,7 +534,7 @@ export const languageDict = [...basicLanguages, ...extensiveLanguages].sort((a, 
  *
  * Order: `empty` (no-language sentinel) stays pinned first, then working
  * languages in `languageDict` order, then all remaining languages in original
- * order. Because react-select's default filter preserves option array order,
+ * order. Because the dropdown filter preserves option array order,
  * this makes working languages rank first both on open and while typing.
  *
  * Unknown or duplicate values in `workingLanguages` are ignored.

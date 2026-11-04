@@ -1,5 +1,6 @@
 import MuniFont from "assets/fonts/muni-bold-webfont.woff2?inline";
 import { createGlobalStyle } from "styled-components";
+import { SCROLLBAR_SIZE } from "./constants";
 import { ThemeType } from "./theme";
 
 interface GlobalStyle {
@@ -15,7 +16,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     font-size: 62.5%;
   }
   body {
-    font-family: "Roboto", sans-serif;
+    font-family: ${({ theme }) => theme.fontFamily["body"]};
     letter-spacing: .2px;
     line-height: 1.3;
   }
@@ -29,6 +30,50 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   }
   .no-select {
     user-select: none;
+  }
+  /*
+    Every scrollbar in the app: a thin gray thumb on a transparent track.
+    Styling ::-webkit-scrollbar makes Chrome and Safari draw a classic
+    scrollbar that stays visible on macOS. Chrome drops those pseudo-elements
+    on an element with scrollbar-color or scrollbar-width set, so the standard
+    properties apply only in Firefox, which keeps the system's overlay behavior.
+  */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
+    }
+  }
+  /* the transparent thumb border is the gap around a 7px thumb, and the track
+     margin keeps the thumb clear of the box ends */
+  ::-webkit-scrollbar {
+    width: ${SCROLLBAR_SIZE}px;
+    height: ${SCROLLBAR_SIZE}px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track:vertical {
+    margin: 5px 0;
+  }
+  ::-webkit-scrollbar-track:horizontal {
+    margin: 0 5px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.color.gray[500]};
+    background-clip: padding-box;
+    /* on all four sides, so the clipped corners stay circular */
+    border: 2px solid transparent;
+    border-radius: ${({ theme }) => theme.borderRadius["full"]};
+  }
+  ::-webkit-scrollbar-thumb:vertical {
+    min-height: 40px;
+  }
+  ::-webkit-scrollbar-thumb:horizontal {
+    min-width: 40px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: ${({ theme }) => theme.color.gray[700]};
   }
   /*
     React Query devtools. Its own sizes are multiples of --tsqd-font-size, which
@@ -66,80 +111,6 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   h6 {
     font-size: ${({ theme }) => theme.fontSize["base"]};
     line-height: 1.3;
-  }
-
-  /* react-select portal */
-  .react-select__menu-portal {
-    font-size: ${({ theme }) => theme.fontSize["xs"]};
-    .react-select__menu {
-      border-radius: ${({ theme }) => theme.borderRadius["input"]};
-      box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-      width: 100%;
-      overflow: hidden;
-
-      color: ${({ theme }) => theme.color["black"]};
-      background-color: ${({ theme }) => theme.color["white"]};
-    }
-    .react-select__menu-list {
-      /* no max-height here: react-select computes one that fits the space left
-         below (or above) the control, and a rule at this specificity would beat
-         its emotion class and pin the menu to a height the viewport cannot show.
-         The cap lives on the maxMenuHeight prop in BaseDropdown. */
-      border-radius: ${({ theme }) => theme.borderRadius["input"]};
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-    .react-select__option {
-      margin: 0;
-      min-height: 3rem;
-    }
-    .react-select__option--is-selected {
-      font-weight: bold;
-      color: ${({ theme }) => theme.color["black"]};
-      background-color: ${({ theme }) => theme.color["white"]};
-      &:hover {
-        background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
-      }
-    }
-    .react-select__option--is-focused {
-      background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
-    }
-    .react-select__option--is-disabled {
-      color: ${({ theme }) => theme.color["gray"][500]};
-    }
-    .react-select__group {
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-    /* sticks to the top of the menu while its own options scroll past, so a
-       long group still shows which group the visible options belong to */
-    .react-select__group-heading {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      margin: 0;
-      padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
-      font-size: ${({ theme }) => theme.fontSize["xxs"]};
-      font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-      color: ${({ theme }) => theme.color["gray"][600]};
-      background-color: ${({ theme }) => theme.color["gray"][100]};
-    }
-  }
-
-  .react-select__entity-dropdown {
-    .react-select__option {
-      padding: 2px;
-      padding-left: 0;
-    }
-    .react-select__option--is-selected {
-    }
-  }
-
-  .react-select__user-dropdown {
-    .react-select__option {
-      min-height: unset;
-      padding: 2px 6px;
-    }
   }
 `;
 
