@@ -104,23 +104,11 @@ export default class SearchEdge implements Query.IEdge {
    * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
    * else by the classes the edge's target can hold
    */
-  private async constrainedTargetIds(conn: Conn, { statuses, languages, label }: TargetFilters): Promise<string[]> {
+  private async constrainedTargetIds(conn: Conn, filters: TargetFilters): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
-    const where: string[] = [];
-    if (statuses.length) {
-      where.push(`e.status = ${anyOf(p, statuses)}`);
-    }
-    if (languages.length) {
-      where.push(`e.language = ${anyOf(p, languages)}`);
-    }
-    if (classes.length) {
-      where.push(`e.class = ${anyOf(p, classes)}`);
-    }
-    if (label) {
-      where.push(labelMatch(p, labelPattern(...label)));
-    }
+    const where = filterParts(p, "e", classes, filters);
     const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
     return res.rows.map((row: { id: string }) => row.id);
   }
@@ -224,6 +212,33 @@ const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.class = '${
 /** a filled id read from json (ReQL `.default("").ne("")`) */
 const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
 
+/**
+ * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
+ * constraint; empty lists do not constrain. Every node filter is checked here, for the id set
+ * prepare() selects and for the per-partner checks alike
+ */
+function filterParts(
+  p: Params,
+  alias: string,
+  classes: EntityEnums.Class[],
+  filters: TargetFilters
+): string[] {
+  const parts: string[] = [];
+  if (classes.length) {
+    parts.push(`${alias}.class = ${anyOf(p, classes)}`);
+  }
+  if (filters.statuses.length) {
+    parts.push(`${alias}.status = ${anyOf(p, filters.statuses)}`);
+  }
+  if (filters.languages.length) {
+    parts.push(`${alias}.language = ${anyOf(p, filters.languages)}`);
+  }
+  if (filters.label) {
+    parts.push(labelMatch(p, labelPattern(...filters.label), `${alias}.labels`));
+  }
+  return parts;
+}
+
 /** an existing entity `idSql` of the classes, passing the filters; empty lists do not constrain */
 function entityMatches(
   p: Params,
@@ -231,19 +246,7 @@ function entityMatches(
   classes: EntityEnums.Class[],
   filters = NO_FILTERS
 ): string {
-  const parts = [`t.id = ${idSql}`];
-  if (classes.length) {
-    parts.push(`t.class = ${anyOf(p, classes)}`);
-  }
-  if (filters.statuses.length) {
-    parts.push(`t.status = ${anyOf(p, filters.statuses)}`);
-  }
-  if (filters.languages.length) {
-    parts.push(`t.language = ${anyOf(p, filters.languages)}`);
-  }
-  if (filters.label) {
-    parts.push(labelMatch(p, labelPattern(...filters.label), "t.labels"));
-  }
+  const parts = [`t.id = ${idSql}`, ...filterParts(p, "t", classes, filters)];
   return `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE ${parts.join(" AND ")})`;
 }
 
