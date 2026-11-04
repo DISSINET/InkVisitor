@@ -345,20 +345,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               count={countNodeFilters(node.params)}
               tooltipLabel="filters for the entities of this node"
               width="26rem"
-              onClear={() => {
-                dispatch({
-                  type: QueryActionType.updateNodeStatuses,
-                  payload: { nodeId: node.id, newEntityStatuses: [] },
-                });
-                dispatch({
-                  type: QueryActionType.updateNodeLanguages,
-                  payload: { nodeId: node.id, newEntityLanguages: [] },
-                });
-                dispatch({
-                  type: QueryActionType.updateNodeLabel,
-                  payload: { nodeId: node.id, newLabel: "" },
-                });
-              }}
+              onClear={() =>
+                dispatch({ type: QueryActionType.clearNodeFilters, payload: { nodeId: node.id } })
+              }
             >
               <StyledForm>
                 <StyledRow>

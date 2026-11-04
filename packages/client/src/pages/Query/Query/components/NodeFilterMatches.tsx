@@ -1,4 +1,3 @@
-import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
@@ -40,24 +39,18 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   // filters are being edited: the request runs only while the node still
   // carries the filters that were asked for, and a combination asked for
   // before reads from the cache.
-  const filtersSignature = JSON.stringify([
+  const filters = {
     classes,
-    entityStatuses ?? [],
-    entityLanguages ?? [],
-    label?.trim() ?? "",
-  ]);
+    statuses: entityStatuses ?? [],
+    languages: entityLanguages ?? [],
+    label: label?.trim() ?? "",
+  };
+  const filtersSignature = JSON.stringify(filters);
   const [requestedSignature, setRequestedSignature] = useState<string | null>(null);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["node-filter-matches", filtersSignature],
+    queryKey: ["node-filter-matches", filters],
     queryFn: async () => {
-      const [requestedClasses, requestedStatuses, requestedLanguages, requestedLabel] =
-        JSON.parse(filtersSignature) as [
-          EntityEnums.Class[],
-          EntityEnums.Status[],
-          EntityEnums.Language[],
-          string,
-        ];
       const res = await api.query({
         query: {
           id: "node-filter-matches",
@@ -65,10 +58,10 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
           operator: Query.NodeOperator.And,
           edges: [],
           params: {
-            entityClasses: requestedClasses,
-            entityStatuses: requestedStatuses,
-            entityLanguages: requestedLanguages,
-            label: requestedLabel || undefined,
+            entityClasses: filters.classes,
+            entityStatuses: filters.statuses,
+            entityLanguages: filters.languages,
+            label: filters.label || undefined,
           },
         },
         explore: {

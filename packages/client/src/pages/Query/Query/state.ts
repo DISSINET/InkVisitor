@@ -73,6 +73,7 @@ enum QueryActionType {
   updateNodeStatuses,
   updateNodeLabel,
   updateNodeLanguages,
+  clearNodeFilters,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -115,6 +116,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeLanguages;
       payload: { nodeId: string; newEntityLanguages: EntityEnums.Language[] };
+    }
+  | {
+      type: QueryActionType.clearNodeFilters;
+      payload: { nodeId: string };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -233,6 +238,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeLanguages:
       return updateNodeLanguages(state, action.payload.nodeId, action.payload.newEntityLanguages);
 
+    case QueryActionType.clearNodeFilters:
+      return clearNodeFilters(state, action.payload.nodeId);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -331,6 +339,20 @@ const updateNodeLabel = (state: Query.INode, nodeId: string, newLabel: string): 
     delete nodeToUpdate.params.label;
   } else {
     nodeToUpdate.params.label = newLabel;
+  }
+
+  return updatedState;
+};
+
+// the node filters: status, language and label
+const clearNodeFilters = (state: Query.INode, nodeId: string): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (nodeToUpdate) {
+    delete nodeToUpdate.params.entityStatuses;
+    delete nodeToUpdate.params.entityLanguages;
+    delete nodeToUpdate.params.label;
   }
 
   return updatedState;
