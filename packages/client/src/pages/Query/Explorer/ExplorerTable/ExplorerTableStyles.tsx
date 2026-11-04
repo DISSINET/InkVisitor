@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { SCROLLBAR_SIZE } from "Theme/constants";
-import { FLOATING_SEARCH_COLLAPSED_SIZE } from "../../FloatingSearchContainer/FloatingSearchContainerStyles";
 
 interface StyledTableWrapper {
   // $height: number;
@@ -290,13 +289,15 @@ export const StyledCounter = styled.div`
   color: ${({ theme }) => theme.color["black"]};
 `;
 
+// takes up to 36rem of the search row and gives way first when the row runs
+// out of width, so the buttons beside it keep their size on one line
 export const StyledLabelFilter = styled.div`
   display: flex;
+  flex: 0 1 36rem;
   align-items: center;
   gap: 0.2rem;
-  width: 100%;
+  min-width: 10rem;
   margin: 0 0.5rem;
-  max-width: 36rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
@@ -323,13 +324,6 @@ export const StyledIdsFilter = styled.div`
   width: 100%;
 `;
 
-export const StyledIdsFilterHint = styled.span`
-  flex-shrink: 0;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color["gray"][600]};
-  white-space: nowrap;
-`;
-
 export const StyledChipInputBox = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -351,113 +345,6 @@ export const StyledChipInputBox = styled.div`
   &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
-`;
-
-export const StyledIdsFloatingRoot = styled.div`
-  position: absolute;
-  right: 2rem;
-  bottom: calc(2rem + ${FLOATING_SEARCH_COLLAPSED_SIZE}px + 1.5rem);
-  z-index: 161;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1rem;
-`;
-
-export const StyledIdsToggleWrapper = styled.div<{ $isActive?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.color.invertedBg["info"]};
-  box-shadow: ${({ theme, $isActive }) =>
-    $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
-  filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
-  transition:
-    filter 0.2s,
-    box-shadow 0.2s;
-  &:hover {
-    box-shadow: ${({ theme }) => theme.boxShadow.normal};
-    filter: brightness(0.98);
-  }
-`;
-
-export const StyledIdsToggleButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
-  color: ${({ theme }) => theme.color["info"]};
-  background: transparent;
-`;
-
-export const StyledIdsToggleClear = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: ${({ theme }) => theme.color["info"]};
-  cursor: pointer;
-  &:hover {
-    color: ${({ theme }) => theme.color["danger"]};
-  }
-`;
-
-export const StyledIdsCountBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.6rem;
-  height: 1.6rem;
-  padding: 0 0.4rem;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.color["info"]};
-  color: ${({ theme }) => theme.color["white"]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-`;
-
-export const StyledIdsPanel = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 30rem;
-  max-width: calc(100vw - 4rem);
-  min-height: 0;
-  padding: 0.75rem;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.color["invertedBg"]["info"]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
-  overflow: hidden;
-`;
-
-export const StyledIdsPanelHeader = styled.div`
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-`;
-
-export const StyledIdsPanelTitle = styled.span`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
-  color: ${({ theme }) => theme.color["primary"]};
-`;
-
-export const StyledIdsPanelFooter = styled.div`
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
 `;
 
 export const StyledUuidChip = styled.span<{ $selected?: boolean }>`
@@ -510,23 +397,6 @@ export const StyledChipTextInput = styled.input<{ $invalid?: boolean }>`
     color: ${({ theme }) => theme.color["gray"][500]};
     font-weight: inherit;
     text-decoration: none;
-  }
-`;
-
-export const StyledClearAllButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  flex-shrink: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color["gray"][600]};
-  cursor: pointer;
-  white-space: nowrap;
-  &:hover {
-    color: ${({ theme }) => theme.color["danger"]};
   }
 `;
 

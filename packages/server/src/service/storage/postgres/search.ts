@@ -39,9 +39,12 @@ export function labelPattern(label: string, left: string, right: string): string
   return `(?i)${left}${body}${right}`;
 }
 
-/** true when one of the row's labels matches `pattern` */
-export const labelMatch = (p: Params, pattern: string): string =>
-  `EXISTS (SELECT 1 FROM unnest(labels) l WHERE l ~ ${p.add(pattern)})`;
+/**
+ * true when one of the row's labels matches `pattern`; `labels` names the column, qualified
+ * (t.labels) inside a subquery over another entity
+ */
+export const labelMatch = (p: Params, pattern: string, labels = "labels"): string =>
+  `EXISTS (SELECT 1 FROM unnest(${labels}) l WHERE l ~ ${p.add(pattern)})`;
 
 const REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
 

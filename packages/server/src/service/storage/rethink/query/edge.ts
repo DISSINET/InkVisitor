@@ -3,8 +3,10 @@ import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
+import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
@@ -43,8 +45,8 @@ export default class SearchEdge implements Query.IEdge {
    * target node the pinned entityId plus its equivalents (SYN/AEE/IDE) and/or
    * subordinates (inverse SCL/SOE/HOL + child territories, all levels) when the
    * node's expansion toggles ask for them; for an unpinned node the entities
-   * matching its status constraint. Null when the target is neither pinned nor
-   * status-constrained - expansion toggles never affect an unpinned target.
+   * matching its status and label constraints. Null when the target is neither
+   * pinned nor constrained - expansion toggles never affect an unpinned target.
    */
   protected targetEntityIds: string[] | null = null;
 
@@ -80,19 +82,26 @@ export default class SearchEdge implements Query.IEdge {
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
-    // the status narrows an empty target only: a pinned entity is the target
-    // itself, whatever its status, and the query builder offers no status
-    // picker while one is pinned
-    const statuses = this.node.params.entityStatuses ?? [];
+    // the node filters narrow an empty target only: a pinned entity is the
+    // target itself, whatever its status, and the query builder offers no
+    // node filters while one is pinned
+    const filters: TargetFilters = {
+      statuses: this.node.params.entityStatuses ?? [],
+      languages: this.node.params.entityLanguages ?? [],
+      label: nodeLabel(this.node.params.label),
+    };
 
     if (!entityId) {
-      // resolving the status constraint into an id set here is what makes it
+      // resolving the constraints into an id set here is what makes them
       // apply to every edge type: each run() already matches against
-      // targetIds(), so no edge needs to know about statuses
-      this.targetEntityIds =
-        statuses.length && !this.checksUnpinnedTargetStatusInRun
-          ? await this.statusTargetIds(db, statuses)
-          : null;
+      // targetIds(), so no edge needs to know about them. The edges that check
+      // statuses per candidate have no such check for a language or label, so
+      // either takes the statuses into the id set with it.
+      const constrained =
+        !!filters.label ||
+        filters.languages.length > 0 ||
+        (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
+      this.targetEntityIds = constrained ? await this.constrainedTargetIds(db, filters) : null;
       return;
     }
 
@@ -108,24 +117,35 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Ids of entities carrying one of `statuses`, narrowed by the target node's
-   * classes, else by the classes the edge's target can hold. Status has no
-   * index, so without either this is a full scan of the entity table.
+   * Ids of entities passing `filters` (an empty list passes any), narrowed by
+   * the target node's classes, else by the classes the edge's target can hold.
+   * None of the filters has an index, so without a class this is a full scan
+   * of the entity table.
    */
-  private async statusTargetIds(db: Connection, statuses: EntityEnums.Status[]): Promise<string[]> {
+  private async constrainedTargetIds(
+    db: Connection,
+    { statuses, languages, label }: TargetFilters
+  ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const base: RStream = classes.length
       ? r.table(TABLE.entities).getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : r.table(TABLE.entities);
 
-    return filterStreamByStatus(base, statuses).run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
+    let q = statuses.length ? filterStreamByStatus(base, statuses) : base;
+    if (languages.length) {
+      q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
+    }
+    if (label) {
+      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
+    }
+    return q.getField("id").distinct().run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
   }
 
   /**
    * Target-id set for run() call sites to match against, null when the target
    * is unconstrained. A pinned target always contains at least the pinned id; a
-   * status-constrained one may resolve to an empty set, which every run()
+   * constrained one may resolve to an empty set, which every run()
    * treats as "matches nothing". Falls back to the raw params.entityId when
    * prepare() has not run, so a bare run() keeps the single-id semantics.
    */
@@ -146,13 +166,17 @@ export default class SearchEdge implements Query.IEdge {
  * Narrows a stream of entities to those carrying one of `statuses` and emits
  * their distinct ids.
  */
+/** an unpinned target node's filters; prepareLabel's parts for the label */
+type TargetFilters = {
+  statuses: EntityEnums.Status[];
+  languages: EntityEnums.Language[];
+  label: [string, string, string] | undefined;
+};
+
 function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStream {
-  return q
-    .filter(function (e: RDatum<IEntity>) {
-      return r.expr(statuses).contains(e("status"));
-    })
-    .getField("id")
-    .distinct() as unknown as RStream;
+  return q.filter(function (e: RDatum<IEntity>) {
+    return r.expr(statuses).contains(e("status"));
+  });
 }
 
 /**

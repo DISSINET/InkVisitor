@@ -19,6 +19,16 @@ export const StyledNodeMainRow = styled.div`
   align-items: center;
   gap: 0.5rem;
   width: 100%;
+  // A node row is wider than its grid column, so the query tree's scroll width
+  // ends where the widest row ends, and padding on the grid falls inside it.
+  // This empty item is the room after the last row's buttons, whatever the
+  // node's width.
+  &::after {
+    content: "";
+    flex-shrink: 0;
+    width: ${({ theme }) => theme.space[8]};
+    height: 1px;
+  }
 `;
 
 export const StyledParallelOperator = styled.div`

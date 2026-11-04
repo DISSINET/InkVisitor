@@ -13,6 +13,7 @@ import {
   StyledArrow,
   StyledContainer,
   StyledContent,
+  StyledContentColumn,
   StyledLabel,
   StyledRow,
 } from "./TooltipStyles";
@@ -138,7 +139,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                   $color={color}
                 />
               )}
-              <div>
+              <StyledContentColumn>
                 {label && (
                   <StyledContent $color={color}>
                     <StyledRow>
@@ -151,7 +152,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                     {content}
                   </StyledContent>
                 )}
-              </div>
+              </StyledContentColumn>
             </StyledContainer>
           </FloatingPortal>
         </>

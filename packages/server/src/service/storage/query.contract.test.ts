@@ -196,6 +196,9 @@ describe("entity search", () => {
     expect(await search({ labelOrId: "(city)" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "(city" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "star" })).toEqual(["c-2", "c-3"]);
+    // a run of spaces separates two words as one space does
+    expect(await search({ labelOrId: "blue  star*" })).toEqual(["c-2"]);
+    expect(await search({ label: "blue \t star" })).toEqual(["c-2"]);
   });
 
   // RethinkDB returns ["p-1"]: its filter skips p-2, which has no `labels`
@@ -301,11 +304,53 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", miss)])).toEqual([]);
   });
 
-  it("a root without edges returns its base; the label param matches nothing", async () => {
+  it("a root without edges returns its base", async () => {
     expect(await explore({ entityClasses: [C.Person] })).toEqual(["p-1", "p-2"]);
     expect(await explore({ entityId: "c-1" })).toEqual(["c-1"]);
-    expect(await explore({ entityClasses: [C.Concept], label: "Blue star" })).toEqual([]);
     expect(await explore({})).toEqual(ALL);
+  });
+
+  it("the label param matches from the start of a word, as the main search box does", async () => {
+    expect(await explore({ entityClasses: [C.Concept], label: "star" })).toEqual(["c-2", "c-3"]);
+    expect(await explore({ entityClasses: [C.Concept], label: " ETOILE " })).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "sta" })).toEqual(["c-2", "c-3"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "blue  sta" })).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "tar" })).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept], label: "*bjec" })).toEqual(["c-3", "c-4"]);
+    // regex characters match literally
+    expect(await explore({ label: "(city" })).toEqual(["l-1"]);
+    expect(await explore({ label: "pr.gue" })).toEqual([]);
+    expect(await explore({ label: "c++" })).toEqual([]);
+    // nothing left to match once the wildcard markers are stripped
+    expect(await explore({ entityClasses: [C.Concept], label: "*" })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
+  });
+
+  it("a label on an unpinned target narrows it on every edge type, statuses included", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "shaped" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "hape" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "nothing" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { label: "star" })])).toEqual(["c-1", "c-2"]);
+    const status0 = "0" as EntityEnums.Status;
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { label: "star", entityStatuses: [status0] })])).toEqual(["c-1"]);
+  });
+
+  it("entityLanguages narrow a node's base and an unpinned target, relation edges included", async () => {
+    const eng = "eng" as EntityEnums.Language;
+    const ces = "ces" as EntityEnums.Language;
+    expect(await explore({ entityClasses: [C.Concept], entityLanguages: [eng] })).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], entityLanguages: [ces] })).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityLanguages: [eng] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { entityLanguages: [eng] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_HP:V", { entityLanguages: [eng] })])).toEqual(["c-3"]);
+  });
+
+  // ReQL takes a language or label into the target id set, which R: matches the source entity against
+  itPg("the relation edges test a language or label on the partner, never the entity itself", async () => {
+    const eng = "eng" as EntityEnums.Language;
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:", { entityLanguages: [eng] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:", { label: "etoile" })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SYN", { label: "star" })])).toEqual(["c-4"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SYN", { label: "(city" })])).toEqual([]);
   });
 
   // the stats view returns this list unsorted and caps it by position

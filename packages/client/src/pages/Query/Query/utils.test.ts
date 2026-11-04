@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Query, Explore } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import { isQueryRequestEmpty } from "./utils";
+import { countNodeFilters, isQueryRequestEmpty } from "./utils";
 
 const makeRoot = (params: Query.INodeParams = {}): Query.INode => ({
   id: "root",
@@ -81,5 +81,19 @@ describe("isQueryRequestEmpty", () => {
         makeExplore([{ type: Explore.SearchOption.Label, label: "x" }]),
       ),
     ).toBe(false);
+  });
+});
+
+describe("countNodeFilters", () => {
+  it("counts each node filter that is set once, whatever its list length", () => {
+    expect(countNodeFilters({})).toBe(0);
+    expect(countNodeFilters({ label: "  " })).toBe(0);
+    expect(
+      countNodeFilters({
+        entityStatuses: ["0" as EntityEnums.Status, "1" as EntityEnums.Status],
+        entityLanguages: ["eng" as EntityEnums.Language],
+        label: "gi",
+      }),
+    ).toBe(3);
   });
 });
