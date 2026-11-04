@@ -4,6 +4,7 @@ import api from "api";
 import { EntityTag } from "components/advanced";
 import React, { useRef, useState } from "react";
 
+import { NODE_FILTER_KEYS } from "../utils";
 import { NodePopover } from "./NodePopover";
 import {
   StyledExpansionCountButton,
@@ -30,7 +31,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   edgeType,
   onOpenEntityInDetail,
 }) => {
-  const { entityClasses, entityStatuses, entityLanguages, label } = node.params;
+  const { entityClasses } = node.params;
   const classes = entityClasses?.length
     ? entityClasses
     : (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]?.entityId?.allowedClasses) || [];
@@ -39,17 +40,21 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   // filters are being edited: the request runs only while the node still
   // carries the filters that were asked for, and a combination asked for
   // before reads from the cache.
-  const filters = {
-    classes,
-    statuses: entityStatuses ?? [],
-    languages: entityLanguages ?? [],
-    label: label?.trim() ?? "",
+  const params: Query.INodeParams = {
+    entityClasses: classes,
+    ...Object.fromEntries(
+      NODE_FILTER_KEYS.filter((key) => node.params[key] !== undefined).map((key) => [
+        key,
+        node.params[key],
+      ]),
+    ),
+    label: node.params.label?.trim() || undefined,
   };
-  const filtersSignature = JSON.stringify(filters);
+  const filtersSignature = JSON.stringify(params);
   const [requestedSignature, setRequestedSignature] = useState<string | null>(null);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["node-filter-matches", filters],
+    queryKey: ["node-filter-matches", params],
     queryFn: async () => {
       const res = await api.query({
         query: {
@@ -57,12 +62,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
           type: node.type,
           operator: Query.NodeOperator.And,
           edges: [],
-          params: {
-            entityClasses: filters.classes,
-            entityStatuses: filters.statuses,
-            entityLanguages: filters.languages,
-            label: filters.label || undefined,
-          },
+          params,
         },
         explore: {
           view: { mode: Explore.EViewMode.Table, columns: [] },

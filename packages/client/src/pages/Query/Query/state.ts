@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
-import { getAllEdges, getAllNodes } from "./utils";
+import { NODE_FILTER_KEYS, getAllEdges, getAllNodes } from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { deepCopy } from "utils/utils";
 import { getRelationConstrainedCategoryTypes } from "../utils";
@@ -74,6 +74,7 @@ enum QueryActionType {
   updateNodeLabel,
   updateNodeLanguages,
   clearNodeFilters,
+  updateNodeFilters,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -120,6 +121,10 @@ type QueryAction =
   | {
       type: QueryActionType.clearNodeFilters;
       payload: { nodeId: string };
+    }
+  | {
+      type: QueryActionType.updateNodeFilters;
+      payload: { nodeId: string; changes: Partial<Query.INodeParams> };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -241,6 +246,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.clearNodeFilters:
       return clearNodeFilters(state, action.payload.nodeId);
 
+    case QueryActionType.updateNodeFilters:
+      return updateNodeFilters(state, action.payload.nodeId, action.payload.changes);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -350,10 +358,32 @@ const clearNodeFilters = (state: Query.INode, nodeId: string): Query.INode => {
 
   const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
   if (nodeToUpdate) {
-    delete nodeToUpdate.params.entityStatuses;
-    delete nodeToUpdate.params.entityLanguages;
-    delete nodeToUpdate.params.label;
+    NODE_FILTER_KEYS.forEach((key) => delete nodeToUpdate.params[key]);
   }
+
+  return updatedState;
+};
+
+// an empty value (undefined, "" or []) removes the param
+const updateNodeFilters = (
+  state: Query.INode,
+  nodeId: string,
+  changes: Partial<Query.INodeParams>,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  const params = nodeToUpdate.params as Record<string, unknown>;
+  Object.entries(changes).forEach(([key, value]) => {
+    if (value === undefined || value === "" || (Array.isArray(value) && value.length === 0)) {
+      delete params[key];
+    } else {
+      params[key] = value;
+    }
+  });
 
   return updatedState;
 };
@@ -394,11 +424,9 @@ const updateNodeEntityId = (
   } else {
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
-    // a pinned entity carries its own status, language and label, so the node
-    // filters are hidden while one is set
-    delete nodeToUpdate.params.entityStatuses;
-    delete nodeToUpdate.params.entityLanguages;
-    delete nodeToUpdate.params.label;
+    // a pinned entity is the node's whole match, so the node filters are hidden
+    // while one is set
+    NODE_FILTER_KEYS.forEach((key) => delete nodeToUpdate.params[key]);
   }
 
   return updatedState;

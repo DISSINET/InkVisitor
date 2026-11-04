@@ -1,11 +1,10 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { Params, ident } from "../sql";
-import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edges";
+import { filterParts, nodeFilters } from "./filters";
 
 /** the rows an edge runs over: the node's own params, or the ids earlier edges left */
 export type Input = { kind: "base"; params: Query.INodeParams } | { kind: "ids"; ids: string[] };
@@ -15,23 +14,10 @@ export function inputWhere(input: Input, p: Params): string {
   if (input.kind === "ids") {
     return `e.id = ANY(${p.add(input.ids)}::text[])`;
   }
-  const { entityClasses, entityStatuses, entityLanguages, entityId, label } = input.params;
-  const where: string[] = [];
-  if (entityClasses?.length) {
-    where.push(`e.class = ANY(${p.add(entityClasses)}::text[])`);
-  }
-  if (entityStatuses?.length) {
-    where.push(`e.status = ANY(${p.add(entityStatuses)}::text[])`);
-  }
-  if (entityLanguages?.length) {
-    where.push(`e.language = ANY(${p.add(entityLanguages)}::text[])`);
-  }
+  const { entityClasses, entityId } = input.params;
+  const where = filterParts(p, "e", entityClasses ?? [], nodeFilters(input.params));
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);
-  }
-  const prepared = nodeLabel(label);
-  if (prepared) {
-    where.push(labelMatch(p, labelPattern(...prepared)));
   }
   return where.length ? where.join(" AND ") : "TRUE";
 }

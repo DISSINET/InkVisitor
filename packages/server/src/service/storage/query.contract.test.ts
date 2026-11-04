@@ -379,6 +379,70 @@ describe("explore: operators, nesting and target expansion", () => {
   });
 });
 
+// the dates and users read the audits as the Explorer's created at / updated at / created by /
+// updated by / edited by filters do; RethinkDB leaves these params unread
+describe("explore: audit and co-occurrence filters", () => {
+  const audit = (id: string, modelId: string, type: string, user: string, date: string): Row => ({
+    id,
+    modelId,
+    type,
+    user,
+    date,
+    auditScope: "entity",
+    changes: {},
+  });
+
+  beforeAll(async () => {
+    await storage.users.insert(conn, ["u-1", "u-2"].map((id) => ({ id, name: id, email: `${id}@x` })));
+    await storage.audits.insert(conn, [
+      audit("au-1", "c-1", "create", "u-1", "2024-01-01T00:00:00.000Z"),
+      audit("au-2", "c-1", "edit", "u-2", "2025-06-01T00:00:00.000Z"),
+      audit("au-3", "c-2", "create", "u-2", "2025-01-01T00:00:00.000Z"),
+      audit("au-4", "c-3", "create", "u-1", "2024-03-01T00:00:00.000Z"),
+      audit("au-5", "c-3", "edit", "u-1", "2024-04-01T00:00:00.000Z"),
+      // the last audit for updated at, but neither an update nor an edit by u-2
+      audit("au-6", "c-3", "text_edit", "u-2", "2026-01-01T00:00:00.000Z"),
+    ]);
+  });
+
+  const concepts = (params: Query.INodeParams) => explore({ entityClasses: [C.Concept], ...params });
+
+  itPg("created at reads the first audit, updated at the last, both ends inclusive", async () => {
+    expect(await concepts({ createdAfter: "2024-06-01T00:00:00.000Z" })).toEqual(["c-2"]);
+    expect(await concepts({ createdBefore: "2024-06-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(
+      await concepts({ createdAfter: "2024-01-01T00:00:00.000Z", createdBefore: "2024-01-01T00:00:00.000Z" })
+    ).toEqual(["c-1"]);
+    expect(await concepts({ updatedAfter: "2025-03-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBefore: "2025-03-01T00:00:00.000Z" })).toEqual(["c-2"]);
+  });
+
+  itPg("created by, updated by and edited by read the create and edit audits", async () => {
+    expect(await concepts({ createdBy: "u-1" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBy: "u-2" })).toEqual(["c-1"]);
+    expect(await concepts({ updatedBy: "u-1" })).toEqual(["c-3"]);
+    expect(await concepts({ editedBy: ["u-2"] })).toEqual(["c-1", "c-2"]);
+    expect(await concepts({ editedBy: ["u-1", "u-2"] })).toEqual(["c-1", "c-2", "c-3"]);
+    expect(await concepts({ createdBy: "u-1", updatedBy: "u-2" })).toEqual(["c-1"]);
+  });
+
+  itPg("co-occurrence keeps the entities sharing a statement with a listed one, a listed one only with another", async () => {
+    expect(await concepts({ coOccurrence: ["p-1"] })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1"] })).toEqual(["p-2"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1", "p-2"] })).toEqual(["p-1", "p-2"]);
+    expect(await explore({ entityClasses: [C.Location], coOccurrence: ["p-2"] })).toEqual(["l-1"]);
+    expect(await explore({ coOccurrence: ["t-child"] })).toEqual(["p-1", "s-2"]);
+  });
+
+  itPg("an unpinned target applies them on a statement edge and on a relation edge's partner", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-1" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-2" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { createdBy: "u-2" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { editedBy: ["u-1"] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:CLA", { coOccurrence: ["l-1"] })])).toEqual(["p-1", "p-2"]);
+  });
+});
+
 describe("explore: statement edges", () => {
   const S = { entityClasses: [C.Statement] };
 
