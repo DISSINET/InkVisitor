@@ -1,7 +1,7 @@
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
-import { prepareLabel } from "@common/searchLabel";
+import { prepareLabel, quoteCharPattern } from "@common/searchLabel";
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -26,7 +26,7 @@ const toDiacriticPattern = (text: string): string =>
   text
     .toLowerCase()
     .split("")
-    .map((char) => DIACRITIC_CHAR_MAP[char] ?? escapeRegExp(char))
+    .map((char) => DIACRITIC_CHAR_MAP[char] ?? quoteCharPattern(char) ?? escapeRegExp(char))
     .join("");
 
 /**

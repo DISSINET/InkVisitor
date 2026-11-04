@@ -1,5 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { prepareLabel } from "../../../common/searchLabel";
+import { prepareLabel, quoteCharPattern } from "../../../common/searchLabel";
 import { TABLE } from "../names";
 import { SearchFilters } from "../types";
 import { Params, arr, ident } from "./sql";
@@ -32,7 +32,7 @@ export function labelPattern(label: string, left: string, right: string): string
   const body = label
     .toLowerCase()
     .split("")
-    .map((char) => map[char] || char)
+    .map((char) => map[char] || quoteCharPattern(char) || char)
     .join("")
     .split(" ")
     .join("([^a-zA-Z0-9]+[0-9A-Za-z_]+)*[^a-zA-Z0-9]+");

@@ -215,6 +215,38 @@ describe("entity search", () => {
     expect(rows.sort((a, b) => a.id.localeCompare(b.id))).toEqual([{ id: "p-1", labels: ["Anna Nováková"] }, { id: "p-2" }]);
     expect(await storage.entities.labelsOf(conn, [])).toEqual([]);
   });
+
+  describe("quote marks and apostrophes", () => {
+    beforeAll(async () => {
+      await storage.entities.insert(conn, [
+        entity("q-1", C.Concept, ["heretics\u2019 presence"]),
+        entity("q-2", C.Concept, ["\u201EPater noster\u201C prayer"]),
+      ]);
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, ["q-1", "q-2"]);
+    });
+
+    it("match a typographic apostrophe when typing a straight one", async () => {
+      expect(await search({ label: "heretics' presence" })).toEqual(["q-1"]);
+      expect(await search({ labelOrId: "heretics' pres*" })).toEqual(["q-1"]);
+    });
+
+    it("treat single and double quote marks as interchangeable", async () => {
+      for (const label of ['"Pater noster"', "'Pater noster'", "\u00ABPater*"]) {
+        expect([label, await search({ label })]).toEqual([label, ["q-2"]]);
+      }
+      expect(await search({ labelOrId: "'Pater*" })).toEqual(["q-2"]);
+    });
+
+    it("match in a query builder node label", async () => {
+      const plan = storage.explore.plan(
+        { id: "", type: Query.NodeType.E, params: { label: "heretics' pre" }, operator: Query.NodeOperator.And, edges: [] },
+        { expand: getNodeExpansionIds, subordinates: getSubordinateEntityIds, territoryPath: () => [] }
+      );
+      expect(sorted(await plan.run(conn))).toEqual(["q-1"]);
+    });
+  });
 });
 
 /** the fixture's territory lineage, root first (t-grand is added by the last describe block) */
