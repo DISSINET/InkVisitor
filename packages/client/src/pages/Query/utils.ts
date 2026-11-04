@@ -625,15 +625,15 @@ const hashString = (s: string): string => {
  */
 const ENTITY_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-/**
- * Entity uuid trimmed for display: first 8 and last 5 characters. Ids shorter
- * than the elision itself are returned unchanged.
- */
 export const getUuidsFilter = (
   filters: Explore.IExploreSearchFilter[],
 ): Explore.IExploreUuidsFilter | undefined =>
   filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
 
+/**
+ * Entity uuid trimmed for display: first 8 and last 5 characters. Ids shorter
+ * than the elision itself are returned unchanged.
+ */
 export const shortenUuid = (id: string): string =>
   id.length > 13 ? `${id.slice(0, 8)}\u2026${id.slice(-5)}` : id;
 
