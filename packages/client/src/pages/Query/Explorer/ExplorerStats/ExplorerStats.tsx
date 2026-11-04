@@ -25,6 +25,10 @@ import {
   // StyledDateInputWrapper, // parked time filter
 } from "./ExplorerStatsStyles";
 
+// px; the table box hugs its rows and scrolls only past this, so a table that
+// fits never shows a scrollbar
+const TABLE_MAX_HEIGHT = 300;
+
 /**
  * Event types hidden from the stats config (paired deletion markers, plus
  * relation types - the explorer stats are entity-scoped so relation audits
@@ -95,11 +99,9 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
     width: chartWidth,
     height: chartHeight,
   } = useResizeObserver<HTMLDivElement>({ debounceDelay: 50 });
-  const {
-    ref: tableRef,
-    width: tableWidth,
-    height: tableHeight,
-  } = useResizeObserver<HTMLDivElement>({ debounceDelay: 50 });
+  const { ref: tableRef, width: tableWidth } = useResizeObserver<HTMLDivElement>({
+    debounceDelay: 50,
+  });
 
   const setParams = (params: Partial<Explore.IExploreStatsParams>) => {
     setLocalStats((prev) => ({ ...prev, ...params }));
@@ -320,7 +322,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
             <StatsTable
               data={statsData}
               width={tableWidth ? Math.max(0, tableWidth - 20) : 0}
-              height={tableHeight ? Math.max(0, tableHeight) : 0}
+              height={TABLE_MAX_HEIGHT}
             />
           </StyledTableWrapper>
 
