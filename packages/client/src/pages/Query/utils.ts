@@ -1,6 +1,7 @@
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query, Relation } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 
 /**
  * The relation a `has relation:` / `is related to:` query edge walks, and which
@@ -628,6 +629,11 @@ const ENTITY_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
  * Entity uuid trimmed for display: first 8 and last 5 characters. Ids shorter
  * than the elision itself are returned unchanged.
  */
+export const getUuidsFilter = (
+  filters: Explore.IExploreSearchFilter[],
+): Explore.IExploreUuidsFilter | undefined =>
+  filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
+
 export const shortenUuid = (id: string): string =>
   id.length > 13 ? `${id.slice(0, 8)}\u2026${id.slice(-5)}` : id;
 

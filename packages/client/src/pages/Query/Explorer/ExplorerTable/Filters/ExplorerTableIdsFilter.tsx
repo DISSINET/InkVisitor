@@ -2,6 +2,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import {
   applyPasteToDraft,
   entityIdsEqual,
+  getUuidsFilter,
   isViableUuidPrefix,
   mergeTokensIntoIds,
   shortenUuid,
@@ -22,17 +23,12 @@ interface ExplorerTableIdsFilterProps {
   dispatch: React.Dispatch<ExploreAction>;
 }
 
-const getRowIdsFilter = (
-  filters: Explore.IExploreSearchFilter[],
-): Explore.IExploreUuidsFilter | undefined =>
-  filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
-
 /**
  * The UUID chip editor; it sits in the UUIDs filter panel and lives as long as
  * the panel is open.
  */
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
-  const rowIdsFilter = getRowIdsFilter(filters);
+  const rowIdsFilter = getUuidsFilter(filters);
   const appliedIds = rowIdsFilter?.ids ?? [];
 
   const [draft, setDraft] = useState("");

@@ -77,7 +77,7 @@ import {
   invalidateAllExplorerQueries,
   useQueryData,
 } from "./useQueryData";
-import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+import { buildSearchSignature, buildStableSignature, getUuidsFilter, isEdgeValid } from "./utils";
 import { ButtonSize, EditorBoxState } from "types";
 
 interface ExplorerPage {}
@@ -245,10 +245,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     subordinates: false,
   });
 
-  const uuidFilterCount =
-    exploreState.filters.find(
-      (f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs,
-    )?.ids.length ?? 0;
+  const uuidFilterCount = getUuidsFilter(exploreState.filters)?.ids.length ?? 0;
 
   const handleRunSearch = useCallback(() => {
     setCommittedSearchSignature(searchSignature);
