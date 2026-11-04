@@ -105,6 +105,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   entitySOEs: string[];
   entityLanguages: EntityEnums.Language[];
   entityStatuses: EntityEnums.Status[];
+  entityLabelContains?: string;
   tieType: EProtocolTieType; // default is property
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
@@ -120,6 +121,7 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.entitySOEs = data.entitySOEs || [];
     this.entityLanguages = data.entityLanguages || [];
     this.entityStatuses = data.entityStatuses || [];
+    this.entityLabelContains = data.entityLabelContains;
 
     this.tieType = data.tieType || EProtocolTieType.Property;
 

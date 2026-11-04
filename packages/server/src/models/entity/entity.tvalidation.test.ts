@@ -384,3 +384,58 @@ describe("models/entity getTBasedWarnings with expansions", () => {
     });
   });
 });
+
+describe("models/entity getTBasedWarnings with a label condition", () => {
+  const rule: ITerritoryValidation = {
+    tieType: EProtocolTieType.Reference,
+    detail: "",
+    entityLabelContains: "Polemical charge of",
+  };
+
+  const labelled = (labels: string[]): Entity =>
+    new Entity({ id: "C1", class: EntityEnums.Class.Concept, labels });
+
+  it("applies the rule when the label contains the text, in any case", () => {
+    expect(
+      warningTypes(
+        labelled(["polemical charge of heresy"]),
+        territoryWith(rule),
+        [],
+        []
+      )
+    ).toEqual([WarningTypeEnums.TVER]);
+  });
+
+  it("applies the rule when only an alt label contains the text", () => {
+    expect(
+      warningTypes(
+        labelled(["heresy charge", "a POLEMICAL CHARGE OF heresy"]),
+        territoryWith(rule),
+        [],
+        []
+      )
+    ).toEqual([WarningTypeEnums.TVER]);
+  });
+
+  it("leaves an entity alone when no label contains the text", () => {
+    expect(
+      warningTypes(
+        labelled(["heresy charge", "polemical target"]),
+        territoryWith(rule),
+        [],
+        []
+      )
+    ).toEqual([]);
+  });
+
+  it("ignores a blank text", () => {
+    expect(
+      warningTypes(
+        labelled(["heresy charge"]),
+        territoryWith({ ...rule, entityLabelContains: "  " }),
+        [],
+        []
+      )
+    ).toEqual([WarningTypeEnums.TVER]);
+  });
+});

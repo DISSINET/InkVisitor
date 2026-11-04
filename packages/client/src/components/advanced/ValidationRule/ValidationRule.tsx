@@ -54,6 +54,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     entitySOEs,
     entityLanguages,
     entityStatuses,
+    entityLabelContains,
     tieType,
     propType,
     allowedClasses,
@@ -344,6 +345,16 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             })}
           />
         </div>
+
+        {/* Entity label */}
+        <StyledLabel>label or alt label containing</StyledLabel>
+        <Input
+          width="full"
+          value={entityLabelContains ?? ""}
+          placeholder="any label"
+          onChangeFn={(value) => updateValidationRule({ entityLabelContains: value })}
+          disabled={!userCanEdit}
+        />
 
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
