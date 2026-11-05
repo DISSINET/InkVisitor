@@ -13,20 +13,19 @@ import React, { useId, useMemo, useState } from "react";
 
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types/relation";
-import { useTheme } from "styled-components";
+import { DefaultTheme, useTheme } from "styled-components";
 
-const certaintyStyles: Record<
-  EntityEnums.Certainty,
-  { dashArray: string; width: number; stroke: string; strokeOpacity: number }
-> = {
-  "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "white" },
-  "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: "black" },
-  "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: "black" },
-  "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: "black" },
-  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: "grey" },
-  "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: "darkred" },
-  "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "red" },
-};
+type EdgeStyle = { dashArray: string; width: number; stroke: string; strokeOpacity: number };
+
+const getCertaintyStyles = (theme: DefaultTheme): Record<EntityEnums.Certainty, EdgeStyle> => ({
+  "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: theme.color["white"] },
+  "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: theme.color["black"] },
+  "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: theme.color["black"] },
+  "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: theme.color["black"] },
+  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: theme.color["gray"][500] },
+  "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: theme.color["danger"] },
+  "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: theme.color["queryInvalid"] },
+});
 
 export const GraphEdge: React.FC<EdgeProps> = ({
   id,
@@ -84,7 +83,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const edgeStyle = useMemo(() => {
     if (data.certainty) {
-      return certaintyStyles[data.certainty as EntityEnums.Certainty];
+      return getCertaintyStyles(theme)[data.certainty as EntityEnums.Certainty];
     } else {
       return {
         strokeOpacity: 1,
@@ -155,7 +154,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           d={edgePath}
           fill="none"
           strokeWidth={10}
-          stroke="orange"
+          stroke={theme.color["warning"]}
           strokeOpacity={tooltipVisible ? 0.2 : 0.01}
         />
         <EdgeLabelRenderer>

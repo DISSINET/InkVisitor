@@ -4,6 +4,7 @@ import ReactFlow, { Background, Controls, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "styled-components";
 import {
   StyledEntityDetailRelationGraph,
   StyledGraphResizeHandle,
@@ -31,6 +32,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   entities,
   relations,
 }) => {
+  const theme = useTheme();
   const nodeW = 200;
   // leaves room between stacked nodes for an edge with its label and arrowheads
   const nodeH = 90;
@@ -99,7 +101,6 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        style={{ backgroundColor: "white" }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesDraggable={false}
@@ -120,7 +121,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
       >
         {/* <MiniMap /> */}
         <Controls showInteractive={false} />
-        <Background />
+        <Background color={theme.color["gray"][500]} />
       </ReactFlow>
       <StyledGraphResizeHandle
         onPointerDown={onResizeStart}

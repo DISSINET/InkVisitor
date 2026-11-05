@@ -17,7 +17,9 @@ export const GraphNode: React.FC<{
       <Handle type="source" id="source-right" position={Position.Right} />
       <StyledGraphVerticalHandle type="source" id="source-top" position={Position.Top} />
       <StyledGraphVerticalHandle type="source" id="source-bottom" position={Position.Bottom} />
-      <div>
+      {/* nopan keeps reactflow from zooming on a double click, which on a tag
+          opens the entity in the detail */}
+      <div className="nopan">
         {data.entity ? <EntityTag entity={data.entity} /> : <div />}
         <div className="custom-drag-handle"></div>
       </div>
