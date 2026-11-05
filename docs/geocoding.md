@@ -386,7 +386,7 @@ the client-side checks exist to pre-empt:
 
 ## Which gazetteers the engine asks
 
-Sixteen sources, and two places to switch one off: the global settings modal
+Seventeen sources, and two places to switch one off: the global settings modal
 sets it for the project, and *My geocoding preferences* sets it for one
 researcher's own runs. A source switched off is never asked, so it costs nothing
 and returns nothing — which is what makes this different from weighting a source
@@ -413,6 +413,29 @@ and the record URL. The footer's Save writes all of it; the list itself is
 written only when it was changed from what the modal opened with, and after the
 roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
+
+**Each row says what the source covers, how long it takes and how much it holds.**
+Under the name, in both tables, one line of time · geography · topic from the
+engine's `info.scope`, then chips: how long it usually takes, and how many
+records it holds. Nothing is hidden behind a hover, because it is what a researcher
+reads to decide whether to ask a source at all ("use only what you need").
+
+The time is the engine's own measurement, `latency` on `GET /suggesters`: the
+median and 95th percentile of the last runs that really reached the source
+(cached answers and skipped sources never count). A local file is `local`. An
+online service is `quick` under 1.5 s, `slow` from 4 s and `moderate` between, by
+its median; the two thresholds are constants in `gazetteerFacts.ts`. A source that
+failed or was cut off in a fifth or more of its runs also says `often fails`. The
+figure is a typical wait and not a speed: it grows with the number of name forms
+searched, and it includes any wait a source's own rate limit imposes (Nominatim
+waits a second per form by its published policy), so the card says so. Until the
+engine has five runs of a source on record, `latency` is null and the row shows no
+speed, not a guess.
+
+The count is `info.size.records`, marked `≈` when the engine says it is
+approximate, and left out where nobody publishes one. An engine that publishes
+none of these gets the first sentence of the source's description as its line and,
+for a local file, the located records it measured.
 
 **A source is explained where it is chosen, and only there.** `GazetteerHover` gives
 a source's name in the gazetteer table of both modals a mark and a card. Hovering

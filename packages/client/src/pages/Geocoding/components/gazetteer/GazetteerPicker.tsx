@@ -1,5 +1,6 @@
 import { Checkbox } from "components";
 import React from "react";
+import { GazetteerFacts } from "./GazetteerFacts";
 import { GazetteerHover } from "./GazetteerTag";
 import {
   LLM_SOURCE,
@@ -108,6 +109,7 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
                     {suggester.health.reason || suggester.health.status}
                   </StyledGazetteerUnwell>
                 ) : null}
+                {suggester ? <GazetteerFacts suggester={suggester} /> : null}
                 {lockedHere ? (
                   <StyledGazetteerLocked>
                     off for the whole project — an owner can switch it on

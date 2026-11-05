@@ -8,6 +8,7 @@ import {
   sizeSentence,
   weightSentence,
 } from "../../utils/context/gazetteerDetails";
+import { itemsOf, oftenFails, speedOf } from "../../utils/context/gazetteerFacts";
 import {
   StyledCardChip,
   StyledCardChips,
@@ -38,6 +39,18 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
   const { info, coverage, footprint, weight, health, category } = suggester;
   const groups = coverageGroups(coverage);
   const license = info.license;
+  const speed = speedOf(suggester);
+  const items = itemsOf(suggester);
+  const fails = oftenFails(suggester);
+  // each said as a sentence of its own, whatever the engine ended its text with
+  const dataSentences = [
+    items?.sentence ?? sizeSentence(footprint),
+    speed?.sentence,
+    fails?.sentence,
+    weightSentence(weight),
+  ]
+    .filter((sentence): sentence is string => !!sentence)
+    .map((sentence) => (/[.!?]$/.test(sentence) ? sentence : `${sentence}.`));
 
   return (
     <StyledGazetteerCard>
@@ -60,6 +73,15 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
       </StyledCardChips>
 
       {info.description ? <div>{info.description}</div> : null}
+
+      {info.scope ? (
+        <StyledCardRow>
+          <StyledCardLabel>covers</StyledCardLabel>
+          <span>
+            {info.scope.time} · {info.scope.geography} · {info.scope.topic}
+          </span>
+        </StyledCardRow>
+      ) : null}
 
       <StyledCardRow>
         <StyledCardLabel>good for</StyledCardLabel>
@@ -92,9 +114,7 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
 
       <StyledCardRow>
         <StyledCardLabel>data</StyledCardLabel>
-        <span>
-          {sizeSentence(footprint)}. {weightSentence(weight)}
-        </span>
+        <span>{dataSentences.join(" ")}</span>
       </StyledCardRow>
 
       {license?.attributionText ? (
