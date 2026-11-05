@@ -34,12 +34,19 @@ export default class Identification
     return true;
   }
 
+  /**
+   * Builds the identification tree of an entity, following only Certain
+   * relations deeper. Identifications can form cycles (A=B, B=C, C=A), so a
+   * branch stops at an entity already on its own path; sibling branches are
+   * independent, so every direct identification stays a top-level connection.
+   * @param ancestorIds entities on the path from the root down to entityId
+   */
   static async getIdentificationForwardConnections(
     conn: Conn,
     entityId: string,
     maxNestLvl: number,
     nestLvl: number,
-    processedRelations: string[]
+    ancestorIds: string[]
   ): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
 
@@ -53,32 +60,34 @@ export default class Identification
         [entityId],
         RelationEnums.Type.Identification
       );
+    const path = [...ancestorIds, entityId];
 
     for (const relation of relations) {
       const relatedEntityId =
         relation.entityIds[entityId === relation.entityIds[0] ? 1 : 0];
 
-      if (!processedRelations.includes(relation.id)) {
-        const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
-          {
-            ...relation,
-            subtrees: [],
-          };
-        processedRelations.push(relation.id);
-
-        if (relation.certainty === EntityEnums.Certainty.Certain) {
-          connection.subtrees =
-            await Identification.getIdentificationForwardConnections(
-              conn,
-              relatedEntityId,
-              maxNestLvl,
-              nestLvl + 1,
-              processedRelations
-            );
-        }
-
-        out.push(connection);
+      if (path.includes(relatedEntityId)) {
+        continue;
       }
+
+      const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
+        {
+          ...relation,
+          subtrees: [],
+        };
+
+      if (relation.certainty === EntityEnums.Certainty.Certain) {
+        connection.subtrees =
+          await Identification.getIdentificationForwardConnections(
+            conn,
+            relatedEntityId,
+            maxNestLvl,
+            nestLvl + 1,
+            path
+          );
+      }
+
+      out.push(connection);
     }
 
     return out;
