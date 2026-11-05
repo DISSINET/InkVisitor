@@ -396,35 +396,8 @@ export default class Audit implements IAudit, IDbModel {
     after?: Date,
     before?: Date,
   ): Promise<Audit[]> {
-    const result = await storage.audits.entityScopedInRange(db, after, before);
-    const audits = result.map((data) => new Audit(data)) as Audit[];
-    const entityIds = [
-      ...new Set(
-        audits
-          .map((audit) => audit.modelId)
-          .filter((modelId): modelId is string => Boolean(modelId)),
-      ),
-    ];
-
-    const withValidDate: Audit[] = [];
-    for (const entityId of entityIds) {
-      const lastAudit = await Audit.getLastForEntity(db, entityId);
-      if (!lastAudit) {
-        continue;
-      }
-
-      const lastDate = lastAudit.date;
-      if (after && lastDate < after) {
-        continue;
-      }
-      if (before && lastDate > before) {
-        continue;
-      }
-
-      withValidDate.push(lastAudit);
-    }
-
-    return withValidDate;
+    const result = await storage.audits.lastPerEntityInRange(db, after, before);
+    return result.map((data) => new Audit(data));
   }
 
   /**
@@ -437,35 +410,8 @@ export default class Audit implements IAudit, IDbModel {
     after?: Date,
     before?: Date,
   ): Promise<Audit[]> {
-    const result = await storage.audits.entityScopedInRange(db, after, before);
-    const audits = result.map((data) => new Audit(data)) as Audit[];
-    const entityIds = [
-      ...new Set(
-        audits
-          .map((audit) => audit.modelId)
-          .filter((modelId): modelId is string => Boolean(modelId)),
-      ),
-    ];
-
-    const withValidDate: Audit[] = [];
-    for (const entityId of entityIds) {
-      const firstAudit = await Audit.getFirstForEntity(db, entityId);
-      if (!firstAudit) {
-        continue;
-      }
-
-      const firstDate = firstAudit.date;
-      if (after && firstDate < after) {
-        continue;
-      }
-      if (before && firstDate > before) {
-        continue;
-      }
-
-      withValidDate.push(firstAudit);
-    }
-
-    return withValidDate;
+    const result = await storage.audits.firstPerEntityInRange(db, after, before);
+    return result.map((data) => new Audit(data));
   }
 
   /**

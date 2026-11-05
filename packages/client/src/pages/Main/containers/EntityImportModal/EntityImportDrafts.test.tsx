@@ -159,7 +159,7 @@ describe("EntityImportDrafts", () => {
     expect(text()).toContain("References");
     expect(text()).toContain("Relations");
     expect(text()).not.toContain("Used in");
-    expect(text()).not.toContain("Audits");
+    expect(text()).not.toContain("Entity audits");
     expect(text()).not.toContain("Apply Template");
 
     await openTab("TEST hit");

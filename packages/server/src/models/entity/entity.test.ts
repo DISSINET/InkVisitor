@@ -12,6 +12,7 @@ import { IEvent, IReference, IStatement } from "@inkvisitor/shared/types";
 import Prop, { PropSpec } from "@models/prop/prop";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { getEntityClass } from "@models/factory";
+import Territory from "@models/territory/territory";
 import Reference from "./reference";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 
@@ -171,11 +172,12 @@ describe("test Entity.update", function () {
 
   describe("if providing only part of nested data", () => {
     it("should update it as merge operation", async () => {
+      await new Territory({ id: "T0" }).save(db.connection);
       const entity = new Statement({});
       entity.data.tags = ["origtag1", "origtag2"];
       entity.data.text = "jea";
       entity.data.territory = new StatementTerritory({
-        territoryId: "territoryId",
+        territoryId: "T0",
         order: 2,
       });
       entity.data.actants = [

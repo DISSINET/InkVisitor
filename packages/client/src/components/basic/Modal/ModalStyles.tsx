@@ -1,6 +1,7 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
+import { SCROLLBAR_SIZE } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import { space5, space6 } from "Theme/theme-space-shortcut";
 
@@ -141,7 +142,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-// holds the scrolling body plus its edge blurs, which must sit outside the
+// holds the scrolling body plus its edge fades, which must sit outside the
 // scroller to stay put while the rows move under them
 export const StyledCardBodyFrame = styled.div`
   position: relative;
@@ -155,24 +156,21 @@ interface StyledScrollEdge {
 }
 export const StyledScrollEdge = styled.div<StyledScrollEdge>`
   /* The strip is exactly the body's vertical padding, so at rest it lies over
-     empty space and shows nothing; a row only blurs once it scrolls into it.
-     The mask makes the blur strongest at the edge and fade out inwards. */
+     empty space and shows nothing; a row only fades once it scrolls into it.
+     It shades from the card's background at the edge to transparent inwards,
+     and stops short of the scrollbar so the thumb stays sharp. */
   position: absolute;
   left: 0;
-  right: 0;
+  right: ${SCROLLBAR_SIZE}px;
   ${({ $edge }) => $edge}: 0;
   z-index: 1;
   height: ${space6};
   pointer-events: none;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  --modal-edge-mask: linear-gradient(
+  background: linear-gradient(
     to ${({ $edge }) => ($edge === "top" ? "bottom" : "top")},
-    #000,
+    ${({ theme }) => theme.color["gray"][100]},
     transparent
   );
-  -webkit-mask-image: var(--modal-edge-mask);
-  mask-image: var(--modal-edge-mask);
 `;
 interface StyledFooter {
   $spaceBetween?: boolean;

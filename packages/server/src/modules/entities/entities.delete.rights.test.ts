@@ -6,7 +6,7 @@ import Territory from "@models/territory/territory";
 import User from "@models/user/user";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { findEntityById } from "@service/shorthands";
+import { deleteAudits, findEntityById } from "@service/shorthands";
 import defaultAcl from "../../../../database/datasets/default/acl_permissions.json";
 
 /**
@@ -63,6 +63,7 @@ describe("entities delete - editor rights", () => {
   });
 
   afterAll(async () => {
+    await deleteAudits(db);
     await storage.users.deleteMany(db.connection, [editorId, viewerId]);
     await db.close();
     await pool.end();

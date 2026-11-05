@@ -485,8 +485,8 @@ export const Suggester: React.FC<Suggester> = ({
               options={dropdownOptions}
               onChange={(option) => {
                 onChangeCategory(option);
-                // react-select keeps focus on Tab, so typing and the arrow keys
-                // would reach the class menu instead of the suggestions
+                // the class dropdown keeps focus after a pick, so typing and the
+                // arrow keys would reach the class menu instead of the suggestions
                 textInputRef.current?.focus();
               }}
               width={categoryBoxWidth}

@@ -2,10 +2,12 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExploreResolvers } from "../../types";
 import { collect, propPaths } from "../provision";
 import { Params, arr, ident, indexHolds } from "../sql";
+import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
 import SearchNode, { ID_ORDER, Input, inputWhere } from "./nodes";
 
@@ -47,17 +49,17 @@ export default class SearchEdge implements Query.IEdge {
 
   /**
    * Explicit target-id set, resolved in prepare(): for a pinned target the
-   * pinned entityId plus its toggle-driven expansion; for an unpinned node
-   * the entities matching its status constraint. Null when the target is
-   * neither pinned nor status-constrained.
+   * pinned entityId plus its toggle-driven expansion; for an unpinned node on
+   * an edge that does not check the target per relation, the entities passing
+   * its filters. Null when the target is neither pinned nor constrained.
    */
   protected targetEntityIds: string[] | null = null;
 
   /** the subtree below the pinned targets, resolved for I_CT: with the SUB toggle */
   protected descendantIds: string[] | null = null;
 
-  /** the relation edges check an unpinned target's statuses on the far-side entity per relation */
-  private checksUnpinnedTargetStatusInRun(): boolean {
+  /** the relation edges check an unpinned target's filters on the far-side entity per relation */
+  private checksUnpinnedTargetInRun(): boolean {
     return this.type.startsWith("R:") || this.type.startsWith("I_R:");
   }
 
@@ -74,14 +76,16 @@ export default class SearchEdge implements Query.IEdge {
   /** resolves the target set; the node evaluator calls it before run() */
   async prepare(conn: Conn): Promise<void> {
     const entityId = this.node.params.entityId;
-    // the status narrows an empty target only: a pinned entity is the target itself, whatever its status
-    const statuses = this.node.params.entityStatuses ?? [];
+    // the node filters narrow an empty target only: a pinned entity is the target itself, whatever its status
     this.descendantIds = null;
 
     if (!entityId) {
-      // resolved into an id set so every predicate applies it through targetIds()
-      this.targetEntityIds =
-        statuses.length && !this.checksUnpinnedTargetStatusInRun() ? await this.statusTargetIds(conn, statuses) : null;
+      // every other predicate applies the filters through the targetIds() set; the relation edges
+      // test them on the partner row, as a broad filter (one language) holds most of the entities
+      // and each relation would be tested against that whole list
+      const filters = this.unpinnedTargetFilters();
+      const constrained = hasFilters(filters) && !this.checksUnpinnedTargetInRun();
+      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, filters) : null;
       return;
     }
 
@@ -96,15 +100,15 @@ export default class SearchEdge implements Query.IEdge {
     }
   }
 
-  /** ids of entities carrying one of `statuses`, narrowed by the node's classes, else by the classes the edge's target can hold */
-  private async statusTargetIds(conn: Conn, statuses: EntityEnums.Status[]): Promise<string[]> {
+  /**
+   * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
+   * else by the classes the edge's target can hold
+   */
+  private async constrainedTargetIds(conn: Conn, filters: TargetFilters): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
-    const where = [`e.doc->>'status' = ${anyOf(p, statuses)}`];
-    if (classes.length) {
-      where.push(`e.doc->>'class' = ${anyOf(p, classes)}`);
-    }
+    const where = filterParts(p, "e", classes, filters);
     const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
     return res.rows.map((row: { id: string }) => row.id);
   }
@@ -112,7 +116,7 @@ export default class SearchEdge implements Query.IEdge {
   /**
    * Target-id set for the predicates to match against, null when the target
    * is unconstrained. A pinned target always contains the pinned id; a
-   * status-constrained one may be empty, which run() treats as "matches
+   * constrained one may be empty, which run() treats as "matches
    * nothing". Falls back to the raw params.entityId when prepare() has not run.
    */
   targetIds(): string[] | null {
@@ -128,9 +132,20 @@ export default class SearchEdge implements Query.IEdge {
     return this.node.params.entityClasses ?? [];
   }
 
-  /** statuses of an unpinned target for the per-relation check; a pinned target carries its status in the id set */
-  unpinnedTargetStatuses(): EntityEnums.Status[] {
-    return this.node.params.entityId ? [] : this.node.params.entityStatuses ?? [];
+  /**
+   * filters of an unpinned target for the per-relation check; none for a pinned
+   * target, which is the target itself whatever its filters
+   */
+  unpinnedTargetFilters(): TargetFilters {
+    const params = this.node.params;
+    if (params.entityId) {
+      return NO_FILTERS;
+    }
+    return {
+      statuses: params.entityStatuses ?? [],
+      languages: params.entityLanguages ?? [],
+      label: nodeLabel(params.label),
+    };
   }
 
   /** ancestors of the pinned targets through the tree cache: every level, or the direct parents only */
@@ -157,7 +172,7 @@ export default class SearchEdge implements Query.IEdge {
   /** ids of the input rows matching this edge */
   async run(conn: Conn, input: Input): Promise<string[]> {
     const targets = this.targetIds();
-    // a status constraint no entity meets: the edge matches nothing, as ReQL intersecting with an empty set
+    // a constraint no entity meets: the edge matches nothing, as ReQL intersecting with an empty set
     if (targets && !targets.length) {
       return [];
     }
@@ -168,6 +183,18 @@ export default class SearchEdge implements Query.IEdge {
     return res.rows.map((row: { id: string }) => row.id);
   }
 }
+
+/** an unpinned target node's filters; nodeLabel's parts for the label */
+type TargetFilters = {
+  statuses: EntityEnums.Status[];
+  languages: EntityEnums.Language[];
+  label: [string, string, string] | undefined;
+};
+
+const NO_FILTERS: TargetFilters = { statuses: [], languages: [], label: undefined };
+
+const hasFilters = (f: TargetFilters): boolean =>
+  !!f.label || f.languages.length > 0 || f.statuses.length > 0;
 
 export type Predicate = (edge: SearchEdge, p: Params) => string;
 
@@ -181,19 +208,45 @@ const T = EntityEnums.Class.Territory;
 
 const anyOf = (p: Params, values: unknown[]): string => `ANY(${p.add(values)}::text[])`;
 /** the row `x` is of class `cls` */
-const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.doc->>'class' = '${cls}'`;
+const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.class = '${cls}'`;
 /** a filled id read from json (ReQL `.default("").ne("")`) */
 const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
 
-/** an existing entity `idSql` of the classes and statuses; an empty list does not constrain (entityMatchesClassesAndStatuses) */
-function entityMatches(p: Params, idSql: string, classes: EntityEnums.Class[], statuses: EntityEnums.Status[]): string {
-  const parts = [`t.id = ${idSql}`];
+/**
+ * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
+ * constraint; empty lists do not constrain. Every node filter is checked here, for the id set
+ * prepare() selects and for the per-partner checks alike
+ */
+function filterParts(
+  p: Params,
+  alias: string,
+  classes: EntityEnums.Class[],
+  filters: TargetFilters
+): string[] {
+  const parts: string[] = [];
   if (classes.length) {
-    parts.push(`t.doc->>'class' = ${anyOf(p, classes)}`);
+    parts.push(`${alias}.class = ${anyOf(p, classes)}`);
   }
-  if (statuses.length) {
-    parts.push(`t.doc->>'status' = ${anyOf(p, statuses)}`);
+  if (filters.statuses.length) {
+    parts.push(`${alias}.status = ${anyOf(p, filters.statuses)}`);
   }
+  if (filters.languages.length) {
+    parts.push(`${alias}.language = ${anyOf(p, filters.languages)}`);
+  }
+  if (filters.label) {
+    parts.push(labelMatch(p, labelPattern(...filters.label), `${alias}.labels`));
+  }
+  return parts;
+}
+
+/** an existing entity `idSql` of the classes, passing the filters; empty lists do not constrain */
+function entityMatches(
+  p: Params,
+  idSql: string,
+  classes: EntityEnums.Class[],
+  filters = NO_FILTERS
+): string {
+  const parts = [`t.id = ${idSql}`, ...filterParts(p, "t", classes, filters)];
   return `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE ${parts.join(" AND ")})`;
 }
 
@@ -202,7 +255,7 @@ function entityMatches(p: Params, idSql: string, classes: EntityEnums.Class[], s
  * ANY reads a bare parenthesized subquery as a row source; the cast makes it an array expression
  */
 const hasIdOfClasses = (p: Params, idsSql: string, classes: EntityEnums.Class[]): string =>
-  `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE t.id = ANY(${idsSql}::text[]) AND t.doc->>'class' = ${anyOf(p, classes)})`;
+  `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE t.id = ANY(${idsSql}::text[]) AND t.class = ${anyOf(p, classes)})`;
 
 /** the collected text[] `idsSql` meets a target, holds an entity of the classes, or holds anything */
 function idsMatch(p: Params, idsSql: string, targets: string[] | null, classes: EntityEnums.Class[]): string {
@@ -222,71 +275,86 @@ const collected = (paths: string[], doc: string): string => `(${collect(paths, "
 
 /** relations of `type` with e.id on the source side whose far side meets the target (runRelationTargetEdge) */
 function relationTarget(e: SearchEdge, p: Params, type: RelationEnums.Type, inverse = false): string {
-  const far = `r.doc->'entityIds'->>${inverse ? 0 : 1}`;
+  const far = `r.entity_ids[${inverse ? 1 : 2}]`;
   const targets = e.targetIds();
   const classes = e.targetClasses();
-  const statuses = e.unpinnedTargetStatuses();
+  const filters = e.unpinnedTargetFilters();
   let check = "TRUE";
   if (targets) {
     check = `${far} = ${anyOf(p, targets)}`;
-  } else if (classes.length || statuses.length) {
-    check = entityMatches(p, far, classes, statuses);
+  } else if (classes.length || hasFilters(filters)) {
+    check = entityMatches(p, far, classes, filters);
   }
   return (
-    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.doc->>'type' = ${p.add(type)}` +
-    ` AND r.doc->'entityIds'->>${inverse ? 1 : 0} = e.id AND ${check})`
+    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.type = ${p.add(type)}` +
+    ` AND r.entity_ids[${inverse ? 2 : 1}] = e.id AND ${check})`
   );
 }
 
 /**
- * text[] of the partners of e in relation r: every id that is not e.id, and
- * e.id itself when the row holds it twice, a self loop (relationPartners)
+ * text[] of the partners of `id` in relation r: every id that is not `id`, and
+ * `id` itself when the row holds it twice, a self loop (relationPartners)
  */
-const partners = (selfLoop: boolean): string =>
-  `(SELECT coalesce(array_agg(x), '{}') FROM jsonb_array_elements_text(${arr("r.doc->'entityIds'")}) x WHERE x <> e.id` +
-  (selfLoop ? ` OR (SELECT count(*) FROM jsonb_array_elements_text(${arr("r.doc->'entityIds'")}) y WHERE y = e.id) > 1` : "") +
-  `)`;
+const partners = (selfLoop: boolean, id = "e.id"): string =>
+  selfLoop
+    ? `(array_remove(r.entity_ids, ${id}) || CASE WHEN cardinality(array_positions(r.entity_ids, ${id})) > 1 THEN ARRAY[${id}] ELSE '{}'::text[] END)`
+    : `array_remove(r.entity_ids, ${id})`;
 
-/** a partner is a target, a partner is of the classes and statuses, or there is a partner at all */
+/**
+ * a partner is a target, a partner is of the classes and passes the filters, or there is a
+ * partner at all
+ */
 function partnersMatch(
   p: Params,
   partnersSql: string,
   targets: string[] | null,
   classes: EntityEnums.Class[],
-  statuses: EntityEnums.Status[]
+  filters: TargetFilters
 ): string {
   if (targets) {
     return `${partnersSql} && ${p.add(targets)}::text[]`;
   }
-  if (classes.length || statuses.length) {
-    return `EXISTS (SELECT 1 FROM unnest(${partnersSql}) pid WHERE ${entityMatches(p, "pid", classes, statuses)})`;
+  if (classes.length || hasFilters(filters)) {
+    const partnerMatches = entityMatches(p, "pid", classes, filters);
+    return `EXISTS (SELECT 1 FROM unnest(${partnersSql}) pid WHERE ${partnerMatches})`;
   }
   return `cardinality(${partnersSql}) > 0`;
 }
 
-/** relations of `type` holding e.id whose partners meet the target (runHasUnorderedRelationEdge) */
+/**
+ * relations of `type` holding e.id whose partners meet the target (runHasUnorderedRelationEdge);
+ * a semi-join over the members m of every relation of the type, which reads those relations once,
+ * where an EXISTS over the gin index probes it per input row
+ */
 function unorderedRelation(e: SearchEdge, p: Params, type: RelationEnums.Type): string {
   const selfLoop = RelationTypes.RelationRules[type]?.selfLoop ?? false;
   return (
-    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.doc->>'type' = ${p.add(type)}` +
-    ` AND ${partnersMatch(p, partners(selfLoop), e.targetIds(), e.targetClasses(), e.unpinnedTargetStatuses())})`
+    `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id) WHERE r.type = ${p.add(type)}` +
+    ` AND ${partnersMatch(
+      p,
+      partners(selfLoop, "m.id"),
+      e.targetIds(),
+      e.targetClasses(),
+      e.unpinnedTargetFilters()
+    )})`
   );
 }
 
 /**
- * Any relation holding e.id: one holding a target too (the whole array, so a
- * target that is e itself matches), one with a partner of the classes and
- * statuses, or any relation at all (EdgeHasRelation).
+ * Any relation holding e.id: one holding a pinned target too (the whole array,
+ * so a target that is e itself matches), one with a partner of the classes
+ * passing the filters, or any relation at all (EdgeHasRelation).
  */
 function anyRelation(e: SearchEdge, p: Params): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
-  const statuses = e.unpinnedTargetStatuses();
+  const filters = e.unpinnedTargetFilters();
   let check = "TRUE";
   if (targets) {
     check = p.index(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, targets);
-  } else if (classes.length || statuses.length) {
-    check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${entityMatches(p, "pid", classes, statuses)})`;
+  } else if (classes.length || hasFilters(filters)) {
+    const partnerMatches = entityMatches(p, "pid", classes, filters);
+    check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${partnerMatches})`;
   }
   return `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND ${check})`;
 }
@@ -352,7 +420,7 @@ function targetRows(e: SearchEdge, p: Params): string {
   if (targets) {
     return `s.id = ${anyOf(p, targets)}`;
   }
-  return classes.length ? `s.doc->>'class' = ${anyOf(p, classes)}` : "TRUE";
+  return classes.length ? `s.class = ${anyOf(p, classes)}` : "TRUE";
 }
 
 /** e is a filled `kind` side of a top-level prop of a target entity (runInversePropEdge) */
@@ -431,7 +499,7 @@ function statementHasActant(e: SearchEdge, p: Params, positions: EntityEnums.Pos
   if (targets) {
     check = `a->>'entityId' = ${anyOf(p, targets)}`;
   } else if (classes.length) {
-    check = entityMatches(p, "a->>'entityId'", classes, []);
+    check = entityMatches(p, "a->>'entityId'", classes);
   }
   return `${isClass("e", S)} AND EXISTS (SELECT 1 FROM ${ACTANTS("e")} WHERE a->>'position' = ${anyOf(p, positions)} AND ${check})`;
 }
@@ -511,7 +579,7 @@ const usedInStatements = (cands: string): string =>
 
 // ---- territories ----------------------------------------------------------
 
-const PARENT_ID = (x: string): string => `${x}.doc->'data'->'parent'->>'territoryId'`;
+const PARENT_ID = (x: string): string => `${x}.parent_id`;
 /** the root carries `parent: false`, every other territory an object */
 const HAS_PARENT = (x: string): string => `jsonb_typeof(${x}.doc->'data'->'parent') = 'object'`;
 
@@ -543,12 +611,12 @@ function statementUnderTerritory(e: SearchEdge, p: Params): string {
   if (targets) {
     return `${isClass("e", S)} AND ${p.index(TABLE.entities, DbEnums.Indexes.StatementTerritory, targets)}`;
   }
-  return `${isClass("e", S)} AND ${nonEmpty("e.doc->'data'->'territory'->>'territoryId'")}`;
+  return `${isClass("e", S)} AND ${nonEmpty("e.territory_id")}`;
 }
 
 /** the direct territories of the target statements (EdgeTerritoryHasStatement) */
 const territoryHasStatement = (e: SearchEdge, p: Params): string =>
-  `e.id IN (SELECT s.doc->'data'->'territory'->>'territoryId' FROM ${ENTITIES} s WHERE ${isClass("s", S)} AND ${targetStatements(e, p)})`;
+  `e.id IN (SELECT s.territory_id FROM ${ENTITIES} s WHERE ${isClass("s", S)} AND ${targetStatements(e, p)})`;
 
 /** SQL over alias `e` for each edge type; a type missing here is unknown to the evaluator */
 export const PREDICATES: Record<string, Predicate> = {

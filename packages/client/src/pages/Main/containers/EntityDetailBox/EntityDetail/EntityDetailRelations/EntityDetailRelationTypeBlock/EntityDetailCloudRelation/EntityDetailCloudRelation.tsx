@@ -1,14 +1,13 @@
 import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { Cloud } from "components";
-import { EntityTag } from "components/advanced";
+import { CopyUuidsButton, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import {
   StyledCloudEntityWrapper,
   StyledRelation,
 } from "../EntityDetailRelationTypeBlockStyles";
-import { CopyUuidsButton } from "../../CopyUuidsButton/CopyUuidsButton";
 
 interface EntityDetailCloudRelation {
   relation: Relation.IRelation;

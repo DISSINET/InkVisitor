@@ -8,6 +8,7 @@ import Statement, {
   StatementTerritory,
 } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
+import { createEntity } from "@service/shorthands";
 import {
   clean,
   successfulGenericResponse,
@@ -64,11 +65,14 @@ describe("Entities create", function () {
       const db = new Db();
       await db.initDb();
 
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+
       const statementRandomId = Math.random().toString();
       const entityData = new Statement({
         id: statementRandomId,
         data: new StatementData({
-          territory: new StatementTerritory({ territoryId: "not relevant" }),
+          territory: new StatementTerritory({ territoryId: territory.id }),
         }),
       });
 

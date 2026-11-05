@@ -236,7 +236,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     saveMutation.mutate({
       name: trimmedSaveName,
       shared: saveShared,
-      // every Explorer filter in play (UUIDs, label, floating search) travels
+      // every Explorer filter in play (UUIDs, label, Filters panel) travels
       // with the query, so loading it reproduces the whole result; the table
       // columns go along unless the user opts out, and a query stored without
       // them leaves the columns of whoever loads it in place

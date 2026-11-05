@@ -39,9 +39,12 @@ export function labelPattern(label: string, left: string, right: string): string
   return `(?i)${left}${body}${right}`;
 }
 
-/** true when one of the row's labels matches `pattern` */
-export const labelMatch = (p: Params, pattern: string): string =>
-  `EXISTS (SELECT 1 FROM jsonb_array_elements_text(${arr("doc->'labels'")}) l WHERE l ~ ${p.add(pattern)})`;
+/**
+ * true when one of the row's labels matches `pattern`; `labels` names the column, qualified
+ * (t.labels) inside a subquery over another entity
+ */
+export const labelMatch = (p: Params, pattern: string, labels = "labels"): string =>
+  `EXISTS (SELECT 1 FROM unnest(${labels}) l WHERE l ~ ${p.add(pattern)})`;
 
 const REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
 
@@ -56,30 +59,30 @@ export function searchWhere(filters: SearchFilters, seedIds: string[] | undefine
     where.push(`id = ANY(${p.add(seedIds)}::text[])`);
   }
   if (filters.class) {
-    where.push(`doc->>'class' = ${p.add(filters.class)}`);
+    where.push(`class = ${p.add(filters.class)}`);
   }
   if (filters.status) {
-    where.push(`doc->>'status' = ${p.add(filters.status)}`);
+    where.push(`status = ${p.add(filters.status)}`);
   }
   if (filters.usedTemplate) {
-    where.push(`doc->>'usedTemplate' = ${p.add(filters.usedTemplate)}`);
+    where.push(`used_template = ${p.add(filters.usedTemplate)}`);
   }
   if (filters.language !== undefined) {
-    where.push(`doc->>'language' = ${p.add(filters.language)}`);
+    where.push(`language = ${p.add(filters.language)}`);
   }
   if (filters.onlyTemplates) {
-    where.push(`doc->'isTemplate' = 'true'::jsonb`);
+    where.push("is_template");
   }
   if (filters.resourceHasDocument) {
     // an unqualified `doc` inside a subquery over documents would bind to d.doc,
     // so the document id is compared through IN on the outer row
     where.push(
-      `doc->>'class' = '${EntityEnums.Class.Resource}' AND coalesce(doc->'data'->>'documentId', '') <> '' ` +
-        `AND doc->'data'->>'documentId' IN (SELECT d.id FROM ${ident(TABLE.documents)} d)`
+      `class = '${EntityEnums.Class.Resource}' AND coalesce(document_id, '') <> '' ` +
+        `AND document_id IN (SELECT d.id FROM ${ident(TABLE.documents)} d)`
     );
   }
   if (filters.excluded) {
-    where.push(`NOT (doc->>'class' = ANY(${p.add(filters.excluded)}::text[]))`);
+    where.push(`NOT (class = ANY(${p.add(filters.excluded)}::text[]))`);
   }
   if (filters.label) {
     const [label, left, right] = prepareLabel(filters.label);
@@ -97,8 +100,10 @@ export function searchWhere(filters: SearchFilters, seedIds: string[] | undefine
     where.push(`id = ANY(${p.add(filters.entityIds)}::text[])`);
   }
   if (filters.haveReferenceTo) {
+    // the column holds resource and value ids both, so the document decides the side
+    const ref = p.add(filters.haveReferenceTo);
     where.push(
-      `EXISTS (SELECT 1 FROM jsonb_array_elements(${arr("doc->'references'")}) ref WHERE ref->>'resource' = ${p.add(filters.haveReferenceTo)})`
+      `(reference_entity_ids && ARRAY[${ref}]::text[] AND EXISTS (SELECT 1 FROM jsonb_array_elements(${arr("doc->'references'")}) ref WHERE ref->>'resource' = ${ref}))`
     );
   }
   return where.length ? where.join(" AND ") : "TRUE";

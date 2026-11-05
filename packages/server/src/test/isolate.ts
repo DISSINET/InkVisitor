@@ -26,10 +26,12 @@ import { adminSeed } from "./fixtures";
  * in a beforeAll that runs after this. Tolerant of a missing/unreachable DB so a
  * pure-unit run without RethinkDB is unaffected.
  */
+// audits and saved queries reference users, so they go before the users
 const MUTABLE_TABLES = [
   storage.entities,
   storage.relations,
   storage.audits,
+  storage.savedQueries,
   storage.documents,
   storage.settings,
 ];

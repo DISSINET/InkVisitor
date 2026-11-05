@@ -129,7 +129,7 @@ class Importer {
     let that = this;
     const menu: Record<
       string,
-      { description: string; action: Function; lastAction?: boolean }
+      { description: string; action: () => unknown; lastAction?: boolean }
     > = {
       L: {
         description: `Enter '${colors.yellow("L")}' to switch databases`,
@@ -350,6 +350,9 @@ class Importer {
     for (const table of Object.values(this.dataset)) {
       await feedTable(this.targets, table, dataFilePath(this.datasetName, table));
     }
+    for (const target of this.targets) {
+      await target.addConstraints();
+    }
   }
 
   /**
@@ -363,6 +366,9 @@ class Importer {
     }
 
     await this.recreate();
+    for (const target of this.targets) {
+      await target.addConstraints();
+    }
   }
 
   /**

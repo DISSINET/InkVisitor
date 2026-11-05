@@ -1,5 +1,9 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
+import {
+  StyledControl,
+  StyledSingleValue,
+} from "components/basic/BaseDropdown/BaseDropdownStyles";
 
 export const StyledNodeContainer = styled.div<{ $column?: boolean }>`
   display: flex;
@@ -15,6 +19,16 @@ export const StyledNodeMainRow = styled.div`
   align-items: center;
   gap: 0.5rem;
   width: 100%;
+  // A node row is wider than its grid column, so the query tree's scroll width
+  // ends where the widest row ends, and padding on the grid falls inside it.
+  // This empty item is the room after the last row's buttons, whatever the
+  // node's width.
+  &::after {
+    content: "";
+    flex-shrink: 0;
+    width: ${({ theme }) => theme.space[8]};
+    height: 1px;
+  }
 `;
 
 export const StyledParallelOperator = styled.div`
@@ -33,10 +47,6 @@ export const StyledGraphNode = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
-
-  .react-select__input-container {
-    color: ${({ theme }) => theme.color.white};
-  }
 `;
 
 // per-node EQ / SUB expansion checkboxes: a small pill straddling the node's
@@ -64,14 +74,14 @@ export const StyledNodeExpansionToggles = styled.div`
 `;
 
 export const StyledNodeTypeSelect = styled.div`
-  .react-select__control {
+  ${StyledControl} {
     background-color: transparent;
     border: none;
     text-align: center;
   }
-  .react-select__single-value {
+  ${StyledSingleValue} {
     color: ${({ theme }) => theme.color.primary};
-    font-weight: 900 !important;
+    font-weight: 900;
     font-size: large;
   }
 `;

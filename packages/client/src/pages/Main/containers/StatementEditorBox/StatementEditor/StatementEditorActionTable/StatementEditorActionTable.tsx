@@ -5,10 +5,16 @@ import {
   IStatementData,
 } from "@inkvisitor/shared/types";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyles";
+
+const toFilteredActions = (statement: IResponseStatement): FilteredActionObject[] =>
+  statement.data.actions.map((sAction, key) => {
+    const action = statement.entities[sAction.actionId];
+    return { id: key, data: { action, sAction } };
+  });
 
 interface StatementEditorActionTable {
   statement: IResponseStatement;
@@ -37,20 +43,17 @@ export const StatementEditorActionTable: React.FC<
 
   handleDataAttributeChange,
 }) => {
-  const [filteredActions, setFilteredActions] = useState<
-    FilteredActionObject[]
-  >([]);
-
+  // local copy of the actions so drag-reordering can update rows before the
+  // order is saved; rebuilt whenever a new statement object arrives
   // TODO: how to temporarily show action from suggester before it comes from BE
-  useEffect(() => {
-    const filteredActions: FilteredActionObject[] = statement.data.actions.map(
-      (sAction, key) => {
-        const action = statement.entities[sAction.actionId];
-        return { id: key, data: { action, sAction } };
-      }
-    );
-    setFilteredActions(filteredActions);
-  }, [statement]);
+  const [filteredActions, setFilteredActions] = useState<FilteredActionObject[]>(() =>
+    toFilteredActions(statement)
+  );
+  const [actionsSource, setActionsSource] = useState(statement);
+  if (actionsSource !== statement) {
+    setActionsSource(statement);
+    setFilteredActions(toFilteredActions(statement));
+  }
 
   const updateActionOrder = () => {
     if (userCanEdit) {

@@ -71,6 +71,9 @@ enum QueryActionType {
   updateNodeType,
   updateNodeClass,
   updateNodeStatuses,
+  updateNodeLabel,
+  updateNodeLanguages,
+  clearNodeFilters,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -105,6 +108,18 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeStatuses;
       payload: { nodeId: string; newEntityStatuses: EntityEnums.Status[] };
+    }
+  | {
+      type: QueryActionType.updateNodeLabel;
+      payload: { nodeId: string; newLabel: string };
+    }
+  | {
+      type: QueryActionType.updateNodeLanguages;
+      payload: { nodeId: string; newEntityLanguages: EntityEnums.Language[] };
+    }
+  | {
+      type: QueryActionType.clearNodeFilters;
+      payload: { nodeId: string };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -217,6 +232,15 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeStatuses:
       return updateNodeStatuses(state, action.payload.nodeId, action.payload.newEntityStatuses);
 
+    case QueryActionType.updateNodeLabel:
+      return updateNodeLabel(state, action.payload.nodeId, action.payload.newLabel);
+
+    case QueryActionType.updateNodeLanguages:
+      return updateNodeLanguages(state, action.payload.nodeId, action.payload.newEntityLanguages);
+
+    case QueryActionType.clearNodeFilters:
+      return clearNodeFilters(state, action.payload.nodeId);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -304,6 +328,56 @@ const updateNodeStatuses = (
   return updatedState;
 };
 
+const updateNodeLabel = (state: Query.INode, nodeId: string, newLabel: string): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newLabel === "") {
+    delete nodeToUpdate.params.label;
+  } else {
+    nodeToUpdate.params.label = newLabel;
+  }
+
+  return updatedState;
+};
+
+// the node filters: status, language and label
+const clearNodeFilters = (state: Query.INode, nodeId: string): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (nodeToUpdate) {
+    delete nodeToUpdate.params.entityStatuses;
+    delete nodeToUpdate.params.entityLanguages;
+    delete nodeToUpdate.params.label;
+  }
+
+  return updatedState;
+};
+
+const updateNodeLanguages = (
+  state: Query.INode,
+  nodeId: string,
+  newEntityLanguages: EntityEnums.Language[],
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newEntityLanguages.length === 0) {
+    delete nodeToUpdate.params.entityLanguages;
+  } else {
+    nodeToUpdate.params.entityLanguages = newEntityLanguages;
+  }
+
+  return updatedState;
+};
+
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
@@ -320,9 +394,11 @@ const updateNodeEntityId = (
   } else {
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
-    // a pinned entity carries its own status, so the status filter has no
-    // picker while one is set
+    // a pinned entity carries its own status, language and label, so the node
+    // filters are hidden while one is set
     delete nodeToUpdate.params.entityStatuses;
+    delete nodeToUpdate.params.entityLanguages;
+    delete nodeToUpdate.params.label;
   }
 
   return updatedState;

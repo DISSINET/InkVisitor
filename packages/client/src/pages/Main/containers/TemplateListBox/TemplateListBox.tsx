@@ -24,6 +24,7 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
+import { templateMatcher } from "./matchTemplate";
 import { sortTemplates, TemplateOrder, templateOrderOptions } from "./sortTemplates";
 import { ButtonSize } from "types";
 
@@ -60,6 +61,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     if (!allTemplatesData) {
       return [];
     }
+    const matchesSearch = templateMatcher(filterByLabel);
     const filtered = allTemplatesData.filter((template: IEntity) => {
       // discouraged templates stay reachable through search and Explorer only
       if (template.status === EntityEnums.Status.Discouraged) {
@@ -71,10 +73,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       if (onlyStarred && !starredTemplateIds.has(template.id)) {
         return false;
       }
-      if (
-        filterByLabel.length &&
-        !template.labels[0]?.toLocaleLowerCase().startsWith(filterByLabel.toLocaleLowerCase())
-      ) {
+      if (matchesSearch && !matchesSearch(template)) {
         return false;
       }
       return true;

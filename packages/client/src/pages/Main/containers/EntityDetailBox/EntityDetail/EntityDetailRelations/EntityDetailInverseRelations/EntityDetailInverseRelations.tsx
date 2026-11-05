@@ -27,7 +27,7 @@ export const EntityDetailInverseRelations: React.FC<
   }, [entity]);
 
   const atLeastOneNonEmpty = filteredRelationTypes.some(
-    (type) => relations[type]?.iConnections!.length! > 0
+    (type) => (relations[type]?.iConnections?.length ?? 0) > 0
   );
 
   return (

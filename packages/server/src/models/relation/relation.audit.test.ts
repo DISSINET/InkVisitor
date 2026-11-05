@@ -14,7 +14,7 @@ import { IRequest } from "../../custom_typings/request";
  * supertest harness.
  */
 
-const USER_ID = "test-relation-audit-user";
+const USER_ID = "1";
 
 function mockRequest(db: Db): IRequest {
   return {

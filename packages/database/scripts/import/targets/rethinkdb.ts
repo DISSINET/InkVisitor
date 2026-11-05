@@ -88,6 +88,9 @@ export class RethinkTarget implements SeedTarget {
     this.conn?.use(dbName);
   }
 
+  /** RethinkDB has no constraints between rows */
+  async addConstraints(): Promise<void> {}
+
   async createTables(): Promise<void> {
     for (const [name, indexes] of Object.entries(TABLES)) {
       await r.tableCreate(name).run(this.conn);

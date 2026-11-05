@@ -4,11 +4,13 @@ import Location from "@models/location/location";
 import Person from "@models/person/person";
 import { newMockRequest } from "@modules/common.test";
 import { Db } from "@service/storage";
-import { EntityEnums, StatementEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { EntityEnums, RelationEnums, StatementEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import "ts-jest";
-import { ResponseStatement } from "./response";
+import { ResponseStatement, loadValidationTies } from "./response";
+import Concept from "@models/concept/concept";
+import { getRelationClass } from "@models/factory";
 import Statement, { StatementActant, StatementAction } from "./statement";
 import { prepareStatement } from "./statement.test";
 import Territory from "@models/territory/territory";
@@ -790,4 +792,48 @@ describe("models/statement/response", function () {
   //     await sResponse.prepare(request);
   //   });
   // });
+});
+
+describe("loadValidationTies", () => {
+  const db = new Db();
+  const id = (name: string) => `ties-${name}-${Math.random()}`;
+  const [person, concept, superordinate, value, gone] = ["p", "c", "soe", "v", "gone"].map(id);
+
+  beforeAll(async () => {
+    await db.initDb();
+    await new Person({ id: person }).save(db.connection);
+    for (const cid of [concept, superordinate, value]) {
+      await new Concept({ id: cid }).save(db.connection);
+    }
+    const relations: Partial<RelationTypes.IRelation>[] = [
+      { type: RelationEnums.Type.Classification, entityIds: [person, concept] },
+      { type: RelationEnums.Type.Classification, entityIds: [person, gone] },
+      { type: RelationEnums.Type.Classification, entityIds: [concept, value] },
+      { type: RelationEnums.Type.SuperordinateEntity, entityIds: [person, superordinate] },
+      { type: RelationEnums.Type.SuperordinateEntity, entityIds: [superordinate, concept] },
+    ];
+    for (const relation of relations) {
+      await getRelationClass({ id: id("rel"), ...relation } as RelationTypes.IRelation).save(db.connection);
+    }
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  test("loads the forward ties of each entity, stored entities only", async () => {
+    const withProp = {
+      ...new Person({ id: person }),
+      props: [{ type: { entityId: concept }, value: { entityId: value }, children: [] }],
+    } as unknown as IEntity;
+    const ties = await loadValidationTies(db.connection, [withProp, new Concept({ id: concept })]);
+
+    expect(ties.get(person)).toEqual({
+      classifications: [expect.objectContaining({ id: concept })],
+      soes: [expect.objectContaining({ id: superordinate })],
+      propValues: [expect.objectContaining({ id: value })],
+    });
+    // a concept is never classified, and the inverse soe is not its own
+    expect(ties.get(concept)).toEqual({ classifications: [], soes: [], propValues: [] });
+  });
 });

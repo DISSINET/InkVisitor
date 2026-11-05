@@ -17,7 +17,6 @@ export const StyledTable = styled.table<StyledTable>`
   overflow: hidden;
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
-  margin-bottom: ${({ theme }) => theme.space[4]};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`

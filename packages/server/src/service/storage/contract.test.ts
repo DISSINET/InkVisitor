@@ -4,7 +4,6 @@ import { closeTestDb, openTestDb } from "../../test/db";
 import { TABLE } from "./names";
 import { EXTRA_INDEXES, TABLES as PG_TABLES } from "./postgres/provision";
 import { q } from "./postgres/tables";
-import { resetWatchers } from "./postgres/invalidation";
 
 /**
  * Behaviour of the storage adapter, the same file on both backends: run with
@@ -24,6 +23,9 @@ beforeAll(async () => {
 afterAll(async () => {
   await closeTestDb(conn);
 });
+
+const insertUsers = (...userIds: string[]) =>
+  storage.users.insert(conn, userIds.map((id) => ({ id, name: id, email: `${id}@x` })));
 
 const ids = (rows: { id: string }[]) => rows.map((r) => r.id).sort();
 
@@ -299,9 +301,9 @@ describe("dates", () => {
   it("come back as Date objects on every listed field", async () => {
     // ids prefixed dt- so they never collide with the fixtures of the other blocks
     const date = new Date("2024-03-02T10:20:30.123Z");
-    await storage.audits.insert(conn, { id: "dt-a1", auditScope: "entity", modelId: "m", user: "u", date, changes: {}, type: "edit" });
+    await storage.audits.insert(conn, { id: "dt-a1", auditScope: "entity", modelId: "m", user: "1", date, changes: {}, type: "edit" });
     await storage.documents.insert(conn, { id: "dt-d1", title: "t", content: "", createdAt: date, updatedAt: date });
-    await storage.savedQueries.insert(conn, { id: "dt-q1", name: "n", ownerId: "u", shared: false, data: {}, createdAt: date });
+    await storage.savedQueries.insert(conn, { id: "dt-q1", name: "n", ownerId: "1", shared: false, data: {}, createdAt: date });
     await storage.users.insert(conn, { id: "dt-u1", name: "x", email: "x@x", deletedAt: date });
     await storage.stats("day").insert(conn, { id: "dt-st1", date: "2024-03-02", lastUpdated: date });
     try {
@@ -312,39 +314,20 @@ describe("dates", () => {
       expect((await storage.stats("day").get(conn, "dt-st1"))?.lastUpdated).toEqual(date);
     } finally {
       await storage.stats("day").delete(conn, "dt-st1");
+      await storage.audits.delete(conn, "dt-a1");
+      await storage.savedQueries.delete(conn, "dt-q1");
     }
   });
 
   it("stores a Date carried by an update patch", async () => {
     const created = new Date("2024-03-02T00:00:00.000Z");
     const updated = new Date("2024-03-03T00:00:00.000Z");
-    await storage.savedQueries.insert(conn, { id: "dt-q2", name: "n", ownerId: "u", shared: false, data: {}, createdAt: created });
+    await storage.savedQueries.insert(conn, { id: "dt-q2", name: "n", ownerId: "1", shared: false, data: {}, createdAt: created });
     await storage.savedQueries.update(conn, "dt-q2", { updatedAt: updated });
     const row = await storage.savedQueries.get(conn, "dt-q2");
     expect(row?.createdAt).toEqual(created);
     expect(row?.updatedAt).toEqual(updated);
-  });
-});
-
-describe("in-process invalidation on postgres", () => {
-  afterEach(() => {
-    if (onPostgres) resetWatchers();
-  });
-
-  itPg("calls the handlers with the written ids and onClear on deleteAll", async () => {
-    const changed: string[] = [];
-    let cleared = 0;
-    storage.watch("test", TABLE.settings, {
-      onClear: () => cleared++,
-      onChange: (newVal, oldVal) => changed.push(newVal?.id ?? oldVal?.id ?? "?"),
-    });
-    await storage.settings.insert(conn, { id: "w1", value: 1 });
-    await storage.settings.update(conn, "w1", { value: 2 });
-    await storage.settings.update(conn, "w1", { value: 2 });
-    await storage.settings.delete(conn, "w1");
-    await storage.settings.deleteAll(conn);
-    expect(changed).toEqual(["w1", "w1", "w1"]);
-    expect(cleared).toBe(1);
+    await storage.savedQueries.delete(conn, "dt-q2");
   });
 });
 
@@ -421,6 +404,7 @@ describe("acl", () => {
 describe("saved queries", () => {
   beforeAll(async () => {
     await storage.savedQueries.deleteAll(conn);
+    await insertUsers("u1", "u2");
     await storage.savedQueries.insert(conn, [
       { id: "q-s1", name: "Alpha", ownerId: "u1", shared: true, data: {}, createdAt: new Date("2024-01-01T00:00:00Z") },
       { id: "q-p1", name: "alpha", ownerId: "u1", shared: false, data: {}, createdAt: new Date("2024-01-03T00:00:00Z") },
@@ -429,6 +413,7 @@ describe("saved queries", () => {
   });
   afterAll(async () => {
     await storage.savedQueries.deleteAll(conn);
+    await storage.users.deleteMany(conn, ["u1", "u2"]);
   });
 
   it("idsWithName ignores case within the shared or the owner's private folder", async () => {
@@ -532,10 +517,6 @@ describe("entities", () => {
   afterAll(async () => {
     await storage.entities.deleteAll(conn);
   });
-  afterEach(() => {
-    if (onPostgres) resetWatchers();
-  });
-
   it("get and getMany return nested documents intact", async () => {
     const [c1] = await storage.entities.getMany(conn, ["c-1"]);
     expect(c1.props[0].children[0].type.entityId).toBe("c-2");
@@ -594,20 +575,6 @@ describe("entities", () => {
 
   itPg("statementTerritoryPairs returns nothing for an empty index list", async () => {
     expect(await storage.entities.statementTerritoryPairs(conn, ["c-1"], [])).toEqual([]);
-  });
-
-  itPg("updateStatementTerritoryOrders notifies the watchers of the moved ids only", async () => {
-    const changed: string[] = [];
-    storage.watch("test", TABLE.entities, {
-      onClear: () => undefined,
-      onChange: (newVal) => changed.push(newVal?.id ?? "?"),
-    });
-    await storage.entities.updateStatementTerritoryOrders(
-      conn,
-      [{ id: "s-2", territoryId: "t-child", order: 2 }, { id: "nope", territoryId: "t-child", order: 0 }],
-      new Date()
-    );
-    expect(changed).toEqual(["s-2"]);
   });
 
   // last: it moves s-1 out of t-root
@@ -680,6 +647,7 @@ describe("audits", () => {
   });
   beforeAll(async () => {
     await storage.audits.deleteAll(conn);
+    await insertUsers("u1", "u2");
     await storage.audits.insert(conn, [
       audit("au-1", "2024-02-28T10:00:00Z", { type: "create" }),
       audit("au-2", "2024-03-01T23:59:59Z"),
@@ -689,6 +657,10 @@ describe("audits", () => {
       audit("au-6", "2024-03-06T12:00:00Z", { auditScope: "relation", modelId: "r1", type: "relation_create", changes: { entityIds: ["m1", "m2"] } }),
       audit("au-7", "2025-01-01T00:00:00Z", { auditScope: "relation", modelId: "r2", type: "relation_edit", changes: { entityIds: ["m2"] } }),
     ]);
+  });
+  afterAll(async () => {
+    await storage.audits.deleteAll(conn);
+    await storage.users.deleteMany(conn, ["u1", "u2"]);
   });
 
   it("firstFor, lastFor, lastNFor by scope and model, ordered by date", async () => {
@@ -715,11 +687,23 @@ describe("audits", () => {
     expect(await storage.audits.onDate(conn, new Date("2024-03-03T00:00:00Z"))).toEqual([]);
   });
 
-  it("entityScopedInRange with inclusive optional bounds", async () => {
-    expect(ids(await storage.audits.entityScopedInRange(conn))).toEqual(["au-1", "au-2", "au-3", "au-4"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, new Date("2024-03-02T00:00:00Z")))).toEqual(["au-3", "au-4"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, undefined, new Date("2024-03-01T23:59:59Z")))).toEqual(["au-1", "au-2"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, new Date("2024-03-01T00:00:00Z"), new Date("2024-03-02T00:00:00Z")))).toEqual(["au-2", "au-3"]);
+  it("firstPerEntityInRange keeps entities first audited within the inclusive optional bounds", async () => {
+    const first = (after?: string, before?: string) =>
+      storage.audits.firstPerEntityInRange(conn, after ? new Date(after) : undefined, before ? new Date(before) : undefined);
+    expect(ids(await first())).toEqual(["au-1", "au-4"]);
+    expect(ids(await first("2024-03-02T00:00:00Z"))).toEqual(["au-4"]);
+    expect(ids(await first(undefined, "2024-03-01T23:59:59Z"))).toEqual(["au-1"]);
+    expect(ids(await first("2024-02-28T10:00:00Z", "2024-03-04T12:00:00Z"))).toEqual(["au-1", "au-4"]);
+    expect(await first("2024-03-01T00:00:00Z", "2024-03-02T00:00:00Z")).toEqual([]);
+  });
+
+  it("lastPerEntityInRange keeps entities last audited within the inclusive optional bounds", async () => {
+    const last = (after?: string, before?: string) =>
+      storage.audits.lastPerEntityInRange(conn, after ? new Date(after) : undefined, before ? new Date(before) : undefined);
+    expect(ids(await last())).toEqual(["au-3", "au-4"]);
+    expect(ids(await last("2024-03-02T00:00:00Z"))).toEqual(["au-3", "au-4"]);
+    expect(await last(undefined, "2024-03-01T23:59:59Z")).toEqual([]);
+    expect(ids(await last("2024-03-01T00:00:00Z", "2024-03-02T00:00:00Z"))).toEqual(["au-3"]);
   });
 
   it("byTypeAndUser", async () => {

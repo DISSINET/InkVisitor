@@ -9,6 +9,8 @@ import Statement, {
   StatementTerritory,
 } from "@models/statement/statement";
 import { Db } from "@service/storage";
+import Territory from "@models/territory/territory";
+import { createEntity } from "@service/shorthands";
 import { pool } from "@middlewares/db";
 
 describe("Entities get method", function () {
@@ -43,12 +45,15 @@ describe("Entities get method", function () {
       const db = new Db();
       await db.initDb();
 
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+
       const statementRandomId = Math.random().toString();
       const entityData = new Statement({
         id: statementRandomId,
         data: new StatementData({
           territory: new StatementTerritory({
-            territoryId: "not relevant",
+            territoryId: territory.id,
           }),
         }),
       });

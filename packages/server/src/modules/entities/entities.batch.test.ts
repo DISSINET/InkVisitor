@@ -11,6 +11,8 @@ import Statement, {
 import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { IResponseEntity } from "@inkvisitor/shared/types";
+import Territory from "@models/territory/territory";
+import { createEntity } from "@service/shorthands";
 import Document from "@models/document/document";
 
 describe("Entities batch method", function () {
@@ -60,6 +62,9 @@ describe("Entities batch method", function () {
       const db = new Db();
       await db.initDb();
 
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+
       // Create test entities
       const statementId1 = `test-statement-${Math.random().toString()}`;
       const statementId2 = `test-statement-${Math.random().toString()}`;
@@ -68,7 +73,7 @@ describe("Entities batch method", function () {
         id: statementId1,
         data: new StatementData({
           territory: new StatementTerritory({
-            territoryId: "test-territory-1",
+            territoryId: territory.id,
           }),
         }),
       });
@@ -77,7 +82,7 @@ describe("Entities batch method", function () {
         id: statementId2,
         data: new StatementData({
           territory: new StatementTerritory({
-            territoryId: "test-territory-2",
+            territoryId: territory.id,
           }),
         }),
       });
@@ -109,6 +114,9 @@ describe("Entities batch method", function () {
       const db = new Db();
       await db.initDb();
 
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+
       // the statement id doubles as the document tag name, which excludes
       // ".", so keep it dot-free
       const statementId = `anchored${Math.random()
@@ -118,7 +126,7 @@ describe("Entities batch method", function () {
         id: statementId,
         data: new StatementData({
           territory: new StatementTerritory({
-            territoryId: "test-territory-1",
+            territoryId: territory.id,
           }),
         }),
       });

@@ -18,6 +18,7 @@ import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 import nestGeocodingAccuracyJob from "./nest-geocoding-accuracy";
 import addGeocodingSourcesJob from "./add-geocoding-sources";
+import fixDuplicateRowsJob from "./fix-duplicate-rows";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -41,6 +42,7 @@ const alljobs: Record<string, IJob> = {
   migrateGeocodingPlaceTypesJob,
   nestGeocodingAccuracyJob,
   addGeocodingSourcesJob,
+  fixDuplicateRowsJob,
 };
 
 export default alljobs;

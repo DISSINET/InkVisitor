@@ -13,6 +13,7 @@ import api from "api";
 import { boxContentId, Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
+  CopyUuidsButton,
   EntityCreateModal,
   EntitySuggester,
   EntityTag,
@@ -657,7 +658,12 @@ export const EntitySearchBox: React.FC = () => {
         </StyledOptions>
 
         <StyledResultsHeader>
-          {sortedEntities.length > 0 && <>{`Results (${sortedEntities.length})`}</>}
+          {sortedEntities.length > 0 && (
+            <>
+              {`Results (${sortedEntities.length})`}
+              <CopyUuidsButton uuids={sortedEntities.map((entity) => entity.id)} />
+            </>
+          )}
           {sortedEntities.length === 0 && !isFetching && (
             <StyledNoResults>{`No results found`}</StyledNoResults>
           )}

@@ -23,7 +23,7 @@ describe("postgres sql helpers", () => {
 
   it("builds a single btree predicate with ANY", () => {
     expect(indexPredicate("entities", DbEnums.Indexes.Class, ["C", "P"])).toEqual({
-      sql: "(doc->>'class') = ANY($1::text[])",
+      sql: "class = ANY($1::text[])",
       params: [["C", "P"]],
     });
   });
@@ -32,14 +32,14 @@ describe("postgres sql helpers", () => {
     expect(
       indexPredicate("audits", DbEnums.Indexes.AuditScopeModelId, [["entity", "e1"], ["document", null]], 1)
     ).toEqual({
-      sql: "((doc->>'auditScope'), (doc->>'modelId')) IN (($2, $3), ($4, $5))",
+      sql: "(audit_scope, model_id) IN (($2, $3), ($4, $5))",
       params: ["entity", "e1", "document", null],
     });
   });
 
-  it("builds a gin predicate with the key function", () => {
+  it("builds a gin predicate over the generated column", () => {
     expect(indexPredicate("documents", DbEnums.Indexes.DocumentEntityIds, ["e1"])).toEqual({
-      sql: "documents_entityids(doc) && $1::text[]",
+      sql: "entity_ids && $1::text[]",
       params: [["e1"]],
     });
   });
@@ -67,10 +67,10 @@ describe("postgres sql helpers", () => {
 
   it("indexHolds builds the join form for gin and single btree indexes", () => {
     expect(indexHolds("entities", DbEnums.Indexes.StatementEntities, "e.id")).toBe(
-      "entities_statement_entities(doc) @> ARRAY[e.id]"
+      "statement_entity_ids @> ARRAY[e.id]"
     );
     expect(indexHolds("entities", DbEnums.Indexes.StatementTerritory, "e.id")).toBe(
-      "(doc->'data'->'territory'->>'territoryId') = e.id"
+      "territory_id = e.id"
     );
   });
 
@@ -82,7 +82,7 @@ describe("postgres sql helpers", () => {
   it("Params numbers placeholders in order and appends the params of an index predicate", () => {
     const p = new Params();
     expect(p.add("x")).toBe("$1");
-    expect(p.index("entities", DbEnums.Indexes.Class, ["C"])).toBe("(doc->>'class') = ANY($2::text[])");
+    expect(p.index("entities", DbEnums.Indexes.Class, ["C"])).toBe("class = ANY($2::text[])");
     expect(p.add(3)).toBe("$3");
     expect(p.list).toEqual(["x", ["C"], 3]);
   });

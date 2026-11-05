@@ -4,7 +4,7 @@ import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
 import { Db } from "@service/storage";
 import { unwrap } from "@service/storage/rethink/conn";
-import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
   IConcept,
@@ -15,6 +15,7 @@ import {
   IProp,
   Relation as RelationTypes,
   AuditScope,
+  IUser,
 } from "@inkvisitor/shared/types";
 import * as path from "path";
 import { Connection, r as rethink } from "rethinkdb-ts";
@@ -462,6 +463,22 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     acc[user.id] = user.name;
     return acc;
   }, {} as Record<string, string>);
+
+  // every audit names its author, which has to be a user of the dataset; an
+  // inactive viewer without email or password keeps the name and cannot log in
+  const authors: IUser[] = [...new Set(audits.map((a) => a.user))].sort().map((id) => ({
+    id,
+    email: "",
+    name: userNames[id] ?? id,
+    role: UserEnums.Role.Viewer,
+    options: { defaultTerritory: "", defaultLanguage: EntityEnums.Language.Empty, searchLanguages: [], workingLanguages: [] },
+    bookmarks: [],
+    storedTerritories: [],
+    rights: [],
+    active: false,
+    verified: false,
+  }));
+  fs.writeFileSync(generator.getPath("users.json"), JSON.stringify(authors, null, 4));
 
   const stats = collectStats({
     entities: exportedEntities,

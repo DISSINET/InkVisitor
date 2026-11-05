@@ -2,7 +2,7 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import { AuditDoesNotExist } from "@inkvisitor/shared/types/errors";
+import { AuditDoesNotExist, TerritoryDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
@@ -13,6 +13,7 @@ import "ts-jest";
 import { prepareEntity } from "@models/entity/entity.test";
 import { AuditScope } from "@inkvisitor/shared/types";
 import Audit from "@models/audit/audit";
+import Statement from "@models/statement/statement";
 import { pool } from "@middlewares/db";
 
 // The restoration endpoint was redesigned: it is now
@@ -51,6 +52,7 @@ describe("Entities restoration", function () {
     // restoring it will create the entity from the stored snapshot.
     const validAudit = new Audit({
       modelId: restorableId,
+      user: "1",
       auditScope: AuditScope.Entity,
       changes: {
         ...JSON.parse(JSON.stringify(entity)),
@@ -79,6 +81,36 @@ describe("Entities restoration", function () {
 
       const restored = await findEntityById(db.connection, validAudit.modelId);
       expect(restored).toBeTruthy();
+    });
+  });
+
+  describe("statement whose territory was deleted", () => {
+    const db = new Db();
+    const restorableId = `statement-${Math.random()}`;
+    const audit = new Audit({
+      modelId: restorableId,
+      user: "1",
+      auditScope: AuditScope.Entity,
+      changes: {
+        ...JSON.parse(JSON.stringify(new Statement({ id: restorableId }))),
+        data: { territory: { territoryId: "deleted-territory", order: 0 } },
+      },
+    });
+    beforeAll(async () => {
+      await db.initDb();
+      await audit.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    it("should return a TerritoryDoesNotExits error and restore nothing", async () => {
+      await authAgent
+        .post(`${apiPath}/entities/${restorableId}/restore`)
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new TerritoryDoesNotExits("", "")));
+      expect(await findEntityById(db.connection, restorableId)).toBeFalsy();
     });
   });
 });

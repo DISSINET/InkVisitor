@@ -1,4 +1,4 @@
-import { testErroneousResponse } from "@modules/common.test";
+import { seedAcl, testErroneousResponse } from "@modules/common.test";
 import { BadCredentialsError, BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
@@ -13,13 +13,13 @@ describe("Users signin", function () {
   beforeAll(async () => {
     const db = new Db();
     await db.initDb();
-    await storage.acl.insert(db.connection, {
-        controller: "users",
-        method: "POST",
-        route: "signin",
-        roles: [],
-        public: true,
-      });
+    await seedAcl(db, {
+      controller: "users",
+      method: "POST",
+      route: "signin",
+      roles: [],
+      public: true,
+    });
     // Another suite (users.password) mutates the seeded admin's password and
     // does not restore it; reset it here so this signin assertion is
     // independent of test execution order.

@@ -1,5 +1,5 @@
 import { TABLES as RETHINK } from "./rethink/provision";
-import { EXTRA_INDEXES, TABLES as PG, ddl } from "./postgres/provision";
+import { CONSTRAINTS, EXTRA_INDEXES, TABLES as PG, constraintDdl, ddl } from "./postgres/provision";
 import { REQUIRED } from "./requiredIndexes";
 
 /**
@@ -34,14 +34,32 @@ describe("storage catalogues", () => {
     }
   });
 
+  it("add the constraints last, so a loader can leave them out", () => {
+    expect(ddl().slice(-CONSTRAINTS.length)).toEqual(CONSTRAINTS.map(constraintDdl));
+    expect(ddl(false)).toEqual(ddl().slice(0, -CONSTRAINTS.length));
+  });
+
   it("create the postgres-only indexes last, on catalogue tables, under names the catalogue does not use", () => {
-    const statements = ddl();
+    const statements = ddl(false);
     expect(statements.slice(-EXTRA_INDEXES.length)).toEqual(
       EXTRA_INDEXES.map((i) => `CREATE INDEX ${i.name} ON ${i.table} (${i.expression})`)
     );
     for (const extra of EXTRA_INDEXES) {
       expect(Object.keys(PG)).toContain(extra.table);
       expect(statements.filter((s) => s.startsWith(`CREATE INDEX ${extra.name} `))).toHaveLength(1);
+    }
+  });
+
+  it("add no postgres-only index that another btree or a unique constraint leads with", () => {
+    const split = (expression: string) => expression.split(",").map((c) => c.trim());
+    for (const extra of EXTRA_INDEXES) {
+      const columns = split(extra.expression);
+      const others = [
+        ...PG[extra.table].map((i) => (i.kind === "btree" ? [...i.columns, ...(i.trailing ?? [])] : [])),
+        ...EXTRA_INDEXES.filter((i) => i !== extra && i.table === extra.table).map((i) => split(i.expression)),
+        ...CONSTRAINTS.filter((c) => c.table === extra.table).map((c) => (c.kind === "unique" ? c.columns : [])),
+      ];
+      expect(others.map((other) => other.slice(0, columns.length))).not.toContainEqual(columns);
     }
   });
 });

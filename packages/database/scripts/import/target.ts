@@ -28,6 +28,11 @@ export interface SeedTarget {
   dbCreate(): Promise<void>;
   /** every table and index of the catalogue, on an empty database */
   createTables(): Promise<void>;
+  /**
+   * the constraints between rows, once every table is loaded: a batch can
+   * hold a row before the row it references
+   */
+  addConstraints(): Promise<void>;
   /** rows already carry ids; a duplicate id is skipped, not an error */
   insert(
     table: TableSchema,

@@ -16,7 +16,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
-import { boxContentId, CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
+import { boxContentId, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
@@ -43,6 +43,7 @@ import {
   StyledEmptyState,
   StyledInfoWrapper,
   StyledStatementListBox,
+  StyledTableScroller,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -450,6 +451,8 @@ export const StatementListBox: React.FC = () => {
     onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      const count = selectedRows.length;
+      toast.info(`References replaced in ${count} statement${count > 1 ? "s" : ""}`);
     },
   });
 
@@ -459,6 +462,8 @@ export const StatementListBox: React.FC = () => {
     onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      const count = selectedRows.length;
+      toast.info(`Reference appended to ${count} statement${count > 1 ? "s" : ""}`);
     },
   });
 
@@ -496,6 +501,9 @@ export const StatementListBox: React.FC = () => {
         (row) => row.entityId,
       );
 
+      if (deletedIds.length > 0) {
+        toast.info(`${deletedIds.length} statement${deletedIds.length > 1 ? "s" : ""} deleted`);
+      }
       if (deletedIds.length < selectedRows.length) {
         toast.error(
           `Some statements (${selectedRows.length - deletedIds.length}) are not possible to delete`,
@@ -787,16 +795,7 @@ export const StatementListBox: React.FC = () => {
 
             // ref={contentRef}
             >
-              <CustomScrollbar
-                scrollerId="Statements"
-                elementId="Statements-box-table"
-                contentWidth={tableWidth}
-                customStyle={{
-                  display: "flex",
-                  flexShrink: 0,
-                  height: "100%",
-                }}
-              >
+              <StyledTableScroller id="Statements-box-table" contentWidth={tableWidth}>
                 <StyledTableWrapper $isListMode={displayMode === StatementListDisplayMode.LIST}>
                   {isListNonEmpty && (
                     <StatementListTable
@@ -828,7 +827,7 @@ export const StatementListBox: React.FC = () => {
                     />
                   )}
                 </StyledTableWrapper>
-              </CustomScrollbar>
+              </StyledTableScroller>
 
               {statementListTableIsLoading && enableStatementListLoader && (
                 <Loader show size={50} />

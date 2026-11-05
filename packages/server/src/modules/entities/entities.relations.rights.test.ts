@@ -1,6 +1,7 @@
 import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { seedAcl } from "@modules/common.test";
 import User from "@models/user/user";
 import Concept from "@models/concept/concept";
 import Superclass from "@models/relation/superclass";
@@ -33,7 +34,7 @@ describe("entities/:entityId/relations - rights", () => {
     const seeded = (defaultAcl as Array<Record<string, unknown>>).filter(
       (row) => row.controller === "entities" && row.route === ":entityId/relations"
     );
-    await storage.acl.insert(db.connection, seeded);
+    await seedAcl(db, seeded);
 
     await dog.save(db.connection);
     await animal.save(db.connection);

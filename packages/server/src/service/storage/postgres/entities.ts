@@ -2,8 +2,6 @@ import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { TABLE } from "../names";
 import { Conn, EntityStore, RelationStore, Row } from "../types";
-import { notifyChanged } from "./invalidation";
-import { pgIndexName } from "./provision";
 import { labelMatch, labelPattern, searchWhere } from "./search";
 import { Params, encode, ident, indexHolds, indexPredicate } from "./sql";
 import { docs, q, tableStore } from "./tables";
@@ -15,7 +13,7 @@ import { docs, q, tableStore } from "./tables";
  */
 
 /** class values are enum constants, so they are spliced as literals */
-export const ofClass = (cls: EntityEnums.Class): string => `doc->>'class' = '${cls}'`;
+export const ofClass = (cls: EntityEnums.Class): string => `class = '${cls}'`;
 export const STATEMENT = ofClass(EntityEnums.Class.Statement);
 
 async function select<T extends Row>(conn: Conn, table: string, where: string, params: unknown[]): Promise<T[]> {
@@ -42,7 +40,7 @@ export const entities: EntityStore = {
   resourcesByDocumentId(conn, documentId) {
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Resource)} AND doc->'data'->>'documentId' = $1`,
+      `${ofClass(EntityEnums.Class.Resource)} AND document_id = $1`,
       [documentId]
     );
   },
@@ -55,7 +53,7 @@ export const entities: EntityStore = {
     // the ReQL `.default("")` makes it
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Resource)} AND coalesce(doc->'data'->>'documentId', '') = ANY($1::text[])`,
+      `${ofClass(EntityEnums.Class.Resource)} AND coalesce(document_id, '') = ANY($1::text[])`,
       [documentIds]
     );
   },
@@ -63,9 +61,8 @@ export const entities: EntityStore = {
   territoryChildren(conn, parentId) {
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Territory)}
-         AND jsonb_typeof(doc->'data'->'parent') = 'object'
-         AND doc->'data'->'parent'->>'territoryId' = $1`,
+      // the root's `parent: false` has no parent_id, so it never matches
+      `${ofClass(EntityEnums.Class.Territory)} AND parent_id = $1`,
       [parentId]
     );
   },
@@ -78,7 +75,7 @@ export const entities: EntityStore = {
     // is reported once per match, as the ReQL union of passes reports it.
     // `->>` yields NULL for a territory that is missing, null or not an object.
     const blocks = indexes.map(
-      (index) => `SELECT e.id AS "entityId", doc->'data'->'territory'->>'territoryId' AS "territoryId"
+      (index) => `SELECT e.id AS "entityId", territory_id AS "territoryId"
         FROM unnest($1::text[]) AS e(id)
         JOIN ${ident(TABLE.entities)} ON ${indexHolds(TABLE.entities, index, "e.id")}
         WHERE ${STATEMENT}`
@@ -96,15 +93,13 @@ export const entities: EntityStore = {
       patch: { data: { territory: { territoryId: u.territoryId, order: u.order } }, updatedAt },
     }));
     // one atomic statement; an id without a row is skipped, as ReQL skips it
-    const res = await q(
+    await q(
       conn,
       `UPDATE ${ident(TABLE.entities)} e SET doc = jsonb_deep_merge(e.doc, u.patch)
          FROM jsonb_to_recordset($1::jsonb) AS u(id text, patch jsonb)
-        WHERE e.id = u.id
-        RETURNING e.id`,
+        WHERE e.id = u.id`,
       [encode(rows)]
     );
-    notifyChanged(TABLE.entities, res.rows.map((row: { id: string }) => row.id), "update");
   },
 
   async idsMatchingLabel(conn, ids, label, leftWildcard, rightWildcard) {
@@ -148,7 +143,7 @@ export const relations: RelationStore = {
   ...tableStore<RelationTypes.IRelation>(TABLE.relations),
 
   byType(conn, type) {
-    return type ? selectRelations(conn, `doc->>'type' = $1`, [type]) : selectRelations(conn, "TRUE", []);
+    return type ? selectRelations(conn, "type = $1", [type]) : selectRelations(conn, "TRUE", []);
   },
 
   async forEntities(conn, entityIds, type) {
@@ -157,9 +152,9 @@ export const relations: RelationStore = {
     }
     // one row per relation whatever the number of matching ids, which is what
     // the ReQL `.distinct()` after the multi-index getAll produces
-    const touching = `${pgIndexName(TABLE.relations, DbEnums.Indexes.RelationsEntityIds)}(doc) && $1::text[]`;
+    const touching = "entity_ids && $1::text[]";
     return type
-      ? selectRelations(conn, `${touching} AND doc->>'type' = $2`, [entityIds, type])
+      ? selectRelations(conn, `${touching} AND type = $2`, [entityIds, type])
       : selectRelations(conn, touching, [entityIds]);
   },
 };

@@ -616,7 +616,7 @@ export default class Keys {
           this.cursor
         );
 
-        if (offsetLeft === -0) {
+        if (offsetLeft === 0) {
           // Reached start of line — jump to end of previous line and stop
           if (this.cursor.xLine <= 0) {
             if (this.cursor.yLine > 0) {

@@ -1,7 +1,9 @@
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Query } from "@inkvisitor/shared/types/query";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { unwrap } from "../conn";
+import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edge";
 import { QUERY_RUN_OPTIONS } from "./run-options";
@@ -41,7 +43,7 @@ export default class SearchNode implements Query.INode, ExplorePlan {
 
   /**
    * Builds the base entity stream for this node from its own params
-   * (entityClasses / entityStatuses / entityId / label). Nested child-node params are NOT
+   * (entityClasses / entityStatuses / entityLanguages / entityId / label). Nested child-node params are NOT
    * applied here - they describe the target of the parent edge and are
    * consumed by that edge, not used to filter the entity stream.
    */
@@ -59,11 +61,18 @@ export default class SearchNode implements Query.INode, ExplorePlan {
         return r.expr(statuses).contains(row("status"));
       });
     }
+    if (this.params.entityLanguages?.length) {
+      const languages = this.params.entityLanguages;
+      q = q.filter(function (row: RDatum) {
+        return r.expr(languages).contains(row("language"));
+      });
+    }
     if (this.params.entityId) {
       q = q.filter({ id: this.params.entityId });
     }
-    if (this.params.label) {
-      q = q.filter({ label: this.params.label });
+    const label = nodeLabel(this.params.label);
+    if (label) {
+      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
     return q;
   }

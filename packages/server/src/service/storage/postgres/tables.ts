@@ -30,8 +30,7 @@ import {
   WriteResult,
 } from "../types";
 import { query } from "./conn";
-import { notifyChanged, notifyCleared } from "./invalidation";
-import { pgIndexName } from "./provision";
+import { COLUMNS } from "./provision";
 import { encode, ident, indexPredicate, revive } from "./sql";
 
 const EMPTY: WriteResult = { deleted: 0, errors: 0, inserted: 0, replaced: 0, skipped: 0, unchanged: 0 };
@@ -75,7 +74,6 @@ async function write(conn: Conn, table: string, id: string, merged: string, valu
     return result({ skipped: 1 });
   }
   if (replaced) {
-    notifyChanged(table, [id], "update");
     return result({ replaced: 1 });
   }
   return result({ unchanged: 1 });
@@ -138,7 +136,6 @@ function bulkOutcome(
   opts?: WriteOpts
 ): WriteResult {
   const replacedIds = rows.filter((row) => row.replaced).map((row) => row.id);
-  notifyChanged(table, replacedIds, "update");
   const out = result({ replaced: replacedIds.length, unchanged: rows.length - replacedIds.length, skipped });
   if (opts?.returnChanges) {
     out.changes = rows.map((row) => ({ new_val: revive(table, row.new_doc), old_val: revive(table, row.old_doc) }));
@@ -220,7 +217,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
           const duplicate = rows.find((row) => !done.has(String(row.id))) ?? repeated;
           written.first_error = `Duplicate primary key \`id\`: ${duplicate ? String(duplicate.id) : ""}`;
         }
-        notifyChanged(name, inserted, "insert");
       } else {
         // ON CONFLICT DO UPDATE refuses a batch that touches one row twice;
         // ReQL applies the rows in order, so the last one wins
@@ -246,8 +242,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
           replaced: replaced.length,
           unchanged: unique.length - outcome.length,
         });
-        notifyChanged(name, inserted, "insert");
-        notifyChanged(name, replaced, "update");
       }
       if (generated.length) {
         written.generated_keys = generated;
@@ -332,7 +326,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
     },
     async delete(conn, id) {
       const res = await q(conn, `DELETE FROM ${t} WHERE id = $1 RETURNING id`, [id]);
-      notifyChanged(name, res.rows.map((row: { id: string }) => row.id), "delete");
       return result({ deleted: res.rows.length });
     },
     async deleteMany(conn, ids, opts) {
@@ -340,7 +333,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
         return result({});
       }
       const res = await q(conn, `DELETE FROM ${t} WHERE id = ANY($1::text[]) RETURNING id, doc`, [ids]);
-      notifyChanged(name, res.rows.map((row: { id: string }) => row.id), "delete");
       const out = result({ deleted: res.rows.length });
       if (opts?.returnChanges) {
         out.changes = res.rows.map((row: { doc: Row }) => ({ new_val: null, old_val: revive(name, row.doc) }));
@@ -349,7 +341,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
     },
     async deleteAll(conn) {
       const res = await q(conn, `DELETE FROM ${t}`);
-      notifyCleared(name);
       return result({ deleted: res.rowCount ?? 0 });
     },
   };
@@ -357,10 +348,8 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
 
 // ---- stores ---------------------------------------------------------------
 
-/** a field name spliced into SQL as a string literal; quotes are doubled */
-const literal = (text: string): string => `'${text.replace(/'/g, "''")}'`;
-
-const NOT_TRASHED = `NOT (doc ? 'deletedAt')`;
+// a null deletedAt is no deletion, as ReQL hasFields treats a null field as absent
+const NOT_TRASHED = `deleted_at IS NULL`;
 
 export const users: UserStore = {
   ...tableStore<IUser>(TABLE.users),
@@ -368,28 +357,28 @@ export const users: UserStore = {
   async owner(conn) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'role' = $1 ORDER BY id LIMIT 1`, [UserEnums.Role.Owner])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND role = $1 ORDER BY id LIMIT 1`, [UserEnums.Role.Owner])
     );
   },
 
   async byEmail(conn, email) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'email' = $1 ORDER BY id LIMIT 1`, [email])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND email = $1 ORDER BY id LIMIT 1`, [email])
     );
   },
 
   async byHash(conn, hash) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'hash' = $1 ORDER BY id LIMIT 1`, [hash])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND hash = $1 ORDER BY id LIMIT 1`, [hash])
     );
   },
 
   async allActive(conn) {
     return docs<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} ORDER BY doc->>'role', doc->>'name', id`)
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} ORDER BY role, name, id`)
     );
   },
 
@@ -399,7 +388,7 @@ export const users: UserStore = {
       TABLE.users,
       await q(
         conn,
-        `SELECT doc FROM users WHERE (doc->>'name' = $1 OR doc->>'email' = $1) ${trashed} ORDER BY id LIMIT 1`,
+        `SELECT doc FROM users WHERE (name = $1 OR email = $1) ${trashed} ORDER BY id LIMIT 1`,
         [login]
       )
     );
@@ -433,8 +422,7 @@ export const users: UserStore = {
 
   async deleteAllExceptName(conn, name) {
     // a row without a name is kept, as the ReQL filter skips the row whose field read fails
-    const res = await q(conn, `DELETE FROM users WHERE doc->>'name' <> $1 RETURNING id`, [name]);
-    notifyChanged(TABLE.users, res.rows.map((row: { id: string }) => row.id), "delete");
+    const res = await q(conn, `DELETE FROM users WHERE name <> $1 RETURNING id`, [name]);
     return result({ deleted: res.rows.length });
   },
 };
@@ -448,7 +436,7 @@ export const acl: AclStore = {
       await q(
         conn,
         `SELECT doc FROM acl_permissions
-         WHERE doc->>'controller' = $1 AND doc->>'method' = $2 AND doc->>'route' = $3 ORDER BY id`,
+         WHERE controller = $1 AND method = $2 AND route = $3 ORDER BY id`,
         [controller, method, route]
       )
     );
@@ -462,13 +450,11 @@ export const savedQueries: SavedQueryStore = {
 
   async idsWithName(conn, normalizedName, shared, ownerId) {
     // unindexed scan: one row per saved query, and this runs only on create and on rename
-    const folder = shared
-      ? `(doc->>'shared')::boolean`
-      : `NOT (doc->>'shared')::boolean AND doc->>'ownerId' = $2`;
+    const folder = shared ? "shared" : "NOT shared AND owner_id = $2";
     const params = shared ? [normalizedName] : [normalizedName, ownerId];
     const res = await q(
       conn,
-      `SELECT id FROM saved_queries WHERE lower(doc->>'name') = $1 AND ${folder} ORDER BY id`,
+      `SELECT id FROM saved_queries WHERE lower(name) = $1 AND ${folder} ORDER BY id`,
       params
     );
     return res.rows.map((row: { id: string }) => row.id);
@@ -480,15 +466,13 @@ export const savedQueries: SavedQueryStore = {
       await q(
         conn,
         `SELECT doc FROM saved_queries
-         WHERE (doc->>'shared')::boolean OR doc->>'ownerId' = $1
-         ORDER BY doc->>'createdAt' DESC, id`,
+         WHERE shared OR owner_id = $1
+         ORDER BY created_at DESC, id`,
         [userId]
       )
     );
   },
 };
-
-const documentsEntityIds = pgIndexName(TABLE.documents, DbEnums.Indexes.DocumentEntityIds);
 
 export const documents: DocumentStore = {
   ...tableStore<IDocument>(TABLE.documents),
@@ -507,7 +491,7 @@ export const documents: DocumentStore = {
       TABLE.documents,
       await q(
         conn,
-        `SELECT doc - 'content' AS doc FROM documents WHERE ${documentsEntityIds}(doc) && $1::text[] ORDER BY id`,
+        `SELECT doc - 'content' AS doc FROM documents WHERE entity_ids && $1::text[] ORDER BY id`,
         [entityIds]
       )
     );
@@ -516,41 +500,72 @@ export const documents: DocumentStore = {
   async allByCreatedAt(conn) {
     return docs<IDocument>(
       TABLE.documents,
-      await q(conn, `SELECT doc FROM documents ORDER BY doc->>'createdAt', id`)
+      await q(conn, `SELECT doc FROM documents ORDER BY created_at, id`)
     );
   },
 
   async listMeta(conn) {
     return docs<IDocument>(
       TABLE.documents,
-      await q(conn, `SELECT doc - 'content' - 'anchors' AS doc FROM documents ORDER BY doc->>'createdAt', id`)
+      await q(conn, `SELECT doc - 'content' - 'anchors' AS doc FROM documents ORDER BY created_at, id`)
     );
   },
 };
 
-/** the stored day (an ISO UTC string's first ten characters) as a midnight instant, what ReQL `.date()` compares */
-const AUDIT_DAY = `left(doc->>'date', 10) || 'T00:00:00.000Z'`;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** audit document field -> generated column, for the fields a group key may read */
+const AUDIT_COLUMN_OF_FIELD: Record<string, string> = {};
+for (const [column, path] of Object.entries(COLUMNS.audits)) {
+  if (typeof path === "string") AUDIT_COLUMN_OF_FIELD[path] = column;
+}
+
+function auditColumn(field: string): string {
+  const column = AUDIT_COLUMN_OF_FIELD[field];
+  if (!column) {
+    throw new Error(`postgres: audits has no generated column for ${field}`);
+  }
+  return column;
+}
 
 /** the audit's UTC timestamp bucketed as ReQL does it: yyyy / yyyy-mm / yyyy-mm-dd / the Monday of its ISO week */
 function bucketSql(timeUnit: TimeUnit): string {
   switch (timeUnit) {
     case TimeUnit.DAY:
-      return `left(doc->>'date', 10)`;
+      return `left(date, 10)`;
     case TimeUnit.WEEK:
-      return `to_char(date_trunc('week', (doc->>'date')::timestamptz AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`;
+      return `to_char(date_trunc('week', date::timestamptz AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`;
     case TimeUnit.MONTH:
-      return `left(doc->>'date', 7)`;
+      return `left(date, 7)`;
     case TimeUnit.YEAR:
-      return `left(doc->>'date', 4)`;
+      return `left(date, 4)`;
     default:
       throw new Error("Invalid time unit");
   }
 }
 
-const auditsRelationEntityIds = pgIndexName(TABLE.audits, DbEnums.Indexes.AuditRelationEntityIds);
-
 const byScopeAndModel = (scope: AuditScope, modelId: string) =>
   indexPredicate(TABLE.audits, DbEnums.Indexes.AuditScopeModelId, [[scope, modelId]]);
+
+/**
+ * Entity audits within the bounds that no other audit `b` of the same entity
+ * outranks, `outranks` being that condition in SQL over `b` and `a`. The
+ * anti-join runs on the AuditScopeModelId index, (audit_scope, model_id, date).
+ */
+async function edgePerEntityInRange(conn: Conn, outranks: string, after?: Date, before?: Date): Promise<IAudit[]> {
+  const params: unknown[] = [AuditScope.Entity];
+  let sql = `SELECT a.doc FROM audits a WHERE a.audit_scope = $1 AND a.model_id <> ''`;
+  if (after) {
+    params.push(after.toISOString());
+    sql += ` AND a.date >= $${params.length}`;
+  }
+  if (before) {
+    params.push(before.toISOString());
+    sql += ` AND a.date <= $${params.length}`;
+  }
+  sql += ` AND NOT EXISTS (SELECT 1 FROM audits b WHERE b.audit_scope = $1 AND b.model_id = a.model_id AND (${outranks}))`;
+  return docs<IAudit>(TABLE.audits, await q(conn, `${sql} ORDER BY a.id`, params));
+}
 
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
@@ -559,7 +574,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date', id LIMIT 1`, where.params)
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date, id LIMIT 1`, where.params)
     );
   },
 
@@ -567,7 +582,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date' DESC, id LIMIT 1`, where.params)
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date DESC, id LIMIT 1`, where.params)
     );
   },
 
@@ -575,7 +590,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date' DESC, id LIMIT $3`, [
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date DESC, id LIMIT $3`, [
         ...where.params,
         n,
       ])
@@ -588,44 +603,47 @@ export const audits: AuditStore = {
       await q(
         conn,
         `SELECT doc FROM audits
-         WHERE ${auditsRelationEntityIds}(doc) && $1::text[] AND doc->>'auditScope' = $2
-         ORDER BY doc->>'date' DESC, id LIMIT $3`,
+         WHERE entity_ids && $1::text[] AND audit_scope = $2
+         ORDER BY date DESC, id LIMIT $3`,
         [[entityId], AuditScope.Relation, n]
       )
     );
   },
 
   async earliestDate(conn) {
-    const res = await q(conn, `SELECT min(doc->>'date') AS d FROM audits`);
+    const res = await q(conn, `SELECT min(date) AS d FROM audits`);
     const d = res.rows[0]?.d as string | null;
     return d ? new Date(d) : null;
   },
 
   async onDate(conn, date) {
+    // an audit's day is a midnight instant, so any other instant matches nothing
+    if (date.getTime() % DAY_MS !== 0) {
+      return [];
+    }
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${AUDIT_DAY} = $1 ORDER BY id`, [date.toISOString()])
+      await q(conn, `SELECT doc FROM audits WHERE date >= $1 AND date < $2 ORDER BY id`, [
+        date.toISOString(),
+        new Date(date.getTime() + DAY_MS).toISOString(),
+      ])
     );
   },
 
-  async entityScopedInRange(conn, after, before) {
-    const params: unknown[] = [AuditScope.Entity];
-    let sql = `SELECT doc FROM audits WHERE doc->>'auditScope' = $1`;
-    if (after) {
-      params.push(after.toISOString());
-      sql += ` AND doc->>'date' >= $${params.length}`;
-    }
-    if (before) {
-      params.push(before.toISOString());
-      sql += ` AND doc->>'date' <= $${params.length}`;
-    }
-    return docs<IAudit>(TABLE.audits, await q(conn, `${sql} ORDER BY id`, params));
+  async firstPerEntityInRange(conn, after, before) {
+    // the ordering of firstFor: date, then id
+    return edgePerEntityInRange(conn, `b.date < a.date OR (b.date = a.date AND b.id < a.id)`, after, before);
+  },
+
+  async lastPerEntityInRange(conn, after, before) {
+    // the ordering of lastFor: date descending, then id
+    return edgePerEntityInRange(conn, `b.date > a.date OR (b.date = a.date AND b.id < a.id)`, after, before);
   },
 
   async byTypeAndUser(conn, type: EventType, user) {
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE doc->>'type' = $1 AND doc->>'user' = $2 ORDER BY id`, [type, user])
+      await q(conn, `SELECT doc FROM audits WHERE type = $1 AND user_id = $2 ORDER BY id`, [type, user])
     );
   },
 
@@ -634,25 +652,26 @@ export const audits: AuditStore = {
       TABLE.audits,
       await q(
         conn,
-        `SELECT doc FROM audits WHERE ${AUDIT_DAY} >= $1 ORDER BY doc->>'date', id OFFSET $2 LIMIT $3`,
-        [filter.from.toISOString(), filter.skip, filter.take]
+        `SELECT doc FROM audits WHERE date >= $1 ORDER BY date, id OFFSET $2 LIMIT $3`,
+        // audits whose UTC day-midnight is >= from: from rounded up to a midnight
+        [new Date(Math.ceil(filter.from.getTime() / DAY_MS) * DAY_MS).toISOString(), filter.skip, filter.take]
       )
     );
   },
 
   async countByBucket(conn, params: AuditCountParams) {
     const values: unknown[] = [params.eventTypes];
-    const where = [`doc->>'type' = ANY($1::text[])`];
+    const where = [`type = ANY($1::text[])`];
     if (params.from !== undefined && params.to !== undefined) {
       values.push(params.from.toISOString(), params.to.toISOString());
       // ReQL between: left-closed, right-open
-      where.push(`doc->>'date' >= $2 AND doc->>'date' < $3`);
+      where.push(`date >= $2 AND date < $3`);
     }
     if (params.entityIds) {
       values.push(AuditScope.Entity, params.entityIds);
-      where.push(`doc->>'auditScope' = $${values.length - 1} AND doc->>'modelId' = ANY($${values.length}::text[])`);
+      where.push(`audit_scope = $${values.length - 1} AND model_id = ANY($${values.length}::text[])`);
     }
-    const keys = [bucketSql(params.timeUnit), ...params.groupBy.map((field) => `doc->>${literal(field)}`)];
+    const keys = [bucketSql(params.timeUnit), ...params.groupBy.map(auditColumn)];
     const positions = keys.map((_, i) => i + 1).join(", ");
     const res = await q(
       conn,
@@ -680,9 +699,8 @@ export function stats(timeUnit: string): MaterializedStatsStore {
         await q(
           conn,
           `SELECT doc FROM ${t}
-           WHERE doc->>'date' >= $1 AND doc->>'date' < $2
-             AND doc->>'eventType' = ANY($3::text[]) AND doc->>'aggregateBy' = $4
-           ORDER BY doc->>'date', id`,
+           WHERE date >= $1 AND date < $2 AND event_type = ANY($3::text[]) AND aggregate_by = $4
+           ORDER BY date, id`,
           [fromDate, toDate, eventTypes, aggregateBy]
         )
       );
@@ -690,7 +708,7 @@ export function stats(timeUnit: string): MaterializedStatsStore {
 
     async latestUpdate(conn) {
       try {
-        const res = await q(conn, `SELECT max(doc->>'lastUpdated') AS d FROM ${t}`);
+        const res = await q(conn, `SELECT max(last_updated) AS d FROM ${t}`);
         const d = res.rows[0]?.d as string | null;
         return d ? new Date(d) : null;
       } catch {

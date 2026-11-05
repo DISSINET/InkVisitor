@@ -10,7 +10,8 @@ import {
   testErroneousResponse,
 } from "@modules/common.test";
 import { Db } from "@service/storage";
-import { findEntityById } from "@service/shorthands";
+import Territory from "@models/territory/territory";
+import { createEntity, findEntityById } from "@service/shorthands";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
@@ -52,12 +53,14 @@ describe("Entities update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
+      const territory = new Territory({ id: `root-${testId}` });
+      await createEntity(db, territory);
       const changeLabelTo = "new label";
       const statementData = new Statement({
         id: testId,
         labels: ["test"],
         data: new StatementData({
-          territory: new StatementTerritory({ territoryId: testId + "ter" }),
+          territory: new StatementTerritory({ territoryId: territory.id }),
         }),
       });
       await statementData.save(db.connection);

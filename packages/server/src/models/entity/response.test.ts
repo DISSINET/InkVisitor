@@ -585,6 +585,7 @@ describe("models/entity/response", function () {
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
+      await new Territory({ id: "T0" }).save(db.connection);
       await territory1.save(db.connection);
       await territory2.save(db.connection);
       // entityWithDoc must exist before the documents are preprocessed so that

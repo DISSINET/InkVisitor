@@ -42,8 +42,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   entityClass: EntityEnums.Class;
   @nonenumerable
   maxNestLvl = 3;
+  /** load iConnections (relations pointing at the entity) for each type */
   @nonenumerable
-  maxListLen = 10;
+  withInverse = true;
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
@@ -81,6 +82,10 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this.warnings = [];
   }
 
+  private inverse<T>(load: () => Promise<T[]>): Promise<T[]> {
+    return this.withInverse ? load() : Promise.resolve([]);
+  }
+
   async prepareSuperclasses(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Superclass.getSuperclassForwardConnections(
@@ -90,10 +95,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.maxNestLvl,
         0
       ),
-      Superclass.getSuperclassInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        Superclass.getSuperclassInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.Superclass] = { connections, iConnections };
@@ -108,10 +115,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.maxNestLvl,
         0
       ),
-      SuperordinateEntity.getSuperordinateEntityInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        SuperordinateEntity.getSuperordinateEntityInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.SuperordinateEntity] = {
@@ -146,10 +155,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         this.entityClass
       ),
-      Holonym.getHolonymInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        Holonym.getHolonymInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.Holonym] = { connections, iConnections };
@@ -186,10 +197,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.maxNestLvl,
         0
       ),
-      ActionEventEquivalent.getActionEventEquivalentInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        ActionEventEquivalent.getActionEventEquivalentInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.ActionEventEquivalent] = {
@@ -207,7 +220,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.maxNestLvl,
         0
       ),
-      Classification.getClassificationInverseConnections(dbConn, this.entityId),
+      this.inverse(() =>
+        Classification.getClassificationInverseConnections(dbConn, this.entityId)
+      ),
     ]);
     this[RelationEnums.Type.Classification] = { connections, iConnections };
   }
@@ -231,10 +246,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         this.entityClass
       ),
-      Implication.getImplicationInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        Implication.getImplicationInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.Implication] = { connections, iConnections };
@@ -247,10 +264,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         this.entityClass
       ),
-      SubjectSemantics.getSubjectSemanticsInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        SubjectSemantics.getSubjectSemanticsInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.SubjectSemantics] = { connections, iConnections };
@@ -263,10 +282,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         this.entityClass
       ),
-      Actant1Semantics.getActant1SemanticsInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        Actant1Semantics.getActant1SemanticsInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.Actant1Semantics] = { connections, iConnections };
@@ -279,10 +300,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         this.entityClass
       ),
-      Actant2Semantics.getActant2SemanticsInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
+      this.inverse(() =>
+        Actant2Semantics.getActant2SemanticsInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        )
       ),
     ]);
     this[RelationEnums.Type.Actant2Semantics] = { connections, iConnections };

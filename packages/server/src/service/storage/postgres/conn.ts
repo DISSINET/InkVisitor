@@ -3,6 +3,7 @@ import { PgConfig, pgConfigFromEnv } from "../config";
 import { REQUIRED } from "../requiredIndexes";
 import { Conn } from "../types";
 import { MERGE_FUNCTION_DDL, SESSIONS_DDL, pgIndexName, provision } from "./provision";
+import { syncSchema } from "./schema";
 import { ident } from "./sql";
 
 export const pgConfig: PgConfig = pgConfigFromEnv();
@@ -128,12 +129,15 @@ export async function dropDatabase(name: string): Promise<void> {
 }
 
 /**
- * Verifies every entry in REQUIRED exists in pg_indexes, then (re)creates the
- * merge function the generic store's updates call: a database seeded before
- * the function existed becomes usable without a reseed, and no index depends
- * on the function so replacing it is safe.
+ * Runs at every server start. Brings the generated columns and their indexes
+ * to the declared schema (syncSchema), verifies every entry in REQUIRED exists
+ * in pg_indexes, then (re)creates the merge function the generic store's
+ * updates call: a database seeded before the function existed becomes usable
+ * without a reseed, and no index depends on the function so replacing it is
+ * safe.
  */
 export async function assertRequiredIndexes(conn: Conn): Promise<void> {
+  await syncSchema(conn);
   const { rows } = await query(conn, "SELECT tablename, indexname FROM pg_indexes WHERE schemaname = 'public'");
   const present = new Set(
     rows.map((row: { tablename: string; indexname: string }) => `${row.tablename}.${row.indexname}`)

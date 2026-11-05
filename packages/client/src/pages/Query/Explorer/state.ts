@@ -117,7 +117,7 @@ const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
   Explore.SearchOption.CoOccurrence,
 ]);
 
-// how many of the filters currently applied belong to the floating search panel
+// how many of the filters currently applied belong to the Filters panel
 // (label and UUID filters have their own controls, so they are not counted here)
 export const countFloatingSearchFilters = (filters: Explore.IExploreSearchFilter[]): number =>
   filters.filter((f) => floatingSearchFilterTypes.has(f.type)).length;

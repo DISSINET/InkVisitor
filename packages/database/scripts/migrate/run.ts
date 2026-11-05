@@ -5,17 +5,19 @@ import { r } from "rethinkdb-ts";
 import { TABLES } from "@service/storage/postgres/provision";
 import { flag, has } from "../import/common";
 import { DATASETS_DIR, dataFilePath, prepareRawDataset } from "../import/datasets";
-import { addCounts, feedTable, noRows } from "../import/feed";
+import { addCounts, feedTable, noRows, streamFile } from "../import/feed";
 import { PostgresTarget } from "../import/targets/postgres";
 import { RethinkTarget } from "../import/targets/rethinkdb";
 import { diffDatabases, hasDifferences, lenientCount, printReports } from "../storage-diff/diff";
 import { exportTable } from "./export";
+import { checkConstraints } from "./preflight";
 
 /**
  * Moves one RethinkDB database into PostgreSQL: every catalogue table is
- * exported into datasets/<out>/<table>.json, the PostgreSQL database is
- * created with the schema, the export is imported through the seeder and the
- * two databases are diffed. RethinkDB is only read.
+ * exported into datasets/<out>/<table>.json, the export is checked against
+ * the PostgreSQL constraints, the PostgreSQL database is created with the
+ * schema, the export is imported through the seeder and the two databases are
+ * diffed. RethinkDB is only read.
  *   pnpm migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [env]
  */
 const USAGE = "usage: migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [env]";
@@ -89,6 +91,24 @@ async function main(): Promise<void> {
       console.log(colors.yellow(`not exported, outside the catalogue: ${outside.join(", ")}`));
     }
 
+    // before PostgreSQL is touched: a row the constraints refuse is fixed in
+    // RethinkDB, and the whole list is worth more than the first hit
+    const preflightStarted = Date.now();
+    const violations = await checkConstraints((table, each) => {
+      const file = path.join(dir, `${table}.json`);
+      return fs.existsSync(file) ? streamFile(file, async (rows) => rows.forEach(each)) : Promise.resolve();
+    });
+    if (violations.length) {
+      for (const v of violations) {
+        console.log(colors.red(`${v.constraint.name}: ${v.constraint.table} ${v.id} ${v.detail}`));
+      }
+      throw new Error(
+        `${violations.length} rows violate the PostgreSQL constraints (${seconds(preflightStarted)} s), nothing was migrated. ` +
+          `Fix them in RethinkDB (the fixDuplicateRowsJob job covers duplicates and dangling document and template references) and rerun.`
+      );
+    }
+    console.log(colors.green(`constraints hold on every exported row (${seconds(preflightStarted)} s)`));
+
     if (replace) {
       await postgres.dbDrop();
     }
@@ -120,6 +140,14 @@ async function main(): Promise<void> {
         const warnings = lenient ? `${lenient} lenient warning${lenient === 1 ? "" : "s"}, ` : "";
         console.log(colors.green(`storage diff: databases match (${warnings}${seconds(diffStarted)} s)`));
       }
+    }
+
+    // last, so a dangling row is reported next to the import counts and the diff that explain it
+    try {
+      await postgres.addConstraints();
+    } catch (e) {
+      console.log(colors.red(e instanceof Error ? e.message : String(e)));
+      process.exitCode = 1;
     }
 
     const line = `migrated ${dbName} -> ${pgName} (postgres) through datasets/${out} in ${seconds(started)} s`;
