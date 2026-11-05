@@ -465,6 +465,24 @@ and names them: `1 filter · accuracy precise`. Five dropdowns each reading `any
 say only that five controls exist, and a list shortened by one of them explains
 itself nowhere. Each field carries its own label for the same reason.
 
+## Making a Location from the page
+
+A `+` beside the Locations search opens the Explorer's own create dialog, limited
+to the Location class, with what is typed in the search as the label. It is absent
+for a Viewer, who may not create entities.
+
+A new Location is used in no statement and starts Pending, so a territory filter
+can never list it and the other filters may exclude it. Once it exists the page
+clears every filter, asks for the list again and selects the new Location from
+the list when it arrives. It is selected from the list and not from the entity the
+dialog returns, because a write on this page is checked against the row it was
+selected as. The page stops waiting when the reader selects another Location, and
+after twenty seconds, when it says the Location was created but the list has not
+shown it yet.
+
+Creating writes nothing of its own: no coordinate, no accuracy, no location type. A
+template chosen in the dialog may carry them, as in the Explorer.
+
 ## While a request runs
 
 A `/suggest` call takes five to ten seconds and returns once, so on its own it

@@ -4,13 +4,13 @@ import {
   IGeocodingContext,
   IGeocodingContextWeights,
 } from "@inkvisitor/shared/types/geocoding";
-import { UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, Panel } from "components";
-import { LayoutSeparatorVertical } from "components/advanced";
+import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -44,6 +44,7 @@ import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./containers/suggesti
 import { StyledEngineDot, StyledEngineLabel, StyledEngineStatus } from "./GeocodingPageStyles";
 import { EngineState } from "./types/page";
 import { useGeocodingBrowse } from "./hooks/useGeocodingBrowse";
+import { mayCreateLocation, useCreateLocation } from "./hooks/useCreateLocation";
 import { useGeocodingBulk } from "./hooks/useGeocodingBulk";
 import { useGeocodingConfig } from "./hooks/useGeocodingConfig";
 import { useGeocodingPanels } from "./hooks/useGeocodingPanels";
@@ -53,6 +54,7 @@ import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./hooks/usePlaceTypeAssignments";
 import { useGeocodingSuggest } from "./hooks/useGeocodingSuggest";
 import { useGeocodingWriter } from "./hooks/useGeocodingWriter";
 import { useRecentGeocodes } from "./hooks/useRecentGeocodes";
+import { useRefreshedSelection } from "./hooks/useRefreshedSelection";
 
 /**
  * How long after the last movement of a weight slider it is written.
@@ -331,6 +333,14 @@ export const GeocodingPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
   };
 
+  const createLocation = useCreateLocation({
+    all: browse.all,
+    selectedId: selected?.entity.id,
+    clearFilters: browse.clearFilters,
+    refresh: refreshLocations,
+    onSelect: setSelected,
+  });
+
   /**
    * The next Location still wanting a coordinate, skipping the one being written.
    *
@@ -509,19 +519,7 @@ export const GeocodingPage: React.FC = () => {
       ? Promise.resolve(false)
       : editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
 
-  // `selected` is a snapshot taken when the row was clicked. After a write the
-  // collection refetches, and under the default ungeocoded filter the row
-  // leaves the list - so without re-syncing, the panel and the map keep showing
-  // the pre-write state and the coordinate never visibly lands.
-  useEffect(() => {
-    if (!selected) {
-      return;
-    }
-    const fresh = browse.all.find((location) => location.entity.id === selected.entity.id);
-    if (fresh && fresh !== selected) {
-      setSelected(fresh);
-    }
-  }, [browse.all, selected]);
+  useRefreshedSelection(browse.all, selected, setSelected);
   const { recent, record: recordRecent } = useRecentGeocodes();
   const {
     write,
@@ -648,6 +646,7 @@ export const GeocodingPage: React.FC = () => {
       : engineLabel[engineState];
   // the same rule as the menu entry that opens the modal
   const canEditSettings = user?.role === UserEnums.Role.Owner;
+  const canCreateLocation = mayCreateLocation(user?.role);
 
   return (
     <PlaceTypesProvider placeTypes={roles.placeTypes} viaLabels={browse.viaLabels}>
@@ -689,6 +688,7 @@ export const GeocodingPage: React.FC = () => {
             batch={batch}
             onShowBatch={() => setShowBatch(true)}
             onDismissBatch={() => setBatch(null)}
+            onCreate={canCreateLocation ? createLocation.open : undefined}
             onQuickGeocode={quickGeocode}
             quickBusyId={quickBusy}
             quickStrategy={context.quickStrategy ?? "clearWinner"}
@@ -914,6 +914,17 @@ export const GeocodingPage: React.FC = () => {
             // the panel is behind this window, so reading it means leaving
             setShowBatch(false);
           }}
+        />
+      ) : null}
+
+      {createLocation.creating ? (
+        <EntityCreateModal
+          categorySelected={EntityEnums.Class.Location}
+          allowedEntityClasses={[EntityEnums.Class.Location]}
+          // what was being searched for is most likely the name of what is missing
+          labelTyped={browse.filters.label}
+          closeModal={createLocation.close}
+          onMutationSuccess={createLocation.created}
         />
       ) : null}
 

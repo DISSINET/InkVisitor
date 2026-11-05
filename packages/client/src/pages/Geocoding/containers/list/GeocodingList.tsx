@@ -2,7 +2,7 @@ import {
 } from "@inkvisitor/shared/types/geocoding";
 import { Button, Input, Loader } from "components";
 import Dropdown from "components/advanced";
-import { IcoListTree, IcoSearch } from "Theme/icons";
+import { IcoListTree, IcoPlusBold, IcoSearch } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
 import {
@@ -97,6 +97,11 @@ interface GeocodingList {
   batch: BatchRun | null;
   onShowBatch: () => void;
   onDismissBatch: () => void;
+  /**
+   * Opens the dialog that makes a new Location. Absent for someone who may not
+   * create one, which leaves the button out rather than drawn and refused.
+   */
+  onCreate?: () => void;
 }
 
 export const GeocodingList: React.FC<GeocodingList> = ({
@@ -121,6 +126,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
   batch,
   onShowBatch,
   onDismissBatch,
+  onCreate,
 }) => {
   const { all, visible, isLoading, error, filters, setFilter } = browse;
 
@@ -316,6 +322,16 @@ export const GeocodingList: React.FC<GeocodingList> = ({
             width="full"
             clearable
           />
+          {onCreate ? (
+            <Button
+              tooltipLabel="new location"
+              icon={<IcoPlusBold />}
+              onClick={onCreate}
+              noBackground
+              noBorder
+              inverted
+            />
+          ) : null}
           <StyledArrangeIcon data-hint="how the list is grouped">
             <IcoListTree />
           </StyledArrangeIcon>

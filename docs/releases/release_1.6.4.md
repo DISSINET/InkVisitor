@@ -13,6 +13,7 @@
 - The notes in the global geocoding settings are shorter and in plain words, the role rows say what they hold, and the gazetteer location type column explains what each type covers
 - The query context's labels and sliders line up with the top of their row
 - A search no longer slows the page down while it runs: the seconds counter re-rendered the whole page, and any window open over it, four times a second
+- A new Location can be made from the Geocoding page with the `+` beside the search field. It opens the Explorer's create dialog for Locations, then the list is widened to every Location and the new one is selected
 
 ## Deployment
 
