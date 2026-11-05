@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CoordinateTag } from "../../components/coordinate/CoordinateTag";
 import { engineFeedback } from "../../utils/engine/engine";
 import { FeedbackReason, SuggestResponse, Suggestion } from "../../types/engine";
+import { ElapsedSeconds } from "../../components/suggestion/ElapsedSeconds";
 import { GeocodingProgress } from "../../components/suggestion/GeocodingProgress";
 import { GeocodingProvenance } from "../../utils/write/geocodingWrite";
 import { MatchTag } from "../../components/gazetteer/MatchTag";
@@ -697,7 +698,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   const [degradedAnchor, setDegradedAnchor] = useState<HTMLDivElement | null>(null);
   const [degradedHovered, setDegradedHovered] = useState(false);
 
-  const { isRunning, elapsedMs, stage, error, isProvisional } = suggest;
+  const { isRunning, startedAt, stage, error, isProvisional } = suggest;
   const name = selected?.entity.labels[0] || "";
   const locationId = selected?.entity.id;
 
@@ -751,8 +752,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     setPending(null);
     setDegradedHovered(false);
   }, [locationId, response]);
-
-  const seconds = (elapsedMs / 1000).toFixed(1);
 
   /**
    * What the sources did between them.
@@ -1149,7 +1148,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           <StyledRunFacts>
             <StyledProgress>
               {isRunningForThis
-                ? `${seconds}s`
+                ? startedAt !== null && <ElapsedSeconds since={startedAt} />
                 : response
                   ? `${response.suggestions.length} suggestions · margin ${
                       response.margin == null ? "—" : response.margin.toFixed(2)

@@ -480,6 +480,15 @@ which is the `id` on the audit entries. That identifies the request rather than
 the browser that sent it, so the stage line cannot be driven by anything else
 this browser, or anyone else's, has running.
 
+The seconds counted beside the run button are drawn by their own component,
+`ElapsedSeconds`, from the moment the hook reports the request started. The count
+changes four times a second, and held in the hook it would re-render the whole
+page, and any modal open over it, for the length of every search.
+
+The engine's progress stream repeats its whole audit every second. A frame equal
+to the last one is dropped in the hook before any state is set, because even a
+setter that changes nothing makes React call the page's function again.
+
 `clientId` is therefore not an identifier here at all. The server sends a constant
 `inkvisitor-<env>` for every browser: the engine's response cache excludes it
 from the key, so varying it buys nothing, and a per-browser value would let the

@@ -12,6 +12,7 @@
 - The gazetteer hover card is shown in the settings only, not beside the suggestions; its "cannot do" line is "limitations"
 - The notes in the global geocoding settings are shorter and in plain words, the role rows say what they hold, and the gazetteer location type column explains what each type covers
 - The query context's labels and sliders line up with the top of their row
+- A search no longer slows the page down while it runs: the seconds counter re-rendered the whole page, and any window open over it, four times a second
 
 ## Deployment
 
