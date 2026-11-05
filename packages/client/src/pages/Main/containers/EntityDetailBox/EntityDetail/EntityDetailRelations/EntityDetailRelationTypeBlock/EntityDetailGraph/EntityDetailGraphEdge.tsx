@@ -22,7 +22,7 @@ const getCertaintyStyles = (theme: DefaultTheme): Record<EntityEnums.Certainty, 
   "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: theme.color["black"] },
   "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: theme.color["black"] },
   "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: theme.color["black"] },
-  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: theme.color["gray"][500] },
+  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: theme.color["gray"][600] },
   "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: theme.color["danger"] },
   "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: theme.color["queryInvalid"] },
 });

@@ -92,6 +92,12 @@ export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRela
     }
   }
 
+  /* reactflow paints the connection dots a fixed dark with a white ring */
+  .react-flow__handle {
+    background-color: ${({ theme }) => theme.color["black"]};
+    border-color: ${({ theme }) => theme.color["white"]};
+  }
+
   /* reactflow gives the attribution link a light backdrop in both themes */
   .react-flow__attribution {
     background-color: transparent;
@@ -121,8 +127,24 @@ export const StyledGraphResizeHandle = styled.div`
   border-bottom-style: solid;
   border-bottom-color: transparent;
   transition: border-color 0.3s ease;
+  /* the grip shows the graph can be resized before the pointer reaches the edge */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: ${({ theme }) => theme.space["px"]};
+    left: 50%;
+    transform: translateX(-50%);
+    width: ${({ theme }) => theme.space[12]};
+    height: ${({ theme }) => theme.borderWidth[2]};
+    border-radius: ${({ theme }) => theme.borderRadius["full"]};
+    background-color: ${({ theme }) => theme.color["gray"][500]};
+    transition: background-color 0.3s ease;
+  }
   &:hover,
   &:active {
     border-bottom-color: ${({ theme }) => theme.color["success"]};
+    &::after {
+      background-color: ${({ theme }) => theme.color["success"]};
+    }
   }
 `;

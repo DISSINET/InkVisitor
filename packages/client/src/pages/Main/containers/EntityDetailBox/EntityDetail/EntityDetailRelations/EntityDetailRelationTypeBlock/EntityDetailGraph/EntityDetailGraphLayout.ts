@@ -1,5 +1,5 @@
 import { IResponseDetail, Relation } from "@inkvisitor/shared/types";
-import { Edge, MarkerType, Node, Position } from "reactflow";
+import { Edge, Node, Position } from "reactflow";
 
 interface Graph {
   nodes: Node[];
@@ -111,7 +111,6 @@ export const convertToGraph = (
       edges.push({
         id: String(edges.length),
         type: "relationship",
-        markerEnd: { type: MarkerType.ArrowClosed },
         data: {
           certainty:
             (
@@ -121,10 +120,6 @@ export const convertToGraph = (
               >
             ).certainty ?? undefined,
           relationType: branch.type,
-        },
-        style: {
-          strokeWidth: 1,
-          stroke: "black",
         },
         source: sourceId,
         target: targetId,
