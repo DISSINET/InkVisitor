@@ -11,6 +11,51 @@ const makeNode = (id: string, edges: Query.IEdge[] = []): Query.INode => ({
   edges,
 });
 
+describe("queryReducer node filters", () => {
+  const withTarget = (params: Query.INodeParams): Query.INode =>
+    makeNode("root", [
+      {
+        id: "e1",
+        type: Query.EdgeType["R:SCL"],
+        params: {},
+        logic: Query.EdgeLogic.Positive,
+        node: { ...makeNode("n1"), params },
+      },
+    ]);
+
+  it("updateNodeFilters sets the given params and removes the emptied ones", () => {
+    const next = queryReducer(withTarget({ createdBy: "u-1", editedBy: ["u-2"] }), {
+      type: QueryActionType.updateNodeFilters,
+      payload: {
+        nodeId: "n1",
+        changes: { createdAfter: "2024-01-01T00:00:00.000Z", createdBy: "", editedBy: [] },
+      },
+    });
+    expect(next.edges[0].node.params).toEqual({ createdAfter: "2024-01-01T00:00:00.000Z" });
+  });
+
+  it("clearNodeFilters and pinning an entity drop every node filter, the classes stay", () => {
+    const params: Query.INodeParams = {
+      entityClasses: [EntityEnums.Class.Concept],
+      label: "star",
+      createdBefore: "2024-01-01T00:00:00.000Z",
+      updatedBy: "u-1",
+      coOccurrence: ["c-1"],
+    };
+    const cleared = queryReducer(withTarget({ ...params }), {
+      type: QueryActionType.clearNodeFilters,
+      payload: { nodeId: "n1" },
+    });
+    expect(cleared.edges[0].node.params).toEqual({ entityClasses: [EntityEnums.Class.Concept] });
+
+    const pinned = queryReducer(withTarget({ ...params }), {
+      type: QueryActionType.updateNodeEntityId,
+      payload: { nodeId: "n1", newEntityId: "c-2" },
+    });
+    expect(pinned.edges[0].node.params).toEqual({ entityClasses: [], entityId: "c-2" });
+  });
+});
+
 describe("queryReducer setQueryState", () => {
   it("replaces the whole tree with the payload state", () => {
     const oldState = makeNode("root");

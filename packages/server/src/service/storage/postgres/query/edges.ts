@@ -2,13 +2,21 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExploreResolvers } from "../../types";
 import { collect, propPaths } from "../provision";
 import { Params, arr, ident, indexHolds } from "../sql";
-import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
+import {
+  ENTITIES,
+  NO_FILTERS,
+  NodeFilters,
+  anyOf,
+  filterParts,
+  hasFilters,
+  nodeFilters,
+  withCoOccurrentIds,
+} from "./filters";
 import SearchNode, { ID_ORDER, Input, inputWhere } from "./nodes";
 
 /**
@@ -54,6 +62,8 @@ export default class SearchEdge implements Query.IEdge {
    * its filters. Null when the target is neither pinned nor constrained.
    */
   protected targetEntityIds: string[] | null = null;
+  /** the per-partner filters with the co-occurrence set prepare() resolved */
+  private resolvedTargetFilters: NodeFilters | null = null;
 
   /** the subtree below the pinned targets, resolved for I_CT: with the SUB toggle */
   protected descendantIds: string[] | null = null;
@@ -83,9 +93,13 @@ export default class SearchEdge implements Query.IEdge {
       // every other predicate applies the filters through the targetIds() set; the relation edges
       // test them on the partner row, as a broad filter (one language) holds most of the entities
       // and each relation would be tested against that whole list
-      const filters = this.unpinnedTargetFilters();
-      const constrained = hasFilters(filters) && !this.checksUnpinnedTargetInRun();
-      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, filters) : null;
+      const filters = nodeFilters(this.node.params);
+      if (hasFilters(filters) && !this.checksUnpinnedTargetInRun()) {
+        this.targetEntityIds = await this.constrainedTargetIds(conn, filters);
+      } else {
+        this.targetEntityIds = null;
+        this.resolvedTargetFilters = await withCoOccurrentIds(conn, filters);
+      }
       return;
     }
 
@@ -104,7 +118,7 @@ export default class SearchEdge implements Query.IEdge {
    * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
    * else by the classes the edge's target can hold
    */
-  private async constrainedTargetIds(conn: Conn, filters: TargetFilters): Promise<string[]> {
+  private async constrainedTargetIds(conn: Conn, filters: NodeFilters): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
@@ -136,16 +150,11 @@ export default class SearchEdge implements Query.IEdge {
    * filters of an unpinned target for the per-relation check; none for a pinned
    * target, which is the target itself whatever its filters
    */
-  unpinnedTargetFilters(): TargetFilters {
-    const params = this.node.params;
-    if (params.entityId) {
+  unpinnedTargetFilters(): NodeFilters {
+    if (this.node.params.entityId) {
       return NO_FILTERS;
     }
-    return {
-      statuses: params.entityStatuses ?? [],
-      languages: params.entityLanguages ?? [],
-      label: nodeLabel(params.label),
-    };
+    return this.resolvedTargetFilters ?? nodeFilters(this.node.params);
   }
 
   /** ancestors of the pinned targets through the tree cache: every level, or the direct parents only */
@@ -184,21 +193,8 @@ export default class SearchEdge implements Query.IEdge {
   }
 }
 
-/** an unpinned target node's filters; nodeLabel's parts for the label */
-type TargetFilters = {
-  statuses: EntityEnums.Status[];
-  languages: EntityEnums.Language[];
-  label: [string, string, string] | undefined;
-};
-
-const NO_FILTERS: TargetFilters = { statuses: [], languages: [], label: undefined };
-
-const hasFilters = (f: TargetFilters): boolean =>
-  !!f.label || f.languages.length > 0 || f.statuses.length > 0;
-
 export type Predicate = (edge: SearchEdge, p: Params) => string;
 
-export const ENTITIES = ident(TABLE.entities);
 const RELATIONS = ident(TABLE.relations);
 /** the relation row holds e.id, through the gin index; `doc` resolves to the relation inside the subquery */
 const RELATION_HOLDS_E = indexHolds(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, "e.id");
@@ -206,38 +202,10 @@ const TERRITORY_TREE_EDGES = new Set<string>([Query.EdgeType["CT:"], Query.EdgeT
 const S = EntityEnums.Class.Statement;
 const T = EntityEnums.Class.Territory;
 
-const anyOf = (p: Params, values: unknown[]): string => `ANY(${p.add(values)}::text[])`;
 /** the row `x` is of class `cls` */
 const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.class = '${cls}'`;
 /** a filled id read from json (ReQL `.default("").ne("")`) */
 const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
-
-/**
- * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
- * constraint; empty lists do not constrain. Every node filter is checked here, for the id set
- * prepare() selects and for the per-partner checks alike
- */
-function filterParts(
-  p: Params,
-  alias: string,
-  classes: EntityEnums.Class[],
-  filters: TargetFilters
-): string[] {
-  const parts: string[] = [];
-  if (classes.length) {
-    parts.push(`${alias}.class = ${anyOf(p, classes)}`);
-  }
-  if (filters.statuses.length) {
-    parts.push(`${alias}.status = ${anyOf(p, filters.statuses)}`);
-  }
-  if (filters.languages.length) {
-    parts.push(`${alias}.language = ${anyOf(p, filters.languages)}`);
-  }
-  if (filters.label) {
-    parts.push(labelMatch(p, labelPattern(...filters.label), `${alias}.labels`));
-  }
-  return parts;
-}
 
 /** an existing entity `idSql` of the classes, passing the filters; empty lists do not constrain */
 function entityMatches(
@@ -309,7 +277,7 @@ function partnersMatch(
   partnersSql: string,
   targets: string[] | null,
   classes: EntityEnums.Class[],
-  filters: TargetFilters
+  filters: NodeFilters
 ): string {
   if (targets) {
     return `${partnersSql} && ${p.add(targets)}::text[]`;
