@@ -9,7 +9,7 @@ import "reactflow/dist/style.css";
 
 import { certaintyDict } from "@inkvisitor/shared/dictionaries";
 import { LetterIcon, Tooltip } from "components";
-import React, { useMemo, useState } from "react";
+import React, { useId, useMemo, useState } from "react";
 
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types/relation";
@@ -44,14 +44,35 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
 
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
+  // edge ids repeat across the graphs on one page and a url(#...) reference
+  // takes the first match in the document, so the marker id must be page-unique;
+  // useId may contain characters that break a url() reference
+  const markerId = `arrowhead-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
+  // both ends of an arc face right at about the same x, where a bezier between
+  // handles collapses into a straight line; the bulge grows with the distance
+  // so arcs of different lengths nest instead of overlapping, up to a cap that
+  // keeps the arc in the gap before the next column
+  const bulge = Math.min(Math.abs(targetY - sourceY) / 2, 80);
+  const [edgePath, labelX, labelY] = data.arc
+    ? [
+        [
+          `M ${sourceX},${sourceY}`,
+          `C ${sourceX + bulge},${sourceY}`,
+          `${targetX + bulge},${targetY}`,
+          `${targetX},${targetY}`,
+        ].join(" "),
+        (sourceX + targetX) / 2 + (bulge * 3) / 4,
+        (sourceY + targetY) / 2,
+      ]
+    : getBezierPath({
+        sourceX,
+        sourceY,
+        sourcePosition,
+        targetX,
+        targetY,
+        targetPosition,
+      });
 
   const scaleLabel = 0.75;
 
@@ -86,7 +107,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
       >
         <defs>
           <marker
-            id={`arrowhead-${id}`}
+            id={markerId}
             viewBox="0 0 6 6"
             refX="6"
             refY="3"
@@ -125,8 +146,8 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           strokeWidth={edgeStyle.width}
           stroke={edgeStyle.stroke}
           style={{}}
-          markerEnd={`url(#arrowhead-${id})`}
-          markerStart={relAssymetric ? "none" : `url(#arrowhead-${id})`}
+          markerEnd={`url(#${markerId})`}
+          markerStart={relAssymetric ? "none" : `url(#${markerId})`}
         />
         {/* tooltip interaction path */}
         <path

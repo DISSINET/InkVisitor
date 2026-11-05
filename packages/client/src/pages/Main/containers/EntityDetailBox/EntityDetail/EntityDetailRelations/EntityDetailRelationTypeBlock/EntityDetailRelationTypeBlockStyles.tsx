@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Handle } from "reactflow";
 
 export const StyledRelation = styled.div`
   display: inline-flex;
@@ -60,7 +61,36 @@ interface StyledEntityDetailRelationGraph {
 
 export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRelationGraph>`
   display: block;
+  position: relative;
   height: ${({ theme, height }) => (height ? `${height}px` : "500px")};
+  margin-top: ${({ theme }) => theme.space[4]};
   margin-bottom: ${({ theme }) => theme.space[12]};
   margin-bottom: ${({ theme }) => -theme.space[8]};
+`;
+
+// a handle only for edges between two nodes in one column
+export const StyledGraphVerticalHandle = styled(Handle)`
+  opacity: 0;
+`;
+
+export const StyledGraphResizeHandle = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: ${({ theme }) => theme.space[2]};
+  z-index: 5;
+  cursor: row-resize;
+  /* a pointer drag on a touch screen scrolls the page instead of resizing */
+  touch-action: none;
+  border-bottom-width: ${({ theme }) => theme.borderWidth[2]};
+  border-bottom-style: solid;
+  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+  &:hover,
+  &:active {
+    border-bottom-color: ${({ theme }) => theme.color["success"]};
+    opacity: 1;
+  }
 `;
