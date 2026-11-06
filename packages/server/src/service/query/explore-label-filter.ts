@@ -157,8 +157,15 @@ const findMatchingIdsWithDbSearch = async (
     rightFromPrepare
   );
 
+  // regex mode goes through findMatchingIdsWithRegex, so the text here is literal
   return new Set(
-    await storage.entities.idsMatchingLabel(db, ids, preparedLabel, leftWildcard, rightWildcard)
+    await storage.entities.idsMatchingLabel(
+      db,
+      ids,
+      escapeRegExp(preparedLabel),
+      leftWildcard,
+      rightWildcard
+    )
   );
 };
 

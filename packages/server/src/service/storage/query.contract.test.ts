@@ -1,7 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { getSubordinateEntityIds } from "@models/relation/functions";
+import { filterEntityIdsByRowLabelFilter } from "@service/query/explore-label-filter";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import { Conn, ExploreResolvers, Row, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../test/db";
@@ -221,11 +222,19 @@ describe("entity search", () => {
       await storage.entities.insert(conn, [
         entity("q-1", C.Concept, ["heretics\u2019 presence"]),
         entity("q-2", C.Concept, ["\u201EPater noster\u201C prayer"]),
+        entity("q-3", C.Concept, ["Confession (oral) d'Arc"]),
       ]);
     });
     afterAll(async () => {
-      await storage.entities.deleteMany(conn, ["q-1", "q-2"]);
+      await storage.entities.deleteMany(conn, ["q-1", "q-2", "q-3"]);
     });
+
+    const explorerFilter = (label: string, useRegex = false) =>
+      filterEntityIdsByRowLabelFilter(conn, ["q-1", "q-2", "q-3"], {
+        type: Explore.SearchOption.Label,
+        label,
+        useRegex,
+      });
 
     it("match a typographic apostrophe when typing a straight one", async () => {
       expect(await search({ label: "heretics' presence" })).toEqual(["q-1"]);
@@ -245,6 +254,24 @@ describe("entity search", () => {
         { expand: getNodeExpansionIds, subordinates: getSubordinateEntityIds, territoryPath: () => [] }
       );
       expect(sorted(await plan.run(conn))).toEqual(["q-1"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      expect(await explorerFilter("heretics' pres")).toEqual(["q-1"]);
+      expect(await explorerFilter('"Pater noster"')).toEqual(["q-2"]);
+      expect(await explorerFilter("d\u2019Arc")).toEqual(["q-3"]);
+    });
+
+    it("read regex characters literally in the Explorer label filter", async () => {
+      expect(await explorerFilter('"Pater (noster')).toEqual([]);
+      expect(await explorerFilter("(oral")).toEqual(["q-3"]);
+      expect(await explorerFilter("(noster)")).toEqual([]);
+      expect(await explorerFilter("o.al")).toEqual([]);
+      expect(await explorerFilter("*fession*")).toEqual(["q-3"]);
+    });
+
+    it("keep the regex mode of the Explorer label filter", async () => {
+      expect(await explorerFilter("^Conf.*Arc$", true)).toEqual(["q-3"]);
     });
   });
 });

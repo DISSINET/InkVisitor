@@ -35,3 +35,8 @@ const QUOTE_CHARS =
  */
 export const quoteCharPattern = (char: string): string | undefined =>
   QUOTE_CHARS.includes(char) ? `[${QUOTE_CHARS}]` : undefined;
+
+const QUOTE_MARKS = new RegExp(`[${QUOTE_CHARS}]`, "g");
+
+/** Replaces every quote char with `'`, for matching that compares text without a regex. */
+export const foldQuotes = (text: string): string => text.replace(QUOTE_MARKS, "'");
