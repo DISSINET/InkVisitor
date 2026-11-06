@@ -50,6 +50,15 @@ describe("templateMatcher", () => {
     expect(matches("volapük", template("2", ["Volapuk"]))).toBe(true);
   });
 
+  it("treats quote marks and apostrophes as interchangeable", () => {
+    const typographic = template("1", ["heretics\u2019 presence", "\u201EPater noster\u201C"]);
+    expect(matches("heretics' presence", typographic)).toBe(true);
+    expect(matches('"Pater', typographic)).toBe(true);
+    expect(matches("\u00ABPater noster\u00BB", typographic)).toBe(true);
+    expect(matches("heretics\u2019", template("2", ["heretics' presence"]))).toBe(true);
+    expect(matches("heretics' presence", template("3", ["heretics presence"]))).toBe(false);
+  });
+
   it("matches a UUID prefix", () => {
     expect(matches("c0ffee", witness)).toBe(true);
     expect(matches("ffee12", witness)).toBe(false);

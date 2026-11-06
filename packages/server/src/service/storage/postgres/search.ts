@@ -1,5 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { prepareLabel, quoteCharPattern } from "../../../common/searchLabel";
+import { quoteCharPattern } from "@inkvisitor/shared/constants";
+import { prepareLabel } from "../../../common/searchLabel";
 import { TABLE } from "../names";
 import { SearchFilters } from "../types";
 import { Params, arr, ident } from "./sql";

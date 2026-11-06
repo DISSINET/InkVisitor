@@ -19,3 +19,19 @@ export const MAX_DOCUMENTS_EXPORT_BATCH = 50;
  */
 export const MAX_SAVED_QUERY_DEPTH = 6;
 export const MAX_SAVED_QUERY_NODES = 1000;
+
+/**
+ * Apostrophes, quotation marks and the characters typed in their place (primes,
+ * accents, fullwidth forms). Label search treats all of them as one character,
+ * single and double alike.
+ */
+const QUOTE_CHARS =
+  "'‘’‚‛‹›ʼʻ`´′＇" +
+  '"“”„‟«»″＂';
+
+/**
+ * Regex character class matching every quote char when `char` is one of them.
+ * The class is valid in JavaScript, RethinkDB (RE2) and PostgreSQL patterns.
+ */
+export const quoteCharPattern = (char: string): string | undefined =>
+  QUOTE_CHARS.includes(char) ? `[${QUOTE_CHARS}]` : undefined;

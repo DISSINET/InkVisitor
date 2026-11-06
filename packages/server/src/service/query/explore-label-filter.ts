@@ -1,7 +1,8 @@
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
-import { prepareLabel, quoteCharPattern } from "@common/searchLabel";
+import { prepareLabel } from "@common/searchLabel";
+import { quoteCharPattern } from "@inkvisitor/shared/constants";
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 

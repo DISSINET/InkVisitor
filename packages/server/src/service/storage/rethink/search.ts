@@ -2,7 +2,8 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { SearchFilters } from "../types";
-import { prepareLabel, quoteCharPattern } from "../../../common/searchLabel";
+import { quoteCharPattern } from "@inkvisitor/shared/constants";
+import { prepareLabel } from "../../../common/searchLabel";
 import { QUERY_RUN_OPTIONS } from "./query/run-options";
 
 const TABLE_ENTITIES = "entities";
