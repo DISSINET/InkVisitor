@@ -3,7 +3,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { SearchFilters } from "../types";
 import { quotesToPattern } from "@inkvisitor/shared/constants";
-import { prepareLabel } from "../../../common/searchLabel";
+import { accentsToPattern, prepareLabel } from "../../../common/searchLabel";
 import { QUERY_RUN_OPTIONS } from "./query/run-options";
 
 const TABLE_ENTITIES = "entities";
@@ -33,25 +33,7 @@ export function searchWordByWord(
     right = "($|[^a-zA-Z0-9])";
   }
 
-  // Instead of normalizing, create a pattern that matches both accented and non-accented versions
-  const processedLabel = label.toLowerCase();
-  const diacriticPattern = processedLabel
-    .split("")
-    .map((char) => {
-      // Map common accented characters to their base form with optional accents
-      const map: Record<string, string> = {
-        a: "[aàáâãäå]",
-        e: "[eèéêë]",
-        i: "[iìíîï]",
-        o: "[oòóôõö]",
-        u: "[uùúûü]",
-        y: "[yýÿ]",
-        n: "[nñ]",
-        c: "[cç]",
-      };
-      return map[char] || char;
-    })
-    .join("");
+  const diacriticPattern = accentsToPattern(label.toLowerCase());
 
   const regexBody = quotesToPattern(diacriticPattern)
     .split(" ")

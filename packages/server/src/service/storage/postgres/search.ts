@@ -1,14 +1,14 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { quotesToPattern } from "@inkvisitor/shared/constants";
-import { prepareLabel } from "../../../common/searchLabel";
+import { accentsToPattern, prepareLabel } from "../../../common/searchLabel";
 import { TABLE } from "../names";
 import { SearchFilters } from "../types";
 import { Params, arr, ident } from "./sql";
 
 /**
  * The label regex of searchWordByWord in ../rethink/search.ts, as a string:
- * word boundaries on a side without a wildcard, a class per vowel (and c, n,
- * y) so accented and plain spellings find each other, glue between words.
+ * word boundaries on a side without a wildcard, a class per letter with accented
+ * spellings so a plain letter finds them, glue between words.
  * RE2's `\w` is ASCII while PostgreSQL's follows the locale, so the glue
  * spells the class out. `(?i)` is an embedded option in both engines, which
  * is why the pattern is matched with `~`.
@@ -20,21 +20,7 @@ export function labelPattern(label: string, left: string, right: string): string
   if (right === "$") {
     right = "($|[^a-zA-Z0-9])";
   }
-  const map: Record<string, string> = {
-    a: "[aàáâãäå]",
-    e: "[eèéêë]",
-    i: "[iìíîï]",
-    o: "[oòóôõö]",
-    u: "[uùúûü]",
-    y: "[yýÿ]",
-    n: "[nñ]",
-    c: "[cç]",
-  };
-  const diacriticPattern = label
-    .toLowerCase()
-    .split("")
-    .map((char) => map[char] || char)
-    .join("");
+  const diacriticPattern = accentsToPattern(label.toLowerCase());
   const body = quotesToPattern(diacriticPattern)
     .split(" ")
     .join("([^a-zA-Z0-9]+[0-9A-Za-z_]+)*[^a-zA-Z0-9]+");

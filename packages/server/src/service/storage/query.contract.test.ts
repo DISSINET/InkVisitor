@@ -217,6 +217,52 @@ describe("entity search", () => {
     expect(await storage.entities.labelsOf(conn, [])).toEqual([]);
   });
 
+  describe("Czech accents", () => {
+    const labels = {
+      "d-1": "Evelín Teměř Jr.",
+      "d-2": "Karel Čapek",
+      "d-3": "Žďár nad Sázavou",
+      "d-4": "Příběh ťuhýka",
+      "d-5": "ŘÍP",
+    };
+    const seeded = Object.keys(labels);
+
+    beforeAll(async () => {
+      await storage.entities.insert(
+        conn,
+        Object.entries(labels).map(([id, label]) => entity(id, C.Concept, [label]))
+      );
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, seeded);
+    });
+
+    it("match accented labels when typing plain letters", async () => {
+      expect(await search({ label: "temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "evelin temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "capek" })).toEqual(["d-2"]);
+      expect(await search({ label: "zdar nad sazavou" })).toEqual(["d-3"]);
+      expect(await search({ label: "pribeh tuhyka" })).toEqual(["d-4"]);
+      expect(await search({ labelOrId: "tem*" })).toEqual(["d-1"]);
+    });
+
+    it("match accented capitals when typing plain letters", async () => {
+      expect(await search({ label: "rip" })).toEqual(["d-5"]);
+    });
+
+    it("still match when typing the accents", async () => {
+      expect(await search({ label: "Teměř" })).toEqual(["d-1"]);
+      expect(await search({ label: "Čapek" })).toEqual(["d-2"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      const explorerFilter = (label: string) =>
+        filterEntityIdsByRowLabelFilter(conn, seeded, { type: Explore.SearchOption.Label, label });
+      expect(await explorerFilter("temer")).toEqual(["d-1"]);
+      expect(await explorerFilter("zdar")).toEqual(["d-3"]);
+    });
+  });
+
   describe("quote marks and apostrophes", () => {
     beforeAll(async () => {
       await storage.entities.insert(conn, [

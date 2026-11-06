@@ -36,3 +36,30 @@ export function nodeLabel(label: string | undefined): [string, string, string] |
   const [text, left] = prepareLabel(label?.trim() ?? "");
   return text ? [text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), left, ""] : undefined;
 }
+
+/** the spellings a plain lowercase letter in a search label also finds */
+const ACCENT_CLASSES: Record<string, string> = {
+  a: "[aàáâãäå]",
+  c: "[cçč]",
+  d: "[dď]",
+  e: "[eèéêëě]",
+  i: "[iìíîï]",
+  n: "[nñň]",
+  o: "[oòóôõö]",
+  r: "[rř]",
+  s: "[sš]",
+  t: "[tť]",
+  u: "[uùúûüů]",
+  y: "[yýÿ]",
+  z: "[zž]",
+};
+
+/**
+ * Replaces each plain letter of a lowercased search label with a class of its
+ * accented spellings. A letter typed with its accent stays as typed.
+ */
+export const accentsToPattern = (label: string): string =>
+  label
+    .split("")
+    .map((char) => ACCENT_CLASSES[char] || char)
+    .join("");
