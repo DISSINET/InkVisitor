@@ -2,8 +2,7 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { SearchFilters } from "../types";
-import { quotesToPattern } from "@inkvisitor/shared/constants";
-import { accentsToPattern, prepareLabel } from "../../../common/searchLabel";
+import { labelPattern, prepareLabel } from "../../../common/searchLabel";
 import { QUERY_RUN_OPTIONS } from "./query/run-options";
 
 const TABLE_ENTITIES = "entities";
@@ -12,7 +11,7 @@ const TABLE_DOCUMENTS = "documents";
 /**
  * Word-boundary label match with optional wildcards on either side.
  * @param row - RDatum from rethink api
- * @param label - cleaned label input (with escaped chars)
+ * @param label - typed text without its wildcard markers, matched literally
  * @param left - optional wildcard on the left
  * @param right - optional wildcard on the right
  * @param normalize - unused today; both variants build the same pattern
@@ -25,21 +24,7 @@ export function searchWordByWord(
   right: string,
   normalize = true
 ): RDatum<boolean> {
-  // if wildcard not used, update the left/right side to simulate word boundaries
-  if (left === "^") {
-    left = "(^|[^a-zA-Z0-9])";
-  }
-  if (right === "$") {
-    right = "($|[^a-zA-Z0-9])";
-  }
-
-  const diacriticPattern = accentsToPattern(label.toLowerCase());
-
-  const regexBody = quotesToPattern(diacriticPattern)
-    .split(" ")
-    .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
-
-  const regexp = `(?i)${left}${regexBody}${right}`;
+  const regexp = labelPattern(label, left, right);
 
   return row("labels").contains<string>((targetLabel) => targetLabel.match(regexp));
 }
@@ -137,8 +122,6 @@ export class SearchQuery {
   whereLabelOrId(labelOrId: string): SearchQuery {
     const [label, leftWildcard, rightWildcard] = prepareLabel(labelOrId);
 
-    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
     // id is matched as a prefix of the literal input: strip the trailing
     // wildcard the client appends, then escape regex chars and anchor at start
     const idPrefix = labelOrId.replace(/\*$/, "");
@@ -150,8 +133,8 @@ export class SearchQuery {
     // 3. search for id prefix match
     this.query = this.query.filter(function (row: RDatum) {
       return r.or(
-        searchWordByWord(row, escapedLabel, leftWildcard, rightWildcard),
-        searchWordByWord(row, escapedLabel, leftWildcard, rightWildcard, false),
+        searchWordByWord(row, label, leftWildcard, rightWildcard),
+        searchWordByWord(row, label, leftWildcard, rightWildcard, false),
         row("id").match("^" + escapedIdPrefix).ne(null)
       );
     });

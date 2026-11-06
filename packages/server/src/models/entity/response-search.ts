@@ -527,18 +527,19 @@ export function sortByWordMatch(
     return entities;
   }
 
+  const foldAccents = (text: string) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   // the word tokens compared below hold no quote marks, so the typed ones are dropped
-  const word = foldQuotes(usedLabel.toLowerCase()).replace(/'/g, "");
+  const word = foldQuotes(foldAccents(usedLabel)).replace(/'/g, "");
   const sortedExact: IEntity[] = [];
   const sortedSubstring: IEntity[] = [];
 
   for (const entity of entities) {
     if (
       entity.labels.length > 0 &&
-      entity.labels[0]
-        .toLowerCase()
+      foldAccents(entity.labels[0])
         .match(/[\w]+/g)
-        ?.indexOf(word) !== -1
+        ?.includes(word)
     ) {
       sortedExact.push(entity);
     } else {

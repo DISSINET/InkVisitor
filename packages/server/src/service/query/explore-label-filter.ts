@@ -2,8 +2,6 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
 import { prepareLabel } from "@common/searchLabel";
 
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 /**
  * Parses user input as a JavaScript RegExp.
  * Supports `/pattern/flags` or a raw pattern (default flag: i).
@@ -65,15 +63,8 @@ const findMatchingIdsWithDbSearch = async (
     rightFromPrepare
   );
 
-  // regex mode goes through findMatchingIdsWithRegex, so the text here is literal
   return new Set(
-    await storage.entities.idsMatchingLabel(
-      db,
-      ids,
-      escapeRegExp(preparedLabel),
-      leftWildcard,
-      rightWildcard
-    )
+    await storage.entities.idsMatchingLabel(db, ids, preparedLabel, leftWildcard, rightWildcard)
   );
 };
 

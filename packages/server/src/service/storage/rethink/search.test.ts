@@ -280,6 +280,28 @@ describe("models/response-search", function () {
       });
     });
 
+    describe("sortByWordMatch with accented labels", () => {
+      const labels = (order: string[], label: string) =>
+        sortByWordMatch(
+          order.map((l) => ({ labels: [l] }) as IEntity),
+          label
+        ).map((e) => e.labels[0]);
+
+      it("should count an accented word as exact, with or without the accents typed", function () {
+        const order = ["Karel Čapek", "Capek with a long label"];
+        expect(labels(order, "capek")).toEqual(order);
+        expect(labels(order, "Čapek")).toEqual(order);
+      });
+
+      it("should not count a part of an accented word as exact", function () {
+        expect(labels(["Teměř", "Novák tem"], "tem")).toEqual(["Novák tem", "Teměř"]);
+      });
+
+      it("should not count a label without word characters as exact", function () {
+        expect(labels(["Šš", "???", "one"], "one")).toEqual(["one", "Šš", "???"]);
+      });
+    });
+
     describe("sortByWordMatch with quote marks around the label", () => {
       it("should sort the same as without them", function () {
         const labels = (label: string) => sortByWordMatch(entitites, label).map((e) => e.labels[0]);

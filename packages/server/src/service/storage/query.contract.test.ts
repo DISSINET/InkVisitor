@@ -224,6 +224,7 @@ describe("entity search", () => {
       "d-3": "Žďár nad Sázavou",
       "d-4": "Příběh ťuhýka",
       "d-5": "ŘÍP",
+      "d-6": "Řeč",
     };
     const seeded = Object.keys(labels);
 
@@ -248,6 +249,16 @@ describe("entity search", () => {
 
     it("match accented capitals when typing plain letters", async () => {
       expect(await search({ label: "rip" })).toEqual(["d-5"]);
+    });
+
+    it("count accented letters as part of a word", async () => {
+      expect(await search({ label: "tem" }, seeded)).toEqual([]);
+      expect(await search({ label: "r" }, seeded)).toEqual([]);
+      expect(await search({ label: "ec*" }, seeded)).toEqual([]);
+      expect(await search({ label: "*ec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "rec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "karel" }, seeded)).toEqual(["d-2"]);
+      expect(await search({ label: "evelin jr" }, seeded)).toEqual(["d-1"]);
     });
 
     it("still match when typing the accents", async () => {
@@ -306,6 +317,18 @@ describe("entity search", () => {
       expect(await explorerFilter("heretics' pres")).toEqual(["q-1"]);
       expect(await explorerFilter('"Pater noster"')).toEqual(["q-2"]);
       expect(await explorerFilter("d\u2019Arc")).toEqual(["q-3"]);
+    });
+
+    it("count quote marks as word breaks", async () => {
+      expect(await search({ label: "arc" })).toEqual(["q-3"]);
+      expect(await search({ label: "heretics" })).toEqual(["q-1"]);
+    });
+
+    it("read regex characters literally in the label search", async () => {
+      expect(await search({ label: '"Pater (noster' })).toEqual([]);
+      expect(await search({ label: "(oral" })).toEqual(["q-3"]);
+      expect(await search({ label: "o.al" })).toEqual([]);
+      expect(await search({ label: "heretics\\spresence" })).toEqual([]);
     });
 
     it("read regex characters literally in the Explorer label filter", async () => {
