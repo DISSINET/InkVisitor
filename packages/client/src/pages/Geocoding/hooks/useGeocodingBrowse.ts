@@ -36,7 +36,7 @@ export const accuracyOptions: DropdownItem[] = [
   ...Object.values(GeocodingAccuracy).map((value) => ({ value, label: value })),
 ];
 
-/** Locations that state no kind of place. Not the same as "any". */
+/** Locations that state no location type. Not the same as "any". */
 export const NO_PLACE_TYPE = "__none";
 
 export interface GeocodingFilters {
@@ -73,7 +73,11 @@ export interface UseGeocodingBrowse {
    */
   geocoded: GeocodingLocation[];
   geocodedCount: number;
+  /** The labels of the Concepts the Locations' inferred location types come through, by id. */
+  viaLabels: Record<string, string>;
   isLoading: boolean;
+  /** What the Locations are classified under could not be read; see `useGeocodingLocations`. */
+  typesError: boolean;
   error: unknown;
   filters: GeocodingFilters;
   setFilter: <K extends keyof GeocodingFilters>(key: K, value: GeocodingFilters[K]) => void;
@@ -88,7 +92,7 @@ export interface UseGeocodingBrowse {
    */
   createdByOptions: DropdownItem[];
   /**
-   * The kinds of place actually present in what the server returned, plus a
+   * The location types actually present in what the server returned, plus a
    * choice for the Locations that state none.
    *
    * Built from the data rather than from the vocabulary: a corpus where nothing
@@ -117,7 +121,7 @@ export interface UseGeocodingBrowse {
 }
 
 /**
- * The kinds of place present in a collection, as filter options.
+ * The location types present in a collection, as filter options.
  *
  * Built from the data rather than from the vocabulary. A corpus where nothing
  * has been typed would otherwise offer twelve choices that each empty the list,
@@ -146,18 +150,18 @@ export const placeTypeOptionsFor = (
     .filter((placeType) => present.has(placeType.id))
     .map((placeType) => ({ value: placeType.id, label: placeType.name }));
   if (!typed.length) {
-    return [{ value: ANY, label: "no kinds recorded yet" }];
+    return [{ value: ANY, label: "no location types recorded yet" }];
   }
   return [
     anyOption,
     ...typed,
-    ...(untyped ? [{ value: NO_PLACE_TYPE, label: "no kind recorded" }] : []),
+    ...(untyped ? [{ value: NO_PLACE_TYPE, label: "no location type recorded" }] : []),
   ];
 };
 
 /**
- * Whether a Location survives the place type filter, given every kind it has.
- * A Location with several kinds is found under each of them.
+ * Whether a Location survives the place type filter, given every location type it has.
+ * A Location with several location types is found under each of them.
  */
 export const matchesKinds = (kinds: string[], filter: string): boolean => {
   if (filter === ANY) {
@@ -222,7 +226,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     [users],
   );
 
-  const { locations, geocodedCount, isLoading, error } = useGeocodingLocations(roles, {
+  const { locations, geocodedCount, viaLabels, isLoading, typesError, error } = useGeocodingLocations(roles, {
     // one character matches most of the corpus, which is not a search
     label: filters.label.length > 1 ? filters.label : undefined,
     createdBy: filters.createdBy === ANY ? undefined : filters.createdBy,
@@ -234,7 +238,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   });
 
   // everything except the place type filter, which is what its own options are
-  // drawn from: options taken from the whole collection would offer a kind the
+  // drawn from: options taken from the whole collection would offer a location type the
   // current view cannot contain, and options taken from the result would vanish
   // as soon as one was chosen
   const beforePlaceType = useMemo(
@@ -271,7 +275,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   /**
    * What each option of each client-side filter would leave.
    *
-   * Only accuracy and kind of place: language and status are asked of the
+   * Only accuracy and location type: language and status are asked of the
    * server, so the collection here has already been narrowed by them and a
    * count over it would say the same number for every option.
    */
@@ -321,7 +325,9 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     visible,
     geocoded,
     geocodedCount,
+    viaLabels,
     isLoading,
+    typesError,
     error,
     filters,
     setFilter,

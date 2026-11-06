@@ -1,25 +1,32 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Button } from "components";
+import { IcoCheck } from "Theme/icons";
+import { ButtonSize } from "types";
 import {
   StyledPickerBackdrop,
+  StyledPickerCheck,
   StyledPickerDescription,
+  StyledPickerFooter,
   StyledPickerLabel,
+  StyledPickerList,
   StyledPickerOption,
   StyledPickerPanel,
   StyledPickerTitle,
 } from "./PlaceTypePickerStyles";
 import { UNKNOWN_PLACE_TYPE, kindInfo, placeTypeInfo } from "./placeTypeIcons";
 import { kindsForEngineType } from "../../utils/write/placeTypeEdits";
-import { usePlaceTypes } from "../../hooks/placeTypesContext";
+import { usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
 
 /**
- * The one control for choosing what kind of place something is.
+ * The one control for choosing what location type something is.
  *
  * Rendered into the document rather than into whatever opened it, because the
  * places it opens from — a virtualised list row, a menu already floating over
  * the map — clip their own children.
  *
- * A kind the project has mapped to no Concept is shown and disabled with the
+ * A location type the project has mapped to no Concept is shown and disabled with the
  * reason on it. Hiding it would misrepresent the vocabulary, and offering it
  * only for the write to refuse afterwards wastes the decision.
  */
@@ -58,23 +65,57 @@ const useFloatingPickerPosition = (anchor: FloatingPickerAnchor) => {
 interface FloatingPicker {
   anchor: FloatingPickerAnchor;
   ariaLabel: string;
+  /** Several options can be selected at once. */
+  multiselectable?: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Controls that are not options, kept out of the list. */
+  footer?: React.ReactNode;
 }
 
 /**
  * The backdrop, portal and positioned panel every picker built on this shape
- * shares — a card's accuracy list and its kind-of-place list open from a
+ * shares — a card's accuracy list and its location-type list open from a
  * click and close the same three ways (Escape, a click outside, choosing an
  * option), so only the options inside tell the two apart.
  */
 export const FloatingPicker: React.FC<FloatingPicker> = ({
   anchor,
   ariaLabel,
+  multiselectable,
   onClose,
   children,
+  footer,
 }) => {
   const { panel, position } = useFloatingPickerPosition(anchor);
+
+  // the keyboard goes in with the panel and back to what opened it, which the
+  // portal would otherwise leave focus behind on
+  useEffect(() => {
+    const opener = document.activeElement;
+    panel.current?.querySelector<HTMLElement>("[role=option]:not(:disabled)")?.focus();
+    return () => {
+      if (opener instanceof HTMLElement && document.contains(opener)) {
+        opener.focus();
+      }
+    };
+  }, [panel]);
+
+  const moveFocus = (event: React.KeyboardEvent) => {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
+      return;
+    }
+    const options = Array.from(
+      panel.current?.querySelectorAll<HTMLElement>("[role=option]:not(:disabled)") ?? [],
+    );
+    if (!options.length) {
+      return;
+    }
+    event.preventDefault();
+    const at = options.indexOf(document.activeElement as HTMLElement);
+    const step = event.key === "ArrowDown" ? 1 : -1;
+    options[(at + step + options.length) % options.length].focus();
+  };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -120,10 +161,18 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
         $top={position.top}
         $width={PANEL_WIDTH}
         $maxHeight={PANEL_MAX_HEIGHT}
-        role="listbox"
+        role="dialog"
         aria-label={ariaLabel}
+        onKeyDown={moveFocus}
       >
-        {children}
+        <StyledPickerList
+          role="listbox"
+          aria-label={ariaLabel}
+          aria-multiselectable={multiselectable || undefined}
+        >
+          {children}
+        </StyledPickerList>
+        {footer}
       </StyledPickerPanel>
     </>,
     document.body,
@@ -132,56 +181,115 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
 
 interface PlaceTypePicker {
   anchor: FloatingPickerAnchor;
-  /** Marked as where the value stands, if anywhere. */
-  current: string | null | undefined;
   /**
-   * The engine type the sources gave, which is a starting point and not an
-   * answer: the kinds that answer to it are marked, the favourite first.
+   * How the Location stands to the project's location types, where it is one
+   * Location: those it is classified under are ticked, and those it only comes
+   * under through a subclass or a synonym are shown, not offered, with where
+   * from. Absent for a run over many Locations, where there is no one answer.
+   */
+  held?: LocationTypeEntry[];
+  /**
+   * The gazetteer location type the sources gave, which is a starting point and not an
+   * answer: the location types that answer to it are marked, the favourite first.
    */
   suggested?: string | null;
-  /** The wording for choosing no kind at all, or absent to leave that out. */
+  /**
+   * The wording for choosing no location type at all, or absent to leave that out.
+   * Only where one click chooses; in a list that is ticked there is no such row,
+   * since unticking is how a location type goes.
+   */
   clearLabel?: string;
-  onChoose: (placeType: string | null) => void;
+  /** What choosing none does, said under its wording. */
+  clearDescription?: string;
+  /** One click chooses one location type, which is added to the others, and the list closes. */
+  onChoose?: (placeType: string | null) => void;
+  /**
+   * A click ticks or unticks one location type and the list stays open, so
+   * several can be set in one visit. Resolves to whether it was written: where
+   * it was not, the tick goes back.
+   */
+  onToggle?: (placeType: string, on: boolean) => Promise<boolean> | void;
   onClose: () => void;
 }
 
 export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   anchor,
-  current,
+  held,
   suggested,
   clearLabel,
+  clearDescription,
   onChoose,
+  onToggle,
   onClose,
 }) => {
   const kinds = usePlaceTypes();
-  // the favourite leads the kinds that answer to the suggestion; the rest keep
+  const viaLabel = useViaLabel();
+  // the favourite leads the location types that answer to the suggestion; the rest keep
   // the order the project listed them in
   const answering = kindsForEngineType(kinds, suggested);
   const ordered = [...answering, ...kinds.filter((one) => !answering.includes(one))];
   const engineLabel = suggested ? placeTypeInfo(suggested).label : "";
+  const toggling = !!onToggle;
+
+  // a tick shows as soon as it is made, and the Location's own list replaces it
+  // when that arrives; until then another click waits, so two writes on one
+  // Location never overtake each other
+  const [ticked, setTicked] = useState<Record<string, boolean>>({});
+  const [busy, setBusy] = useState(false);
+  const heldKey = JSON.stringify(held ?? null);
+  useEffect(() => setTicked({}), [heldKey]);
+
+  const toggle = async (kindId: string, on: boolean) => {
+    setTicked((current) => ({ ...current, [kindId]: on }));
+    setBusy(true);
+    const written = await onToggle?.(kindId, on);
+    setBusy(false);
+    if (written === false) {
+      setTicked((current) => {
+        const next = { ...current };
+        delete next[kindId];
+        return next;
+      });
+    }
+  };
 
   return (
-    <FloatingPicker anchor={anchor} ariaLabel="Kind of place" onClose={onClose}>
-      <StyledPickerTitle>what kind of place is it?</StyledPickerTitle>
+    <FloatingPicker
+      anchor={anchor}
+      ariaLabel="Location type"
+      multiselectable={toggling}
+      onClose={onClose}
+      footer={
+        toggling ? (
+          <StyledPickerFooter>
+            <Button label="done" color="primary" size={ButtonSize.Small} onClick={onClose} />
+          </StyledPickerFooter>
+        ) : null
+      }
+    >
+      <StyledPickerTitle>
+        {toggling ? "location types of this place" : "add a location type"}
+      </StyledPickerTitle>
       {answering.length > 1 ? (
         <StyledPickerDescription>
-          {answering.length} of your kinds answer to &ldquo;{engineLabel}&rdquo;, the sources&apos;
-          word for it — the starred one is your favourite.
+          {answering.length} of your location types answer to &ldquo;{engineLabel}&rdquo;, the
+          gazetteers&apos; word for it — the starred one is your favourite.
         </StyledPickerDescription>
       ) : null}
 
-      {clearLabel ? (
+      {clearLabel && !toggling ? (
         <StyledPickerOption
           type="button"
           role="option"
-          aria-selected={!current}
-          $current={!current}
-          onClick={() => onChoose(null)}
+          aria-selected={false}
+          onClick={() => onChoose?.(null)}
         >
           <UNKNOWN_PLACE_TYPE.icon />
           <StyledPickerLabel>
             {clearLabel}
-            <StyledPickerDescription>{UNKNOWN_PLACE_TYPE.description}</StyledPickerDescription>
+            {clearDescription ? (
+              <StyledPickerDescription>{clearDescription}</StyledPickerDescription>
+            ) : null}
           </StyledPickerLabel>
         </StyledPickerOption>
       ) : null}
@@ -191,25 +299,37 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
         const fits = answering.includes(kind);
         const info = kindInfo(kind);
         const Icon = info.icon;
+        const entry = held?.find((one) => one.typeId === kind.id);
+        // set on this Location itself, or only through a subclass or a synonym
+        const direct = kind.id in ticked ? ticked[kind.id] : !!entry && !entry.inferred;
+        const inferred = !!entry?.inferred && !(kind.id in ticked);
+        const offered = mapped && !inferred && !busy && (toggling || !direct);
         return (
           <StyledPickerOption
             key={kind.id}
             type="button"
             role="option"
-            aria-selected={current === kind.id}
-            disabled={!mapped}
-            $current={current === kind.id}
+            aria-selected={direct}
+            disabled={!offered}
+            $current={direct}
             $suggested={fits}
-            onClick={() => onChoose(kind.id)}
+            onClick={() => (toggling ? toggle(kind.id, !direct) : onChoose?.(kind.id))}
           >
             <Icon />
             <StyledPickerLabel>
               {info.label}
               {fits ? (kind.favorite && answering.length > 1 ? " ★ favourite" : " · what the sources call it") : ""}
               <StyledPickerDescription>
-                {mapped ? info.description : "No Concept is assigned for this kind."}
+                {!mapped
+                  ? "No Concept is assigned for this location type."
+                  : inferred
+                    ? `Already applies through ${viaLabel(entry!.via)}.`
+                    : direct && !toggling
+                      ? "This place already has it."
+                      : info.description}
               </StyledPickerDescription>
             </StyledPickerLabel>
+            {direct ? <StyledPickerCheck aria-hidden><IcoCheck /></StyledPickerCheck> : null}
           </StyledPickerOption>
         );
       })}

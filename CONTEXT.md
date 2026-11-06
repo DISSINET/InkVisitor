@@ -238,6 +238,16 @@ The Annotator workflow of stepping through the text, or through search hits, and
 **Statement label**:
 A statement's own text field, deprecated in favor of anchoring. When a statement has no label, the text of its anchor span shows in its place as a pseudo-label.
 
+## Geocoding
+
+**Location type**:
+One of the place categories a project uses for its Locations ("settlement", "fortress"), each assigned a Concept in the global geocoding settings. A Location has a location type by being classified under that Concept or under one of its subclasses or synonyms, and it can have several.
+_Avoid_: kind of place, engine type
+
+**Gazetteer location type**:
+One of the twelve general place categories the gazetteers (the external geographic name indexes the geocoder searches, such as GeoNames) use. Each location type is mapped onto one of them, which is how the category a gazetteer gives a suggestion finds the project's own location types.
+_Avoid_: engine type, and location type alone (that is the project's own list)
+
 ## Screens
 
 **Territories box** (T tree):

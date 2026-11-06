@@ -2,7 +2,7 @@ import React from "react";
 import { CoordinateTag } from "../coordinate/CoordinateTag";
 import { Suggestion } from "../../types/engine";
 import { GazetteerTag } from "../gazetteer/GazetteerTag";
-import { PlaceTypeIcon, placeTypeInfo } from "../placeType/placeTypeIcons";
+import { placeTypeInfo } from "../placeType/placeTypeIcons";
 import {
   StyledQuickToast,
   StyledQuickToastAction,
@@ -17,7 +17,7 @@ import { splitLabel } from "../../utils/suggestions/suggestionLabel";
  *
  * A quick geocode is run from a list row and the answer is a coordinate on a
  * place the researcher has stopped watching, so the notice carries what was
- * decided and on what grounds — which place it matched, what kind it is, how
+ * decided and on what grounds — which place it matched, what gazetteer location type it is, how
  * many sources stood behind it — enough to tell a good answer from a lucky one
  * without opening the Location. The whole notice is the way to the map.
  */
@@ -40,7 +40,6 @@ export const QuickGeocodeToast: React.FC<QuickGeocodeToast> = ({
     <StyledQuickToast>
       <StyledQuickToastHead>{label} geocoded</StyledQuickToastHead>
       <StyledQuickToastLine>
-        {suggestion.placeType ? <PlaceTypeIcon placeType={suggestion.placeType} /> : null}
         <span>
           matched <strong>{name}</strong>
           {region ? ` — ${region}` : ""}
@@ -48,7 +47,7 @@ export const QuickGeocodeToast: React.FC<QuickGeocodeToast> = ({
       </StyledQuickToastLine>
       <StyledQuickToastMeta>
         <CoordinateTag lat={suggestion.lat} lon={suggestion.lon} accuracy={accuracy} /> {accuracy}
-        {suggestion.placeType ? ` · ${kind.label}` : ""}
+        {suggestion.placeType ? ` · ${kind.label} by the gazetteers` : ""}
         {suggestion.sources.length ? (
           <>
             {` · ${suggestion.sources.length} source${suggestion.sources.length === 1 ? "" : "s"}: `}

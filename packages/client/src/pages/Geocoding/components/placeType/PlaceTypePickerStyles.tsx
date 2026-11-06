@@ -31,6 +31,11 @@ export const StyledPickerPanel = styled.div<{
   box-shadow: ${({ theme }) => theme.boxShadow["high"]};
 `;
 
+/** The options as a list for assistive technology, laid out as if it were not there. */
+export const StyledPickerList = styled.div`
+  display: contents;
+`;
+
 export const StyledPickerTitle = styled.div`
   position: sticky;
   top: 0;
@@ -92,4 +97,29 @@ export const StyledPickerDescription = styled.span`
   display: block;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The mark on a location type that the place has, at the end of its row. */
+export const StyledPickerCheck = styled.span`
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: ${({ theme }) => theme.color["primary"]};
+
+  svg {
+    margin-top: 0;
+    font-size: ${({ theme }) => theme.fontSize.base};
+    color: inherit;
+  }
+`;
+
+/** Under the list of a ticked picker, where it is closed from. */
+export const StyledPickerFooter = styled.div`
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
+  border-top: 1px solid ${({ theme }) => theme.color["gray"][400]};
 `;

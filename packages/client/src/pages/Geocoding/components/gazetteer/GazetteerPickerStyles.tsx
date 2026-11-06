@@ -79,6 +79,16 @@ export const StyledGazetteerNote = styled.span`
   line-height: 1.4;
 `;
 
+/**
+ * What a source covers, in one line under its name.
+ *
+ * Capped in width so that it wraps rather than widening the name column, which
+ * the project's settings share with the columns to its right.
+ */
+export const StyledGazetteerScope = styled(StyledGazetteerNote)`
+  max-width: 34em;
+`;
+
 export const StyledGazetteerLocked = styled(StyledGazetteerNote)`
   color: ${({ theme }) => theme.color["warningText"]};
 `;

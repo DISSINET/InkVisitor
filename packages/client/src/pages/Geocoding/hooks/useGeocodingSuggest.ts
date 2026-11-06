@@ -34,8 +34,13 @@ export interface UseGeocodingSuggest {
    */
   responseContext: IGeocodingContext | null;
   isRunning: boolean;
-  /** Seconds since the request started — the only honest progress on its own. */
-  elapsedMs: number;
+  /**
+   * When the running request started, in epoch milliseconds, or null while none
+   * runs. The time elapsed since is the only honest progress on its own, and it
+   * is counted by whatever draws it: a counter held here would re-render the whole
+   * page, and every modal open over it, several times a second for the length of a search.
+   */
+  startedAt: number | null;
   /** The engine's current pipeline stage, from the live audit stream. */
   stage: string | null;
   /**
@@ -79,7 +84,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
   const [responseContext, setResponseContext] = useState<IGeocodingContext | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [runningFor, setRunningFor] = useState<string | null>(null);
-  const [elapsedMs, setElapsedMs] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
   const [stage, setStage] = useState<string | null>(null);
   const [sources, setSources] = useState<UseGeocodingSuggest["sources"]>({
     answered: {},
@@ -103,15 +108,6 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
     [],
   );
 
-  useEffect(() => {
-    if (!isRunning) {
-      return;
-    }
-    const startedAt = Date.now();
-    const timer = setInterval(() => setElapsedMs(Date.now() - startedAt), 250);
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     // nothing may reclaim this run's state afterwards, and its opening frame is
@@ -120,6 +116,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
     stopWatchingRef.current?.();
     stopWatchingRef.current = null;
     setIsRunning(false);
+    setStartedAt(null);
     setRunningFor(null);
     setStage(null);
   }, []);
@@ -144,7 +141,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
       const isCurrent = () => abortRef.current === controller;
       setIsRunning(true);
       setRunningFor(locationId);
-      setElapsedMs(0);
+      setStartedAt(Date.now());
       setStage(null);
       setSources({ answered: {}, failed: {}, excluded: {} });
       setCandidates([]);
@@ -178,7 +175,23 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
               return;
             }
             stopWatchingRef.current?.();
+            // the engine repeats its whole audit every second whether or not
+            // anything in it changed, so a frame equal to the last one is
+            // dropped before any state is set: even a setter that changes
+            // nothing makes React call the page's function again
+            let lastFrame = "";
             stopWatchingRef.current = watchEngineProgress(requestId, (progress) => {
+              const frame = JSON.stringify([
+                progress.stage,
+                progress.answered,
+                progress.failed,
+                progress.excluded,
+                progress.candidates,
+              ]);
+              if (frame === lastFrame) {
+                return;
+              }
+              lastFrame = frame;
               setStage(progress.stage);
               setSources({
                 answered: progress.answered,
@@ -210,6 +223,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
       } finally {
         if (isCurrent()) {
           setIsRunning(false);
+          setStartedAt(null);
           setRunningFor(null);
           setStage(null);
           stopWatchingRef.current?.();
@@ -234,7 +248,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
     responseContext,
     runningFor,
     isRunning,
-    elapsedMs,
+    startedAt,
     stage,
     sources,
     candidates,

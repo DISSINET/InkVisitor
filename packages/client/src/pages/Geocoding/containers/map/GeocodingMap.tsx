@@ -48,6 +48,7 @@ import { useMapStyle } from "../../hooks/useMapStyle";
 import { useRegionDraw } from "../../hooks/useRegionDraw";
 import { AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
+import { defaultTypeFor } from "../../components/placeType/locationTypeText";
 import { engineSearch } from "../../utils/engine/engine";
 import { boxLabel } from "../../utils/map/regionBox";
 import { EngineSearchHit, Suggestion } from "../../types/engine";
@@ -67,7 +68,8 @@ import { MapPending, afterAccuracy, menuAnchorFor } from "../../utils/map/mapAss
 import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import { describeEntry, shownEntries } from "../../components/placeType/locationTypeText";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
 /**
@@ -162,7 +164,7 @@ interface GeocodingMap {
     geometry: GeoJsonGeometry,
     accuracy: GeocodingAccuracy,
     /**
-     * What kind of place to record. `undefined` leaves whatever the Location
+     * What location type to record. `undefined` leaves whatever the Location
      * already carries, which is the right answer for a geometry correction.
      */
     placeType?: string | null,
@@ -201,13 +203,14 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   onRegionBox,
 }) => {
   const placeTypes = usePlaceTypes();
+  const viaLabel = useViaLabel();
   const themeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
   const basemap = themeId === "dark" ? "dark" : "light";
   const [term, setTerm] = useState("");
   const [hits, setHits] = useState<EngineSearchHit[]>([]);
   /**
    * A coordinate waiting to be written, and how far through the two questions it
-   * is. `accuracy` set means the accuracy is chosen and the kind of place is
+   * is. `accuracy` set means the accuracy is chosen and the location type is
    * being asked for.
    */
   const [pending, setPending] = useState<MapPending | null>(null);
@@ -506,7 +509,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           />
           <StyledMarkCardMeta>
             <KindIcon kind={findPlaceType(placeTypes, hoveredCard.location.placeType)} />
-            {kindInfo(findPlaceType(placeTypes, hoveredCard.location.placeType)).label}
+            {shownEntries(hoveredCard.location.typeEntries).length
+              ? shownEntries(hoveredCard.location.typeEntries)
+                  .map((entry) => describeEntry(entry, placeTypes, viaLabel))
+                  .join(", ")
+              : kindInfo(undefined).label}
             {hoveredCard.location.accuracy ? ` · ${hoveredCard.location.accuracy}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>
@@ -550,7 +557,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
               pending,
               accuracy,
               context.recordPlaceType,
-              context.defaultPlaceType,
+              defaultTypeFor(context, selected?.typeEntries ?? []),
             );
             if ("write" in step) {
               finish(pending, step.write.accuracy, step.write.placeType);
@@ -565,16 +572,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       {pending?.accuracy ? (
         <PlaceTypePicker
           anchor={pickerAnchor(pending)}
-          current={selected?.placeType}
-          clearLabel={
-            selected?.placeType ? `keep it as ${selected.placeType}` : "record no kind of place"
-          }
+          held={selected?.typeEntries}
+          clearLabel="leave the location type as it is"
+          clearDescription="Only the coordinate is written."
           onChoose={(placeType) =>
-            finish(
-              pending,
-              pending.accuracy as GeocodingAccuracy,
-              placeType as string | null,
-            )
+            finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
           onClose={() => setPending(null)}
         />

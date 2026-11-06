@@ -6,6 +6,7 @@ import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import { ResponseSearch } from "@models/entity/response-search";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { getEntityClass, getRelationClass } from "@models/factory";
+import { getClassifiedUnder } from "@models/relation/classified-under";
 import { copyRelations } from "@models/relation/functions";
 import Relation from "@models/relation/relation";
 import { getAuditByEntityId } from "@modules/audits";
@@ -20,6 +21,7 @@ import {
   IPropSpec,
   IReference,
   IResourceData,
+  IResponseClassifiedUnder,
   IResponseDetail,
   IResponseEntity,
   IResponseEntityExpansion,
@@ -30,6 +32,7 @@ import {
   RequestSearch,
   AuditScope,
   EXPANSION_RESPONSE_MAX,
+  CLASSIFIED_UNDER_MAX_CONCEPTS,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -62,6 +65,47 @@ import User from "@models/user/user";
 import { randomUUID } from "crypto";
 
 export default Router()
+  /**
+   * @openapi
+   * /entities/classified-under:
+   *   get:
+   *     description: Returns the entities classified under the given Concepts, or under a subclass or a synonym of one, and how each got there. Declared before /entities/{entityId}, which would take it for an id.
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: query
+   *         name: concepts
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: comma-separated ids of the Concepts to ask about, in the order the result keeps
+   *     responses:
+   *       200:
+   *         description: Returns IResponseClassifiedUnder
+   */
+  .get(
+    "/classified-under",
+    asyncRouteHandler<IResponseClassifiedUnder>(
+      async (request: IRequest<unknown, unknown, { concepts?: string | string[] }>) => {
+        const asked = ([] as string[])
+          .concat(request.query.concepts ?? [])
+          .reduce<string[]>((all, one) => all.concat(one.split(",")), [])
+          .map((id) => id.trim())
+          .filter(Boolean);
+
+        if (!asked.length) {
+          throw new BadParams("concepts has to be set");
+        }
+        if (asked.length > CLASSIFIED_UNDER_MAX_CONCEPTS) {
+          throw new BadParams(
+            `at most ${CLASSIFIED_UNDER_MAX_CONCEPTS} concepts can be asked about at once`
+          );
+        }
+
+        return getClassifiedUnder(request.db.connection, asked);
+      }
+    )
+  )
   /**
    * @openapi
    * /entities/{entityId}:

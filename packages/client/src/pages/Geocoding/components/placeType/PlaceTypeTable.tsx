@@ -4,16 +4,17 @@ import {
   GeocodingPlaceType,
   IGeocodingPlaceType,
 } from "@inkvisitor/shared/types/geocoding";
-import { Button, IconWithTooltip, Input } from "components";
+import { Button, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash } from "Theme/icons";
+import { IcoInfo, IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash, IcoWarning } from "Theme/icons";
 import { v4 as uuidv4 } from "uuid";
 import { PLACE_ICON_KEYS, placeIcon } from "./placeTypeIcons";
 import { assignConcept, makeFavorite, pairEngineType } from "../../utils/write/placeTypeEdits";
 import {
   StyledFavorite,
+  StyledHelpMark,
   StyledIconAnchor,
   StyledIconBackdrop,
   StyledIconButton,
@@ -21,7 +22,10 @@ import {
   StyledIconPanel,
   StyledKindActions,
   StyledKindCell,
+  StyledEngineTypeHelp,
   StyledKindCount,
+  StyledKindInferred,
+  StyledKindHeadHelp,
   StyledKindHeadRight,
   StyledKindHeader,
   StyledKindRow,
@@ -30,12 +34,12 @@ import {
 import { ButtonSize } from "types";
 
 /**
- * The project's own kinds of place.
+ * The project's own location types.
  *
  * Free to define: a name, the Concept a Location is classified under, a mark,
- * the engine type it answers to and a description. The engine type is what
+ * the gazetteer location type it answers to and a description. The gazetteer location type is what
  * connects a suggestion's own type to the project's vocabulary, and the star
- * marks the kind offered first where several answer to the same engine type.
+ * marks the location type offered first where several answer to the same gazetteer location type.
  */
 
 interface PlaceTypeTable {
@@ -43,8 +47,14 @@ interface PlaceTypeTable {
   onChange: (next: IGeocodingPlaceType[]) => void;
   /** The assigned Concept with its unlink, or the suggester that picks one. */
   renderConcept: (conceptId: string, set: (conceptId: string | null) => void) => React.ReactNode;
-  /** Locations classified under each kind's Concept, by kind id. */
+  /** Locations classified under each location type's Concept, by location type id. */
   counts: Record<string, number>;
+  /** How many of each count are Locations that come under a subclass or a synonym of the Concept. */
+  inferredCounts?: Record<string, number>;
+  /** The location types whose Concept has more subclasses than could be followed. */
+  truncatedTypes?: string[];
+  /** The location types whose count is not yet known, as against zero. */
+  pendingTypes?: string[];
   countsLoading: boolean;
   /** The counts could not be read, so they are not shown as zero. */
   countsFailed: boolean;
@@ -56,18 +66,66 @@ const PANEL_HEIGHT = 230;
 const NO_ENGINE_TYPE = "none";
 
 const engineOptions = [
-  { value: NO_ENGINE_TYPE, label: "no engine type" },
+  { value: NO_ENGINE_TYPE, label: "no gazetteer location type" },
   ...GEOCODING_PLACE_TYPES.map((engineType) => ({
     value: engineType,
     label: ENGINE_PLACE_TYPE_INFO[engineType].label,
   })),
 ];
 
+/**
+ * What each gazetteer location type covers, from the mark on the column title.
+ *
+ * A location type such as "church" is paired with one of twelve names that mean
+ * more than they say, and "religious house" is the one that covers it. Opened by
+ * hover or by focus, so it can be read from the keyboard.
+ */
+const EngineTypeHelp: React.FC = () => {
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <StyledHelpMark
+        type="button"
+        ref={setAnchor}
+        aria-label="what each gazetteer location type covers"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+      >
+        <IcoInfo />
+      </StyledHelpMark>
+      <Tooltip
+        visible={open}
+        referenceElement={anchor}
+        position="bottom"
+        content={
+          <StyledEngineTypeHelp>
+            <p>The twelve types the gazetteers use. Choose the one that covers your location type:</p>
+            <dl>
+              {GEOCODING_PLACE_TYPES.map((engineType) => (
+                <React.Fragment key={engineType}>
+                  <dt>{ENGINE_PLACE_TYPE_INFO[engineType].label}</dt>
+                  <dd>{ENGINE_PLACE_TYPE_INFO[engineType].description}</dd>
+                </React.Fragment>
+              ))}
+            </dl>
+          </StyledEngineTypeHelp>
+        }
+      />
+    </>
+  );
+};
+
 export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   value,
   onChange,
   renderConcept,
   counts,
+  inferredCounts = {},
+  truncatedTypes = [],
+  pendingTypes = [],
   countsLoading,
   countsFailed,
 }) => {
@@ -98,7 +156,10 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         <span />
         <span>name</span>
         <span>Concept a Location is classified under</span>
-        <span>engine type</span>
+        <StyledKindHeadHelp>
+          <span>gazetteer location type</span>
+          <EngineTypeHelp />
+        </StyledKindHeadHelp>
         <span />
         <StyledKindHeadRight>locations</StyledKindHeadRight>
         <span>description</span>
@@ -112,7 +173,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               <StyledIconButton
                 type="button"
                 $open={iconFor?.id === kind.id}
-                aria-label={`mark for ${kind.name || "this kind"}`}
+                aria-label={`mark for ${kind.name || "this location type"}`}
                 onClick={(event) => {
                   const box = event.currentTarget.getBoundingClientRect();
                   setIconFor(
@@ -198,8 +259,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               disabled={!kind.engineType}
               aria-label={
                 kind.favorite
-                  ? "favourite for its engine type"
-                  : "make this the favourite for its engine type"
+                  ? "favourite for its gazetteer location type"
+                  : "make this the favourite for its gazetteer location type"
               }
               aria-pressed={kind.favorite}
               onClick={() => onChange(makeFavorite(value, kind.id))}
@@ -208,8 +269,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                 icon={kind.favorite ? <IcoStarFilled /> : <IcoStarOutline />}
                 tooltipText={
                   kind.engineType
-                    ? "the favourite is the kind offered first when a suggestion has this engine type"
-                    : "choose an engine type to make this a favourite"
+                    ? "the favourite is the location type offered first when a suggestion has this gazetteer location type"
+                    : "choose a gazetteer location type to make this a favourite"
                 }
                 tooltipPosition="top"
               />
@@ -219,9 +280,28 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                 ? "–"
                 : countsFailed
                   ? "?"
-                  : countsLoading
+                  : countsLoading || pendingTypes.includes(kind.id)
                     ? "…"
                     : (counts[kind.id] ?? 0)}
+              {kind.conceptId &&
+              !countsFailed &&
+              !countsLoading &&
+              !pendingTypes.includes(kind.id) &&
+              inferredCounts[kind.id] ? (
+                <IconWithTooltip
+                  icon={<StyledKindInferred>+{inferredCounts[kind.id]}</StyledKindInferred>}
+                  tooltipText={`${inferredCounts[kind.id]} of these are classified under a subclass or a synonym of this Concept, not under the Concept itself.`}
+                  tooltipPosition="top"
+                />
+              ) : null}
+              {truncatedTypes.includes(kind.id) ? (
+                <IconWithTooltip
+                  icon={<IcoWarning />}
+                  color="warning"
+                  tooltipText="This Concept has more subclasses than can be followed, so Locations classified deeper down are not counted and show no location type. Assign a narrower Concept."
+                  tooltipPosition="top"
+                />
+              ) : null}
             </StyledKindCount>
             <Input
               value={kind.description}
@@ -234,7 +314,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               icon={<IcoTrash />}
               color="danger"
               inverted
-              tooltipLabel="remove this kind from the list — Classifications already made stay"
+              tooltipLabel="remove this location type from the list — Classifications already made stay"
               onClick={() => onChange(value.filter((one) => one.id !== kind.id))}
               shape="square"
             />
@@ -244,7 +324,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
       <StyledKindActions>
         <Button
           icon={<IcoPlus />}
-          label="add a kind of place"
+          label="add a location type"
           color="primary"
           inverted
           onClick={add}

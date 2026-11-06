@@ -47,10 +47,10 @@ export type MapAssignStep =
  * A project that records no place type has nothing to ask, and asking anyway
  * would put a step in front of every map click that can only be dismissed.
  *
- * Not asking is not the same as having no answer. Where one kind has been named
- * to stand for the whole corpus, that kind is written — the question is settled
+ * Not asking is not the same as having no answer. Where one location type has been named
+ * to stand for the whole corpus, that location type is written — the question is settled
  * once rather than left open, which is what the setting is for. Without one the
- * write carries no kind at all and each Location keeps whatever it had.
+ * write carries no location type at all and each Location keeps whatever it had.
  */
 export const afterAccuracy = (
   pending: MapPending,

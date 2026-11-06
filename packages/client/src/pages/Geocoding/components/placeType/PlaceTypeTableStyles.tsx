@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 /**
- * The project's kinds of place, one row each, laid out as a table that scrolls
+ * The project's location types, one row each, laid out as a table that scrolls
  * sideways where the modal is narrower than it.
  */
 export const StyledKindScroll = styled.div`
@@ -22,6 +22,45 @@ export const StyledKindHeader = styled.div`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
+/** A column title with a help mark beside it. */
+export const StyledKindHeadHelp = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** The mark that opens the help: a button, so it can be reached and opened from the keyboard. */
+export const StyledHelpMark = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: help;
+`;
+
+/** What each gazetteer location type covers, set out in the tooltip of its column title. */
+export const StyledEngineTypeHelp = styled.div`
+  max-width: 28rem;
+  text-align: left;
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+    margin: ${({ theme }) => theme.space[2]} 0 0;
+  }
+
+  dt {
+    font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  }
+
+  dd {
+    margin: 0;
+  }
+`;
+
 export const StyledKindRow = styled.div`
   display: grid;
   grid-template-columns: ${COLUMNS};
@@ -39,12 +78,21 @@ export const StyledKindCell = styled.div`
 `;
 
 export const StyledKindCount = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color["black"]};
-  text-align: right;
 `;
 
-/** The mark a kind carries, as the button that opens the set to choose another. */
+/** How many of a count are only inferred, paler than the count itself. */
+export const StyledKindInferred = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The mark a location type carries, as the button that opens the set to choose another. */
 export const StyledIconButton = styled.button<{ $open: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -105,7 +153,7 @@ export const StyledIconChoice = styled.button<{ $current: boolean }>`
   }
 `;
 
-/** The favourite toggle: filled while this kind is the one offered first for its engine type. */
+/** The favourite toggle: filled while this location type is the one offered first for its gazetteer location type. */
 export const StyledFavorite = styled.button<{ $on: boolean }>`
   display: inline-flex;
   align-items: center;

@@ -8,6 +8,7 @@ import {
   sizeSentence,
   weightSentence,
 } from "../../utils/context/gazetteerDetails";
+import { itemsOf, oftenFails, speedOf } from "../../utils/context/gazetteerFacts";
 import {
   StyledCardChip,
   StyledCardChips,
@@ -23,7 +24,7 @@ import {
 
 /**
  * What the engine says about one source, laid out to be read before deciding
- * whether to ask it: what it is, what it is good for, what it cannot do, and on
+ * whether to ask it: what it is, what it is good for, its limitations, and on
  * what terms its data may be used.
  *
  * Everything here comes from `GET /suggesters`; nothing is written by this page.
@@ -38,6 +39,18 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
   const { info, coverage, footprint, weight, health, category } = suggester;
   const groups = coverageGroups(coverage);
   const license = info.license;
+  const speed = speedOf(suggester);
+  const items = itemsOf(suggester);
+  const fails = oftenFails(suggester);
+  // each said as a sentence of its own, whatever the engine ended its text with
+  const dataSentences = [
+    items?.sentence ?? sizeSentence(footprint),
+    speed?.sentence,
+    fails?.sentence,
+    weightSentence(weight),
+  ]
+    .filter((sentence): sentence is string => !!sentence)
+    .map((sentence) => (/[.!?]$/.test(sentence) ? sentence : `${sentence}.`));
 
   return (
     <StyledGazetteerCard>
@@ -61,6 +74,15 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
 
       {info.description ? <div>{info.description}</div> : null}
 
+      {info.scope ? (
+        <StyledCardRow>
+          <StyledCardLabel>covers</StyledCardLabel>
+          <span>
+            {info.scope.time} · {info.scope.geography} · {info.scope.topic}
+          </span>
+        </StyledCardRow>
+      ) : null}
+
       <StyledCardRow>
         <StyledCardLabel>good for</StyledCardLabel>
         {groups.length ? (
@@ -78,23 +100,21 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
           </StyledCardCoverage>
         ) : (
           <span>
-            declares no particular region, period, language or kind of place — asked about anything
+            declares no particular region, period, language or gazetteer location type — asked about anything
           </span>
         )}
       </StyledCardRow>
 
       {info.limitations ? (
         <StyledCardRow>
-          <StyledCardLabel>cannot do</StyledCardLabel>
+          <StyledCardLabel>limitations</StyledCardLabel>
           <StyledCardLimits>{info.limitations}</StyledCardLimits>
         </StyledCardRow>
       ) : null}
 
       <StyledCardRow>
         <StyledCardLabel>data</StyledCardLabel>
-        <span>
-          {sizeSentence(footprint)}. {weightSentence(weight)}
-        </span>
+        <span>{dataSentences.join(" ")}</span>
       </StyledCardRow>
 
       {license?.attributionText ? (

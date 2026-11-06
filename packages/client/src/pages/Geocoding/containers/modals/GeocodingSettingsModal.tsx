@@ -4,6 +4,7 @@ import {
   GeocodingAccuracy,
   IGeocodingContext,
   IGeocodingRoles,
+  rolesShareAConcept,
 } from "@inkvisitor/shared/types/geocoding";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -56,13 +57,17 @@ import {
 /**
  * Assigning the entities that give a coordinate its meaning.
  *
- * Owner and admin only, because which Concept means `geo:geometry` decides what
+ * Owner only (the menu hides the entry from everyone else), because which Concept means
+ * `geo:geometry` decides what
  * "geocoded" means: if one user could point it elsewhere, the same Location
  * would read as geocoded for them and not for anyone else.
  *
  * Every field selects an existing entity or creates one, so a fresh deployment
  * needs no seeding job.
  */
+
+const NAMELESS = "Every location type needs a name.";
+const SHARED_CONCEPT = "One Concept cannot be used for two of the coordinate roles.";
 
 interface GeocodingSettingsModal {
   roles: IGeocodingRoles;
@@ -96,6 +101,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       [
         draft.geometry,
         draft.accuracy,
+        draft.epistemicSource,
         ...Object.values(draft.accuracyValues),
         ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
@@ -136,7 +142,12 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const save = useMutation({
     mutationFn: async () => {
       if (draft.placeTypes.some((one) => !one.name.trim())) {
-        throw new Error("Every kind of place needs a name.");
+        throw new Error(NAMELESS);
+      }
+      // the roles are told apart by their Concept, so one Concept in two of them
+      // would make the geometry and the accuracy under it the same thing
+      if (rolesShareAConcept(draft)) {
+        throw new Error(SHARED_CONCEPT);
       }
       // the draft holds every role, so a role the researcher unlinked is absent
       // from this object — it has to replace, not merge
@@ -168,7 +179,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       onClose();
     },
     onError: (error) => {
-      if (error instanceof Error && error.message === "Every kind of place needs a name.") {
+      if (error instanceof Error && [NAMELESS, SHARED_CONCEPT].includes(error.message)) {
         toast.error(error.message);
         return;
       }
@@ -317,22 +328,26 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   return (
     <Modal showModal onClose={onClose} width={1300} fullHeight>
       <ModalHeader title="Global geocoding settings" onClose={onClose} />
-      {/* the sections are a fixed length — twelve place types and fifteen
+      {/* the sections are a fixed length — twelve location types and fifteen
           gazetteers — so the body outgrows any viewport and scrolls inside
           the card, which keeps the footer and its save button in reach */}
       <ModalContent column enableScroll>
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy.
-            Which Concept plays which role is set once for the project — it is what
-            &ldquo;geocoded&rdquo; means, so it cannot differ between users.
+            Choose (or create) the Concept holding geographic coordinates in GeoJSON format, the
+            Concept holding localisation accuracy, and the Concept holding the source of knowledge.
+            Without the last one the gazetteers are recorded as references only, and the
+            coordinate does not name them.
           </StyledSectionNote>
-          {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
+          {row("concept for referencing geocoding in GeoJSON format", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
           )}
-          {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
+          {row("concept for localisation accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" }))
+          )}
+          {row("concept for the source of knowledge", draft.epistemicSource, EntityEnums.Class.Concept, (id) =>
+            setDraft((d) => ({ ...d, epistemicSource: id ?? "" }))
           )}
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>
@@ -348,13 +363,11 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             )
           )}
 
-          <StyledSectionHeading>Place types</StyledSectionHeading>
+          <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s own kinds of place, free to define. A Location has a kind by being
-            classified under the kind&apos;s Concept, so assign one Concept per kind — picking a
-            Concept another kind holds moves it. The engine type connects a suggestion&apos;s own
-            type to your kinds: when several of yours answer to one, the starred one is offered
-            first. A kind with no Concept blocks the write rather than being dropped.
+            The project&apos;s location typology. The gazetteer location type select maps it onto
+            the gazetteers&apos; general typology, which is then used for prioritising the proper
+            category. A Concept must be assigned if you want to geocode that general type.
           </StyledSectionNote>
           <StyledKindsRow>
             <PlaceTypeTable
@@ -364,6 +377,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
                 picker(conceptId || undefined, EntityEnums.Class.Concept, set)
               }
               counts={assignments.countByType}
+              inferredCounts={assignments.inferredByType}
+              truncatedTypes={assignments.truncatedTypes}
+              pendingTypes={assignments.pendingTypes}
               countsLoading={assignments.isLoading || !locationIds}
               countsFailed={!!assignments.error}
             />
@@ -371,13 +387,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>
-            One row per source the engine can ask. Switched off, a source is never asked for this
-            project, so it costs nothing and returns nothing: use it for a source this corpus has no
-            use for, or one whose licence does not cover this work. A researcher can switch further
-            sources off for their own runs, but cannot switch these back on. The resource is the
-            entity a reference to the source points at, and the record URL plus the stored
-            identifier rebuilds a link back into it; a source whose record URL does not end in the
-            identifier is left blank.
+            Gazetteers not checked in the checkbox to the left are not searched. Resource: the
+            entity that stands for the gazetteer when its coordinates are cited. Record URL: the
+            beginning of the link to a record in the gazetteer, to which the record&apos;s identifier
+            is added; leave it empty where a gazetteer&apos;s links do not end in the identifier.
           </StyledSectionNote>
           <StyledScrollRow>
             <GazetteerPicker

@@ -1,4 +1,6 @@
 import { GEOCODING_PLACE_TYPES, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   PLACE_ICONS,
@@ -10,7 +12,7 @@ import {
 } from "./placeTypeIcons";
 
 /**
- * Most of the corpus states no kind of place, so the mark for "nobody has said"
+ * Most of the corpus states no location type, so the mark for "nobody has said"
  * is the one seen most often. An absent icon there would read as a rendering
  * fault rather than as the fact it is.
  */
@@ -56,6 +58,16 @@ describe("the icon set a project chooses from", () => {
       expect(PLACE_ICON_KEYS).toContain(kind.icon);
       expect(kindInfo(kind).icon).not.toBe(UNKNOWN_PLACE_TYPE.icon);
     }
+  });
+
+  it("has a church with a tower beside the one without, drawn in the stroke of the rest", () => {
+    expect(PLACE_ICONS.church).toBeDefined();
+    expect(PLACE_ICONS.church).not.toBe(PLACE_ICONS.religious);
+    // a filled or hairline mark would stand out in a list of outlined ones
+    const markup = renderToStaticMarkup(React.createElement(PLACE_ICONS.church));
+    expect(markup).toContain('fill="none"');
+    expect(markup).toContain('stroke="currentColor"');
+    expect(markup).toContain('stroke-width="2"');
   });
 
   it("falls back to the unknown mark for a key the set does not have", () => {
