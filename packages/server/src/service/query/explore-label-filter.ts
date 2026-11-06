@@ -38,34 +38,16 @@ export const getRowLabelFilter = (
   );
 };
 
-const exploreLabelWildcards = (label: string, left: string, right: string): [string, string] => {
-  // prepareLabel defaults to ^/$ (whole-word). Explorer row filter uses substring
-  // matching unless the user typed explicit * wildcards.
-  const trimmed = label.trim();
-  const useLeadingWildcard = trimmed.startsWith("*");
-  const useTrailingWildcard = trimmed.endsWith("*");
-
-  return [
-    useLeadingWildcard ? left : left === "^" ? "" : left,
-    useTrailingWildcard ? right : right === "$" ? "" : right,
-  ];
-};
-
 const findMatchingIdsWithDbSearch = async (
   db: Conn,
   ids: string[],
   label: string
 ): Promise<Set<string>> => {
-  const [preparedLabel, leftFromPrepare, rightFromPrepare] = prepareLabel(label);
-  const [leftWildcard, rightWildcard] = exploreLabelWildcards(
-    label,
-    leftFromPrepare,
-    rightFromPrepare
-  );
+  // the row filter matches anywhere in a label, so a typed * changes nothing and
+  // prepareLabel's anchors go unused
+  const [preparedLabel] = prepareLabel(label);
 
-  return new Set(
-    await storage.entities.idsMatchingLabel(db, ids, preparedLabel, leftWildcard, rightWildcard)
-  );
+  return new Set(await storage.entities.idsMatchingLabel(db, ids, preparedLabel, "", ""));
 };
 
 const findMatchingIdsWithRegex = async (

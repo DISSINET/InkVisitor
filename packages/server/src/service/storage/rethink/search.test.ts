@@ -308,6 +308,23 @@ describe("models/response-search", function () {
         expect(labels('"one"')).toEqual(labels("one"));
         expect(labels("\u201Eone\u201C")).toEqual(labels("one"));
       });
+
+      const sortLabels = (order: string[], label: string) =>
+        sortByWordMatch(
+          order.map((l) => ({ labels: [l] }) as IEntity),
+          label
+        ).map((e) => e.labels[0]);
+
+      it("should count a word with a quote mark at its end as exact, in any spelling", function () {
+        const order = ["heretics\u2019 presence", "a long label about something else"];
+        expect(sortLabels([...order].reverse(), "heretics'")).toEqual(order);
+        expect(sortLabels([...order].reverse(), "heretics\u2019")).toEqual(order);
+      });
+
+      it("should not join the parts around a quote mark inside a word", function () {
+        const order = ["Jeanne d'Arc", "Darc"];
+        expect(sortLabels(order, "d'Arc")).toEqual(order);
+      });
     });
 
     describe("sortByWordMatch with label matching more entities", () => {

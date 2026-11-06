@@ -529,8 +529,9 @@ export function sortByWordMatch(
 
   const foldAccents = (text: string) =>
     text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  // the word tokens compared below hold no quote marks, so the typed ones are dropped
-  const word = foldQuotes(foldAccents(usedLabel)).replace(/'/g, "");
+  // the word tokens compared below hold no quote marks, so the ones around the typed word go;
+  // one inside it stays, as d'arc is two tokens in a label and darc is a different word
+  const word = foldQuotes(foldAccents(usedLabel)).replace(/^'+|'+$/g, "");
   const sortedExact: IEntity[] = [];
   const sortedSubstring: IEntity[] = [];
 

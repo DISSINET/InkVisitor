@@ -271,6 +271,9 @@ describe("entity search", () => {
         filterEntityIdsByRowLabelFilter(conn, seeded, { type: Explore.SearchOption.Label, label });
       expect(await explorerFilter("temer")).toEqual(["d-1"]);
       expect(await explorerFilter("zdar")).toEqual(["d-3"]);
+      for (const label of ["eme", "*eme", "eme*", "*eme*"]) {
+        expect([label, await explorerFilter(label)]).toEqual([label, ["d-1"]]);
+      }
     });
   });
 
