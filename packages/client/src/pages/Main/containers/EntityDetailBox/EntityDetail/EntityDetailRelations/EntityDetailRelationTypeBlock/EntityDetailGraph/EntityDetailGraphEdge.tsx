@@ -9,24 +9,23 @@ import "reactflow/dist/style.css";
 
 import { certaintyDict } from "@inkvisitor/shared/dictionaries";
 import { LetterIcon, Tooltip } from "components";
-import React, { useMemo, useState } from "react";
+import React, { useId, useMemo, useState } from "react";
 
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types/relation";
-import { useTheme } from "styled-components";
+import { DefaultTheme, useTheme } from "styled-components";
 
-const certaintyStyles: Record<
-  EntityEnums.Certainty,
-  { dashArray: string; width: number; stroke: string; strokeOpacity: number }
-> = {
-  "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "white" },
-  "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: "black" },
-  "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: "black" },
-  "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: "black" },
-  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: "grey" },
-  "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: "darkred" },
-  "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "red" },
-};
+type EdgeStyle = { dashArray: string; width: number; stroke: string; strokeOpacity: number };
+
+const getCertaintyStyles = (theme: DefaultTheme): Record<EntityEnums.Certainty, EdgeStyle> => ({
+  "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: theme.color["white"] },
+  "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: theme.color["black"] },
+  "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: theme.color["black"] },
+  "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: theme.color["black"] },
+  "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: theme.color["gray"][600] },
+  "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: theme.color["danger"] },
+  "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: theme.color["queryInvalid"] },
+});
 
 export const GraphEdge: React.FC<EdgeProps> = ({
   id,
@@ -44,14 +43,35 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
 
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
+  // edge ids repeat across the graphs on one page and a url(#...) reference
+  // takes the first match in the document, so the marker id must be page-unique;
+  // useId may contain characters that break a url() reference
+  const markerId = `arrowhead-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
+  // both ends of an arc face right at about the same x, where a bezier between
+  // handles collapses into a straight line; the bulge grows with the distance
+  // so arcs of different lengths nest instead of overlapping, up to a cap that
+  // keeps the arc in the gap before the next column
+  const bulge = Math.min(Math.abs(targetY - sourceY) / 2, 80);
+  const [edgePath, labelX, labelY] = data.arc
+    ? [
+        [
+          `M ${sourceX},${sourceY}`,
+          `C ${sourceX + bulge},${sourceY}`,
+          `${targetX + bulge},${targetY}`,
+          `${targetX},${targetY}`,
+        ].join(" "),
+        (sourceX + targetX) / 2 + (bulge * 3) / 4,
+        (sourceY + targetY) / 2,
+      ]
+    : getBezierPath({
+        sourceX,
+        sourceY,
+        sourcePosition,
+        targetX,
+        targetY,
+        targetPosition,
+      });
 
   const scaleLabel = 0.75;
 
@@ -63,7 +83,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const edgeStyle = useMemo(() => {
     if (data.certainty) {
-      return certaintyStyles[data.certainty as EntityEnums.Certainty];
+      return getCertaintyStyles(theme)[data.certainty as EntityEnums.Certainty];
     } else {
       return {
         strokeOpacity: 1,
@@ -86,7 +106,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
       >
         <defs>
           <marker
-            id={`arrowhead-${id}`}
+            id={markerId}
             viewBox="0 0 6 6"
             refX="6"
             refY="3"
@@ -125,8 +145,8 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           strokeWidth={edgeStyle.width}
           stroke={edgeStyle.stroke}
           style={{}}
-          markerEnd={`url(#arrowhead-${id})`}
-          markerStart={relAssymetric ? "none" : `url(#arrowhead-${id})`}
+          markerEnd={`url(#${markerId})`}
+          markerStart={relAssymetric ? "none" : `url(#${markerId})`}
         />
         {/* tooltip interaction path */}
         <path
@@ -134,7 +154,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           d={edgePath}
           fill="none"
           strokeWidth={10}
-          stroke="orange"
+          stroke={theme.color["warning"]}
           strokeOpacity={tooltipVisible ? 0.2 : 0.01}
         />
         <EdgeLabelRenderer>
