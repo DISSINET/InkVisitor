@@ -2,7 +2,7 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { SearchFilters } from "../types";
-import { quoteCharPattern } from "@inkvisitor/shared/constants";
+import { quotesToPattern } from "@inkvisitor/shared/constants";
 import { prepareLabel } from "../../../common/searchLabel";
 import { QUERY_RUN_OPTIONS } from "./query/run-options";
 
@@ -49,11 +49,11 @@ export function searchWordByWord(
         n: "[nñ]",
         c: "[cç]",
       };
-      return map[char] || quoteCharPattern(char) || char;
+      return map[char] || char;
     })
     .join("");
 
-  const regexBody = diacriticPattern
+  const regexBody = quotesToPattern(diacriticPattern)
     .split(" ")
     .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
 

@@ -1,4 +1,4 @@
-import { quoteCharPattern } from "@inkvisitor/shared/constants";
+import { quotesToPattern } from "@inkvisitor/shared/constants";
 import { IEntity } from "@inkvisitor/shared/types";
 import { foldText } from "components/basic/BaseDropdown/dropdownLogic";
 
@@ -21,10 +21,7 @@ export const templateMatcher = (search: string): ((template: IEntity) => boolean
   }
   // the glue between words keeps word and separator classes disjoint, so a
   // label that fails to match can not backtrack exponentially
-  const body = text
-    .split("")
-    .map((char) => quoteCharPattern(char) ?? char.replace(REGEX_CHARS, "\\$&"))
-    .join("")
+  const body = quotesToPattern(text.replace(REGEX_CHARS, "\\$&"))
     .split(" ")
     .join("[^a-z0-9]+([a-z0-9]+[^a-z0-9]+)*");
   const pattern = new RegExp(`${anywhere ? "" : "(^|[^a-z0-9])"}${body}`);

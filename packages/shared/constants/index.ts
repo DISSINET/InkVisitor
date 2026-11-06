@@ -29,14 +29,14 @@ const QUOTE_CHARS =
   "'‘’‚‛‹›ʼʻ`´′＇" +
   '"“”„‟«»″＂';
 
-/**
- * Regex character class matching every quote char when `char` is one of them.
- * The class is valid in JavaScript, RethinkDB (RE2) and PostgreSQL patterns.
- */
-export const quoteCharPattern = (char: string): string | undefined =>
-  QUOTE_CHARS.includes(char) ? `[${QUOTE_CHARS}]` : undefined;
-
 const QUOTE_MARKS = new RegExp(`[${QUOTE_CHARS}]`, "g");
+
+/**
+ * Replaces each quote char in a regex source with a class matching every quote
+ * char. The class is valid in JavaScript, RethinkDB (RE2) and PostgreSQL patterns.
+ */
+export const quotesToPattern = (source: string): string =>
+  source.replace(QUOTE_MARKS, `[${QUOTE_CHARS}]`);
 
 /** Replaces every quote char with `'`, for matching that compares text without a regex. */
 export const foldQuotes = (text: string): string => text.replace(QUOTE_MARKS, "'");

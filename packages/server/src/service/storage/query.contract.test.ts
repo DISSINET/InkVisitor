@@ -270,6 +270,12 @@ describe("entity search", () => {
       expect(await explorerFilter("*fession*")).toEqual(["q-3"]);
     });
 
+    it("match parts of words and words in order in the Explorer label filter", async () => {
+      expect(await explorerFilter("onfess")).toEqual(["q-3"]);
+      expect(await explorerFilter("Confession Arc")).toEqual(["q-3"]);
+      expect(await explorerFilter("Arc Confession")).toEqual([]);
+    });
+
     it("keep the regex mode of the Explorer label filter", async () => {
       expect(await explorerFilter("^Conf.*Arc$", true)).toEqual(["q-3"]);
     });

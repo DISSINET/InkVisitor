@@ -1,5 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { quoteCharPattern } from "@inkvisitor/shared/constants";
+import { quotesToPattern } from "@inkvisitor/shared/constants";
 import { prepareLabel } from "../../../common/searchLabel";
 import { TABLE } from "../names";
 import { SearchFilters } from "../types";
@@ -30,11 +30,12 @@ export function labelPattern(label: string, left: string, right: string): string
     n: "[nñ]",
     c: "[cç]",
   };
-  const body = label
+  const diacriticPattern = label
     .toLowerCase()
     .split("")
-    .map((char) => map[char] || quoteCharPattern(char) || char)
-    .join("")
+    .map((char) => map[char] || char)
+    .join("");
+  const body = quotesToPattern(diacriticPattern)
     .split(" ")
     .join("([^a-zA-Z0-9]+[0-9A-Za-z_]+)*[^a-zA-Z0-9]+");
   return `(?i)${left}${body}${right}`;

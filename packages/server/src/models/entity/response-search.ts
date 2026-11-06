@@ -5,6 +5,7 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
@@ -526,6 +527,8 @@ export function sortByWordMatch(
     return entities;
   }
 
+  // the word tokens compared below hold no quote marks, so the typed ones are dropped
+  const word = foldQuotes(usedLabel.toLowerCase()).replace(/'/g, "");
   const sortedExact: IEntity[] = [];
   const sortedSubstring: IEntity[] = [];
 
@@ -535,7 +538,7 @@ export function sortByWordMatch(
       entity.labels[0]
         .toLowerCase()
         .match(/[\w]+/g)
-        ?.indexOf(usedLabel.toLowerCase()) !== -1
+        ?.indexOf(word) !== -1
     ) {
       sortedExact.push(entity);
     } else {

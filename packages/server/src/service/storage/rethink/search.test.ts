@@ -280,6 +280,14 @@ describe("models/response-search", function () {
       });
     });
 
+    describe("sortByWordMatch with quote marks around the label", () => {
+      it("should sort the same as without them", function () {
+        const labels = (label: string) => sortByWordMatch(entitites, label).map((e) => e.labels[0]);
+        expect(labels('"one"')).toEqual(labels("one"));
+        expect(labels("\u201Eone\u201C")).toEqual(labels("one"));
+      });
+    });
+
     describe("sortByWordMatch with label matching more entities", () => {
       const sorted = sortByWordMatch(entitites, "one");
       const sortedLabels = sorted.map((e) => e.labels[0]);

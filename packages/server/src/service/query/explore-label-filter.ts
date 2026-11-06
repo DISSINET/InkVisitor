@@ -1,34 +1,8 @@
-import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
 import { prepareLabel } from "@common/searchLabel";
-import { quoteCharPattern } from "@inkvisitor/shared/constants";
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-/** Same diacritic folding as searchWordByWord in the storage adapter (service/storage/rethink/search.ts) */
-const DIACRITIC_CHAR_MAP: Record<string, string> = {
-  a: "[aàáâãäå]",
-  e: "[eèéêëě]",
-  i: "[iìíîï]",
-  o: "[oòóôõö]",
-  u: "[uùúûüů]",
-  y: "[yýÿ]",
-  n: "[nñň]",
-  c: "[cç]",
-  r: "[rř]",
-  d: "[dď]",
-  t: "[tť]",
-  s: "[sš]",
-  z: "[zž]",
-};
-
-const toDiacriticPattern = (text: string): string =>
-  text
-    .toLowerCase()
-    .split("")
-    .map((char) => DIACRITIC_CHAR_MAP[char] ?? quoteCharPattern(char) ?? escapeRegExp(char))
-    .join("");
 
 /**
  * Parses user input as a JavaScript RegExp.
@@ -53,75 +27,9 @@ export const parseUserRegex = (input: string): RegExp | null => {
   }
 };
 
-/**
- * Builds a case-insensitive RegExp aligned with entity label search (searchWordByWord).
- */
-export const labelFilterToRegExp = (label: string): RegExp => {
-  let left = "^";
-  let right = "$";
-  let cleaned = label.trim();
-
-  if (cleaned.startsWith("*")) {
-    left = "";
-    cleaned = cleaned.slice(1).trimStart();
-  } else {
-    left = "";
-  }
-  if (cleaned.endsWith("*")) {
-    right = "";
-    cleaned = cleaned.slice(0, -1).trimEnd();
-  } else {
-    right = "";
-  }
-
-  if (left === "^") {
-    left = "(^|[^a-zA-Z0-9])";
-  }
-  if (right === "$") {
-    right = "($|[^a-zA-Z0-9])";
-  }
-
-  const words = cleaned.split(/\s+/).filter(Boolean);
-  if (!words.length) {
-    return /^/i;
-  }
-
-  const regexBody = words
-    .map((word) => toDiacriticPattern(word))
-    .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+");
-
-  return new RegExp(`${left}${regexBody}${right}`, "i");
-};
-
-export const entityLabelMatchesFilter = (
-  entityLabels: string[],
-  filter: Pick<Explore.IExploreLabelFilter, "label" | "useRegex">
-): boolean => {
-  const trimmed = filter.label.trim();
-  if (!trimmed) {
-    return true;
-  }
-  if (!entityLabels.length) {
-    return false;
-  }
-
-  if (filter.useRegex) {
-    const pattern = parseUserRegex(trimmed);
-    if (!pattern) {
-      return false;
-    }
-    return entityLabels.some((label) => pattern.test(label));
-  }
-
-  const pattern = labelFilterToRegExp(trimmed);
-  return entityLabels.some((label) => pattern.test(label));
-};
-
-export const entityMatchesRowLabelFilter = (
-  entity: IEntity,
-  filter: Explore.IExploreLabelFilter
-): boolean => {
-  return entityLabelMatchesFilter(entity.labels ?? [], filter);
+export const entityLabelMatchesRegex = (entityLabels: string[], input: string): boolean => {
+  const pattern = parseUserRegex(input);
+  return !!pattern && entityLabels.some((label) => pattern.test(label));
 };
 
 export const getRowLabelFilter = (
@@ -134,7 +42,7 @@ export const getRowLabelFilter = (
 
 const exploreLabelWildcards = (label: string, left: string, right: string): [string, string] => {
   // prepareLabel defaults to ^/$ (whole-word). Explorer row filter uses substring
-  // matching (same as labelFilterToRegExp) unless the user typed explicit * wildcards.
+  // matching unless the user typed explicit * wildcards.
   const trimmed = label.trim();
   const useLeadingWildcard = trimmed.startsWith("*");
   const useTrailingWildcard = trimmed.endsWith("*");
@@ -177,7 +85,7 @@ const findMatchingIdsWithRegex = async (
   const matching = new Set<string>();
 
   for (const row of await storage.entities.labelsOf(db, ids)) {
-    if (entityLabelMatchesFilter(row.labels ?? [], filter)) {
+    if (entityLabelMatchesRegex(row.labels ?? [], filter.label)) {
       matching.add(row.id);
     }
   }
