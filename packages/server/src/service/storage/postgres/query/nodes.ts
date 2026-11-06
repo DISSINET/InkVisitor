@@ -1,9 +1,9 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
+import { labelPattern, nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { Params, ident } from "../sql";
-import { labelMatch, labelPattern } from "../search";
+import { labelMatch } from "../search";
 import { q } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edges";
 

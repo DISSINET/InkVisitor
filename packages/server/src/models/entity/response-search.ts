@@ -5,6 +5,7 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
@@ -526,16 +527,20 @@ export function sortByWordMatch(
     return entities;
   }
 
+  const foldAccents = (text: string) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // the word tokens compared below hold no quote marks, so the ones around the typed word go;
+  // one inside it stays, as d'arc is two tokens in a label and darc is a different word
+  const word = foldQuotes(foldAccents(usedLabel)).replace(/^'+|'+$/g, "");
   const sortedExact: IEntity[] = [];
   const sortedSubstring: IEntity[] = [];
 
   for (const entity of entities) {
     if (
       entity.labels.length > 0 &&
-      entity.labels[0]
-        .toLowerCase()
+      foldAccents(entity.labels[0])
         .match(/[\w]+/g)
-        ?.indexOf(usedLabel.toLowerCase()) !== -1
+        ?.includes(word)
     ) {
       sortedExact.push(entity);
     } else {
