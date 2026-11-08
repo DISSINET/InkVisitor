@@ -303,9 +303,11 @@ class StatementInvalidMove extends CustomError {
  * InternalServerError will be thrown when some unexpected error occurs
  */
 class InternalServerError extends CustomError {
+  public static readonly TYPE = "InternalServerError";
   public static code = 500;
-  public static title = "Internal server error";
-  public static message = "An unknown error occured";
+  public static title = "Something went wrong on the server";
+  public static message =
+    "Please try again. If it keeps happening, copy the details and send them to the project owner.";
   loggable = true;
 }
 
@@ -532,6 +534,24 @@ class NetworkError extends CustomError {
     "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
 }
 
+// a proxy in front of the API answered in its place, typically while the server
+// restarts or is overloaded
+class ServerUnavailableError extends CustomError {
+  public static readonly TYPE = "ServerUnavailableError";
+  public static code = 503;
+  public static title = "Server unavailable";
+  public static message = "The server is not responding right now. Please try again shortly.";
+}
+
+// a bug in the client code, so neither the network nor the server is at fault
+class ClientError extends CustomError {
+  public static readonly TYPE = "ClientError";
+  public static code = 500;
+  public static title = "Something went wrong";
+  public static message =
+    "Please reload the page and try again. If it keeps happening, contact the project owner.";
+}
+
 class TimeoutError extends CustomError {
   public static readonly TYPE = "TimeoutError";
   public static code = 504;
@@ -591,6 +611,8 @@ const allErrors: Record<string, any> = {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  ServerUnavailableError,
+  ClientError,
   TimeoutError,
   HtmlResponseError,
   RequestTooLargeError,
@@ -607,6 +629,10 @@ const allErrors: Record<string, any> = {
 export interface IErrorSignature {
   error: string; // unique error code - error's constructor
   message: string; // additional message in readable form
+}
+
+export function isKnownErrorCode(code: string): boolean {
+  return Object.prototype.hasOwnProperty.call(allErrors, code);
 }
 
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
@@ -654,6 +680,8 @@ export {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  ServerUnavailableError,
+  ClientError,
   TimeoutError,
   HtmlResponseError,
   RequestTooLargeError,
