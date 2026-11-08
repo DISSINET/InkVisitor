@@ -10,6 +10,7 @@ import "@service/mailer";
 import { Db, storage } from "@service/storage";
 import { CronService } from "@service/cron";
 import { startDbStatsEmitter } from "@service/dbStats";
+import { startDocumentPresence } from "@service/documentPresence";
 import { startCacheInvalidators } from "@service/changefeedInvalidator";
 import { ensureSessionsTable } from "@service/sessionStore";
 import {
@@ -73,6 +74,7 @@ import Document from "@models/document/document";
   });
 
   startDbStatsEmitter(socketio);
+  startDocumentPresence(socketio);
 
   httpServer.listen(port, () => {
     console.log(

@@ -127,6 +127,9 @@ const theme = {
     warningText: "#99103B",
     warningMessage: "#FFE089",
     warningBorder: "#ffbb00",
+    // warningMessage is the same amber in both themes, so anything drawn on it
+    // needs a fixed dark ink - `black` inverts to white and disappears there.
+    warningMessageText: "#000",
 
     tooltipColor: "#fff",
     // on entity class colours, in both light and dark mode
