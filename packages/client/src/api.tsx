@@ -364,8 +364,10 @@ class Api {
         return this.rejectIfNonJsonApiBody(response);
       },
       (error: AxiosError) => {
+        // a cancelled request was aborted by the app's own code, so nothing failed
+        const cancelled = axios.isCancel(error);
         //@ts-ignore
-        if (!error.config?.ignoreErrorToast) {
+        if (!error.config?.ignoreErrorToast && !cancelled) {
           // Any status codes that falls outside the range of 2xx cause this function to trigger
           // Do something with response error
           if (this.shouldShowErrorToast(error)) {
