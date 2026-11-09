@@ -142,6 +142,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               key={`${wi}-${hi}`}
               style={{
                 position: "relative",
+                // a node's row (suggester, filters, add and remove buttons) runs past its
+                // cell into the next column, whose cells come later and would cover it
+                zIndex: thisCellNode ? 1 : undefined,
                 gridColumn: wi + 1,
                 gridRow: hi + 1,
                 width: QUERY_GRID_WIDTH,

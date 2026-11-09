@@ -140,11 +140,16 @@ export const convertToGraph = (
   while (frontier.length) {
     const next: typeof frontier = [];
     for (const { sourceId, branch } of frontier) {
+      const [first, second] = branch.entityIds;
+      // a branch reached through an identification cycle can join two entities
+      // of which neither is its parent; it is then drawn in its own direction
+      const fromParent = sourceId === first || sourceId === second;
       const [sourceEntityId, targetEntityId] =
-        sourceId === branch.entityIds[0]
-          ? branch.entityIds
-          : [branch.entityIds[1], branch.entityIds[0]];
+        sourceId === second ? [second, first] : [first, second];
 
+      if (!fromParent) {
+        addNode(sourceEntityId, level);
+      }
       addNode(targetEntityId, level);
       addEdge(sourceEntityId, targetEntityId, branch);
       for (const subtree of branch.subtrees ?? []) {
