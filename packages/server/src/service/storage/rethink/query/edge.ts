@@ -637,6 +637,9 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
    */
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
+    // a pinned target is matched against the whole relation, so a target that
+    // is the entity itself matches; a resolved set only against the partners
+    const pinned = !!this.node.params.entityId;
     const targetClasses = this.node.params.entityClasses ?? [];
     const targetStatuses = this.unpinnedTargetStatuses();
 
@@ -650,7 +653,10 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
           })
           .filter(function (relation: RDatum<RelationTypes.IRelation>) {
             if (targetIds) {
-              return relation("entityIds").setIntersection(r.expr(targetIds)).isEmpty().not();
+              const members = pinned
+                ? relation("entityIds")
+                : relationPartners(relation, entity("id"), true);
+              return members.setIntersection(r.expr(targetIds)).isEmpty().not();
             }
             if (targetClasses.length || targetStatuses.length) {
               // relation types differ in whether an entity may be its own

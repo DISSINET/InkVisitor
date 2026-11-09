@@ -313,6 +313,12 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", synonym)])).toEqual(["c-1"]);
     const notSynonym = node({}, [edge("R:SYN", { entityId: "c-4" }, Query.EdgeLogic.Negative)]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", notSynonym)])).toEqual([]);
+    // has relation: any looks for the survivors among the partners, so p-1 does not match
+    // itself; a pinned target is matched against the whole relation, the entity included
+    const classifiedAsC2 = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", classifiedAsC2)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Location] }, [edge("R:", classifiedAsC2)])).toEqual(["l-1"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", { entityId: "p-1" })])).toEqual(["p-1"]);
   });
 
   it("a root without edges returns its base", async () => {

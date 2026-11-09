@@ -313,26 +313,27 @@ function unorderedRelation(e: SearchEdge, p: Params, type: RelationEnums.Type): 
 
 /**
  * Any relation holding e.id: one holding a pinned target too (the whole array,
- * so a target that is e itself matches), one with a partner of the classes
- * passing the filters, or any relation at all (EdgeHasRelation).
+ * so a target that is e itself matches), one with a partner among the targets
+ * the nested conditions left, one with a partner of the classes passing the
+ * filters, or any relation at all (EdgeHasRelation).
  */
 function anyRelation(e: SearchEdge, p: Params): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
   const filters = e.unpinnedTargetFilters();
-  if (targets) {
-    // the members of the relations holding a target. A nested condition can resolve the targets
-    // into a list of thousands: `&&` compares every relation against the whole list and an
-    // EXISTS per input row loops each input entity over those relations, while `|| ''` keeps
-    // the member test off the index so the planner hashes the list
-    const isTarget = `t.id || '' = ${anyOf(p, targets)}`;
-    return (
-      `e.id IN (SELECT unnest(r.entity_ids) FROM ${RELATIONS} r` +
-      ` WHERE EXISTS (SELECT 1 FROM unnest(r.entity_ids) t(id) WHERE ${isTarget}))`
-    );
-  }
   let check = "TRUE";
-  if (classes.length || hasFilters(filters)) {
+  if (targets && e.node.params.entityId) {
+    check = p.index(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, targets);
+  } else if (targets) {
+    // a semi-join over the members m of every relation, as in unorderedRelation: the nested
+    // conditions can leave thousands of targets, which `&&` would compare against every
+    // relation, while `|| ''` keeps the partner test off the index so the planner hashes the list
+    const isTarget = `pid || '' = ${anyOf(p, targets)}`;
+    return (
+      `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id)` +
+      ` WHERE EXISTS (SELECT 1 FROM unnest(${partners(true, "m.id")}) pid WHERE ${isTarget}))`
+    );
+  } else if (classes.length || hasFilters(filters)) {
     const partnerMatches = entityMatches(p, "pid", classes, filters);
     check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${partnerMatches})`;
   }
