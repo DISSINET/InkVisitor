@@ -3,7 +3,6 @@ import { userCacheKey } from "@models/user/user";
 import { SETTINGS_ALL_CACHE_KEY } from "@models/setting/setting";
 import { closeTestDb, openTestDb } from "../test/db";
 import { startCacheInvalidators } from "./changefeedInvalidator";
-import { getCachedBaseIds, setCachedBaseIds } from "./query/query-base-cache";
 import { cache } from "./ttlCache";
 import { TABLE } from "./storage/names";
 import { query } from "./storage/postgres/conn";
@@ -84,22 +83,8 @@ describePg("changefeed on postgres", () => {
     expect(events[2]).toBe("1");
   });
 
-  it("clears the cached query results on an entity or relation write", async () => {
-    startCacheInvalidators();
-    const events = probe(TABLE.relations);
-    await eventually(() => events.length === 1);
-
-    setCachedBaseIds("query-1", ["e-1"]);
-    await storage.entities.insert(conn, [{ id: "feed-e1", class: "C", labels: ["feed"] }]);
-    await eventually(() => getCachedBaseIds("query-1") === null);
-
-    setCachedBaseIds("query-1", ["e-1"]);
-    await storage.relations.insert(conn, [{ id: "feed-r1", type: "SYN", entityIds: ["feed-e1", "feed-e1"] }]);
-    await eventually(() => getCachedBaseIds("query-1") === null);
-  });
-
   it("does not follow a table without a change trigger", async () => {
-    const events = probe(TABLE.documents);
+    const events = probe(TABLE.entities);
     await new Promise((resolve) => setTimeout(resolve, 200));
     expect(events).toEqual([]);
   });

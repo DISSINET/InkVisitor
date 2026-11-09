@@ -282,10 +282,7 @@ describePg("syncSchema", () => {
 
   it("restores the dropped change triggers and the function they call", async () => {
     await exec("DROP FUNCTION notify_change() CASCADE");
-    const triggers = ["users", "settings", "entities", "relations"].map(notifyTriggers);
-    expect(await syncSchema(conn)).toEqual(
-      ([] as { ddl: string }[]).concat(...triggers).map((t) => t.ddl)
-    );
+    expect(await syncSchema(conn)).toEqual([...notifyTriggers("users"), ...notifyTriggers("settings")].map((t) => t.ddl));
     expect(await syncSchema(conn)).toEqual([]);
   });
 

@@ -1,5 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { AuditScope } from "@inkvisitor/shared/types/audit";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { nodeLabel } from "../../../../common/searchLabel";
@@ -43,6 +44,28 @@ const isoDate = (value: string | undefined): string | undefined => {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
+/** a list param bound as text[]; any other shape fails the request with 400, not in the database */
+const idList = (name: string, value: unknown): string[] => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+  if (!Array.isArray(value) || value.some((id) => typeof id !== "string")) {
+    throw new BadParams(`${name} has to be a list of ids`);
+  }
+  return value;
+};
+
+/** a single user id param, undefined when empty */
+const userId = (name: string, value: unknown): string | undefined => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new BadParams(`${name} has to be a user id`);
+  }
+  return value;
+};
+
 export const nodeFilters = (params: Query.INodeParams): NodeFilters => ({
   statuses: params.entityStatuses ?? [],
   languages: params.entityLanguages ?? [],
@@ -51,10 +74,10 @@ export const nodeFilters = (params: Query.INodeParams): NodeFilters => ({
   createdBefore: isoDate(params.createdBefore),
   updatedAfter: isoDate(params.updatedAfter),
   updatedBefore: isoDate(params.updatedBefore),
-  createdBy: params.createdBy || undefined,
-  updatedBy: params.updatedBy || undefined,
-  editedBy: params.editedBy ?? [],
-  coOccurrence: params.coOccurrence ?? [],
+  createdBy: userId("createdBy", params.createdBy),
+  updatedBy: userId("updatedBy", params.updatedBy),
+  editedBy: idList("editedBy", params.editedBy),
+  coOccurrence: idList("coOccurrence", params.coOccurrence),
 });
 
 /** some filter constrains: filterParts emits a condition for it */
