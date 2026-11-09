@@ -22,9 +22,10 @@ interface NodeFilterMatches {
 }
 
 /**
- * How many entities the filters of an empty node let through, and which. The
- * server narrows such a target to the same set: the node's classes, else the
- * classes the edge's target can hold, with its status, language and label.
+ * How many entities the filters and nested conditions of an empty node let
+ * through, and which. The server narrows such a target to the same set: the
+ * node's classes, else the classes the edge's target can hold, with its
+ * filters and the conditions under it.
  */
 export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   node,
@@ -50,20 +51,15 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
     ),
     label: node.params.label?.trim() || undefined,
   };
-  const filtersSignature = JSON.stringify(params);
+  const { edges, operator } = node;
+  const filtersSignature = JSON.stringify({ params, edges, operator });
   const [requestedSignature, setRequestedSignature] = useState<string | null>(null);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["node-filter-matches", params],
+    queryKey: ["node-filter-matches", params, edges, operator],
     queryFn: async () => {
       const res = await api.query({
-        query: {
-          id: "node-filter-matches",
-          type: node.type,
-          operator: Query.NodeOperator.And,
-          edges: [],
-          params,
-        },
+        query: { id: "node-filter-matches", type: node.type, operator, edges, params },
         explore: {
           view: { mode: Explore.EViewMode.Table, columns: [] },
           filters: [],
@@ -110,7 +106,9 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
           )}
           {!isPending && data && data.total === 0 && (
             <StyledExpansionPopoverMessage>
-              no entity passes these filters
+              {edges.length
+                ? "no entity passes these filters and conditions"
+                : "no entity passes these filters"}
             </StyledExpansionPopoverMessage>
           )}
           {!isPending && shown.length > 0 && (

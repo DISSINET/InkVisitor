@@ -80,9 +80,15 @@ export const nodeFilters = (params: Query.INodeParams): NodeFilters => ({
   coOccurrence: idList("coOccurrence", params.coOccurrence),
 });
 
-/** some filter constrains: filterParts emits a condition for it */
+/** some filter constrains; the same fields filterParts emits a condition for */
 export const hasFilters = (f: NodeFilters): boolean =>
-  filterParts(new Params(), "e", [], f).length > 0;
+  f.statuses.length > 0 ||
+  f.languages.length > 0 ||
+  !!f.label ||
+  !!(f.createdAfter || f.createdBefore || f.updatedAfter || f.updatedBefore) ||
+  !!(f.createdBy || f.updatedBy) ||
+  f.editedBy.length > 0 ||
+  f.coOccurrence.length > 0;
 
 export const ENTITIES = ident(TABLE.entities);
 const AUDITS = ident(TABLE.audits);
