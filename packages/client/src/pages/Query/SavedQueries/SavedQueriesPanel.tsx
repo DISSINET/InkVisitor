@@ -7,10 +7,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Checkbox, Input, Submit, Tooltip } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel } from "utils/utils";
 import {
+  IcoArrowReturnRight,
   IcoChevronRight,
   IcoCloseMd,
   IcoEdit,
@@ -36,6 +37,7 @@ import {
   StyledFolderList,
   StyledLockIcon,
   StyledNameError,
+  StyledNameRow,
   StyledPanel,
   StyledPanelHeader,
   StyledPanelTitle,
@@ -130,9 +132,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
 }) => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  // null until the user types, so the field follows the suggested name
-  const [typedName, setTypedName] = useState<string | null>(null);
-  const saveNameRef = useRef<HTMLInputElement>(null);
+  const [saveName, setSaveName] = useState("");
   const [saveShared, setSaveShared] = useState(false);
   const [saveColumns, setSaveColumns] = useState(true);
   const [openFolders, setOpenFolders] = useState<Record<FolderKey, boolean>>({
@@ -192,14 +192,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     ]);
     return entity ? getEntityLabel(entity) : undefined;
   };
-  const saveName = typedName ?? (isOpen ? suggestQueryName(queryState, pinnedLabel) : "");
-
-  // the suggestion opens selected, so typing replaces it
-  useEffect(() => {
-    if (isOpen) {
-      saveNameRef.current?.select();
-    }
-  }, [isOpen]);
+  const suggestedName = isOpen ? suggestQueryName(queryState, pinnedLabel) : "";
 
   const trimmedSaveName = saveName.trim();
   const saveNameTaken = !!trimmedSaveName && isNameTaken(trimmedSaveName, saveShared);
@@ -208,7 +201,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     mutationFn: (payload: ISavedQueryCreate) => api.savedQueryCreate(payload),
     onSuccess: (_data, variables) => {
       toast.success(`Query "${variables.name}" saved`);
-      setTypedName(null);
+      setSaveName("");
       setSaveShared(false);
       setSaveColumns(true);
       queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
@@ -403,23 +396,35 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
             </StyledPanelHeader>
 
             <StyledSaveRow>
-              <Input
-                value={saveName}
-                placeholder="name for the current query"
-                changeOnType
-                width="full"
-                autoFocus
-                inputRef={saveNameRef}
-                maxLength={QUERY_NAME_MAX_LENGTH}
-                borderColor={saveNameTaken ? "danger" : undefined}
-                rightContent={
-                  <StyledCharCounter>
-                    {saveName.length}/{QUERY_NAME_MAX_LENGTH}
-                  </StyledCharCounter>
-                }
-                onChangeFn={setTypedName}
-                onEnterPressFn={handleSave}
-              />
+              <StyledNameRow>
+                <Button
+                  icon={<IcoArrowReturnRight size={13} />}
+                  tooltipLabel="fill in a name from the query"
+                  tooltipPosition="top"
+                  onClick={() => setSaveName(suggestedName)}
+                  disabled={!suggestedName || saveName === suggestedName}
+                  noBorder
+                  noBackground
+                  color="black"
+                  inverted
+                />
+                <Input
+                  value={saveName}
+                  placeholder="name for the current query"
+                  changeOnType
+                  width="full"
+                  autoFocus
+                  maxLength={QUERY_NAME_MAX_LENGTH}
+                  borderColor={saveNameTaken ? "danger" : undefined}
+                  rightContent={
+                    <StyledCharCounter>
+                      {saveName.length}/{QUERY_NAME_MAX_LENGTH}
+                    </StyledCharCounter>
+                  }
+                  onChangeFn={setSaveName}
+                  onEnterPressFn={handleSave}
+                />
+              </StyledNameRow>
               {saveNameTaken && (
                 <StyledNameError role="alert">
                   Name already used in {saveShared ? SHARED_LABEL : MINE_LABEL}
