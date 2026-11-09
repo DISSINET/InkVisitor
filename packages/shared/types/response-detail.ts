@@ -34,12 +34,13 @@ export interface IResponseDetail extends IResponseEntity {
 }
 
 /**
- * The relations part of IResponseDetail, for views that show only the relations of an entity
+ * The relations part of IResponseDetail, for views that show only the relations of an entity.
+ * In this response, entities holds only the entities the relations point to.
  */
-export interface IResponseEntityRelations extends IResponseEntity {
-  entities: Record<string, IEntity>; // the entities the relations point to
-  relations: Relation.IUsedRelations;
-}
+export type IResponseEntityRelations = Pick<
+  IResponseDetail,
+  keyof IResponseEntity | "entities" | "relations"
+>;
 
 // legacy validations will be returned in a form of a tree / set of nodes ranging from the parent T to the root territory. In each node, there will be a list of validations for the territory.
 export interface ITerritoryValidationNode {
