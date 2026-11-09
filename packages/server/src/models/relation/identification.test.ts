@@ -6,6 +6,8 @@ import { IRequest } from "src/custom_typings/request";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import Identification from "./identification";
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { deleteRelations } from "@service/shorthands";
 
 describe("test Identification.beforeSave", function () {
   const db = new Db();
@@ -162,5 +164,72 @@ describe("test Identification.validateEntities", function () {
 
     result = relation.validateEntities();
     expect(result).toBeNull();
+  });
+});
+
+describe("test Identification.getIdentificationForwardConnections", function () {
+  const db = new Db();
+
+  const saveIdentification = (id: string, entityIds: [string, string]) =>
+    new Identification({
+      id,
+      entityIds,
+      certainty: EntityEnums.Certainty.Certain,
+    }).save(db.connection);
+
+  const relatedIds = (
+    entityId: string,
+    connections: RelationTypes.IConnection<RelationTypes.IIdentification>[] = []
+  ): string[] => {
+    const out: string[] = [];
+    for (const connection of connections) {
+      const related = connection.entityIds.find((id) => id !== entityId) as string;
+      out.push(related, ...relatedIds(related, connection.subtrees));
+    }
+    return out;
+  };
+
+  beforeAll(async () => {
+    await db.initDb();
+    await deleteRelations(db);
+
+    // a cycle t1 = t2 = t3 = t1, with t1 = t2 stored a second time reversed
+    await saveIdentification("ide-t1-t2", ["t1", "t2"]);
+    await saveIdentification("ide-t2-t1", ["t2", "t1"]);
+    await saveIdentification("ide-t2-t3", ["t2", "t3"]);
+    await saveIdentification("ide-t3-t1", ["t3", "t1"]);
+  });
+
+  afterAll(async () => {
+    await deleteRelations(db);
+    await db.close();
+  });
+
+  test("every direct identification is a top-level connection in a cycle", async () => {
+    const connections = await Identification.getIdentificationForwardConnections(
+      db.connection,
+      "t1",
+      3,
+      0,
+      []
+    );
+    expect(connections.map((connection) => connection.id).sort()).toEqual([
+      "ide-t1-t2",
+      "ide-t2-t1",
+      "ide-t3-t1",
+    ]);
+  });
+
+  test("a branch does not lead back to the root", async () => {
+    const connections = await Identification.getIdentificationForwardConnections(
+      db.connection,
+      "t1",
+      3,
+      0,
+      []
+    );
+    expect(relatedIds("t1", connections)).not.toContain("t1");
+    const viaT3 = connections.find((connection) => connection.id === "ide-t3-t1");
+    expect((viaT3?.subtrees ?? []).map((connection) => connection.id)).toEqual(["ide-t2-t3"]);
   });
 });

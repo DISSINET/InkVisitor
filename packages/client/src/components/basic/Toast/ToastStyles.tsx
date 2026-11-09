@@ -44,3 +44,27 @@ export const StyledLink = styled.a`
 export const StyledWrap = styled.div`
   display: flex;
 `;
+
+export const StyledErrorToastMessage = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+`;
+export const StyledErrorToastActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
+// plain button: the app's Button imports the components index, which imports
+// the api module that renders this toast
+export const StyledErrorToastCopyButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["white"]};
+  background: transparent;
+  border: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["white"]}`};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  cursor: pointer;
+`;
