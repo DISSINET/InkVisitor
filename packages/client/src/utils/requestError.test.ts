@@ -109,7 +109,9 @@ describe("readRequestError", () => {
 
     const withoutMessage = getErrorByCode({ error: "", message: "" });
     expect(withoutMessage.title).toBe("Something went wrong");
-    expect(withoutMessage.message).toBe("Please try again.");
+    expect(withoutMessage.message).toBe(
+      "Please try again. If the problem persists, send the details to the project owner."
+    );
   });
 
   it("reads an error thrown by client code as a client error", () => {

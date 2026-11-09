@@ -306,7 +306,8 @@ class InternalServerError extends CustomError {
   public static readonly TYPE = "InternalServerError";
   public static code = 500;
   public static title = "Something went wrong on the server";
-  public static message = "Please try again.";
+  public static message =
+    "Please try again. If the problem persists, send the details to the project owner.";
   loggable = true;
 }
 
@@ -522,7 +523,8 @@ class InvalidEmailError extends CustomError {
 class UnknownError extends CustomError {
   public static code = 500;
   public static title = "Something went wrong";
-  public static message = "Please try again.";
+  public static message =
+    "Please try again. If the problem persists, send the details to the project owner.";
 }
 
 class NetworkError extends CustomError {
@@ -547,7 +549,8 @@ class ClientError extends CustomError {
   public static readonly TYPE = "ClientError";
   public static code = 500;
   public static title = "Something went wrong";
-  public static message = "Please reload the page and try again.";
+  public static message =
+    "Please reload the page and try again. If the problem persists, send the details to the project owner.";
 }
 
 class TimeoutError extends CustomError {
