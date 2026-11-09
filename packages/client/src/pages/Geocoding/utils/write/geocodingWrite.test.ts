@@ -15,6 +15,7 @@ import { CEntity, CProp } from "constructors";
 import { describe, expect, it, vi } from "vitest";
 import {
   GeocodingWritePlan,
+  coordinateChanged,
   isBlocked,
   needsOverwriteConfirmation,
   planGeocodingWrite,
@@ -33,6 +34,7 @@ import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteEx
 const roles: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
+  epistemicSource: "c-source",
   accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
   placeTypes: [
     { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
@@ -82,9 +84,17 @@ describe("planGeocodingWrite", () => {
       type: "Point",
       coordinates: [17.033, 51.107],
     });
-    const byType = Object.fromEntries(plan.props.map((p) => [p.type.entityId, p.value.entityId]));
-    expect(byType["c-geo"]).toBe(plan.newValues[0].id);
-    expect(byType["c-acc"]).toBe("v-precise");
+    const geometry = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(geometry.value.entityId).toBe(plan.newValues[0].id);
+  });
+
+  it("writes the accuracy as a subproperty of the geometry, not as a prop beside it", () => {
+    const plan = planOf(baseInput);
+    const geometry = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(geometry.children.map((c) => [c.type.entityId, c.value.entityId])).toEqual([
+      ["c-acc", "v-precise"],
+    ]);
+    expect(plan.props.some((p) => p.type.entityId === "c-acc")).toBe(false);
   });
 
   it("rounds a coordinate to a precision the source can justify", () => {
@@ -197,7 +207,7 @@ describe("planGeocodingWrite", () => {
 });
 
 /**
- * Changing what kind of place a Location is, without moving it. Every other
+ * Changing what location type a Location is, without moving it. Every other
  * write mints a Value entity per coordinate; doing that here would orphan a pair
  * on the operation researchers repeat most, and an orphan survives whenever
  * something still refers to it or the account cannot delete.
@@ -258,7 +268,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
     expect(plan.displacedValueIds).toEqual(["v-geo"]);
   });
 
-  it("still carries the kind of place it was called for, as a Concept to classify under", () => {
+  it("still carries the location type it was called for, as a Concept to classify under", () => {
     const plan = retype(same);
     expect(plan.kindConceptId).toBe("v-settlement");
     expect(plan.props.some((p) => p.type.entityId === "c-type")).toBe(false);
@@ -319,7 +329,7 @@ describe("planGeocodingWrite, what it offers for deletion", () => {
 /**
  * `isOverwrite` gates the one confirmation on the page, so what counts as an
  * overwrite is the whole of its meaning: a first coordinate must not ask, and a
- * write that keeps the coordinate and changes only the kind of place must not
+ * write that keeps the coordinate and changes only the location type must not
  * ask either, or the dialog appears on the correction done most often.
  */
 describe("planGeocodingWrite, what counts as replacing a geometry", () => {
@@ -355,6 +365,271 @@ describe("planGeocodingWrite, what counts as replacing a geometry", () => {
   });
 });
 
+/**
+ * The accuracy is a subproperty of the geometry. An earlier version wrote it as
+ * a prop beside the geometry, and Locations written then still carry that shape
+ * until a migration moves them, so the write has to take either as its starting
+ * point and leave the new shape behind.
+ */
+describe("planGeocodingWrite, the accuracy under the geometry", () => {
+  const withChildren = (parent: IProp, children: IProp[]): IProp => {
+    parent.children = children;
+    return parent;
+  };
+  const childrenOf = (plan: GeocodingWritePlan, type = "c-geo") =>
+    plan.props.find((p) => p.type.entityId === type)!.children;
+  const same = pointGeometry(17.0384, 51.1079);
+
+  it("leaves no accuracy prop beside the geometry where the Location had one", () => {
+    const plan = planOf({
+      ...baseInput,
+      location: location([prop("c-geo", "old-geo"), prop("c-acc", "v-precise")]),
+    });
+    expect(plan.props.filter((p) => p.type.entityId === "c-acc")).toEqual([]);
+    expect(childrenOf(plan).map((c) => c.type.entityId)).toEqual(["c-acc"]);
+  });
+
+  it("moves the accuracy of a geometry that stayed under it, keeping the geometry prop itself", () => {
+    const geometry = withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+    });
+    const kept = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(kept.id).toBe(geometry.id);
+    expect(kept.children.map((c) => c.value.entityId)).toEqual(["v-precise"]);
+    expect(plan.newValues).toEqual([]);
+  });
+
+  it("migrates the shape beside the geometry when the geometry itself did not move", () => {
+    const geometry = prop("c-geo", "v-geo");
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry, prop("c-acc", "v-old")]),
+    });
+    expect(plan.props.map((p) => p.type.entityId)).toEqual(["c-geo"]);
+    expect(plan.props[0].id).toBe(geometry.id);
+    expect(childrenOf(plan).map((c) => c.value.entityId)).toEqual(["v-precise"]);
+  });
+
+  it("carries over what a researcher hung under the geometry beside the accuracy", () => {
+    const note = prop("c-note", "v-note");
+    const geometry = withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old"), note]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+    });
+    expect(childrenOf(plan).map((c) => c.type.entityId).sort()).toEqual(["c-acc", "c-note"]);
+    expect(childrenOf(plan).find((c) => c.type.entityId === "c-note")).toBe(note);
+  });
+
+  it("keeps the accuracy prop it finds, with its id and what hangs under it, and changes only its value", () => {
+    const accuracy = withChildren(prop("c-acc", "v-old"), [prop("c-note", "v-note")]);
+    accuracy.certainty = EntityEnums.Certainty.Probable;
+    const geometry = withChildren(prop("c-geo", "v-geo"), [accuracy]);
+    const plan = planOf({ ...baseInput, geometry: same, current: same, location: location([geometry]) });
+    const [child] = childrenOf(plan);
+    expect(child.id).toBe(accuracy.id);
+    expect(child.value.entityId).toBe("v-precise");
+    expect(child.certainty).toBe(EntityEnums.Certainty.Probable);
+    expect(child.children.map((c) => c.type.entityId)).toEqual(["c-note"]);
+  });
+
+  it("moves the accuracy prop written beside the geometry under it as the same prop", () => {
+    const beside = prop("c-acc", "v-old");
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(childrenOf(plan)[0].id).toBe(beside.id);
+  });
+
+  it("refuses, rather than lose notes under notes, when the accuracy beside the geometry has them", () => {
+    const grandchild = withChildren(prop("c-n1", "v1"), [prop("c-n2", "v2")]);
+    const beside = withChildren(prop("c-acc", "v-old"), [grandchild]);
+    const result = planGeocodingWrite({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(isBlocked(result) && result.blocked).toContain("notes under notes");
+  });
+
+  it("moves an accuracy prop beside the geometry that has notes of one level, whole", () => {
+    const beside = withChildren(prop("c-acc", "v-old"), [prop("c-n1", "v1")]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(childrenOf(plan)[0].id).toBe(beside.id);
+    expect(childrenOf(plan)[0].children.map((c) => c.type.entityId)).toEqual(["c-n1"]);
+  });
+
+  it("carries what a researcher hung under a geometry that is replaced onto the new one", () => {
+    const note = prop("c-note", "v-note");
+    const old = withChildren(prop("c-geo", "old-geo"), [
+      prop("c-acc", "v-precise"),
+      prop("c-source", "r-geonames"),
+      note,
+    ]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: pointGeometry(1, 2),
+      current: same,
+      location: location([old]),
+    });
+    expect(childrenOf(plan).map((c) => c.type.entityId)).toEqual(["c-acc", "c-note"]);
+    expect(childrenOf(plan)[1]).toBe(note);
+  });
+
+  it.each([
+    ["the accuracy", { geometry: "c-geo", accuracy: "c-geo" }],
+    ["the source and the geometry", { epistemicSource: "c-geo" }],
+    ["the source and the accuracy", { epistemicSource: "c-acc" }],
+  ])("refuses to write when one Concept is given to %s", (_name, clash) => {
+    const result = planGeocodingWrite({ ...baseInput, roles: { ...roles, ...clash } });
+    expect(isBlocked(result) && result.blocked).toContain("one Concept to two roles");
+  });
+
+  it("keeps the previous shape in the record, so what was there can be restored", () => {
+    const before = [withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")])];
+    const plan = planOf({ ...baseInput, location: location(before) });
+    expect(plan.previous.props).toEqual(before);
+  });
+});
+
+/**
+ * The gazetteers behind a coordinate are named as subproperties of the geometry,
+ * one per gazetteer, alongside the references that carry the record identifiers.
+ * The credit a licence asks for is owed to the gazetteer, however many of its
+ * records matched.
+ */
+describe("planGeocodingWrite, the sources of a coordinate", () => {
+  const from = (...sources: string[]) =>
+    sources.map((source) => ({ source, sourceId: `${source}-1` }));
+  const sourcesOf = (plan: GeocodingWritePlan) =>
+    plan.props
+      .find((p) => p.type.entityId === "c-geo")!
+      .children.filter((c) => c.type.entityId === "c-source")
+      .map((c) => c.value.entityId);
+  const same = pointGeometry(17.0384, 51.1079);
+
+  it("names each gazetteer that supplied the coordinate, under the geometry after the accuracy", () => {
+    const plan = planOf({ ...baseInput, provenance: from("wikidata", "geonames") });
+    const children = plan.props.find((p) => p.type.entityId === "c-geo")!.children;
+    expect(children.map((c) => c.type.entityId)).toEqual(["c-acc", "c-source", "c-source"]);
+    expect(sourcesOf(plan)).toEqual(["r-wikidata", "r-geonames"]);
+    expect(plan.props.some((p) => p.type.entityId === "c-source")).toBe(false);
+  });
+
+  it("names a gazetteer once, however many of its records matched", () => {
+    const plan = planOf({
+      ...baseInput,
+      provenance: [...from("geonames"), { source: "geonames", sourceId: "another" }],
+    });
+    expect(sourcesOf(plan)).toEqual(["r-geonames"]);
+  });
+
+  it("names nothing for a source with no Resource, as the model's own guess has none", () => {
+    expect(sourcesOf(planOf({ ...baseInput, provenance: from("llm-coords") }))).toEqual([]);
+  });
+
+  it("names nothing where the project has not assigned the role, and still writes the references", () => {
+    const plan = planOf({
+      ...baseInput,
+      roles: { ...roles, epistemicSource: "" },
+      provenance: from("wikidata"),
+    });
+    expect(plan.props.find((p) => p.type.entityId === "c-geo")!.children).toHaveLength(1);
+    expect(plan.references).toHaveLength(1);
+  });
+
+  it("names nothing for a coordinate that no gazetteer supplied", () => {
+    // a click on the map, or a shape drawn by hand
+    expect(sourcesOf(planOf(baseInput))).toEqual([]);
+  });
+
+  it("keeps the sources a coordinate that stayed already names, and adds only the new ones", () => {
+    const geometry = prop("c-geo", "v-geo");
+    geometry.children = [prop("c-acc", "v-old"), prop("c-source", "r-wikidata")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+      provenance: from("wikidata", "geonames"),
+    });
+    expect(sourcesOf(plan)).toEqual(["r-wikidata", "r-geonames"]);
+  });
+
+  it("does not take a change of type for a change of source", () => {
+    // a write that keeps the coordinate and changes only the location type
+    // carries no provenance, and must not strip what is already named
+    const geometry = prop("c-geo", "v-geo");
+    geometry.children = [prop("c-acc", "v-precise"), prop("c-source", "r-geonames")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+      placeType: "settlement",
+    });
+    expect(sourcesOf(plan)).toEqual(["r-geonames"]);
+  });
+
+  it("does not carry the sources of a coordinate that moved onto the new one", () => {
+    const geometry = prop("c-geo", "old-geo");
+    geometry.children = [prop("c-acc", "v-precise"), prop("c-source", "r-geonames")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: pointGeometry(1, 2),
+      location: location([geometry]),
+    });
+    expect(sourcesOf(plan)).toEqual([]);
+  });
+});
+
+describe("coordinateChanged", () => {
+  const withChildren = (parent: IProp, children: IProp[]): IProp => {
+    parent.children = children;
+    return parent;
+  };
+  const geocoded = (accuracy: string, extra: IProp[] = []) =>
+    location([withChildren(prop("c-geo", "v-geo"), [prop("c-acc", accuracy), ...extra])]);
+
+  it("sees someone else change the accuracy under the geometry", () => {
+    expect(coordinateChanged(geocoded("v-precise"), geocoded("v-approximate"), roles)).toBe(true);
+  });
+
+  it("counts the move of the accuracy from beside the geometry to under it as a change, and so refuses a write that raced a migration", () => {
+    const beside = location([prop("c-geo", "v-geo"), prop("c-acc", "v-precise")]);
+    expect(coordinateChanged(beside, geocoded("v-precise"), roles)).toBe(true);
+  });
+
+  it("sees someone else name a different source of the coordinate", () => {
+    const named = (resource: string) => geocoded("v-precise", [prop("c-source", resource)]);
+    expect(coordinateChanged(named("r-wikidata"), named("r-geonames"), roles)).toBe(true);
+  });
+
+  it("is not moved by a subproperty the page does not own", () => {
+    expect(
+      coordinateChanged(geocoded("v-precise"), geocoded("v-precise", [prop("c-note", "v-n")]), roles),
+    ).toBe(false);
+  });
+});
+
 describe("needsOverwriteConfirmation", () => {
   it("asks for a Location whose existing geometry the page could not read", () => {
     // `current` is undefined for an unreadable Value, yet the write deletes it
@@ -378,11 +653,11 @@ describe("needsOverwriteConfirmation", () => {
 });
 
 /**
- * Three answers, not two. Clearing a kind of place is a statement the researcher
+ * Three answers, not two. Clearing a location type is a statement the researcher
  * makes; leaving it alone is what a coordinate correction does, and collapsing
- * them makes the control that offers "no kind of place" do nothing at all.
+ * them makes the control that offers "no location type" do nothing at all.
  */
-describe("planGeocodingWrite, clearing versus leaving the kind of place", () => {
+describe("planGeocodingWrite, clearing versus leaving the location type", () => {
   // a prop of the retired type role: the plan must neither read nor remove it
   const typed = () => location([prop("c-geo", "v-geo"), prop("c-type", "v-fortress")]);
 

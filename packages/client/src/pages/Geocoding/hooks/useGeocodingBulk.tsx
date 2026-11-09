@@ -7,6 +7,7 @@ import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { defaultTypeFor } from "../components/placeType/locationTypeText";
 import { QuickGeocodeToast } from "../components/recent/QuickGeocodeToast";
 import { SuggestResponse, Suggestion } from "../types/engine";
 import { engineSuggestStream } from "../utils/engine/engine";
@@ -19,7 +20,7 @@ import { GeocodingLocation } from "./useGeocodingLocations";
 import { UseGeocodingWriter } from "./useGeocodingWriter";
 
 /**
- * The runs over many Locations: a kind of place across the marked set, a quick
+ * The runs over many Locations: a location type across the marked set, a quick
  * geocode of one row, and a batch geocode of the marked set.
  *
  * They share one rule about stopping and one way of deciding and writing, so
@@ -40,7 +41,7 @@ interface UseGeocodingBulkInput {
   marked: Set<string>;
   setMarked: Dispatch<SetStateAction<Set<string>>>;
   write: UseGeocodingWriter["write"];
-  /** Records a kind of place on one Location, leaving its geometry alone. */
+  /** Records a location type on one Location, leaving its geometry alone. */
   retype: (
     location: GeocodingLocation,
     placeType: string | null,
@@ -105,7 +106,7 @@ export const useGeocodingBulk = ({
   };
 
   /**
-   * Records one kind of place across the marked set.
+   * Records one location type across the marked set.
    *
    * Sequential rather than parallel: each write is a read-modify-write of one
    * entity through the same path a single retype takes, and the first refusal
@@ -113,9 +114,7 @@ export const useGeocodingBulk = ({
    * Concept for it refuses all of them and forty toasts say it forty times.
    */
   const retypeMarked = async (placeType: string | null) => {
-    const targets = locations.filter(
-      (location) => marked.has(location.entity.id) && location.isGeocoded,
-    );
+    const targets = locations.filter((location) => marked.has(location.entity.id));
     cancelBulk.current = false;
     let done = 0;
     for (const location of targets) {
@@ -154,8 +153,8 @@ export const useGeocodingBulk = ({
     refresh();
     toast.success(
       done === 1
-        ? "Kind of place recorded on one Location."
-        : `Kind of place recorded on ${done} Locations.`,
+        ? "Location type recorded on one Location."
+        : `Location type recorded on ${done} Locations.`,
     );
   };
 
@@ -228,8 +227,8 @@ export const useGeocodingBulk = ({
         skipped: pick.skip,
         choices: choicesFrom(response.suggestions),
         // carried with the choices: a spread only means something against the
-        // distance the engine was willing to merge, which comes from the kind
-        // of place rather than from a constant
+        // distance the engine was willing to merge, which comes from the gazetteer
+        // location type rather than from a constant
         mergeRadiusKm: response.mergeRadiusKm,
       };
     }
@@ -239,10 +238,9 @@ export const useGeocodingBulk = ({
         roles,
         geometry: pointGeometry(pick.take.lon, pick.take.lat),
         accuracy: pick.accuracy,
-        // the same rule every other path follows: a kind is written only where
+        // the same rule every other path follows: a location type is written only where
         // the corpus named one to stand for all of them, and never guessed at
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
+        placeType: defaultTypeFor(context, location.typeEntries),
         provenance: provenanceOf(pick.take),
         current: location.geometry,
         userOptions: user.options,
@@ -340,8 +338,7 @@ export const useGeocodingBulk = ({
         roles,
         geometry: pointGeometry(suggestion.lon, suggestion.lat),
         accuracy,
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
+        placeType: defaultTypeFor(context, location.typeEntries),
         provenance: provenanceOf(suggestion),
         current: location.geometry,
         userOptions: user.options,
@@ -368,7 +365,7 @@ export const useGeocodingBulk = ({
   /**
    * Geocodes every marked Location.
    *
-   * Sequential, and stopped the same way the kind-of-place run is: one request
+   * Sequential, and stopped the same way the location-type run is: one request
    * is in flight at a time because the engine's own progress stream reports one,
    * and because a researcher watching a hundred of these wants to be able to
    * stop after the third.

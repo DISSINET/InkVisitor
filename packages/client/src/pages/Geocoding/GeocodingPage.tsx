@@ -4,13 +4,13 @@ import {
   IGeocodingContext,
   IGeocodingContextWeights,
 } from "@inkvisitor/shared/types/geocoding";
-import { UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, Panel } from "components";
-import { LayoutSeparatorVertical } from "components/advanced";
+import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -44,6 +44,7 @@ import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./containers/suggesti
 import { StyledEngineDot, StyledEngineLabel, StyledEngineStatus } from "./GeocodingPageStyles";
 import { EngineState } from "./types/page";
 import { useGeocodingBrowse } from "./hooks/useGeocodingBrowse";
+import { mayCreateLocation, useCreateLocation } from "./hooks/useCreateLocation";
 import { useGeocodingBulk } from "./hooks/useGeocodingBulk";
 import { useGeocodingConfig } from "./hooks/useGeocodingConfig";
 import { useGeocodingPanels } from "./hooks/useGeocodingPanels";
@@ -53,6 +54,7 @@ import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./hooks/usePlaceTypeAssignments";
 import { useGeocodingSuggest } from "./hooks/useGeocodingSuggest";
 import { useGeocodingWriter } from "./hooks/useGeocodingWriter";
 import { useRecentGeocodes } from "./hooks/useRecentGeocodes";
+import { useRefreshedSelection } from "./hooks/useRefreshedSelection";
 
 /**
  * How long after the last movement of a weight slider it is written.
@@ -70,6 +72,9 @@ const WEIGHT_SAVE_DELAY_MS = 400;
  * hovering nothing, which would close the card being reached for.
  */
 const HOVER_GRACE_MS = 260;
+
+/** The one message about location types that could not be read, kept single by its id. */
+const TYPES_UNREADABLE_TOAST = "geocoding-types-unreadable";
 
 export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
@@ -286,6 +291,20 @@ export const GeocodingPage: React.FC = () => {
   const browse = useGeocodingBrowse(roles);
   const panels = useGeocodingPanels();
 
+  // a Location whose classifications could not be read looks like one with no
+  // location type, which is not what it is, so the page says so for as long as that
+  // holds, and does not offer to change what it cannot see
+  useEffect(() => {
+    if (browse.typesError) {
+      toast.error(
+        "The location types of the Locations could not be read, so none are shown and they cannot be changed. Reload the page to try again.",
+        { toastId: TYPES_UNREADABLE_TOAST, autoClose: false },
+      );
+    } else {
+      toast.dismiss(TYPES_UNREADABLE_TOAST);
+    }
+  }, [browse.typesError]);
+
   /**
    * The Locations a bulk action applies to.
    *
@@ -313,6 +332,14 @@ export const GeocodingPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
     queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
   };
+
+  const createLocation = useCreateLocation({
+    all: browse.all,
+    selectedId: selected?.entity.id,
+    clearFilters: browse.clearFilters,
+    refresh: refreshLocations,
+    onSelect: setSelected,
+  });
 
   /**
    * The next Location still wanting a coordinate, skipping the one being written.
@@ -466,51 +493,43 @@ export const GeocodingPage: React.FC = () => {
   const advanceTo = useRef<GeocodingLocation | undefined>(undefined);
 
   /**
-   * Records what kind of place a Location is, leaving its geometry alone.
+   * Adds a location type to a Location, or removes every one the page can where
+   * told there is none, leaving its coordinate alone.
    *
-   * The geometry and accuracy are written back unchanged because the write
-   * replaces every role it owns, and a partial one would leave a Location with a
-   * kind and no geometry. A Location with no geometry has nothing to write
-   * against, so the mark on its row is a label rather than a control.
+   * Only its Classifications are written, so a Location with no coordinate takes
+   * a location type like any other. Adding one leaves the others, and a quiet
+   * write holds back the refetch for a run to make once.
    */
-  const retype = async (
+  const retype = (
     location: GeocodingLocation,
     placeType: string | null,
     options?: { quiet?: boolean },
-  ): Promise<boolean> => {
-    if (!user?.options || !location.geometry) {
-      return false;
-    }
-    return write(
-      {
-        location: location.entity,
-        roles,
-        geometry: location.geometry,
-        accuracy: location.accuracy || GeocodingAccuracy.Unknown,
-        placeType,
-        current: location.geometry,
-        userOptions: user.options,
-      },
-      options,
-    );
-  };
+  ): Promise<boolean> =>
+    browse.typesError
+      ? Promise.resolve(false)
+      : editTypes(location.entity, placeType ? { add: [placeType] } : { clear: true }, options);
 
-  // `selected` is a snapshot taken when the row was clicked. After a write the
-  // collection refetches, and under the default ungeocoded filter the row
-  // leaves the list - so without re-syncing, the panel and the map keep showing
-  // the pre-write state and the coordinate never visibly lands.
-  useEffect(() => {
-    if (!selected) {
-      return;
-    }
-    const fresh = browse.all.find((location) => location.entity.id === selected.entity.id);
-    if (fresh && fresh !== selected) {
-      setSelected(fresh);
-    }
-  }, [browse.all, selected]);
+  /** Adds or removes one location type of a Location, as its own Classification. */
+  const toggleType = (
+    location: GeocodingLocation,
+    placeType: string,
+    on: boolean,
+  ): Promise<boolean> =>
+    browse.typesError
+      ? Promise.resolve(false)
+      : editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
+
+  useRefreshedSelection(browse.all, selected, setSelected);
   const { recent, record: recordRecent } = useRecentGeocodes();
-  const { write, blocked, clearBlocked, pendingOverwrite, confirmOverwrite, cancelOverwrite } =
-    useGeocodingWriter(roles, recordRecent);
+  const {
+    write,
+    editTypes,
+    blocked,
+    clearBlocked,
+    pendingOverwrite,
+    confirmOverwrite,
+    cancelOverwrite,
+  } = useGeocodingWriter(roles, recordRecent);
 
   // a refused write says why. Without this the researcher cannot tell an accept
   // that worked from one the project's configuration silently rejected.
@@ -627,9 +646,10 @@ export const GeocodingPage: React.FC = () => {
       : engineLabel[engineState];
   // the same rule as the menu entry that opens the modal
   const canEditSettings = user?.role === UserEnums.Role.Owner;
+  const canCreateLocation = mayCreateLocation(user?.role);
 
   return (
-    <PlaceTypesProvider placeTypes={roles.placeTypes}>
+    <PlaceTypesProvider placeTypes={roles.placeTypes} viaLabels={browse.viaLabels}>
       <HintLayer />
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also
@@ -657,7 +677,7 @@ export const GeocodingPage: React.FC = () => {
             browse={browse}
             selectedId={selected?.entity.id}
             onSelect={setSelected}
-            onRetype={retype}
+            onToggleType={toggleType}
             marked={marked}
             onMark={mark}
             onClearMarks={() => setMarked(new Set())}
@@ -668,6 +688,7 @@ export const GeocodingPage: React.FC = () => {
             batch={batch}
             onShowBatch={() => setShowBatch(true)}
             onDismissBatch={() => setBatch(null)}
+            onCreate={canCreateLocation ? createLocation.open : undefined}
             onQuickGeocode={quickGeocode}
             quickBusyId={quickBusy}
             quickStrategy={context.quickStrategy ?? "clearWinner"}
@@ -768,9 +789,10 @@ export const GeocodingPage: React.FC = () => {
                 roles,
                 geometry,
                 accuracy,
-                // an undecided kind of place keeps whatever the Location carries,
-                // which is what a coordinate correction means
-                placeType: placeType === undefined ? selected.placeType : placeType,
+                // an undecided location type says nothing about it: what the
+                // Location is classified under stays, and nothing is written for
+                // the first of them, which may only be inferred
+                placeType,
                 current: selected.geometry,
                 userOptions: user.options,
               });
@@ -829,10 +851,8 @@ export const GeocodingPage: React.FC = () => {
                 />
               ) : null
             }
-            onRetype={
-              selected?.isGeocoded && user?.options
-                ? (placeType) => retype(selected, placeType)
-                : undefined
+            onToggleType={
+              selected ? (placeType, on) => toggleType(selected, placeType, on) : undefined
             }
             showAll={showAll}
             chosenOnMap={chosenOnMap}
@@ -894,6 +914,17 @@ export const GeocodingPage: React.FC = () => {
             // the panel is behind this window, so reading it means leaving
             setShowBatch(false);
           }}
+        />
+      ) : null}
+
+      {createLocation.creating ? (
+        <EntityCreateModal
+          categorySelected={EntityEnums.Class.Location}
+          allowedEntityClasses={[EntityEnums.Class.Location]}
+          // what was being searched for is most likely the name of what is missing
+          labelTyped={browse.filters.label}
+          closeModal={createLocation.close}
+          onMutationSuccess={createLocation.created}
         />
       ) : null}
 

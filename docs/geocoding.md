@@ -12,12 +12,34 @@ own API reference lives in its repository; nothing here restates it.
 ## How a coordinate is stored
 
 The geometry is a metaproperty on the Location entity, not a field on
-`ILocationData`. Two sibling props carry it:
+`ILocationData`. One prop carries it, and the accuracy is that prop's
+subproperty:
 
-| prop type | prop value | example |
-|-----------|------------|---------|
-| Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
-| Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
+| level | prop type | prop value | example |
+|-------|-----------|------------|---------|
+| first | Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
+| second, under the geometry | Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
+
+Locations written before the accuracy moved under the geometry carry it as a
+second first-level prop beside the geometry. The page reads either shape, prefers
+the one under the geometry where both are there, and writes only the nested one,
+removing the prop beside it; `nestGeocodingAccuracyJob` moves the rest in one go
+and lists the Locations it will not touch (an accuracy with no geometry, several of
+either, two accuracies that disagree, or an accuracy prop whose children have
+children, which moved down a level would sit on a fourth that nothing shows). A job
+writes a Location only if its props are still what the job read, because it reads
+them all at once and a researcher can save one while it runs; one saved in between
+is listed and left. A database still holding coordinates as `geo:x` and `geo:y` has
+no geometry props yet, so `migrateGeocodingGeometryJob` runs first.
+
+What reads the accuracy as a first-level prop stops finding it once it is nested.
+The Explorer's "has prop" edges and the validation rules of the property kind look
+at first-level props only, so a saved query or a rule that expects the accuracy
+there no longer matches and has to be rewritten. The jobs are
+for RethinkDB; a PostgreSQL deployment is migrated after the job has run, or
+holds the earlier shape until each Location is saved by the page. The server keeps
+an entity for up to a minute, so a Location read straight after a job can still
+show the earlier shape.
 
 The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
@@ -43,16 +65,16 @@ vocabulary. When the engine returns a type with no corresponding Concept
 configured, the page warns and refuses rather than inventing one — a controlled
 vocabulary that grows from external input is not controlled.
 
-A Location counts as **geocoded** when both `geo:geometry` and `geo:accuracy`
-are present and the geometry's value resolves to an entity whose label is a valid
+A Location counts as **geocoded** when it has a `geo:geometry` prop with a
+`geo:accuracy` subproperty and the geometry's value resolves to an entity whose label is a valid
 GeoJSON geometry. A prop pointing at a Value that was deleted, or at a Value whose
 label is blank, not JSON, out of range or an open ring, does not count — a
 geometry that cannot be read is not a geometry. One
 Location in the converted set, `diocesis Tudensis`, is exactly that shape.
 
-The kind of place is not a prop. A Location has a kind by being the subject of a
-Classification relation to the kind's Concept, and a Location without one is
-still geocoded: the kind says what the place is, not where.
+The location type is not a prop. A Location has a location type by being the subject of a
+Classification relation to the location type's Concept, and a Location without one is
+still geocoded: the location type says what the place is, not where.
 
 None of these Concept identities is hardcoded. Which Concept plays which role is
 configuration, so a deployment whose data uses different Concepts points the
@@ -60,11 +82,31 @@ settings at them instead of migrating.
 
 ## Where the source of a coordinate is recorded
 
-The gazetteer that produced a coordinate is an entity reference: one Resource
-entity per gazetteer, reused across every Location, plus a Value entity holding
-that gazetteer's own identifier for the record. `IResourceData` already carries
-`partValueBaseURL`, so the base URL plus the value label reconstructs the deep
-link without storing a second URL.
+The gazetteer that produced a coordinate is recorded twice, for two readers. A
+reference is one Resource entity per gazetteer, reused across every Location, plus
+a Value entity holding that gazetteer's own identifier for the record.
+`IResourceData` already carries `partValueBaseURL`, so the base URL plus the value
+label reconstructs the deep link without storing a second URL. The licences of
+several gazetteers require them to be credited for what is taken from them, so
+the gazetteer is also named on the coordinate itself: a subproperty of the
+geometry prop, typed with the epistemic source Concept and valued with the
+gazetteer's Resource, once per gazetteer however many of its records matched. It
+is where someone reading the coordinate in Detail finds who it came from; the
+reference is where the record is. The Explorer's "has prop" edges read first-level
+props only, so a query cannot ask for the source.
+
+The Concept is the `epistemicSource` role of the global settings. Where it is not
+assigned the sources are recorded as references alone. A coordinate written by a
+click on the map or drawn by hand names none, since no gazetteer supplied it. A
+write that keeps the coordinate where it was keeps the sources already named and
+adds those of the new run; one that moves it starts with only the new ones.
+`addGeocodingSourcesJob` names the gazetteers of Locations written before, from
+the references they carry. A reference does not say which coordinate it supplied,
+so the job credits a gazetteer only when the Value holding its record id was
+created within five minutes of the Value holding the current geometry, which is
+how one accepted suggestion writes them; a reference added by hand later, or left
+behind when the coordinate was moved, is not credited, and a Location whose Values
+carry no creation time is left alone.
 
 Every source that contributed to an accepted suggestion gets a reference, with
 one exception: `llm-coords` is not a gazetteer but the language model's own
@@ -90,15 +132,15 @@ permission at all and a deny-all row has already been persisted for it — so a
 group would be unreadable by everyone but an owner. The whole object is read and
 written together in any case.
 
-The **global** modal is owner-or-admin, alongside Global validations, and holds
-the Concept and Resource assignments and the place-type dictionary. The query
-context — region, period, language, kind of place — is edited on the Suggestions
+The **global** modal is owner-only, alongside Global validations, and holds
+the Concept and Resource assignments and the location type dictionary. The query
+context — region, period, language, gazetteer location type — is edited on the Suggestions
 panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
-validations. It assigns the geometry and accuracy roles, the four
-accuracy values, the project's own place types and fifteen gazetteer Resources. Each
+validations. It assigns the geometry, accuracy and epistemic source roles, the four
+accuracy values, the project's own location types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier
 have their base URL prefilled from the engine's own builders.
@@ -145,7 +187,7 @@ the other three are claims a source makes about itself. A dimension weighted to
 an out-of-scope source outright, and a dimension weighted to nothing that went on
 deciding which sources ran would be a filter nobody asked for. Zeroing region
 therefore lets every gazetteer run on every request, which is slower — that is
-the trade being asked for. Language and place type never skip a source either
+the trade being asked for. Language and gazetteer location type never skip a source either
 way; they only lift one.
 
 **The slider is not the engine's own number.** The four dimensions do not share
@@ -171,11 +213,11 @@ comparable across two different contexts.** One measured `Breslau` query scored
 0.705 under the defaults and 0.656 under region alone. Nothing on this page pins
 anything to a score value.
 
-**Every field holds a list.** Region, period, language and kind of place each take
+**Every field holds a list.** Region, period, language and gazetteer location type each take
 several values, and several mean *any of them*: a source keeps its best score
 among the regions and is skipped only if it covers none of them, the periods are
 scored on the union of their spans so overlapping ones count once, a source
-matching any of the kinds of place scores in full, and the merge radius is the
+matching any of the gazetteer location types scores in full, and the merge radius is the
 largest among them. Language is the one list whose order matters — it is the
 researcher's own statement of which is likelier. The engine (0.2.0) accepts these
 four only as lists: a bare string, an empty list or a blank entry is 422, so an
@@ -344,7 +386,7 @@ the client-side checks exist to pre-empt:
 
 ## Which gazetteers the engine asks
 
-Sixteen sources, and two places to switch one off: the global settings modal
+Seventeen sources, and two places to switch one off: the global settings modal
 sets it for the project, and *My geocoding preferences* sets it for one
 researcher's own runs. A source switched off is never asked, so it costs nothing
 and returns nothing — which is what makes this different from weighting a source
@@ -372,24 +414,47 @@ written only when it was changed from what the modal opened with, and after the
 roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
 
-**A gazetteer is one tag wherever the page names it.** `GazetteerTag` draws a
-source's name with one mark, the same for every source whatever its kind, and
-`GazetteerHover` gives any face the page already draws
-the same mark and the same card. Hovering or focusing it shows what
-`GET /suggesters` says about the source: whether it is local records or an online
-service, its licence as chips (commercial use allowed or not, credit required,
-share-alike), its description, what it is good for (regions, periods, languages
-and kinds of place, written as words rather than slugs and codes), what it
-cannot do, how large its data is, the credit wording, the citation and the
-homepage. It is used in the gazetteer table of both modals, on every match tag
-in the suggestion cards, in the progress strip, in the map's place search and in
-the quick-geocode notice, so a source is explained identically everywhere and
-one the engine adds is explained everywhere at once. The card stays open briefly
-after the pointer leaves so the homepage link can be reached.
+**Each row says what the source covers, how long it takes and how much it holds.**
+Under the name, in both tables, one line of time · geography · topic from the
+engine's `info.scope`, then chips: how long it usually takes, and how many
+records it holds. Nothing is hidden behind a hover, because it is what a researcher
+reads to decide whether to ask a source at all ("use only what you need").
 
-Where the engine has not been reached, or does not list the source, the tag is
-the bare name with no mark and no card: an empty card would claim the engine said
-something. The catalogue is one request an hour shared by every tag.
+The time is the engine's own measurement, `latency` on `GET /suggesters`: the
+median and 95th percentile of the last runs that really reached the source
+(cached answers and skipped sources never count). A local file is `local`. An
+online service is `quick` under 1.5 s, `slow` from 4 s and `moderate` between, by
+its median; the two thresholds are constants in `gazetteerFacts.ts`. A source that
+failed or was cut off in a fifth or more of its runs also says `often fails`. The
+figure is a typical wait and not a speed: it grows with the number of name forms
+searched, and it includes any wait a source's own rate limit imposes (Nominatim
+waits a second per form by its published policy), so the card says so. Until the
+engine has five runs of a source on record, `latency` is null and the row shows no
+speed, not a guess.
+
+The count is `info.size.records`, marked `≈` when the engine says it is
+approximate, and left out where nobody publishes one. An engine that publishes
+none of these gets the first sentence of the source's description as its line and,
+for a local file, the located records it measured.
+
+**A source is explained where it is chosen, and only there.** `GazetteerHover` gives
+a source's name in the gazetteer table of both modals a mark and a card. Hovering
+or focusing it shows what `GET /suggesters` says about the source: whether it is
+local records or an online service, its licence as chips (commercial use allowed
+or not, credit required, share-alike), its description, what it is good for
+(regions, periods, languages and gazetteer location types, written as words rather than
+slugs and codes), its limitations, how large its data is, the credit wording, the
+citation and the homepage. The card stays open briefly after the pointer leaves
+so the homepage link can be reached.
+
+Beside a result — on a match tag, in the progress strip, in the map's place search
+and in the quick-geocode notice — a source is its name in its colour and nothing
+more. A card there would open over the answer being judged, as the mouse moves
+through the suggestions, and hide the thing the researcher is looking at.
+
+Where the engine has not been reached, or does not list the source, the settings
+name is the bare name with no mark and no card: an empty card would claim the
+engine said something. The catalogue is one request an hour shared by every card.
 
 The table does not show the footprint column the engine measures of each source
 (`footprint` on `GET /suggesters`: records held and the one-degree squares they
@@ -411,7 +476,7 @@ done 687 · unreadable 0 · all 687` — because they count one population.
 
 That matters because the panel applies its filters in two places. Name, language
 and status go to the server and change what comes back; coordinate state,
-accuracy and kind of place are applied to what came back. A figure taken over the
+accuracy and location type are applied to what came back. A figure taken over the
 server's answer, printed beside a control that filters in the browser, moves for
 three of the six controls and sits still for the other three — and nothing on
 screen says which kind of control was just used. A count printed beside a filter
@@ -422,6 +487,24 @@ The rest of the filters sit behind one control that says how many are in force
 and names them: `1 filter · accuracy precise`. Five dropdowns each reading `any`
 say only that five controls exist, and a list shortened by one of them explains
 itself nowhere. Each field carries its own label for the same reason.
+
+## Making a Location from the page
+
+A `+` beside the Locations search opens the Explorer's own create dialog, limited
+to the Location class, with what is typed in the search as the label. It is absent
+for a Viewer, who may not create entities.
+
+A new Location is used in no statement and starts Pending, so a territory filter
+can never list it and the other filters may exclude it. Once it exists the page
+clears every filter, asks for the list again and selects the new Location from
+the list when it arrives. It is selected from the list and not from the entity the
+dialog returns, because a write on this page is checked against the row it was
+selected as. The page stops waiting when the reader selects another Location, and
+after twenty seconds, when it says the Location was created but the list has not
+shown it yet.
+
+Creating writes nothing of its own: no coordinate, no accuracy, no location type. A
+template chosen in the dialog may carry them, as in the Explorer.
 
 ## While a request runs
 
@@ -437,6 +520,15 @@ Entries are matched on `requestId`, which the stream's opening frame carries and
 which is the `id` on the audit entries. That identifies the request rather than
 the browser that sent it, so the stage line cannot be driven by anything else
 this browser, or anyone else's, has running.
+
+The seconds counted beside the run button are drawn by their own component,
+`ElapsedSeconds`, from the moment the hook reports the request started. The count
+changes four times a second, and held in the hook it would re-render the whole
+page, and any modal open over it, for the length of every search.
+
+The engine's progress stream repeats its whole audit every second. A frame equal
+to the last one is dropped in the hook before any state is set, because even a
+setter that changes nothing makes React call the page's function again.
 
 `clientId` is therefore not an identifier here at all. The server sends a constant
 `inkvisitor-<env>` for every browser: the engine's response cache excludes it
@@ -516,7 +608,7 @@ whichever applies:
 - `query.candidates[].llmProvider === "none"` — no name variants were generated,
   so only the name as written was searched.
 - `contextEvaluated === false`, when the request carried any criterion at all —
-  a region named or drawn, a period, a language, a kind of place. Those criteria
+  a region named or drawn, a period, a language, a gazetteer location type. Those criteria
   were never weighed. Absent is not false: the preview frame omits the field
   because the stage has not run yet, which is why the band is computed on the
   final frame only. Each field is asked whether it *says* anything rather than
@@ -527,43 +619,82 @@ whichever applies:
 Nothing here blocks accepting a suggestion — the researcher may recognise the
 place regardless. What they cannot do is notice this by looking at the list.
 
-## Recording what kind of place it is
+## Recording what location type it is
 
-A coordinate answers where; the project's place types answer what. The project
+A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
-classified under, a mark chosen from a set of sixty-two, a description and,
-optionally, the engine type it answers to. The engine's twelve types are a
-separate vocabulary: they say what to ask the gazetteers for, while a place type
-says what the project calls a Location. The default list is one kind per engine
-type. When several kinds answer to one engine type, the starred favourite is
-offered first and the picker says how many match. The table counts the Locations
-classified under each kind's Concept, and assigning a Concept another kind holds
-moves it, since a Concept stands for one kind. A Location can carry several kinds;
-the page shows and edits the first one in the project's order, and writing a kind
-replaces the Location's other kinds while leaving every other Classification
-alone. The kinds are asked
-for rather than inferred, in a second step after the accuracy: a suggestion
-frequently carries no type of its own, and where it does, the type is what the
-sources called the record rather than what the researcher knows the place to be.
+classified under, a mark chosen from a set of sixty-three, a description and,
+optionally, the gazetteer location type it answers to. The gazetteer location
+types, the engine's twelve, are a separate vocabulary: they say what to ask the
+gazetteers for, while a location type says what the project calls a Location. The
+default list is one location type per gazetteer location type. When several
+location types answer to one gazetteer location type, the starred favourite is
+offered first and the picker says how many match. Assigning a Concept another
+location type holds moves it, since a Concept stands for one location type. The
+location types are asked for rather than inferred from the suggestion, in a second
+step after the accuracy: a suggestion frequently carries no type of its own, and
+where it does, the type is what the sources called the record rather than what the
+researcher knows the place to be.
 The engine's own `placeType` is marked as a starting point and never preselected.
+
+### Which location types a Location has
+
+A Location has a location type by being classified under the type's Concept, or
+under a subclass or a synonym of it, at any depth: what is classified "city" is a
+settlement where "city" is a subclass of the Concept assigned to settlement, and
+what is classified "civitas" is one too where civitas is a synonym of city. The
+page does not walk that hierarchy. It asks the server once for all the assigned
+Concepts, `GET /entities/classified-under`, and is told for every classified
+entity which of them it comes under, through which Concept, whether that is the
+assigned Concept itself (a **direct** location type) or not (an **inferred**
+one), and whether another of the project's types lies below this one on the same
+classification (**shadowed**). It is open to every logged-in user, a viewer
+among them, so the types read the same for everyone.
+
+Only superclass and synonym links count. The Explorer's "include subordinates"
+also follows part-of links, and a settlement part is not a settlement: on the
+Sept 2026 production data they add 190 Locations to "settlement" that are not.
+
+A location type is shadowed only by one that lies below it. A Location classified
+"city", with types for both "city" and "settlement", has both, and shows "city":
+the more specific one describes it, and "settlement" is hidden but still applies.
+A Location classified "cathedral town", which is below both a religious type and a
+settlement type through different parents, shows both, since neither is below the
+other. Two synonyms are not below each other and both show. Nothing here is
+computed from the number of steps between Concepts.
+
+A Location shows its types side by side: the ones it is classified under itself
+first, the inferred ones paler, each in the order the project lists them. A list
+row has room for one mark, which is the first, with a count of the others, and the
+hover says every one and, for an inferred one, where it comes from ("settlement —
+inferred from city"). The panel head and the map's card show them all. An
+inferred type cannot be removed from the page, which never edits what it did not
+create; the classification it comes from is changed in Detail. In the settings
+table a type's count is the Locations that read as it, with the share that is
+only inferred beside it, and a warning where the Concept has more subclasses than
+the walk can follow, so that some Locations are missing.
+
+What is classified is read as it was when the page asked, up to thirty seconds
+before: a subclass added in Detail shows on the Geocoding page after it is next
+reloaded or after a write on it.
 
 Three things follow from the vocabulary being the project's own:
 
 - A type with no Concept assigned in the global settings is shown disabled, with
   the reason on it. Hiding it would misrepresent the vocabulary; offering it and
   refusing the write afterwards wastes the decision.
-- "record place type" in the personal context turns the second step off. A
+- "location type" in the personal context turns the second step off. A
   project that has not mapped the twelve has nothing to write, and the coordinate
   is worth recording without them.
 - The accuracy prop points at a Concept, not at a Value this page owns. A write
   never offers a previous accuracy for deletion: that Concept belongs to the
   vocabulary and to every other Location using it.
-- The kind is written after the props, as a relation, so a failure there is
+- The location type is written after the props, as a relation, so a failure there is
   reported while the geometry stays saved; the new Classification is created
   before the old one is removed.
 
 Setting a coordinate from the map asks the same two questions in the same order,
-in the menu that opens where the click landed. Leaving the kind undecided there
+in the menu that opens where the click landed. Leaving the location type undecided there
 keeps whatever the Location carries: a map click corrects where a place is and
 says nothing about what it is.
 
@@ -573,21 +704,37 @@ one kind are saved together as one `Multi*` geometry, and a mix of kinds is
 refused when saving. The saved shape then asks the same two questions at its
 centre. "Edit current shape" loads the stored geometry back into the tool.
 
-The kind of place is corrected far more often than a coordinate is, so it can be
-changed from the panel head without re-running the engine. That write keeps the
-geometry exactly as it stands — including the Value entity behind it, which
-is reused rather than minted afresh, since orphaning one on every correction
-accumulates on the most frequent operation.
+The location type is corrected far more often than a coordinate is, so it is
+written on its own, as Classification relations and nothing else: a location type
+is never carried by the geometry write, and changing one cannot touch the
+coordinate, its accuracy or its sources, nor mint a Value entity to orphan.
+Because nothing but relations are written, it works as well on a Location that has
+no coordinate yet, which is the page's default view, as on one that has.
 
-The list filters by kind of place, and its options come from the Locations the
+**A Location can have several location types, and choosing one adds it.** In the
+step after the accuracy, in the menu of a map click and when a type is set on the
+marked Locations, one click adds one location type to those the Location has; it
+never replaces another, and a type the Location already has, or already comes
+under through a subclass or a synonym, is shown and not offered a second time —
+adding it would put a second Classification beside the one it comes from. Leaving
+the question alone is a row of its own ("leave the location type as it is"), and
+removing the location types of the marked Locations is another. In the list row
+and the panel head the picker is a set of ticks instead: a click ticks or unticks
+one location type and the list stays open to set several, a tick shows at once and
+goes back if the write is refused, and one write waits for the last. Unticking
+removes only that location type's own Classification. A location type that is
+only inferred is not offered to be unticked: the Classification it comes from is
+not the page's, and it is changed in Detail.
+
+The list filters by location type, and its options come from the Locations the
 other filters leave rather than from the vocabulary. That matters because the
 corpus does not state what a place is: a type appears only once a Location has
 been geocoded through this page, so on the ungeocoded view — the page's default —
-the control reads "no kinds recorded yet" and offers nothing, rather than
-offering twelve kinds that each empty the list. Options taken from its own result
+the control reads "no location types recorded yet" and offers nothing, rather than
+offering twelve location types that each empty the list. Options taken from its own result
 would instead vanish the moment one was chosen.
 
-Each kind carries a mark from one uniform-stroke set drawn for interface sizes.
+Each location type carries a mark from one uniform-stroke set drawn for interface sizes.
 A detailed mark loses its detail at sixteen pixels and becomes a smudge — a
 village of nine small roofs is a village at 48px and a grey blur in a list. The
 mark is the control: in the
@@ -597,11 +744,12 @@ saying what it covers, because the twelve are the engine's vocabulary rather tha
 ordinary English — "religious" covers a chapel and a monastery, and nobody
 guesses that from the word.
 
-A Location stating no kind draws a mark of its own rather than nothing. That is
+A Location stating no location type draws a mark of its own rather than nothing. That is
 the state most of the corpus is in, and a blank space reads as a rendering fault
-rather than as a fact. Choosing it removes the kind: a value sets, `null` clears,
-and only leaving the question alone — which is what a map click does — keeps what
-is there.
+rather than as a fact. A map click or a drawn shape that leaves the question
+undecided writes nothing about it: not even the first of the Location's location
+types, which may be one it only comes under through a subclass, and which writing
+would turn into a Classification nobody made.
 
 ## Reading the order on the map
 
@@ -712,13 +860,15 @@ separate opens nothing at all: opening its first row would name a leader the
 engine declined to name.
 
 The line that names a place carries everything about the place itself: its rank,
-the symbol for what kind of place it is, its name, its coordinate at the end
-where it is read last — nobody scans a list of places by latitude — and a framed
-control that moves the map to it. The kind symbol is an indicator and nothing
-more: the same glyph opens the kind-of-place picker on a row of the locations
-list, so a symbol that also travelled taught one mark two jobs on one screen. A
-glyph alone reads as decoration, and the frame is what says a thing can be
-pressed.
+its name, its coordinate at the end where it is read last — nobody scans a list of
+places by latitude — and a framed control that moves the map to it. What the
+gazetteers call it is not a mark on that line but words among the card's other
+facts, "settlement by the gazetteers": the marks on this page are the project's own
+location types, and the gazetteers' twelve are another vocabulary that is only
+wanted when a location type is chosen for the Location, where the picker says
+which of the project's answer to it. Nothing is said where no source named a type,
+since "not recorded" would be a claim about the Location. A glyph alone reads as
+decoration, and the frame is what says a thing can be pressed.
 
 Four kinds of mark, told apart by shape rather than by weight. A measurement —
 `10 sources`, `15.8 km apart` — has no edges, and its figure carries the weight
@@ -784,7 +934,7 @@ researcher who wants only the place in front of them is not making a decision
 anybody else has to live with.
 
 Hovering a mark says what it is. A Location the page holds shows its own tag,
-its kind of place, how precisely it is known and its coordinate — enough to tell
+its location type, how precisely it is known and its coordinate — enough to tell
 several marks in one valley apart before choosing between them. A suggestion
 under the pointer shows the whole card the panel would show, and takes
 precedence where the two coincide, because a run's marks land on the places they
@@ -888,7 +1038,7 @@ never recentres, so a chain of matches each within the radius of its neighbour
 spans more than the radius.
 
 What it is measured against is `mergeRadiusKm`, on the response. That is derived
-from the place type rather than fixed — 7.5 km for a church, 12.5 km for a
+from the gazetteer location type rather than fixed — 7.5 km for a church, 12.5 km for a
 fortress, 25 km for a settlement, 150 km for a region — so any threshold written
 as a constant is wrong for every type but one.
 
@@ -942,7 +1092,7 @@ second setting turns the refusal off for a corpus that is genuinely spread.
 Three things they never decide. The accuracy comes from the spread of the
 suggestion's own matches, the same reading the card leads with — how precisely a
 coordinate locates a place is a fact about the sources, not a preference. The
-kind of place is written only where the corpus named one to stand for all of
+location type is written only where the corpus named one to stand for all of
 them, and is otherwise left alone. And neither ever replaces a coordinate that is
 already recorded: the batch runs over the marked Locations that have none, and
 the bar says how many that is before the button is pressed.
@@ -952,7 +1102,7 @@ else stays marked, so the set left behind is exactly the Locations still wanting
 a person — including the ones a stopped run never reached.
 
 A quick geocode that wrote says so in a notice that stays up for twelve seconds:
-the place it matched and where that is, the kind of place, the accuracy, how many
+the place it matched and where that is, the location type, the accuracy, how many
 sources stood behind it, and the position. The whole notice is a way to the map,
 since by the time it lands the researcher has usually looked away and the first
 thing they want is to see the answer.
@@ -1111,14 +1261,16 @@ props and references itself before writing.
 `precise` or `approximate`.
 
 That shape cannot be adopted by pointing settings at it, because one Value entity
-cannot serve two sibling props. 1099 of them have been converted into the four-prop
-form — accuracy taken from the precision child where it existed (681 `precise`,
+cannot serve two props at the first level. 1099 of them have been converted into the
+geometry-and-accuracy form — accuracy taken from the precision child where it existed (681 `precise`,
 361 `approximate`) and `unknown` for the 57 without one. The remaining Location,
-`diocesis Tudensis`, has a coordinate prop whose value points at nothing.
+`diocesis Tudensis`, has a coordinate prop whose value points at nothing. That
+conversion wrote the accuracy beside the geometry, the shape `nestGeocodingAccuracyJob`
+moves under it.
 
 The legacy props were left in place rather than deleted, so the conversion is
 reversible and the original strings stay readable. They are inert: nothing reads
-them, because geocoded state is read from the three configured Concepts above.
+them, because geocoded state is read from the configured Concepts above.
 
 ## Future versions
 
@@ -1167,7 +1319,7 @@ the surface these would join: it already switches groups of layers and remembers
 the choice per browser.
 
 **F10 · Per-territory context overrides.** A default region, period, language and
-place type per territory, so a register from Languedoc does not inherit the
+gazetteer location type per territory, so a register from Languedoc does not inherit the
 project-wide region.
 
 **F11 · Choosing which sources become references.** Every contributing source is

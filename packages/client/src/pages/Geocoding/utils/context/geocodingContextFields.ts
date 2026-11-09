@@ -31,7 +31,7 @@ export const queryFieldLabel: Record<QueryField, string> = {
   region: "region",
   period: "period",
   language: "language",
-  placeType: "kind of place",
+  placeType: "gazetteer location type",
 };
 
 /** What weighting each dimension changes, in the terms the choice is made in. */
@@ -48,7 +48,7 @@ export const queryFieldWeightNote: Record<QueryField, string> = {
     "How much a source indexing one of these languages counts. Language never skips a " +
     "source, only lifts one.",
   placeType:
-    "How much a source declaring this kind of place counts. Kind of place never skips a " +
+    "How much a source declaring this gazetteer location type counts. It never skips a " +
     "source, only lifts one.",
 };
 
@@ -208,7 +208,7 @@ export const parsePeriodRange = (text: string): string | null => {
 /**
  * Whether two lists of values say the same thing.
  *
- * Region, period and kind of place are sets, so the order they were chosen in
+ * Region, period and gazetteer location type are sets, so the order they were chosen in
  * means nothing; language is the one list whose order is the researcher's own
  * statement of which is likelier.
  */

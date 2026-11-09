@@ -25,11 +25,15 @@ const places = ["Roma", "Pavia", "Siena"].map(location);
 const write = vi.hoisted(() => vi.fn());
 
 let bulk: UseGeocodingBulk;
-const Probe = (props: { marked: Set<string> }) => {
+const Probe = (props: { marked: Set<string>; context?: Partial<IGeocodingContext> }) => {
   bulk = useGeocodingBulk({
     user: { options: {} } as never,
     roles: {} as IGeocodingRoles,
-    context: { quickStrategy: "topScore", quickTakeOffRegion: true } as IGeocodingContext,
+    context: {
+      quickStrategy: "topScore",
+      quickTakeOffRegion: true,
+      ...props.context,
+    } as IGeocodingContext,
     locations: places,
     markWritten: vi.fn(),
     marked: props.marked,
@@ -116,5 +120,34 @@ describe("a batch whose write is refused", () => {
     expect(stateOf("Roma")).toBe("failed");
     expect(bulk.batch?.steps[0].note).toContain("could not be saved");
     expect(stateOf("Pavia")).toBe("waiting");
+  });
+});
+
+describe("a quick geocode in a corpus that names one location type for all of it", () => {
+  const settlement = { recordPlaceType: false, defaultPlaceType: "settlement" };
+  const entry = (inferred: boolean) => ({
+    typeId: "settlement",
+    inferred,
+    via: "c-city",
+    shadowed: false,
+  });
+
+  const quickWith = async (typeEntries: unknown[]) => {
+    view.unmount();
+    view = render(<Probe marked={new Set()} context={settlement} />);
+    stream.mockResolvedValue(breslau);
+    write.mockResolvedValue(true);
+    await act(async () => {
+      await bulk.quickGeocode({ ...places[0], typeEntries } as unknown as GeocodingLocation);
+    });
+    return write.mock.calls[0][0].placeType;
+  };
+
+  it("writes that location type for a Location that has none", async () => {
+    expect(await quickWith([])).toBe("settlement");
+  });
+
+  it("writes none for a Location that already comes under it through a subclass", async () => {
+    expect(await quickWith([entry(true)])).toBeUndefined();
   });
 });

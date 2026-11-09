@@ -5,28 +5,28 @@ import { MANUAL_MENU_LIFT, MapPending, afterAccuracy, menuAnchorFor } from "./ma
 /**
  * Setting a coordinate by hand asks where, then what. Whether the second
  * question is asked at all is a preference, and getting that branch wrong is
- * either a step nobody can dismiss or a kind of place recorded without anyone
+ * either a step nobody can dismiss or a location type recorded without anyone
  * choosing it.
  */
 
 const picked: MapPending = { lat: 51.1, lon: 17.03, x: 120, y: 240 };
 
 describe("afterAccuracy", () => {
-  it("asks the kind of place when the preference is unset", () => {
+  it("asks the location type when the preference is unset", () => {
     const step = afterAccuracy(picked, GeocodingAccuracy.Precise, undefined);
     expect("ask" in step).toBe(true);
   });
 
-  it("asks the kind of place when the preference is on", () => {
+  it("asks the location type when the preference is on", () => {
     expect("ask" in afterAccuracy(picked, GeocodingAccuracy.Precise, true)).toBe(true);
   });
 
-  it("writes straight through when the project records no kind of place", () => {
+  it("writes straight through when the project records no location type", () => {
     const step = afterAccuracy(picked, GeocodingAccuracy.Region, false);
     expect(step).toEqual({ write: { accuracy: GeocodingAccuracy.Region } });
   });
 
-  it("names no kind of place on that write, so the Location keeps the one it has", () => {
+  it("names no location type on that write, so the Location keeps the one it has", () => {
     // undefined and null differ here: undefined keeps, null clears, and a map
     // click is a correction to where a place is rather than to what it is
     const step = afterAccuracy(picked, GeocodingAccuracy.Region, false);

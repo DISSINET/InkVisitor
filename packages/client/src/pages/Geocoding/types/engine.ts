@@ -399,8 +399,33 @@ export interface EngineSuggester {
    * measurement.
    */
   footprint: { records: number; cells: number } | null;
+  /**
+   * How long this source took over the engine's last runs that really reached it.
+   *
+   * Cached answers and sources that were skipped never count, so a source that is
+   * always cached or always failing publishes null, as does any source before it
+   * has five runs on record. Absent altogether on an engine that does not measure.
+   * The time grows with the number of name forms searched and includes any wait a
+   * source's own rate limit imposes, so it is a typical wait and not a speed.
+   */
+  latency?: {
+    samples: number;
+    p50Ms: number;
+    p95Ms: number;
+    /** Runs that failed or were cut off, which the percentiles leave out. */
+    failures: number;
+    /** The mean number of name forms searched per run. */
+    meanCandidates: number;
+  } | null;
   info: {
     description?: string;
+    /**
+     * What the source covers, in a phrase each a historian can read. Absent on an
+     * engine that does not publish it.
+     */
+    scope?: { time: string; geography: string; topic: string };
+    /** How much the source holds. `records` is null where nobody publishes a count. */
+    size?: { records: number | null; approximate: boolean; asOf?: string; what: string };
     homepage?: string;
     citation?: string;
     limitations?: string;

@@ -43,7 +43,7 @@ export const coverageGroups = (coverage: EngineSuggester["coverage"]): CoverageG
       { title: "regions", items: (coverage.regions ?? []).map(slugLabel) },
       { title: "periods", items: (coverage.periods ?? []).map(slugLabel) },
       { title: "languages", items: (coverage.languages ?? []).map(languageName) },
-      { title: "kinds of place", items: (coverage.placeTypes ?? []).map(placeTypeName) },
+      { title: "gazetteer location types", items: (coverage.placeTypes ?? []).map(placeTypeName) },
     ] as CoverageGroup[]
   ).filter((group) => group.items.length > 0);
 

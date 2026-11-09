@@ -11,11 +11,11 @@ import {
 /**
  * The one control for choosing how precisely a coordinate locates a place.
  *
- * Built on the same panel as the kind-of-place picker, and opened the same way,
+ * Built on the same panel as the location-type picker, and opened the same way,
  * because the two are asked one after the other about the same coordinate. Drawn
  * differently they read as two unrelated controls, and the smaller of them reads
  * as the lesser question — which it is not: accuracy is written on every
- * Location, and the kind of place is not.
+ * Location, and the location type is not.
  */
 
 export const ACCURACY_ORDER: GeocodingAccuracy[] = [
@@ -46,7 +46,7 @@ interface AccuracyPicker {
   /**
    * Marked as what the evidence argues for — the spread of a suggestion's own
    * sources. A starting point rather than an answer, like the sources' name for
-   * a kind of place.
+   * a location type.
    */
   suggested?: GeocodingAccuracy | null;
   /** Said under the title, where the evidence for the choice belongs. */

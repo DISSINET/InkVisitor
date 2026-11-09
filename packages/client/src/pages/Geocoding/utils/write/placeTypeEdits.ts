@@ -9,7 +9,7 @@ import { GeocodingPlaceType, IGeocodingPlaceType } from "@inkvisitor/shared/type
  * Assigns a Concept to a kind, or unlinks it where null.
  *
  * A Concept that another kind already holds moves: it stands for one kind,
- * because a Location classified under it would otherwise be two kinds at once
+ * because a Location classified under it would otherwise be two location types at once
  * and the count beside each would claim the same Locations.
  */
 export const assignConcept = (
@@ -25,9 +25,9 @@ export const assignConcept = (
   });
 
 /**
- * Pairs a kind with an engine type, or with none.
+ * Pairs a location type with a gazetteer location type, or with none.
  *
- * The first kind to answer to an engine type becomes its favourite, because a
+ * The first location type to answer to a gazetteer location type becomes its favourite, because a
  * suggestion with that type must have something to offer first; one that joins
  * a type already led by another is not, so pairing never takes the star away.
  */
@@ -46,7 +46,7 @@ export const pairEngineType = (
     return { ...one, engineType, favorite: !!engineType && !led };
   });
 
-/** Makes a kind the favourite for its engine type, taking the star from the one that had it. */
+/** Makes a location type the favourite for its gazetteer location type, taking the star from the one that had it. */
 export const makeFavorite = (
   kinds: IGeocodingPlaceType[],
   id: string,
@@ -63,7 +63,7 @@ export const makeFavorite = (
   });
 };
 
-/** Which of the project's kinds a suggestion's engine type points at, the favourite first. */
+/** Which of the project's location types a suggestion's gazetteer location type points at, the favourite first. */
 export const kindsForEngineType = (
   kinds: IGeocodingPlaceType[],
   engineType: string | null | undefined,

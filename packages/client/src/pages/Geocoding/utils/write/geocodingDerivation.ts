@@ -1,4 +1,4 @@
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { GeoJsonGeometry, geometryAnchor, parseGeometry } from "@inkvisitor/shared/types/geometry";
 import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 
@@ -25,9 +25,9 @@ export interface DerivedGeocoding {
   lat: number | null;
   accuracy: GeocodingAccuracy | null;
   /**
-   * The id of the project's kind of place, independent of `isGeocoded` — a kind
+   * The id of the project's location type, independent of `isGeocoded` — a location type
    * says nothing about a coordinate. Not a prop, so it is not derived here: a
-   * Location has a kind by a Classification relation, which the collection of
+   * Location has a location type by a Classification relation, which the collection of
    * Locations joins in.
    */
   placeType: string | null;
@@ -49,26 +49,33 @@ const ungeocoded = (problem: string | null): DerivedGeocoding => ({
   problem,
 });
 
-/** The prop whose type is `conceptId`, ignoring nested children. */
+/** The top-level prop whose type is `conceptId`. */
 const propOfType = (entity: IEntity, conceptId: string) =>
   conceptId ? (entity.props || []).find((prop) => prop.type?.entityId === conceptId) : undefined;
 
 /**
- * Every entity id a Location's geocoding props point at.
+ * The accuracy prop of a Location: the subproperty of its geometry prop, or,
+ * where the Location was written before accuracy moved under the geometry, the
+ * prop beside it.
+ */
+const accuracyPropOf = (entity: IEntity, roles: IGeocodingRoles, geometryProp?: IProp) =>
+  (geometryProp?.children || []).find((child) => child.type?.entityId === roles.accuracy) ??
+  propOfType(entity, roles.accuracy);
+
+/**
+ * Every entity id a Location's geocoding props point at that has to be read.
  *
  * A search result carries only these ids — `IResponseEntity` bundles no entity
  * map, unlike the detail and statement responses — so the labels behind them
- * take a second, batched fetch.
+ * take a second, batched fetch. Only the geometry has a label to read: the
+ * accuracy is told apart by its id.
  */
 export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles): string[] => {
-  const wanted = [roles.geometry, roles.accuracy].filter(Boolean);
   const ids = new Set<string>();
   for (const entity of entities) {
-    for (const conceptId of wanted) {
-      const valueId = propOfType(entity, conceptId)?.value?.entityId;
-      if (valueId) {
-        ids.add(valueId);
-      }
+    const valueId = propOfType(entity, roles.geometry)?.value?.entityId;
+    if (valueId) {
+      ids.add(valueId);
     }
   }
   return [...ids];
@@ -103,7 +110,7 @@ export const deriveGeocoding = (
   }
 
   const geometryProp = propOfType(entity, roles.geometry);
-  const accuracyProp = propOfType(entity, roles.accuracy);
+  const accuracyProp = accuracyPropOf(entity, roles, geometryProp);
 
   if (!geometryProp && !accuracyProp) {
     return ungeocoded(null);

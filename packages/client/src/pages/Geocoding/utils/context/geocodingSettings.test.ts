@@ -32,6 +32,7 @@ const { nextBaseUrls, patchGeocodingContext, patchGeocodingRoles, putGeocodingRo
 const stored: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
+  epistemicSource: "c-source",
   accuracyValues: {
     [GeocodingAccuracy.Precise]: "v-precise",
     [GeocodingAccuracy.Approximate]: "v-approx",

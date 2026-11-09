@@ -1,6 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
-import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
+import {
+  GeocodingAccuracy,
+  IGeocodingRoles,
+  rolesShareAConcept,
+} from "@inkvisitor/shared/types/geocoding";
 import {
   GeoJsonGeometry,
   geometryEquals,
@@ -34,7 +38,7 @@ export interface GeocodingWriteInput {
   geometry: GeoJsonGeometry;
   accuracy: GeocodingAccuracy;
   /**
-   * The id of the project's kind of place to record. A value sets it, `null`
+   * The id of the project's location type to record. A value sets it, `null`
    * removes it, and `undefined` leaves whatever the Location already states.
    * Recorded as a Classification relation once the props are written, not as a
    * prop, so it is carried on the plan for the executor rather than in `props`.
@@ -44,7 +48,7 @@ export interface GeocodingWriteInput {
   /**
    * The geometry the Location already carries, where it has one.
    *
-   * A write that keeps the geometry and changes only the kind of place - the
+   * A write that keeps the geometry and changes only the location type - the
    * common correction - would otherwise mint a fresh Value entity for the same
    * shape and orphan the one it replaced. The orphans survive whenever something
    * else refers to them or the account cannot delete, so they accumulate on
@@ -58,7 +62,10 @@ export interface GeocodingWriteInput {
 export interface GeocodingWritePlan {
   /** Value entities to create, in the order they are created. */
   newValues: IEntity[];
-  /** The Location's complete new props array — the update replaces, never appends. */
+  /**
+   * The Location's complete new props array — the update replaces, never appends.
+   * The accuracy is a child of the geometry prop, not a prop beside it.
+   */
   props: IProp[];
   references: IReference[];
   /**
@@ -67,7 +74,7 @@ export interface GeocodingWritePlan {
    */
   displacedValueIds: string[];
   /**
-   * The Concept the Location is to be classified under, `null` where its kinds
+   * The Concept the Location is to be classified under, `null` where its location types
    * are to be removed, and `undefined` where they are left alone.
    */
   kindConceptId: string | null | undefined;
@@ -76,7 +83,7 @@ export interface GeocodingWritePlan {
   /**
    * True when a geometry already on the Location is being replaced by a
    * different one. False for a first geometry, and false for a write that
-   * leaves the geometry where it is and changes only what kind of place it is.
+   * leaves the geometry where it is and changes only what location type it is.
    */
   isOverwrite: boolean;
 }
@@ -95,6 +102,26 @@ const propFor = (typeId: string, valueId: string): IProp => {
   return prop;
 };
 
+/**
+ * The roles a child of the geometry prop can hold, which this write owns.
+ *
+ * Whatever else a researcher hung under the geometry (another subproperty of
+ * their own) is carried over untouched.
+ */
+const childRoles = (roles: IGeocodingRoles): string[] =>
+  [roles.accuracy, roles.epistemicSource].filter(Boolean);
+
+/**
+ * The Resources of the gazetteers behind a coordinate, one each.
+ *
+ * A source with no Resource assigned has nothing to point at — `llm-coords` is
+ * the model's own guess and never has one — and two matches from one gazetteer
+ * are still one source of the coordinate.
+ */
+const sourceResources = (provenance: GeocodingProvenance[], roles: IGeocodingRoles): string[] => [
+  ...new Set(provenance.map((claim) => roles.resources[claim.source]).filter(Boolean)),
+];
+
 // CEntity leaves `data` empty; every Value in this corpus carries a logicalType,
 // so the created ones match rather than being a recognisably different shape
 const valueEntity = (label: string, userOptions: UserOptions): IEntity => {
@@ -106,7 +133,7 @@ const valueEntity = (label: string, userOptions: UserOptions): IEntity => {
 /**
  * Builds everything a geometry write needs, or refuses with a reason.
  *
- * Refuses rather than degrades: a kind of place the project has no Concept for
+ * Refuses rather than degrades: a location type the project has no Concept for
  * would otherwise be silently dropped, which is how a controlled vocabulary
  * stops being controlled.
  */
@@ -127,6 +154,12 @@ export const planGeocodingWrite = (
   if (!roles.geometry || !roles.accuracy) {
     return { blocked: "The geocoding Concepts are not assigned yet — set them in the settings." };
   }
+  if (rolesShareAConcept(roles)) {
+    return {
+      blocked:
+        "The geocoding settings give one Concept to two roles — assign a different Concept to each.",
+    };
+  }
 
   // whatever is written must be readable back: a click on a repeated copy of
   // the world, or a source that answered NaN, would otherwise store a geometry
@@ -140,9 +173,22 @@ export const planGeocodingWrite = (
     return { blocked: `No Concept is assigned for the accuracy "${accuracy}".` };
   }
 
+  // an accuracy prop beside the geometry that has notes under its own notes would
+  // lose them, or push them to a level nothing shows, when it is written under the
+  // geometry; that is the researcher's to move, in Detail
+  const accuracyBeside = (location.props || []).find(
+    (prop) => prop.type?.entityId === roles.accuracy,
+  );
+  if (accuracyBeside?.children?.some((child) => child.children?.length)) {
+    return {
+      blocked:
+        "The accuracy of this location has notes under notes, which writing it under the coordinate would lose. Move or remove them in Detail first.",
+    };
+  }
+
   /**
    * `null` and `undefined` are different answers. `null` is "this Location
-   * states no kind of place", which removes its Classifications; `undefined` is
+   * states no location type", which removes its Classifications; `undefined` is
    * "not my business", which leaves whatever is there — what a coordinate
    * correction means, since it says nothing about what the place is.
    */
@@ -150,10 +196,10 @@ export const planGeocodingWrite = (
   if (placeType) {
     const kind = roles.placeTypes.find((one) => one.id === placeType);
     if (!kind) {
-      return { blocked: `The kind of place "${placeType}" is not defined in the settings.` };
+      return { blocked: `The location type "${placeType}" is not defined in the settings.` };
     }
     if (!kind.conceptId) {
-      return { blocked: `No Concept is assigned for the kind of place "${kind.name}".` };
+      return { blocked: `No Concept is assigned for the location type "${kind.name}".` };
     }
     kindConceptId = kind.conceptId;
   }
@@ -168,8 +214,10 @@ export const planGeocodingWrite = (
     ? previousProps.find((prop) => prop.type?.entityId === roles.geometry && !!prop.value?.entityId)
     : undefined;
 
-  // every role this write owns; whatever the Location carried for them is
-  // replaced rather than added to, so a second write never leaves two geometries
+  // every role this write owns at the top level; whatever the Location carried
+  // for them is replaced rather than added to, so a second write never leaves two
+  // geometries. The accuracy belongs here too: a Location can carry it beside the
+  // geometry, and that prop goes where the accuracy is written under it
   const ownedTypes = [keptGeometry ? "" : roles.geometry, roles.accuracy].filter(Boolean);
   const displaced = previousProps.filter((prop) => ownedTypes.includes(prop.type?.entityId));
 
@@ -178,10 +226,64 @@ export const planGeocodingWrite = (
     : valueEntity(serializeGeometry(geometry), userOptions);
   const newValues: IEntity[] = geometryValue ? [geometryValue] : [];
 
+  const owned = childRoles(roles);
+
+  // the sources are named only where the project has the role for them; the
+  // references below record them either way
+  const sources = roles.epistemicSource ? sourceResources(provenance, roles) : [];
+  const sourceChildren = (known: string[]) =>
+    sources
+      .filter((resourceId) => !known.includes(resourceId))
+      .map((resourceId) => propFor(roles.epistemicSource, resourceId));
+
+  // an accuracy that is already there keeps its own prop — its certainty, its id,
+  // whatever hangs under it — and takes the new value; one carried beside the
+  // geometry is that same prop moved under it
+  const accuracyOf = (base: IProp | undefined): IProp =>
+    base ? { ...base, value: { ...base.value, entityId: accuracyId } } : propFor(roles.accuracy, accuracyId);
+
+  // the geometry prop the Location keeps carries its other children over, and
+  // the sources it already names, to which the new ones are added: a coordinate
+  // that did not move is still the one those gazetteers supplied. A new geometry
+  // prop starts with what this write says about it, and with whatever else a
+  // researcher hung under the geometry it replaces, which is about the place and
+  // not about the coordinate that moved
+  let geometryProp: IProp;
+  if (keptGeometry) {
+    const children = keptGeometry.children || [];
+    const named = children
+      .filter((child) => child.type?.entityId === roles.epistemicSource)
+      .map((child) => child.value?.entityId);
+    const existing =
+      children.find((child) => child.type?.entityId === roles.accuracy) ??
+      previousProps.find((prop) => prop.type?.entityId === roles.accuracy);
+    const accuracyProp = accuracyOf(existing);
+    // the accuracy stays where it was among the children, and a repeat goes
+    const at = children.findIndex((child) => child.type?.entityId === roles.accuracy);
+    const without = children.filter((child) => child.type?.entityId !== roles.accuracy);
+    geometryProp = {
+      ...keptGeometry,
+      children: [
+        ...(at === -1
+          ? [...without, accuracyProp]
+          : [...without.slice(0, at), accuracyProp, ...without.slice(at)]),
+        ...sourceChildren(named),
+      ],
+    };
+  } else {
+    const replaced = displaced.find((prop) => prop.type?.entityId === roles.geometry);
+    const carried = (replaced?.children || []).filter((child) => !owned.includes(child.type?.entityId));
+    geometryProp = {
+      ...propFor(roles.geometry, geometryValue!.id),
+      children: [accuracyOf(undefined), ...carried, ...sourceChildren([])],
+    };
+  }
+
   const props: IProp[] = [
-    ...previousProps.filter((prop) => !ownedTypes.includes(prop.type?.entityId)),
-    ...(geometryValue ? [propFor(roles.geometry, geometryValue.id)] : []),
-    propFor(roles.accuracy, accuracyId),
+    ...previousProps
+      .filter((prop) => !ownedTypes.includes(prop.type?.entityId))
+      .map((prop) => (prop === keptGeometry ? geometryProp : prop)),
+    ...(keptGeometry ? [] : [geometryProp]),
   ];
 
   // `llm-coords` is the model's own guess rather than a gazetteer: it has no
@@ -244,11 +346,19 @@ export const coordinateChanged = (
   roles: IGeocodingRoles,
 ): boolean => {
   const owned = [roles.geometry, roles.accuracy].filter(Boolean);
+  const ownedChildren = childRoles(roles);
   const signature = (entity: IEntity) =>
     JSON.stringify(
       (entity.props || [])
         .filter((prop) => owned.includes(prop.type?.entityId))
-        .map((prop) => [prop.type.entityId, prop.value?.entityId])
+        .map((prop) => [
+          prop.type.entityId,
+          prop.value?.entityId,
+          (prop.children || [])
+            .filter((child) => ownedChildren.includes(child.type?.entityId))
+            .map((child) => [child.type.entityId, child.value?.entityId])
+            .sort(),
+        ])
         .sort(),
     );
   return signature(before) !== signature(after);

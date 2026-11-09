@@ -41,7 +41,7 @@ export const GEOCODING_PLACE_TYPES = [
 export type GeocodingPlaceType = (typeof GEOCODING_PLACE_TYPES)[number];
 
 /**
- * What each engine type is called and covers. Words rather than a code because
+ * What each gazetteer location type is called and covers. Words rather than a code because
  * the twelve are the engine's vocabulary: "religious" covers a chapel and a
  * monastery, and nobody guesses that from the word. `icon` is a key into the
  * client's icon set.
@@ -113,11 +113,11 @@ export const ENGINE_PLACE_TYPE_INFO: Record<
 };
 
 /**
- * A kind of place as the project defines it.
+ * A location type as the project defines it.
  *
  * Distinct from the engine's twelve: the engine's types say what to ask the
  * gazetteers for, and these say what the project calls a Location. A Location
- * has a kind by being the subject of a Classification relation to `conceptId`.
+ * has a location type by being the subject of a Classification relation to `conceptId`.
  */
 export interface IGeocodingPlaceType {
   /** Stable and never shown; what a default and a write refer to. */
@@ -129,16 +129,16 @@ export interface IGeocodingPlaceType {
   /** The Concept a Location is classified under. Empty means not assigned yet. */
   conceptId: string;
   /**
-   * The engine type this kind answers to, or null for a kind no gazetteer has a
-   * word for. It decides which of the project's kinds a suggestion's own type
+   * The gazetteer location type this location type answers to, or null for a location type no gazetteer has a
+   * word for. It decides which of the project's location types a suggestion's own type
    * points at.
    */
   engineType: GeocodingPlaceType | null;
-  /** The kind offered first for its engine type; at most one per engine type. */
+  /** The location type offered first for its gazetteer location type; at most one per gazetteer location type. */
   favorite: boolean;
 }
 
-/** One kind per engine type, each paired with its own — the list a project starts from. */
+/** One kind per gazetteer location type, each paired with its own — the list a project starts from. */
 export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
   GEOCODING_PLACE_TYPES.map((engineType) => ({
     id: engineType,
@@ -153,10 +153,10 @@ export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
 /**
  * The list a stored value stands for.
  *
- * A row written before the list existed holds a map from engine type to Concept;
+ * A row written before the list existed holds a map from gazetteer location type to Concept;
  * it becomes the default list with those Concepts assigned. Anything else that
  * is not a list is the default list, so a settings row is never the reason the
- * page has no kinds to offer.
+ * page has no location types to offer.
  */
 export const normalizePlaceTypes = (stored: unknown): IGeocodingPlaceType[] => {
   if (Array.isArray(stored)) {
@@ -191,12 +191,21 @@ export interface IGeocodingRoles {
    * GeoJSON geometry. Its presence is what makes a Location geocoded.
    */
   geometry: string;
-  /** Concept whose prop carries the accuracy. */
+  /**
+   * Concept whose prop carries the accuracy. A subproperty of the geometry prop.
+   */
   accuracy: string;
+  /**
+   * Concept whose prop names the source of the coordinate: a subproperty of the
+   * geometry prop, valued with the Resource of a gazetteer that supplied it, one
+   * per gazetteer. Optional: a project that has not assigned it records the
+   * sources as references only.
+   */
+  epistemicSource: string;
   /** Concept per accuracy value — these are the prop's possible values. */
   accuracyValues: Partial<Record<GeocodingAccuracy, string>>;
   /**
-   * The project's kinds of place. A kind with no Concept blocks the write
+   * The project's location types. A location type with no Concept blocks the write
    * rather than being invented.
    */
   placeTypes: IGeocodingPlaceType[];
@@ -301,9 +310,9 @@ export interface IGeocodingContext {
    * the single-value field outlives the change on any deployment that had one.
    */
   language?: string;
-  /** Kinds of place the name may be, any of them. None means no constraint. */
+  /** Gazetteer location types the name may be, any of them. None means no constraint. */
   placeTypes?: string[];
-  /** One kind of place, as stored before the field took several. Read like `region`. */
+  /** One gazetteer location type, as stored before the field took several. Read like `region`. */
   placeType?: string;
   /**
    * Gazetteers the engine is not to ask, by its own source name.
@@ -335,25 +344,25 @@ export interface IGeocodingContext {
   /** Written when a coordinate is set by clicking the map rather than accepting a suggestion. */
   mapClickAccuracy?: GeocodingAccuracy;
   /**
-   * Whether accepting a coordinate also records what kind of place it is.
+   * Whether accepting a coordinate also records what location type it is.
    *
    * A project that has not mapped the engine's twelve types onto its own
    * Concepts has nothing to write, and a suggestion often has no single type of
    * its own, so the type is asked for rather than inferred. Off means the
-   * coordinate is written and the place's kind is left alone.
+   * coordinate is written and the place's location type is left alone.
    */
   recordPlaceType?: boolean;
   /**
-   * The kind of place written on every Location when the question is not asked.
+   * The location type written on every Location when the question is not asked.
    *
-   * Only read while `recordPlaceType` is off. A corpus that is all of one kind —
+   * Only read while `recordPlaceType` is off. A corpus that is all of one location type —
    * a register of parishes, a list of monasteries — has an answer that is the
    * same every time, and asking for it once is the difference between recording
-   * it and recording nothing. Undefined leaves each Location's kind alone, which
+   * it and recording nothing. Undefined leaves each Location's location type alone, which
    * is what turning the question off used to mean on its own. Null means the
    * same thing, chosen explicitly: the settings modal writes null rather than
    * leaving the field untouched when the researcher picks "leave each one
-   * alone" for a corpus that previously had a kind named.
+   * alone" for a corpus that previously had a location type named.
    */
   defaultPlaceType?: string | null;
   /**
@@ -400,9 +409,24 @@ export interface IGeocodingUserSettings {
 
 export const GEOCODING_SETTINGS_KEY = "geocoding";
 
+/**
+ * Whether two of the coordinate roles are given the same Concept.
+ *
+ * The geometry, the accuracy and the source are told apart by their Concept, so
+ * one Concept in two roles makes the geometry prop and the accuracy under it
+ * indistinguishable from each other. Unassigned roles are not a clash.
+ */
+export const rolesShareAConcept = (
+  roles: Pick<IGeocodingRoles, "geometry" | "accuracy" | "epistemicSource">,
+): boolean => {
+  const assigned = [roles.geometry, roles.accuracy, roles.epistemicSource].filter(Boolean);
+  return new Set(assigned).size !== assigned.length;
+};
+
 export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   geometry: "",
   accuracy: "",
+  epistemicSource: "",
   accuracyValues: {},
   placeTypes: defaultPlaceTypes(),
   resources: {},

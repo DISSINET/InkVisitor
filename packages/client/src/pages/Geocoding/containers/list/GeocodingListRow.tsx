@@ -20,11 +20,13 @@ import {
   StyledRowProblem,
   StyledRowTag,
   StyledRowType,
-  StyledRowTypeStatic,
+  StyledRowTypeIcon,
+  StyledRowTypeMore,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "../../utils/context/geocodingGroups";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { describeEntries, shownEntries } from "../../components/placeType/locationTypeText";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
 import { QUICK_STRATEGY_MEANING, QuickStrategy } from "../../utils/suggestions/quickGeocode";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
@@ -104,7 +106,7 @@ export interface GeocodingListRowProps {
   /** The Location a quick geocode is running on, if it is this one. */
   quickBusyId: string | null;
   onToggleGroup: (key: string) => void;
-  /** Opens the kind-of-place picker over the row's own mark. */
+  /** Opens the location-type picker over the row's own mark. */
   onPick: (picking: {
     location: GeocodingLocation;
     anchor: { left: number; top: number; bottom: number };
@@ -141,6 +143,9 @@ const stepRow = (from: HTMLElement, delta: number, props: GeocodingListRowProps)
   }
 };
 
+/** How many location types a row draws; a Location with more has the rest counted. */
+const ROW_TYPE_MARKS = 3;
+
 /**
  * One row of the virtualised list: a group's heading, or a Location.
  *
@@ -151,6 +156,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
   const { index, style, items, selectedId, engineReady, marked } = props;
   const theme = useTheme();
   const kinds = usePlaceTypes();
+  const viaLabel = useViaLabel();
   const item = items[index];
   if (!item) {
     return <div style={style} />;
@@ -163,7 +169,8 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
     );
   }
   const location = item.location;
-  const kind = findPlaceType(kinds, location.placeType);
+  const shown = shownEntries(location.typeEntries);
+  const typeWords = describeEntries(location.typeEntries, kinds, viaLabel);
   const busy = props.quickBusyId === location.entity.id;
   return (
     <div style={style}>
@@ -231,7 +238,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           />
         </StyledRowMarkBox>
         {/* the row says whether it has a coordinate whatever the list is grouped
-            by, so it still reads under "kind of place" or under one flat list,
+            by, so it still reads under "location type" or under one flat list,
             where no heading says it */}
         {/* the dot holds the coordinate, and says it with the card every
             coordinate on this page is read from, when asked */}
@@ -251,36 +258,35 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             icon={<StyledRowMark $state={location.problem ? "problem" : "none"} />}
           />
         )}
-        {/* the mark is the control: a kind of place is corrected far more often
+        {/* the mark is the control: a location type is corrected far more often
             than it is first set, and reaching it should not mean selecting the
             row and losing whatever is being judged beside it */}
-        {location.isGeocoded ? (
-          <StyledRowType
-            type="button"
-            data-row-type
-            data-hint={`${kindInfo(kind).label} — click to change`}
-            aria-label={`kind of place: ${kindInfo(kind).label}`}
-            $unset={!location.placeType}
-            onClick={(event) => {
-              event.stopPropagation();
-              const box = event.currentTarget.getBoundingClientRect();
-              props.onPick({
-                location,
-                anchor: { left: box.left, top: box.top, bottom: box.bottom },
-              });
-            }}
-          >
-            <KindIcon kind={kind} />
-          </StyledRowType>
-        ) : (
-          <StyledRowTypeStatic
-            data-hint={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
-            aria-label={`kind of place: ${kindInfo(kind).label}`}
-            $unset={!location.placeType}
-          >
-            <KindIcon kind={kind} />
-          </StyledRowTypeStatic>
-        )}
+        <StyledRowType
+          type="button"
+          data-row-type
+          data-hint={`${typeWords}\nclick to change`}
+          aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
+          $unset={!location.placeType}
+          onClick={(event) => {
+            event.stopPropagation();
+            const box = event.currentTarget.getBoundingClientRect();
+            props.onPick({
+              location,
+              anchor: { left: box.left, top: box.top, bottom: box.bottom },
+            });
+          }}
+        >
+          {/* the location types side by side, up to the few a row has room for, and
+              the rest counted; the hover names every one */}
+          {(shown.length ? shown : [null]).slice(0, ROW_TYPE_MARKS).map((entry) => (
+            <StyledRowTypeIcon key={entry?.typeId ?? "none"} $inferred={!!entry?.inferred}>
+              <KindIcon kind={findPlaceType(kinds, entry?.typeId)} />
+            </StyledRowTypeIcon>
+          ))}
+          {shown.length > ROW_TYPE_MARKS ? (
+            <StyledRowTypeMore>+{shown.length - ROW_TYPE_MARKS}</StyledRowTypeMore>
+          ) : null}
+        </StyledRowType>
         <StyledRowMain>
           {/* the shared tag rather than a plain label: it carries the status
               border, the italic for an unlabelled entity and the hover card,

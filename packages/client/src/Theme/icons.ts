@@ -322,3 +322,4 @@ export { TbKey as IcoPlaceKey } from "react-icons/tb";
 export { TbCompass as IcoPlaceCompass } from "react-icons/tb";
 export { TbMapPin as IcoPlacePin } from "react-icons/tb";
 export { TbFlame as IcoPlaceFire } from "react-icons/tb";
+export { IcoPlaceChurchTower } from "./IcoPlaceChurchTower";

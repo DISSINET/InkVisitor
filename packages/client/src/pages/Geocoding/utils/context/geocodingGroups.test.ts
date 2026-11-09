@@ -121,7 +121,7 @@ describe("groupsOf, by a field a Location may not carry", () => {
 
   it("gives the Locations carrying no value a named group", () => {
     const groups = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes());
-    const missing = groups.find((group) => group.label === "no kind recorded");
+    const missing = groups.find((group) => group.label === "no location type recorded");
     expect(missing?.rows.map((row) => row.entity.id)).toEqual(["Aura", "Steinau"]);
   });
 
@@ -135,13 +135,13 @@ describe("groupsOf, by a field a Location may not carry", () => {
   });
 
   it("sorts that group last, because it is the one about absence", () => {
-    expect(groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes()).at(-1)?.label).toBe("no kind recorded");
+    expect(groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes()).at(-1)?.label).toBe("no location type recorded");
   });
 
   it("sorts the rest by name, so the arrangement does not move as values change", () => {
     const labels = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes())
       .map((group) => group.label)
-      .filter((label) => label !== "no kind recorded");
+      .filter((label) => label !== "no location type recorded");
     expect(labels).toEqual([...labels].sort());
   });
 

@@ -1,4 +1,5 @@
 import "ts-jest";
+import Identification from "./identification";
 import { Db } from "@service/storage";
 import { deleteRelations } from "@service/shorthands";
 import { getRelationClass } from "@models/factory";
@@ -140,6 +141,33 @@ describe("getEquivalentEntityIds", () => {
   test("never returns the input ids themselves", async () => {
     const result = await getEquivalentEntityIds(db.connection, ["c1", "c2"]);
     expect(result).toEqual(["c3"]);
+  });
+
+  describe("synonymsOnly", () => {
+    test("still returns the whole synonym cloud", async () => {
+      const result = await getEquivalentEntityIds(db.connection, ["c1"], {
+        synonymsOnly: true,
+      });
+      expect(result.sort()).toEqual(["c2", "c3"]);
+    });
+
+    test("leaves out identifications and action-event equivalents", async () => {
+      const opts = { synonymsOnly: true };
+      expect(await getEquivalentEntityIds(db.connection, ["p1"], opts)).toEqual([]);
+      expect(await getEquivalentEntityIds(db.connection, ["a1"], opts)).toEqual([]);
+    });
+
+    test("does not walk identifications at all, which cost a query per entity", async () => {
+      const walk = jest.spyOn(Identification, "getIdentificationForwardConnections");
+      try {
+        await getEquivalentEntityIds(db.connection, ["c1", "p1"], { synonymsOnly: true });
+        expect(walk).not.toHaveBeenCalled();
+        await getEquivalentEntityIds(db.connection, ["c1", "p1"]);
+        expect(walk).toHaveBeenCalled();
+      } finally {
+        walk.mockRestore();
+      }
+    });
   });
 });
 
