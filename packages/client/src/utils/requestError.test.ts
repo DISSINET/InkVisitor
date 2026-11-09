@@ -1,4 +1,5 @@
 import { AxiosError, AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { getErrorByCode } from "@inkvisitor/shared/types/errors";
 import { formatRequestErrorDetails, readRequestError } from "./requestError";
 
 const config = {
@@ -99,6 +100,16 @@ describe("readRequestError", () => {
       signature: { error: "SomethingNew", message: "" },
       reportable: true,
     });
+  });
+
+  it("titles an unknown error code generically and keeps the server's message", () => {
+    const withMessage = getErrorByCode({ error: "SomethingNew", message: "Label is too long" });
+    expect(withMessage.title).toBe("Something went wrong");
+    expect(withMessage.message).toBe("Label is too long");
+
+    const withoutMessage = getErrorByCode({ error: "", message: "" });
+    expect(withoutMessage.title).toBe("Something went wrong");
+    expect(withoutMessage.message).toContain("copy the details");
   });
 
   it("reads an error thrown by client code as a client error", () => {

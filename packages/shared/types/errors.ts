@@ -522,8 +522,9 @@ class InvalidEmailError extends CustomError {
  */
 class UnknownError extends CustomError {
   public static code = 500;
-  public static title = "Unknown error";
-  public static message = "Mysterious";
+  public static title = "Something went wrong";
+  public static message =
+    "Please try again. If it keeps happening, copy the details and send them to the project owner.";
 }
 
 class NetworkError extends CustomError {
@@ -643,7 +644,7 @@ export function getErrorByCode(errSig: IErrorSignature): CustomError {
     errorInstance.title = ErrorClass.title; // Set the title from the class
     return errorInstance;
   }
-  return new UnknownError(errSig.message || "Unknown error occurred");
+  return new UnknownError(errSig.message || UnknownError.message);
 }
 
 export {
