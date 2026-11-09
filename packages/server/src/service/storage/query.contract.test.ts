@@ -297,11 +297,22 @@ describe("explore: operators, nesting and target expansion", () => {
     ).toEqual(["c-2", "c-3", "c-4"]);
   });
 
-  it("a child node's edges run over the entities the edge matched", async () => {
-    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+  it("a child node's edges narrow the child's own entities, the edge then matches the survivors", async () => {
+    // pinned: c-3 is a subclass of c-2, not of c-1, and holds no reference
+    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", hit)])).toEqual(["c-2"]);
+    const notSubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", notSubclassOfC1)])).toEqual([]);
     const miss = node({ entityId: "c-3" }, [edge("HR:R", { entityId: "r-1" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", miss)])).toEqual([]);
+    // unpinned, on a relation edge: of the superclasses c-1 and c-2 only c-1 references r-1
+    const referencing = node({ entityClasses: [C.Concept] }, [edge("HR:R", { entityId: "r-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", referencing)])).toEqual(["c-2"]);
+    // unpinned, on a prop edge: c-1's prop value c-3 is a synonym of c-4
+    const synonym = node({}, [edge("R:SYN", { entityId: "c-4" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", synonym)])).toEqual(["c-1"]);
+    const notSynonym = node({}, [edge("R:SYN", { entityId: "c-4" }, Query.EdgeLogic.Negative)]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", notSynonym)])).toEqual([]);
   });
 
   it("a root without edges returns its base", async () => {

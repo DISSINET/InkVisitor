@@ -96,8 +96,11 @@ export default class SearchEdge implements Query.IEdge {
       // apply to every edge type: each run() already matches against
       // targetIds(), so no edge needs to know about them. The edges that check
       // statuses per candidate have no such check for a language or label, so
-      // either takes the statuses into the id set with it.
+      // either takes the statuses into the id set with it. The conditions
+      // nested under the target node always go through the set, as only the
+      // node evaluator can test them.
       const constrained =
+        this.node.edges.length > 0 ||
         !!filters.label ||
         filters.languages.length > 0 ||
         (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
@@ -113,12 +116,17 @@ export default class SearchEdge implements Query.IEdge {
       subordinates:
         this.expandsPinnedSubordinates && this.node.params.includeSubordinates === true,
     });
-    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    const expanded = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    // the nested conditions keep the expanded targets that meet them
+    this.targetEntityIds = this.node.edges.length
+      ? await this.node.match(db, r.table(TABLE.entities).getAll(r.args(expanded)))
+      : expanded;
   }
 
   /**
-   * Ids of entities passing `filters` (an empty list passes any), narrowed by
-   * the target node's classes, else by the classes the edge's target can hold.
+   * Ids of entities passing `filters` (an empty list passes any) and the
+   * conditions nested under the target node, narrowed by the target node's
+   * classes, else by the classes the edge's target can hold.
    * None of the filters has an index, so without a class this is a full scan
    * of the entity table.
    */
@@ -139,7 +147,7 @@ export default class SearchEdge implements Query.IEdge {
     if (label) {
       q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
-    return q.getField("id").distinct().run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
+    return this.node.match(db, q);
   }
 
   /**

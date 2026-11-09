@@ -92,10 +92,12 @@ export default class SearchEdge implements Query.IEdge {
     if (!entityId) {
       // every other predicate applies the filters through the targetIds() set; the relation edges
       // test them on the partner row, as a broad filter (one language) holds most of the entities
-      // and each relation would be tested against that whole list
+      // and each relation would be tested against that whole list. The conditions nested under
+      // the target node always go through the set, as only the node evaluator can test them.
       const filters = nodeFilters(this.node.params);
-      if (hasFilters(filters) && !this.checksUnpinnedTargetInRun()) {
-        this.targetEntityIds = await this.constrainedTargetIds(conn, filters);
+      const conditioned = this.node.edges.length > 0;
+      if (conditioned || (hasFilters(filters) && !this.checksUnpinnedTargetInRun())) {
+        this.targetEntityIds = await this.constrainedTargetIds(conn);
       } else {
         this.targetEntityIds = null;
         this.resolvedTargetFilters = await withCoOccurrentIds(conn, filters);
@@ -107,7 +109,11 @@ export default class SearchEdge implements Query.IEdge {
       equivalents: this.node.params.includeEquivalents === true,
       subordinates: this.expandsPinnedSubordinates() && this.node.params.includeSubordinates === true,
     });
-    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    const expanded = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    // the nested conditions keep the expanded targets that meet them
+    this.targetEntityIds = this.node.edges.length
+      ? await this.node.match(conn, { kind: "ids", ids: expanded })
+      : expanded;
 
     if (this.type === Query.EdgeType["I_CT:"] && this.node.params.includeSubordinates === true) {
       this.descendantIds = await this.resolve().subordinates(conn, this.targetEntityIds);
@@ -115,16 +121,13 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
-   * else by the classes the edge's target can hold
+   * ids of entities passing the node's filters and nested conditions, narrowed by the node's
+   * classes, else by the classes the edge's target can hold
    */
-  private async constrainedTargetIds(conn: Conn, filters: NodeFilters): Promise<string[]> {
+  private async constrainedTargetIds(conn: Conn): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
-    const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
-    const p = new Params();
-    const where = filterParts(p, "e", classes, filters);
-    const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
-    return res.rows.map((row: { id: string }) => row.id);
+    const entityClasses = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
+    return this.node.match(conn, { kind: "base", params: { ...this.node.params, entityClasses } });
   }
 
   /**
@@ -317,10 +320,19 @@ function anyRelation(e: SearchEdge, p: Params): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
   const filters = e.unpinnedTargetFilters();
-  let check = "TRUE";
   if (targets) {
-    check = p.index(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, targets);
-  } else if (classes.length || hasFilters(filters)) {
+    // the members of the relations holding a target. A nested condition can resolve the targets
+    // into a list of thousands: `&&` compares every relation against the whole list and an
+    // EXISTS per input row loops each input entity over those relations, while `|| ''` keeps
+    // the member test off the index so the planner hashes the list
+    const isTarget = `t.id || '' = ${anyOf(p, targets)}`;
+    return (
+      `e.id IN (SELECT unnest(r.entity_ids) FROM ${RELATIONS} r` +
+      ` WHERE EXISTS (SELECT 1 FROM unnest(r.entity_ids) t(id) WHERE ${isTarget}))`
+    );
+  }
+  let check = "TRUE";
+  if (classes.length || hasFilters(filters)) {
     const partnerMatches = entityMatches(p, "pid", classes, filters);
     check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${partnerMatches})`;
   }
