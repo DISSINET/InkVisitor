@@ -1,5 +1,7 @@
 import { Query } from "@inkvisitor/shared/types/query";
 
+// the changefeed clears the cache on every entity or relation write; the TTL
+// bounds staleness only while the feed is offline
 const BASE_QUERY_CACHE_TTL_MS = 5 * 60 * 1000;
 const BASE_QUERY_CACHE_MAX_ENTRIES = 24;
 // a query may return up to QUERY_RUN_OPTIONS.arrayLimit ids; results above this
@@ -68,7 +70,7 @@ export const setCachedBaseIds = (key: string, ids: string[]): void => {
   });
 };
 
-/** @internal test helper */
+/** drops every cached result; changefeedInvalidator calls it on each entity or relation write */
 export const clearQueryBaseCache = (): void => {
   baseQueryResultsCache.clear();
 };

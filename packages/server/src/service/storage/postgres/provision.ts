@@ -421,7 +421,7 @@ export const CHANGES_CHANNEL = "inkvisitor_changes";
  * TRUNCATE sends `table`. Every row a write touches pays for a notification,
  * so a table nothing watches has no trigger.
  */
-export const NOTIFY_TABLES = ["users", "settings"];
+export const NOTIFY_TABLES = ["users", "settings", "entities", "relations"];
 
 /**
  * Row-level, so each payload carries one id and stays far under the 8000-byte
