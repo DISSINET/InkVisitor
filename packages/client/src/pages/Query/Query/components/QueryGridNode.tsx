@@ -69,7 +69,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
-  const isValid = problems.length === 0;
+  const isValid = problems.every((problem) => problem.warning);
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
     value: type,
