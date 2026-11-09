@@ -1,4 +1,4 @@
-import { Relation } from "@inkvisitor/shared/types";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { Edge, Node, Position } from "reactflow";
 
@@ -74,7 +74,7 @@ export const orderColumns = (columns: string[][], edges: Edge[]): Record<string,
 export const convertToGraph = (
   entity: IResponseEntityRelations,
   relations: Relation.IConnection<Relation.IRelation>[],
-  entities: any,
+  entities: Record<string, IEntity>,
   nodeW: number,
   nodeH: number,
   asymmetrical: boolean

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { StyledSectionLabel } from "../../StatementEditorBoxStyles";
+import { StyledEditorEmptyState, StyledSectionLabel } from "../../StatementEditorBoxStyles";
 
 export const StyledDetailBlock = styled.div`
   margin-top: ${({ theme }) => theme.space[6]};
@@ -14,4 +14,8 @@ export const StyledDetailBlockLabel = styled(StyledSectionLabel)`
 export const StyledRelationsLoading = styled.div`
   position: relative;
   min-height: ${({ theme }) => theme.space[12]};
+`;
+
+export const StyledRelationsError = styled(StyledEditorEmptyState)`
+  color: ${({ theme }) => theme.color["danger"]};
 `;

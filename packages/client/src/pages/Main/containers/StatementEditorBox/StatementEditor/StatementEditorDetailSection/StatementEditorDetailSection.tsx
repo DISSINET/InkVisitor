@@ -16,10 +16,11 @@ import {
 } from "../../../EntityDetailBox/EntityDetail/EntityDetailStyles";
 import { useRelationMutations } from "../../../EntityDetailBox/EntityDetail/useRelationMutations";
 import { useStoredEntityWrites } from "../../../EntityDetailBox/EntityDetail/useStoredEntityWrites";
-import { StyledEditorEmptyState, StyledEditorSectionContent } from "../../StatementEditorBoxStyles";
+import { StyledEditorSectionContent } from "../../StatementEditorBoxStyles";
 import {
   StyledDetailBlock,
   StyledDetailBlockLabel,
+  StyledRelationsError,
   StyledRelationsLoading,
 } from "./StatementEditorDetailSectionStyles";
 
@@ -42,7 +43,11 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
 }) => {
   const [sectionRef, sectionInViewport] = useIsInViewport("200px");
   // the viewport flag flips on every scroll past the section; a write invalidates the query anyway
-  const { data: usedRelations, isError: isRelationsError } = useUsedRelationsQuery(statement.id, {
+  const {
+    data: usedRelations,
+    isError: isRelationsError,
+    isFetching: isRelationsFetching,
+  } = useUsedRelationsQuery(statement.id, {
     enabled: sectionInViewport,
     staleTime: 60 * 1000,
   });
@@ -114,8 +119,8 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
               userCanEdit={userCanEdit}
             />
           </EntityWritesContext.Provider>
-        ) : isRelationsError ? (
-          <StyledEditorEmptyState>Relations could not be loaded</StyledEditorEmptyState>
+        ) : isRelationsError && !isRelationsFetching ? (
+          <StyledRelationsError>Relations could not be loaded</StyledRelationsError>
         ) : (
           <StyledRelationsLoading>
             <Loader show noBackground size={10} loaderStyle="beat" />
