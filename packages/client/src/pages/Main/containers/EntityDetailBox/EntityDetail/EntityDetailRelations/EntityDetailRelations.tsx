@@ -1,5 +1,6 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IResponseDetail, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
+import { IResponseGeneric, Relation } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";
@@ -11,7 +12,7 @@ import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
 interface EntityDetailRelations {
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   relationCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,

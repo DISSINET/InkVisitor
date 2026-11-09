@@ -36,6 +36,7 @@ import {
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
@@ -983,6 +984,18 @@ class Api {
   ): Promise<AxiosResponse<IResponseDetail>> {
     try {
       const response = await this.connection.get(`/entities/${entityId}/detail`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async entityUsedRelationsGet(
+    entityId: string,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseEntityRelations>> {
+    try {
+      const response = await this.connection.get(`/entities/${entityId}/used-relations`, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

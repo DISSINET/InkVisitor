@@ -1,5 +1,6 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import ReactFlow, {
   Background,
   Controls,
@@ -24,7 +25,7 @@ interface Graph {
 }
 
 const convertToGraph = (
-  entity: IResponseDetail,
+  entity: IResponseEntityRelations,
   relations: Relation.IConnection<Relation.IRelation>[],
   entities: any,
   nodeW: number,
@@ -149,7 +150,7 @@ const convertToGraph = (
 interface EntityDetailRelationGraph {
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   entities: Record<string, IEntity>;
   relations: Relation.IConnection<Relation.IRelation>[];
 }

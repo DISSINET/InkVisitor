@@ -2,10 +2,10 @@ import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
-  IResponseDetail,
   IResponseGeneric,
   Relation,
 } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { UseMutationResult } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AxiosResponse } from "axios";
@@ -51,7 +51,7 @@ interface EntityDetailRelationTypeBlock {
     string,
     unknown
   >;
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   userCanEdit: boolean;
 }
 export const EntityDetailRelationTypeBlock: React.FC<

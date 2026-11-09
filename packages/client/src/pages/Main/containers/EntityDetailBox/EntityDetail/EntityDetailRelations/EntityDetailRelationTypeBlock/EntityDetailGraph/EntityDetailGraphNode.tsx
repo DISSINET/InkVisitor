@@ -1,4 +1,4 @@
-import { IResponseDetail } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { Handle, NodeTypes, Position } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -6,7 +6,7 @@ import { EntityTag } from "components/advanced";
 import React from "react";
 
 export const GraphNode: React.FC<{
-  data: { entity: IResponseDetail; level: number };
+  data: { entity: IResponseEntityRelations; level: number };
 }> = ({ data }) => {
   if (!data.entity) {
     console.log("problem");

@@ -3,7 +3,7 @@ import { IResponseStatement, IStatement } from "@inkvisitor/shared/types";
 import { Input } from "components";
 import Dropdown from "components/advanced";
 import { EntityWritesContext, useIsInViewport } from "hooks";
-import { useDetailQuery, useOrderedLanguageDict } from "hooks/react-query";
+import { useOrderedLanguageDict, useUsedRelationsQuery } from "hooks/react-query";
 import React from "react";
 import { EntityDetailMetaProps } from "../../../EntityDetailBox/EntityDetail/EntityDetailMetaProps/EntityDetailMetaProps";
 import { EntityDetailRelations } from "../../../EntityDetailBox/EntityDetail/EntityDetailRelations/EntityDetailRelations";
@@ -28,7 +28,7 @@ interface StatementEditorDetailSection {
 /**
  * The parts of Detail the Editor has no section for. The statement's own attributes save through
  * the Editor, so they go out together with its unsaved edits; relations are stored apart from the
- * statement and are only part of the detail response, fetched once the section scrolls into view.
+ * statement and are fetched once the section scrolls into view.
  */
 export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection> = ({
   statement,
@@ -38,7 +38,7 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
 }) => {
   const [sectionRef, sectionInViewport] = useIsInViewport("200px");
   // the viewport flag flips on every scroll past the section; a write invalidates the query anyway
-  const { data: detail } = useDetailQuery(statement.id, {
+  const { data: usedRelations } = useUsedRelationsQuery(statement.id, {
     enabled: sectionInViewport,
     staleTime: 60 * 1000,
   });
@@ -98,12 +98,12 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
         </StyledDetailContentRow>
       </StyledDetailForm>
 
-      {detail && (
+      {usedRelations && (
         <StyledDetailBlock>
           <StyledDetailBlockLabel>Relations</StyledDetailBlockLabel>
           <EntityWritesContext.Provider value={writes}>
             <EntityDetailRelations
-              entity={detail}
+              entity={usedRelations}
               relationCreateMutation={relationCreateMutation}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}

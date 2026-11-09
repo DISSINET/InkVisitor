@@ -1,8 +1,8 @@
 import {
   IEntity,
-  IResponseDetail,
   Relation
 } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { LetterIcon } from "components";
 import { CopyUuidsButton, EntityTag, PaginationControls } from "components/advanced";
 import { usePagination } from "hooks/usePagination";
@@ -15,7 +15,7 @@ import {
 } from "./EntityDetailInverseRelationStyles";
 
 interface EntityDetailInverseRelation {
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   relationRule: Relation.RelationRule;
   relationType: string;
   relations?: Relation.IRelation[];
