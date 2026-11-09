@@ -46,7 +46,13 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+import { ErrorToast } from "components/basic/Toast/ErrorToast";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import {
+  formatRequestErrorDetails,
+  readApiErrorPayload,
+  readRequestError,
+} from "utils/requestError";
 import { storeRedirectTargetFromWindow } from "utils/redirectAfterLogin";
 import {
   clearStoredUser,
@@ -330,12 +336,10 @@ class Api {
       this.captureHtmlResponse(response);
       this.poisonedPaths.add(response.config?.url || "");
       toast.error(
-        <div>
-          Server returned HTML instead of JSON
-          <p style={{ fontSize: "1rem" }}>
-            This may indicate a service overload or missing database index
-          </p>
-        </div>,
+        <ErrorToast
+          title={errors.HtmlResponseError.title}
+          message={errors.HtmlResponseError.message}
+        />,
       );
       return Promise.reject(
         new AxiosError(
@@ -361,8 +365,10 @@ class Api {
         return this.rejectIfNonJsonApiBody(response);
       },
       (error: AxiosError) => {
+        // a cancelled request was aborted by the app's own code, so nothing failed
+        const cancelled = axios.isCancel(error);
         //@ts-ignore
-        if (!error.config?.ignoreErrorToast) {
+        if (!error.config?.ignoreErrorToast && !cancelled) {
           // Any status codes that falls outside the range of 2xx cause this function to trigger
           // Do something with response error
           if (this.shouldShowErrorToast(error)) {
@@ -442,96 +448,40 @@ class Api {
   }
 
   handleError = (err: any | AxiosError) => {
-    if (axios.isAxiosError(err)) {
-      if (err.code === AxiosError.ECONNABORTED || err.code === AxiosError.ETIMEDOUT) {
-        return new errors.TimeoutError();
-      }
-      if (err.response?.status === 503) {
-        return new errors.NetworkError();
-      }
-      if (err.response?.status === 413) {
-        return new errors.RequestTooLargeError();
-      }
-      const data = err.response?.data;
-      if (typeof data === "string") {
-        return new errors.NetworkError();
-      }
-      return data || new errors.NetworkError();
-    } else {
-      return new errors.NetworkError();
+    // a cancelled request stays recognisable to callers through axios.isCancel
+    if (axios.isCancel(err)) {
+      return err;
     }
+    // callers read fields of our server's own error body, such as its data
+    const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+    if (readApiErrorPayload(data)) {
+      return data;
+    }
+    const { signature } = readRequestError(err);
+    if (signature.error === errors.ClientError.TYPE) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+    return errors.getErrorByCode(signature);
   };
 
-  responseToError(responseData: unknown): errors.IErrorSignature {
-    const out: errors.IErrorSignature = {
-      error: "",
-      message: "",
-    };
-
-    const fillFromApiErrorPayload = (data: unknown): boolean => {
-      if (
-        data &&
-        typeof data === "object" &&
-        typeof (data as { error?: unknown }).error === "string"
-      ) {
-        out.error = (data as { error: string }).error;
-        const msg = (data as { message?: unknown }).message;
-        out.message = typeof msg === "string" ? msg : "";
-        return true;
-      }
-      return false;
-    };
-
-    if (responseData instanceof AxiosError) {
-      const ax = responseData;
-      if (ax.code === AxiosError.ECONNABORTED || ax.code === AxiosError.ETIMEDOUT) {
-        out.error = errors.TimeoutError.TYPE;
-        return out;
-      }
-      if (ax.code === AxiosError.ERR_NETWORK || ax.code === AxiosError.ERR_BAD_RESPONSE) {
-        out.error = errors.NetworkError.TYPE;
-        return out;
-      }
-      if (ax.response?.status === 413) {
-        out.error = errors.RequestTooLargeError.TYPE;
-        return out;
-      }
-      const d = ax.response?.data;
-      if (typeof d === "string") {
-        out.error = errors.NetworkError.TYPE;
-        return out;
-      }
-      if (fillFromApiErrorPayload(d)) {
-        return out;
-      }
-      return out;
-    }
-
-    const wrapped = responseData as { response?: { data?: unknown } } | null | undefined;
-    const nested = wrapped?.response?.data;
-    if (nested === undefined || nested === null) {
-      return out;
-    }
-    if (typeof nested === "string") {
-      out.error = errors.NetworkError.TYPE;
-      return out;
-    }
-    fillFromApiErrorPayload(nested);
-    return out;
-  }
-
   showErrorToast(err: any) {
-    const hydratedError = errors.getErrorByCode(this.responseToError(err));
+    const { signature, reportable } = readRequestError(err);
+    const hydratedError = errors.getErrorByCode(signature);
+    const details = reportable
+      ? formatRequestErrorDetails(err, signature, new Date(), window.location.href)
+      : undefined;
 
     // delay is necessary to resolve toast duplicities before firing the toast
     setTimeout(() => {
       toast.error(
-        <div>
-          {hydratedError.title}
-          {hydratedError.message ? (
-            <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
-          ) : null}
-        </div>,
+        <ErrorToast
+          title={hydratedError.title}
+          message={hydratedError.message}
+          details={details}
+        />,
+        // time to read the error and reach the copy button
+        details ? { autoClose: 10000 } : undefined,
       );
     }, 50);
   }
