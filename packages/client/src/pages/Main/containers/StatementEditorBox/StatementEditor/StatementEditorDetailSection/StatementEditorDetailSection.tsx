@@ -1,6 +1,6 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseStatement, IStatement } from "@inkvisitor/shared/types";
-import { Input } from "components";
+import { Input, Loader } from "components";
 import Dropdown from "components/advanced";
 import { EntityWritesContext, useIsInViewport } from "hooks";
 import { useOrderedLanguageDict, useUsedRelationsQuery } from "hooks/react-query";
@@ -16,8 +16,12 @@ import {
 } from "../../../EntityDetailBox/EntityDetail/EntityDetailStyles";
 import { useRelationMutations } from "../../../EntityDetailBox/EntityDetail/useRelationMutations";
 import { useStoredEntityWrites } from "../../../EntityDetailBox/EntityDetail/useStoredEntityWrites";
-import { StyledEditorSectionContent } from "../../StatementEditorBoxStyles";
-import { StyledDetailBlock, StyledDetailBlockLabel } from "./StatementEditorDetailSectionStyles";
+import { StyledEditorEmptyState, StyledEditorSectionContent } from "../../StatementEditorBoxStyles";
+import {
+  StyledDetailBlock,
+  StyledDetailBlockLabel,
+  StyledRelationsLoading,
+} from "./StatementEditorDetailSectionStyles";
 
 interface StatementEditorDetailSection {
   statement: IResponseStatement;
@@ -38,7 +42,7 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
 }) => {
   const [sectionRef, sectionInViewport] = useIsInViewport("200px");
   // the viewport flag flips on every scroll past the section; a write invalidates the query anyway
-  const { data: usedRelations } = useUsedRelationsQuery(statement.id, {
+  const { data: usedRelations, isError: isRelationsError } = useUsedRelationsQuery(statement.id, {
     enabled: sectionInViewport,
     staleTime: 60 * 1000,
   });
@@ -98,9 +102,9 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
         </StyledDetailContentRow>
       </StyledDetailForm>
 
-      {usedRelations && (
-        <StyledDetailBlock>
-          <StyledDetailBlockLabel>Relations</StyledDetailBlockLabel>
+      <StyledDetailBlock>
+        <StyledDetailBlockLabel>Relations</StyledDetailBlockLabel>
+        {usedRelations ? (
           <EntityWritesContext.Provider value={writes}>
             <EntityDetailRelations
               entity={usedRelations}
@@ -110,8 +114,14 @@ export const StatementEditorDetailSection: React.FC<StatementEditorDetailSection
               userCanEdit={userCanEdit}
             />
           </EntityWritesContext.Provider>
-        </StyledDetailBlock>
-      )}
+        ) : isRelationsError ? (
+          <StyledEditorEmptyState>Relations could not be loaded</StyledEditorEmptyState>
+        ) : (
+          <StyledRelationsLoading>
+            <Loader show noBackground size={10} loaderStyle="beat" />
+          </StyledRelationsLoading>
+        )}
+      </StyledDetailBlock>
 
       <StyledDetailBlock>
         <StyledDetailBlockLabel>Metaproperties</StyledDetailBlockLabel>
