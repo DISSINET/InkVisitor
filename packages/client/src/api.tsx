@@ -447,6 +447,10 @@ class Api {
   }
 
   handleError = (err: any | AxiosError) => {
+    // a cancelled request stays recognisable to callers through axios.isCancel
+    if (axios.isCancel(err)) {
+      return err;
+    }
     // callers read fields of our server's own error body, such as its data
     const data = axios.isAxiosError(err) ? err.response?.data : undefined;
     if (readApiErrorPayload(data)) {
