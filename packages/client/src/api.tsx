@@ -334,12 +334,14 @@ class Api {
     ) {
       this.captureHtmlResponse(response);
       this.poisonedPaths.add(response.config?.url || "");
-      toast.error(
-        <ErrorToast
-          title={errors.HtmlResponseError.title}
-          message={errors.HtmlResponseError.message}
-        />,
-      );
+      if (!(response.config as IApiOptions | undefined)?.ignoreErrorToast) {
+        toast.error(
+          <ErrorToast
+            title={errors.HtmlResponseError.title}
+            message={errors.HtmlResponseError.message}
+          />,
+        );
+      }
       return Promise.reject(
         new AxiosError(
           "Server returned HTML instead of JSON (service may be overloaded or missing DB index).",

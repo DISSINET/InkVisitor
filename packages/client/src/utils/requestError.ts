@@ -54,6 +54,10 @@ export const readRequestError = (err: unknown): IRequestErrorReading => {
     return read(payload.error, payload.message, reportable);
   }
   const isJson = typeof data === "object" && data !== null;
+  // a successful status with an HTML page is what the response interceptor rejects
+  if (!isJson && status < 300) {
+    return read(errors.HtmlResponseError.TYPE);
+  }
   if (PROXY_STATUSES.includes(status) || (!isJson && status >= 500)) {
     return read(errors.ServerUnavailableError.TYPE);
   }

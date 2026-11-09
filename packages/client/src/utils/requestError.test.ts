@@ -48,6 +48,13 @@ describe("readRequestError", () => {
     expect(readRequestError(responseError(500, "")).signature.error).toBe("ServerUnavailableError");
   });
 
+  it("reads an HTML page with a successful status as an HTML response", () => {
+    expect(readRequestError(responseError(200, "<!doctype html><html></html>"))).toEqual({
+      signature: { error: "HtmlResponseError", message: "" },
+      reportable: false,
+    });
+  });
+
   it("reads a non-JSON 4xx page as an unknown error with details", () => {
     const err = responseError(403, "<html>forbidden</html>", AxiosError.ERR_BAD_REQUEST);
     expect(readRequestError(err)).toEqual({
