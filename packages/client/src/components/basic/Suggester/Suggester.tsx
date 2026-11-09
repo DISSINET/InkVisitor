@@ -36,6 +36,7 @@ import {
   StyledAiOutlineWarning,
   StyledContextNote,
   StyledEmptyCategory,
+  StyledPasteRow,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledRightContentDivider,
@@ -45,7 +46,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
-import { IcoMinus, IcoPlusBold } from "Theme/icons";
+import { IcoClipboard, IcoMinus, IcoPlusBold } from "Theme/icons";
 
 // suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
 // even when the input itself is narrow; the list floats in a portal, so it is
@@ -119,6 +120,40 @@ interface Suggester {
   onFocusChange?: (isFocused: boolean) => void;
 }
 
+const PASTE_PREVIEW_LENGTH = 30;
+
+/** clipboard text as one line, the way the input holds it */
+const singleLine = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+/** the paste row's label, quoting the start of the clipboard text when it is known */
+const pasteLabel = (preview?: string): string => {
+  if (!preview) {
+    return "paste";
+  }
+  const shown =
+    preview.length > PASTE_PREVIEW_LENGTH ? `${preview.slice(0, PASTE_PREVIEW_LENGTH)}…` : preview;
+  return `paste "${shown}"`;
+};
+
+/**
+ * The clipboard text without prompting, which only Chromium allows once the
+ * page holds the clipboard-read permission; undefined wherever reading it would
+ * ask the user (Firefox and Safari always do)
+ */
+const previewClipboard = async (): Promise<string | undefined> => {
+  try {
+    const permission = await navigator.permissions.query({
+      name: "clipboard-read" as PermissionName,
+    });
+    if (permission.state !== "granted") {
+      return undefined;
+    }
+    return singleLine(await navigator.clipboard.readText());
+  } catch {
+    return undefined;
+  }
+};
+
 export const Suggester: React.FC<Suggester> = ({
   marginTop = false,
   suggestions = [],
@@ -173,6 +208,9 @@ export const Suggester: React.FC<Suggester> = ({
   const [selected, setSelected] = useState(-1);
   const [isContextOpen, setIsContextOpen] = useState(false);
   const contextListed = isContextOpen && typed.length === 0;
+  // the clipboard text when the browser already lets the page read it, "" for
+  // an empty clipboard, undefined when it can only be read on a click
+  const [clipboardPreview, setClipboardPreview] = useState<string | undefined>(undefined);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
@@ -281,6 +319,19 @@ export const Suggester: React.FC<Suggester> = ({
     return () => cancelAnimationFrame(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalDroppedItem]);
+
+  // the paste row stands in for the browser menu the right click replaces
+  const handlePaste = async () => {
+    try {
+      const text = singleLine(await navigator.clipboard.readText());
+      if (text) {
+        onTypeFn(text);
+      }
+    } catch {
+      toast.info("The browser did not allow reading the clipboard, paste with Ctrl+V");
+    }
+    textInputRef.current?.focus();
+  };
 
   const handleEnterPress = () => {
     // Statements are created without a label, so allow triggering create with an
@@ -558,6 +609,8 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsContextOpen(true);
                 onContextOpen();
                 textInputRef.current?.focus();
+                setClipboardPreview(undefined);
+                previewClipboard().then(setClipboardPreview);
               },
             })}
           >
@@ -667,6 +720,12 @@ export const Suggester: React.FC<Suggester> = ({
               {contextListed ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
+                    {clipboardPreview !== "" && (
+                      <StyledPasteRow type="button" onClick={handlePaste}>
+                        <IcoClipboard size={12} />
+                        {pasteLabel(clipboardPreview)}
+                      </StyledPasteRow>
+                    )}
                     {contextSuggestions?.length ? (
                       renderEntitySuggestions(contextSuggestions)
                     ) : contextSuggestions ? (

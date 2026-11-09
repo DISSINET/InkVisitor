@@ -137,6 +137,25 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
 
   min-height: 2.8rem;
 `;
+export const StyledPasteRow = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 ${({ theme }) => theme.space[2]};
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  background: transparent;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    background-color: ${({ theme }) => theme.color["suggestionSelected"]};
+  }
+`;
 export const StyledContextNote = styled.div`
   display: flex;
   align-items: center;
