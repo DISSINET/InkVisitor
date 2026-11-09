@@ -229,3 +229,22 @@ describe("queryReducer updateNodeClass", () => {
     expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
   });
 });
+
+describe("queryReducer removeEdge", () => {
+  const edge = (id: string, node: Query.INode): Query.IEdge => ({
+    id,
+    type: Query.EdgeType["EP:T"],
+    params: {},
+    logic: Query.EdgeLogic.Positive,
+    node,
+  });
+
+  it("removes a node together with the nodes nested under it", () => {
+    const state = makeNode("root", [
+      edge("e1", makeNode("n1", [edge("e2", makeNode("n2"))])),
+      edge("e3", makeNode("n3")),
+    ]);
+    const next = queryReducer(state, { type: QueryActionType.removeEdge, payload: { edgeId: "e1" } });
+    expect(next.edges.map((e) => e.id)).toEqual(["e3"]);
+  });
+});

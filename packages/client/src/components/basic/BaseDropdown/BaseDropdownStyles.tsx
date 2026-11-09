@@ -260,11 +260,14 @@ export const StyledChevron = styled.div<StyledChevron>`
 
 /* ---- portalled menu ---- */
 
-export const StyledMenu = styled.div`
+export const StyledMenu = styled.div<{ $minWidth?: number }>`
   /* body-level stacking (portal root makes no context): match the other
      floating portal menus (Tooltip, DatePicker, Suggester) so the menu
      clears modals and this component's own tooltip */
   z-index: 10000;
+  /* the size middleware sets the width inline to the control's; a min-width
+     still wins over it */
+  min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth / 10}rem` : "0")};
   overflow-y: auto;
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};

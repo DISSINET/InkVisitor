@@ -15,6 +15,9 @@ import {
 } from "./DropdownStyles";
 import { resolveEntityMultiChange } from "./selectAllLogic";
 
+// fits a checkbox, the class letter and bar, and the longest class label on one line
+const MENU_MIN_WIDTH = 160;
+
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
   value: T[];
@@ -79,6 +82,7 @@ export const EntityMultiDropdown = <T extends string>({
     <BaseDropdown
       multi
       width={width}
+      menuMinWidth={MENU_MIN_WIDTH}
       clearable={isClearable}
       options={[...generalValues, ...options]}
       value={selectedOptions}

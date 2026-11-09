@@ -117,7 +117,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
                 <EntityTag
                   key={entity.id}
                   entity={entity}
-                  tagMaxWidth={160}
+                  fullWidth
                   onDoubleClick={() => onOpenEntityInDetail?.(entity.id)}
                 />
               ))}
