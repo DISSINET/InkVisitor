@@ -34,6 +34,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledContextNote,
   StyledEmptyCategory,
   StyledInputWrapper,
   StyledRelativePosition,
@@ -74,6 +75,12 @@ interface Suggester {
   isFetching?: boolean;
 
   preSuggestions?: EntitySuggestion[];
+  // A right click into the empty input opens this list in place of the
+  // pre-suggestions; undefined while it loads. onContextOpen tells the parent
+  // to load it, and without it the browser's own menu opens.
+  contextSuggestions?: EntitySuggestion[];
+  contextEmptyNote?: string;
+  onContextOpen?: () => void;
 
   // events
   onType: (newType: string) => void;
@@ -127,6 +134,9 @@ export const Suggester: React.FC<Suggester> = ({
   disableButtons = false,
 
   preSuggestions,
+  contextSuggestions,
+  contextEmptyNote = "nothing to list",
+  onContextOpen,
 
   // events
   onType,
@@ -161,9 +171,19 @@ export const Suggester: React.FC<Suggester> = ({
   onFocusChange,
 }) => {
   const [selected, setSelected] = useState(-1);
+  const [isContextOpen, setIsContextOpen] = useState(false);
+  const contextListed = isContextOpen && typed.length === 0;
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+
+  // the input blurs on the mousedown that picks a row, so the right-click list
+  // waits for the whole list to close, focus and hover gone
+  useEffect(() => {
+    if (!isFocused && !isHovered) {
+      setIsContextOpen(false);
+    }
+  }, [isFocused, isHovered]);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
@@ -171,7 +191,10 @@ export const Suggester: React.FC<Suggester> = ({
   useKeypress(
     "Escape",
     () => {
-      if (!showCreateModal && isFocused) onCancel();
+      if (!showCreateModal && isFocused) {
+        setIsContextOpen(false);
+        onCancel();
+      }
     },
     [showCreateModal, isFocused],
   );
@@ -197,6 +220,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
+    setIsContextOpen(false);
     onType(newType);
   };
 
@@ -279,8 +303,8 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      if (!disableEnter) {
-        const entity = suggestions[selected].entity;
+      const entity = (contextListed ? (contextSuggestions ?? []) : suggestions)[selected]?.entity;
+      if (!disableEnter && entity) {
         if (entity.status !== EntityEnums.Status.Discouraged) {
           if (!entity.isTemplate) {
             onPick(entity);
@@ -525,7 +549,17 @@ export const Suggester: React.FC<Suggester> = ({
             style={{
               width: "100%",
             }}
-            {...getReferenceProps()}
+            {...getReferenceProps({
+              onContextMenu: (event) => {
+                // with text in the input the browser's menu stays, for copy and paste
+                if (!onContextOpen || disabled || typed.length > 0) return;
+                event.preventDefault();
+                setSelected(-1);
+                setIsContextOpen(true);
+                onContextOpen();
+                textInputRef.current?.focus();
+              },
+            })}
           >
             <Input
               inputRef={textInputRef}
@@ -608,7 +642,7 @@ export const Suggester: React.FC<Suggester> = ({
                 ...floatingStyles,
               }}
             >
-              {suggestions.length || (isFetching && isFocused) ? (
+              {!contextListed && (suggestions.length || (isFetching && isFocused)) ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(suggestions)}
@@ -629,8 +663,36 @@ export const Suggester: React.FC<Suggester> = ({
                 </>
               ) : null}
 
+              {/* RIGHT-CLICK LIST */}
+              {contextListed ? (
+                <>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
+                    {contextSuggestions?.length ? (
+                      renderEntitySuggestions(contextSuggestions)
+                    ) : contextSuggestions ? (
+                      <StyledContextNote>{contextEmptyNote}</StyledContextNote>
+                    ) : null}
+                    <Loader size={30} show={!contextSuggestions} />
+                  </StyledRelativePosition>
+                  {!isCategoryMenuOpen && contextSuggestions && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < contextSuggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
+                </>
+              ) : null}
+
               {/* PRE-SUGGESTIONS */}
-              {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
+              {!contextListed &&
+              preSuggestions &&
+              preSuggestions.length > 0 &&
+              typed.length === 0 ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(preSuggestions)}

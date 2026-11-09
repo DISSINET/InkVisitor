@@ -5,7 +5,13 @@ import {
   entitiesDictKeys,
 } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IResponseEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IResponseBookmarkFolder,
+  IResponseEntity,
+  IStatement,
+  ITerritory,
+} from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
@@ -28,7 +34,7 @@ import {
 import { deepCopy } from "utils/utils";
 import { canCreateEntities, copiesDroppedValue } from "utils/valueDropCopy";
 import { AddTerritoryModal, EntityCreateModal } from "..";
-import { useUserQuery } from "hooks/react-query";
+import { useBookmarksQuery, useUserQuery } from "hooks/react-query";
 
 interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
@@ -117,6 +123,17 @@ interface EntitySuggesterProps {
   clearableInput?: boolean;
   onEmptyAddButtonClick?: () => void;
 }
+/** every bookmarked entity once, in folder order */
+const bookmarkedEntities = (folders: IResponseBookmarkFolder[]): IEntity[] => {
+  const byId = new Map<string, IEntity>();
+  for (const entity of folders.flatMap((folder) => folder.entities)) {
+    if (!byId.has(entity.id)) {
+      byId.set(entity.id, entity);
+    }
+  }
+  return [...byId.values()];
+};
+
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
  */
@@ -239,6 +256,10 @@ const EntitySuggesterFull: React.FC<
   // get user data
   const userRole = getStoredUserRole();
   const { data: user } = useUserQuery();
+
+  // the bookmarks load on the first right click into the input
+  const [bookmarksOpened, setBookmarksOpened] = useState(false);
+  const { data: bookmarkFolders } = useBookmarksQuery(bookmarksOpened);
 
   // Suggesions query
   const {
@@ -533,6 +554,12 @@ const EntitySuggesterFull: React.FC<
         preSuggestions={
           preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }
+        contextSuggestions={
+          bookmarkFolders &&
+          filterSuggestions(getClassFilteredPreSuggestions(bookmarkedEntities(bookmarkFolders)))
+        }
+        contextEmptyNote="no bookmarks to pick here"
+        onContextOpen={() => setBookmarksOpened(true)}
         placeholder={
           statementLabelHint && selectedCategory === EntityEnums.Class.Statement
             ? STATEMENT_LABEL_NOT_RECOMMENDED
