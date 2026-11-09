@@ -137,6 +137,14 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
 
   min-height: 2.8rem;
 `;
+export const StyledContextNote = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 0 ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-style: italic;
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
 interface StyledSuggestionRow {
   $twoIcons: boolean;
   $isSelected: boolean;
