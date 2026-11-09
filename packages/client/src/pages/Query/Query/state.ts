@@ -352,7 +352,7 @@ const updateNodeLabel = (state: Query.INode, nodeId: string, newLabel: string): 
   return updatedState;
 };
 
-// the node filters: status, language and label
+// every node filter, NODE_FILTER_KEYS
 const clearNodeFilters = (state: Query.INode, nodeId: string): Query.INode => {
   const updatedState = { ...state };
 

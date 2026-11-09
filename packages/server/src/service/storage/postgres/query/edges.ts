@@ -57,9 +57,11 @@ export default class SearchEdge implements Query.IEdge {
 
   /**
    * Explicit target-id set, resolved in prepare(): for a pinned target the
-   * pinned entityId plus its toggle-driven expansion; for an unpinned node on
-   * an edge that does not check the target per relation, the entities passing
-   * its filters. Null when the target is neither pinned nor constrained.
+   * pinned entityId plus its toggle-driven expansion; for an unpinned node, the
+   * entities passing its filters, on an edge that does not check the target per
+   * relation. Conditions nested under the target node always go through the
+   * set, on every edge, narrowing a pinned expansion too. Null when the target
+   * is neither pinned nor constrained.
    */
   protected targetEntityIds: string[] | null = null;
   /** the per-partner filters with the co-occurrence set prepare() resolved */

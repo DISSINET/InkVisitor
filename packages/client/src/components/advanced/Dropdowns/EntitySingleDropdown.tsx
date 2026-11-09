@@ -20,9 +20,6 @@ const StyledEntityDropdownWrap = styled.div<{ $fullWidth: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
 `;
 
-// fits an option's class letter beside the scrollbar; the class name is in its tooltip
-const MENU_MIN_WIDTH = 40;
-
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
   options: { value: T; label: string; info?: string }[];
@@ -66,7 +63,6 @@ export const EntitySingleDropdown = <T extends string>({
   const dropdown = (
     <BaseDropdown
       width={width}
-      menuMinWidth={MENU_MIN_WIDTH}
       value={options.find((o) => o.value === value)}
       options={options}
       onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
