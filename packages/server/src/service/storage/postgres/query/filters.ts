@@ -3,11 +3,11 @@ import { AuditScope } from "@inkvisitor/shared/types/audit";
 import { BadParams } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { EventType } from "@inkvisitor/shared/types/stats";
-import { nodeLabel } from "../../../../common/searchLabel";
+import { labelPattern, nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn } from "../../types";
 import { Params, ident } from "../sql";
-import { labelMatch, labelPattern } from "../search";
+import { labelMatch } from "../search";
 import { q } from "../tables";
 
 /** a node's filters, read from its params; nodeLabel's parts for the label, ISO strings for the dates */

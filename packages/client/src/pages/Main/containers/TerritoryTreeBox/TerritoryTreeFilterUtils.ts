@@ -1,3 +1,4 @@
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree } from "@inkvisitor/shared/types";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
@@ -96,9 +97,9 @@ function isNodeMatchingFilters(
   // first label is not guaranteed to be there to lowercase
   const meetsFilterCondition =
     targetLabel.length === 0 ||
-    (node.territory.labels[0] ?? "")
-      .toLowerCase()
-      .includes(targetLabel.toLowerCase());
+    foldQuotes((node.territory.labels[0] ?? "").toLowerCase()).includes(
+      foldQuotes(targetLabel.toLowerCase())
+    );
 
   // Apply AND/OR logic based on operator
   if (operator === "or") {

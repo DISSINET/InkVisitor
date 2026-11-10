@@ -1,5 +1,5 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import { IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
 import React, { useEffect, useState } from "react";
 import { getRelationInvertedRules } from "utils/utils";
 import {
@@ -10,7 +10,7 @@ import { EntityDetailInverseRelation } from "./EntityDetailInverseRelation/Entit
 import { StyledInverseRelationRow } from "./EntityDetailInverseRelationsStyles";
 
 interface EntityDetailInverseRelations {
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
 }
 export const EntityDetailInverseRelations: React.FC<
   EntityDetailInverseRelations

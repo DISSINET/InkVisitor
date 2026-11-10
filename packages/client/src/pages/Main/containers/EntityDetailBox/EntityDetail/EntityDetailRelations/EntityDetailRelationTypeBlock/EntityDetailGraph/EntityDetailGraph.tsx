@@ -1,5 +1,5 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
 import ReactFlow, { Background, Controls, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -20,7 +20,7 @@ const DEFAULT_MAX_HEIGHT = 400;
 interface EntityDetailRelationGraph {
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   entities: Record<string, IEntity>;
   relations: Relation.IConnection<Relation.IRelation>[];
 }
