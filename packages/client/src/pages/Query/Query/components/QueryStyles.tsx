@@ -90,7 +90,9 @@ export const StyledEdgePropPairSlot = styled.div<{ $color: string }>`
   z-index: 1;
   display: flex;
   align-items: center;
-  max-width: 100%;
+  // a full-width tab ends a little short of the edge type picker, where the
+  // box's bottom border starts to round into its corner
+  max-width: calc(100% - ${({ theme }) => theme.borderRadius["sm"]});
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   line-height: 1.2;
   background-color: ${({ theme }) => theme.color["white"]};
