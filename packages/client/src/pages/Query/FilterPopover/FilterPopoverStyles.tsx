@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const StyledFilterPopoverTrigger = styled.span`
   display: inline-flex;
   flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
 `;
 
 // Portaled into #page; position comes from floating-ui. maxHeight is applied

@@ -32,7 +32,7 @@ interface FilterPopover {
   title: string;
   count: number;
   tooltipLabel?: string;
-  /** shows a "clear" control in the panel header while `count` is above zero */
+  /** shows a "clear all" control beside the button and in the panel header while `count` is above zero */
   onClear?: () => void;
   placement?: Placement;
   width?: string;
@@ -126,6 +126,17 @@ export const FilterPopover: React.FC<FilterPopover> = ({
           tooltipLabel={tooltipLabel}
           onClick={() => setIsOpen((open) => !open)}
         />
+        {onClear && count > 0 && (
+          <IconButton
+            size={buttonSize}
+            icon={<IcoClose size={14} />}
+            color="primary"
+            noBorder
+            noBackground
+            tooltipLabel="clear all"
+            onClick={onClear}
+          />
+        )}
       </StyledFilterPopoverTrigger>
 
       {isOpen && (
