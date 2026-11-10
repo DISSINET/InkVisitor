@@ -70,11 +70,34 @@ export const isQueryRequestEmpty = (
   return true;
 };
 
-/** how many node filters (status, language, label) a node applies */
+/** the params the node filters panel sets, cleared together and dropped when an entity is pinned */
+export const NODE_FILTER_KEYS = [
+  "entityStatuses",
+  "entityLanguages",
+  "label",
+  "createdAfter",
+  "createdBefore",
+  "updatedAfter",
+  "updatedBefore",
+  "createdBy",
+  "updatedBy",
+  "editedBy",
+  "coOccurrence",
+] as const satisfies readonly (keyof Query.INodeParams)[];
+
+/** how many node filters a node applies; a date range counts once, whichever ends are set */
 export const countNodeFilters = (params: Query.INodeParams): number =>
-  (params.entityStatuses?.length ? 1 : 0) +
-  (params.entityLanguages?.length ? 1 : 0) +
-  (params.label?.trim() ? 1 : 0);
+  [
+    params.entityStatuses?.length,
+    params.entityLanguages?.length,
+    params.label?.trim(),
+    params.createdAfter || params.createdBefore,
+    params.updatedAfter || params.updatedBefore,
+    params.createdBy,
+    params.updatedBy,
+    params.editedBy?.length,
+    params.coOccurrence?.length,
+  ].filter(Boolean).length;
 
 // keeps saved query names within the two lines the query rows show (see
 // StyledQueryName); matters most for shared queries, which every user sees in their list

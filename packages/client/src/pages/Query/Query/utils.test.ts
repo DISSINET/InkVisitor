@@ -101,6 +101,21 @@ describe("countNodeFilters", () => {
       }),
     ).toBe(3);
   });
+
+  it("counts a date range once, whichever ends are set, and each user and co-occurrence filter", () => {
+    expect(countNodeFilters({ createdAfter: "2024-01-01T00:00:00.000Z" })).toBe(1);
+    expect(
+      countNodeFilters({
+        createdAfter: "2024-01-01T00:00:00.000Z",
+        createdBefore: "2025-01-01T00:00:00.000Z",
+        updatedBefore: "2025-01-01T00:00:00.000Z",
+      }),
+    ).toBe(2);
+    expect(
+      countNodeFilters({ createdBy: "u-1", updatedBy: "u-2", editedBy: ["u-1"], coOccurrence: ["c-1"] }),
+    ).toBe(4);
+    expect(countNodeFilters({ editedBy: [], coOccurrence: [] })).toBe(0);
+  });
 });
 
 describe("suggestQueryName", () => {

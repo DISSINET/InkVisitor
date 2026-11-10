@@ -434,11 +434,28 @@ describe("explore: operators, nesting and target expansion", () => {
     ).toEqual(["c-2", "c-3", "c-4"]);
   });
 
-  it("a child node's edges run over the entities the edge matched", async () => {
-    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+  it("a child node's edges narrow the child's own entities, the edge then matches the survivors", async () => {
+    // pinned: c-3 is a subclass of c-2, not of c-1, and holds no reference
+    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", hit)])).toEqual(["c-2"]);
+    const notSubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", notSubclassOfC1)])).toEqual([]);
     const miss = node({ entityId: "c-3" }, [edge("HR:R", { entityId: "r-1" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", miss)])).toEqual([]);
+    // unpinned, on a relation edge: of the superclasses c-1 and c-2 only c-1 references r-1
+    const referencing = node({ entityClasses: [C.Concept] }, [edge("HR:R", { entityId: "r-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", referencing)])).toEqual(["c-2"]);
+    // unpinned, on a prop edge: c-1's prop value c-3 is a synonym of c-4
+    const synonym = node({}, [edge("R:SYN", { entityId: "c-4" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", synonym)])).toEqual(["c-1"]);
+    const notSynonym = node({}, [edge("R:SYN", { entityId: "c-4" }, Query.EdgeLogic.Negative)]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", notSynonym)])).toEqual([]);
+    // has relation: any looks for the survivors among the partners, so p-1 does not match
+    // itself; a pinned target is matched against the whole relation, the entity included
+    const classifiedAsC2 = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", classifiedAsC2)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Location] }, [edge("R:", classifiedAsC2)])).toEqual(["l-1"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", { entityId: "p-1" })])).toEqual(["p-1"]);
   });
 
   it("a root without edges returns its base", async () => {
@@ -513,6 +530,70 @@ describe("explore: operators, nesting and target expansion", () => {
   // RethinkDB builds an ordered-relation edge for it: its dispatch reads the relation maps without an own-key check
   itPg("rejects an Object.prototype key as an edge type", () => {
     expect(() => storage.explore.plan(node({}, [edge("hasOwnProperty")]), resolvers)).toThrow(InternalServerError);
+  });
+});
+
+// the dates and users read the audits as the Explorer's created at / updated at / created by /
+// updated by / edited by filters do
+describe("explore: audit and co-occurrence filters", () => {
+  const audit = (id: string, modelId: string, type: string, user: string, date: string): Row => ({
+    id,
+    modelId,
+    type,
+    user,
+    date: new Date(date),
+    auditScope: "entity",
+    changes: {},
+  });
+
+  beforeAll(async () => {
+    await storage.users.insert(conn, ["u-1", "u-2"].map((id) => ({ id, name: id, email: `${id}@x` })));
+    await storage.audits.insert(conn, [
+      audit("au-1", "c-1", "create", "u-1", "2024-01-01T00:00:00.000Z"),
+      audit("au-2", "c-1", "edit", "u-2", "2025-06-01T00:00:00.000Z"),
+      audit("au-3", "c-2", "create", "u-2", "2025-01-01T00:00:00.000Z"),
+      audit("au-4", "c-3", "create", "u-1", "2024-03-01T00:00:00.000Z"),
+      audit("au-5", "c-3", "edit", "u-1", "2024-04-01T00:00:00.000Z"),
+      // the last audit for updated at, but neither an update nor an edit by u-2
+      audit("au-6", "c-3", "text_edit", "u-2", "2026-01-01T00:00:00.000Z"),
+    ]);
+  });
+
+  const concepts = (params: Query.INodeParams) => explore({ entityClasses: [C.Concept], ...params });
+
+  it("created at reads the first audit, updated at the last, both ends inclusive", async () => {
+    expect(await concepts({ createdAfter: "2024-06-01T00:00:00.000Z" })).toEqual(["c-2"]);
+    expect(await concepts({ createdBefore: "2024-06-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(
+      await concepts({ createdAfter: "2024-01-01T00:00:00.000Z", createdBefore: "2024-01-01T00:00:00.000Z" })
+    ).toEqual(["c-1"]);
+    expect(await concepts({ updatedAfter: "2025-03-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBefore: "2025-03-01T00:00:00.000Z" })).toEqual(["c-2"]);
+  });
+
+  it("created by, updated by and edited by read the create and edit audits", async () => {
+    expect(await concepts({ createdBy: "u-1" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBy: "u-2" })).toEqual(["c-1"]);
+    expect(await concepts({ updatedBy: "u-1" })).toEqual(["c-3"]);
+    expect(await concepts({ editedBy: ["u-2"] })).toEqual(["c-1", "c-2"]);
+    expect(await concepts({ editedBy: ["u-1", "u-2"] })).toEqual(["c-1", "c-2", "c-3"]);
+    expect(await concepts({ createdBy: "u-1", updatedBy: "u-2" })).toEqual(["c-1"]);
+  });
+
+  it("co-occurrence keeps the entities sharing a statement with a listed one, a listed one only with another", async () => {
+    expect(await concepts({ coOccurrence: ["p-1"] })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1"] })).toEqual(["p-2"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1", "p-2"] })).toEqual(["p-1", "p-2"]);
+    expect(await explore({ entityClasses: [C.Location], coOccurrence: ["p-2"] })).toEqual(["l-1"]);
+    expect(await explore({ coOccurrence: ["t-child"] })).toEqual(["p-1", "s-2"]);
+  });
+
+  it("an unpinned target applies them on a statement edge and on a relation edge's partner", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-1" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-2" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { createdBy: "u-2" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { editedBy: ["u-1"] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:CLA", { coOccurrence: ["l-1"] })])).toEqual(["p-1", "p-2"]);
   });
 });
 

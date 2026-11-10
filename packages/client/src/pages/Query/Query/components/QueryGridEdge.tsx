@@ -1,4 +1,5 @@
-import { Checkbox } from "components";
+import { Checkbox, IconWithTooltip } from "components";
+import { IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -53,7 +54,8 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
     edgeTypesImplemented,
   );
 
-  const isValid = problems.length === 0;
+  const isValid = problems.every((problem) => problem.warning);
+  const warning = problems.find((problem) => problem.warning);
 
   const color = isValid ? theme.color.query2 : theme.color.queryInvalid;
 
@@ -141,6 +143,14 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               });
             }}
           />
+          {warning && (
+            <IconWithTooltip
+              icon={<IcoWarning size={16} />}
+              color="warning"
+              tooltipText={warning.text}
+              tooltipPosition="top"
+            />
+          )}
         </StyledEdgeBox>
       </StyledEdgeControlsLayer>
     </StyledEdgeContainer>

@@ -24,6 +24,20 @@ export namespace Query {
     entityStatuses?: EntityEnums.Status[];
     entityLanguages?: EntityEnums.Language[];
     label?: string;
+    // the date and user filters read the entity's audits, as the Explorer's
+    // created at / updated at / created by / updated by / edited by filters do;
+    // the dates are ISO strings, both ends inclusive
+    createdAfter?: string;
+    createdBefore?: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    // OR semantics - edited (created or updated) by any of the listed users
+    editedBy?: string[];
+    // OR semantics - shares a statement with any of the listed entities, as
+    // the Explorer's co-occurrence filter
+    coOccurrence?: string[];
     entityId?: string;
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;

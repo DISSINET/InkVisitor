@@ -98,4 +98,11 @@ describe("convertToGraph", () => {
       );
     }
   });
+
+  test("draws a branch that joins two entities neither of which is its parent", () => {
+    const { nodes, edges } = graphOf([connection(["root", "a"], [connection(["b", "c"])])]);
+
+    expect(nodes.map((node) => node.id).sort()).toEqual(["a", "b", "c", "root"]);
+    expect(edges.find((edge) => edge.source === "b" && edge.target === "c")).toBeDefined();
+  });
 });

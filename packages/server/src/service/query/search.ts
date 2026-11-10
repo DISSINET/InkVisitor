@@ -9,11 +9,6 @@ import { Conn, ExplorePlan, storage } from "@service/storage";
 import { Results } from ".";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import Entity from "@models/entity/entity";
-import {
-  getCachedBaseIds,
-  queryCacheKey,
-  setCachedBaseIds,
-} from "./query-base-cache";
 import { getRowIdsFilter } from "./explore-ids-filter";
 import {
   getEquivalentEntityIds,
@@ -31,7 +26,6 @@ export default class QuerySearch {
   root: ExplorePlan;
   explore: Explore.IExplore;
   results: Results<IEntity> | null;
-  private readonly queryForCache: Query.INode;
   private resultsExpanded = false;
   // ids APPENDED by expandFilteredResults (#2969), by provenance - used to
   // stamp isEquivalent/isSubordinate on the response entities. Direct matches
@@ -52,7 +46,6 @@ export default class QuerySearch {
   }
 
   constructor(query: Query.INode, explore: Explore.IExplore) {
-    this.queryForCache = query;
     this.root = storage.explore.plan(query, {
       expand: getNodeExpansionIds,
       subordinates: getSubordinateEntityIds,
@@ -88,25 +81,12 @@ export default class QuerySearch {
       throw new SearchEdgeTypesInvalid();
     }
 
-    const cacheKey = queryCacheKey(this.queryForCache);
-    const cachedIds = getCachedBaseIds(cacheKey);
-    if (cachedIds) {
-      this.results = new Results<IEntity>();
-      this.results.items = [...cachedIds];
-      return this.results.items;
-    }
-
+    // the RAW unexpanded query matches: the explore filters and the root-level
+    // expansion (#2969) are applied per request in expandFilteredResults(),
+    // via getResults()/getStats()
     this.results = new Results<IEntity>();
     this.results.items = await this.root.run(db);
-    const ids = this.results.items;
-
-    // The cache holds the RAW unexpanded query matches: the explore filters
-    // vary per request and the root-level expansion (#2969) depends on the
-    // filtered set, so both are applied per request in
-    // expandFilteredResults() - the cache-hit path above goes through the
-    // exact same step via getResults()/getStats().
-    setCachedBaseIds(cacheKey, ids);
-    return ids;
+    return this.results.items;
   }
 
   /**

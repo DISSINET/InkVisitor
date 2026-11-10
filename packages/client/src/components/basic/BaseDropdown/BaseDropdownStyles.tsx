@@ -260,12 +260,29 @@ export const StyledChevron = styled.div<StyledChevron>`
 
 /* ---- portalled menu ---- */
 
-export const StyledMenu = styled.div`
+export const StyledMenu = styled.div<{ $minWidth?: number }>`
   /* body-level stacking (portal root makes no context): match the other
      floating portal menus (Tooltip, DatePicker, Suggester) so the menu
      clears modals and this component's own tooltip */
   z-index: 10000;
+  /* the size middleware sets the width inline to the control's; a min-width
+     still wins over it */
+  min-width: ${({ $minWidth }) => ($minWidth ? `${$minWidth / 10}rem` : "0")};
   overflow-y: auto;
+  overflow-x: hidden;
+  /* a narrower take on the global scrollbar, a 4px thumb in a 6px strip, so a
+     menu as narrow as its control keeps room for the options. Chrome ignores
+     the pseudo-elements once scrollbar-width is set, so that applies only in
+     Firefox */
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+  }
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-width: 1px;
+  }
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   background-color: ${({ theme }) => theme.color["white"]};

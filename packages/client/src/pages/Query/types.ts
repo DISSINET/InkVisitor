@@ -12,6 +12,41 @@ export type QueryValidity = {
 export type QueryValidityProblem = {
   source: string;
   text: string;
+  // a warning points at a likely mistake but leaves the query valid
+  warning?: boolean;
+};
+
+export const PINNED_CONDITION_WARNING =
+  "This condition checks only the entity selected in the node above. If that entity " +
+  "meets it, nothing changes; if not, the query finds nothing. To filter several " +
+  "entities, turn on EQ or SUB in the node above, or remove its entity and choose a " +
+  "class instead.";
+
+/**
+ * The warnings of a query: conditions nested under a pinned node that EQ / SUB
+ * do not widen test that one entity, so they keep or drop all the matches of
+ * the edge above rather than filtering a set.
+ */
+export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
+  const warnings: QueryValidityProblem[] = [];
+  const visit = (node: Query.INode, incoming?: Query.EdgeType) => {
+    const { entityId, includeEquivalents, includeSubordinates } = node.params;
+    // on the territory-tree edges SUB is ignored or read as depth, never adding subordinates
+    const widened =
+      includeEquivalents === true ||
+      (includeSubordinates === true &&
+        !!incoming &&
+        !edgeTypesWithoutSubordinates.includes(incoming) &&
+        !edgeTypesWithSubtreeDepth.includes(incoming));
+    for (const edge of node.edges) {
+      if (incoming && entityId && !widened) {
+        warnings.push({ source: edge.id, text: PINNED_CONDITION_WARNING, warning: true });
+      }
+      visit(edge.node, edge.type);
+    }
+  };
+  visit(root);
+  return warnings;
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [

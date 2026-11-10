@@ -2,13 +2,21 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
-import { labelPattern, nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExploreResolvers } from "../../types";
 import { collect, propPaths } from "../provision";
 import { Params, arr, ident, indexHolds } from "../sql";
-import { labelMatch } from "../search";
 import { q } from "../tables";
+import {
+  ENTITIES,
+  NO_FILTERS,
+  NodeFilters,
+  anyOf,
+  filterParts,
+  hasFilters,
+  nodeFilters,
+  withCoOccurrentIds,
+} from "./filters";
 import SearchNode, { ID_ORDER, Input, inputWhere } from "./nodes";
 
 /**
@@ -49,11 +57,15 @@ export default class SearchEdge implements Query.IEdge {
 
   /**
    * Explicit target-id set, resolved in prepare(): for a pinned target the
-   * pinned entityId plus its toggle-driven expansion; for an unpinned node on
-   * an edge that does not check the target per relation, the entities passing
-   * its filters. Null when the target is neither pinned nor constrained.
+   * pinned entityId plus its toggle-driven expansion; for an unpinned node, the
+   * entities passing its filters, on an edge that does not check the target per
+   * relation. Conditions nested under the target node always go through the
+   * set, on every edge, narrowing a pinned expansion too. Null when the target
+   * is neither pinned nor constrained.
    */
   protected targetEntityIds: string[] | null = null;
+  /** the per-partner filters with the co-occurrence set prepare() resolved */
+  private resolvedTargetFilters: NodeFilters | null = null;
 
   /** the subtree below the pinned targets, resolved for I_CT: with the SUB toggle */
   protected descendantIds: string[] | null = null;
@@ -82,10 +94,16 @@ export default class SearchEdge implements Query.IEdge {
     if (!entityId) {
       // every other predicate applies the filters through the targetIds() set; the relation edges
       // test them on the partner row, as a broad filter (one language) holds most of the entities
-      // and each relation would be tested against that whole list
-      const filters = this.unpinnedTargetFilters();
-      const constrained = hasFilters(filters) && !this.checksUnpinnedTargetInRun();
-      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, filters) : null;
+      // and each relation would be tested against that whole list. The conditions nested under
+      // the target node always go through the set, as only the node evaluator can test them.
+      const filters = nodeFilters(this.node.params);
+      const conditioned = this.node.edges.length > 0;
+      if (conditioned || (hasFilters(filters) && !this.checksUnpinnedTargetInRun())) {
+        this.targetEntityIds = await this.constrainedTargetIds(conn);
+      } else {
+        this.targetEntityIds = null;
+        this.resolvedTargetFilters = await withCoOccurrentIds(conn, filters);
+      }
       return;
     }
 
@@ -93,7 +111,11 @@ export default class SearchEdge implements Query.IEdge {
       equivalents: this.node.params.includeEquivalents === true,
       subordinates: this.expandsPinnedSubordinates() && this.node.params.includeSubordinates === true,
     });
-    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    const expanded = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    // the nested conditions keep the expanded targets that meet them
+    this.targetEntityIds = this.node.edges.length
+      ? await this.node.match(conn, { kind: "ids", ids: expanded })
+      : expanded;
 
     if (this.type === Query.EdgeType["I_CT:"] && this.node.params.includeSubordinates === true) {
       this.descendantIds = await this.resolve().subordinates(conn, this.targetEntityIds);
@@ -101,16 +123,13 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
-   * else by the classes the edge's target can hold
+   * ids of entities passing the node's filters and nested conditions, narrowed by the node's
+   * classes, else by the classes the edge's target can hold
    */
-  private async constrainedTargetIds(conn: Conn, filters: TargetFilters): Promise<string[]> {
+  private async constrainedTargetIds(conn: Conn): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
-    const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
-    const p = new Params();
-    const where = filterParts(p, "e", classes, filters);
-    const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
-    return res.rows.map((row: { id: string }) => row.id);
+    const entityClasses = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
+    return this.node.match(conn, { kind: "base", params: { ...this.node.params, entityClasses } });
   }
 
   /**
@@ -136,16 +155,11 @@ export default class SearchEdge implements Query.IEdge {
    * filters of an unpinned target for the per-relation check; none for a pinned
    * target, which is the target itself whatever its filters
    */
-  unpinnedTargetFilters(): TargetFilters {
-    const params = this.node.params;
-    if (params.entityId) {
+  unpinnedTargetFilters(): NodeFilters {
+    if (this.node.params.entityId) {
       return NO_FILTERS;
     }
-    return {
-      statuses: params.entityStatuses ?? [],
-      languages: params.entityLanguages ?? [],
-      label: nodeLabel(params.label),
-    };
+    return this.resolvedTargetFilters ?? nodeFilters(this.node.params);
   }
 
   /** ancestors of the pinned targets through the tree cache: every level, or the direct parents only */
@@ -184,21 +198,8 @@ export default class SearchEdge implements Query.IEdge {
   }
 }
 
-/** an unpinned target node's filters; nodeLabel's parts for the label */
-type TargetFilters = {
-  statuses: EntityEnums.Status[];
-  languages: EntityEnums.Language[];
-  label: [string, string, string] | undefined;
-};
-
-const NO_FILTERS: TargetFilters = { statuses: [], languages: [], label: undefined };
-
-const hasFilters = (f: TargetFilters): boolean =>
-  !!f.label || f.languages.length > 0 || f.statuses.length > 0;
-
 export type Predicate = (edge: SearchEdge, p: Params) => string;
 
-export const ENTITIES = ident(TABLE.entities);
 const RELATIONS = ident(TABLE.relations);
 /** the relation row holds e.id, through the gin index; `doc` resolves to the relation inside the subquery */
 const RELATION_HOLDS_E = indexHolds(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, "e.id");
@@ -206,38 +207,10 @@ const TERRITORY_TREE_EDGES = new Set<string>([Query.EdgeType["CT:"], Query.EdgeT
 const S = EntityEnums.Class.Statement;
 const T = EntityEnums.Class.Territory;
 
-const anyOf = (p: Params, values: unknown[]): string => `ANY(${p.add(values)}::text[])`;
 /** the row `x` is of class `cls` */
 const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.class = '${cls}'`;
 /** a filled id read from json (ReQL `.default("").ne("")`) */
 const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
-
-/**
- * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
- * constraint; empty lists do not constrain. Every node filter is checked here, for the id set
- * prepare() selects and for the per-partner checks alike
- */
-function filterParts(
-  p: Params,
-  alias: string,
-  classes: EntityEnums.Class[],
-  filters: TargetFilters
-): string[] {
-  const parts: string[] = [];
-  if (classes.length) {
-    parts.push(`${alias}.class = ${anyOf(p, classes)}`);
-  }
-  if (filters.statuses.length) {
-    parts.push(`${alias}.status = ${anyOf(p, filters.statuses)}`);
-  }
-  if (filters.languages.length) {
-    parts.push(`${alias}.language = ${anyOf(p, filters.languages)}`);
-  }
-  if (filters.label) {
-    parts.push(labelMatch(p, labelPattern(...filters.label), `${alias}.labels`));
-  }
-  return parts;
-}
 
 /** an existing entity `idSql` of the classes, passing the filters; empty lists do not constrain */
 function entityMatches(
@@ -309,7 +282,7 @@ function partnersMatch(
   partnersSql: string,
   targets: string[] | null,
   classes: EntityEnums.Class[],
-  filters: TargetFilters
+  filters: NodeFilters
 ): string {
   if (targets) {
     return `${partnersSql} && ${p.add(targets)}::text[]`;
@@ -342,19 +315,35 @@ function unorderedRelation(e: SearchEdge, p: Params, type: RelationEnums.Type): 
 
 /**
  * Any relation holding e.id: one holding a pinned target too (the whole array,
- * so a target that is e itself matches), one with a partner of the classes
- * passing the filters, or any relation at all (EdgeHasRelation).
+ * so a target that is e itself matches), one with a partner among the targets
+ * the nested conditions left, one with a partner of the classes passing the
+ * filters, or any relation at all (EdgeHasRelation).
  */
 function anyRelation(e: SearchEdge, p: Params): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
   const filters = e.unpinnedTargetFilters();
   let check = "TRUE";
-  if (targets) {
+  if (targets && e.node.params.entityId) {
     check = p.index(TABLE.relations, DbEnums.Indexes.RelationsEntityIds, targets);
+  } else if (targets) {
+    // a semi-join over the members m of every relation, as in unorderedRelation: the nested
+    // conditions can leave thousands of targets, which `&&` would compare against every
+    // relation, while `|| ''` keeps the partner test off the index so the planner hashes the list
+    const isTarget = `pid || '' = ${anyOf(p, targets)}`;
+    return (
+      `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id)` +
+      ` WHERE EXISTS (SELECT 1 FROM unnest(${partners(true, "m.id")}) pid WHERE ${isTarget}))`
+    );
   } else if (classes.length || hasFilters(filters)) {
     const partnerMatches = entityMatches(p, "pid", classes, filters);
-    check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${partnerMatches})`;
+    // the same semi-join: as an EXISTS per input row, a partner test the planner expects to
+    // pass rarely (a class, a less frequent creator) makes it compare every relation against
+    // every input row instead of probing the gin index, 12 s to minutes on 29k relations
+    return (
+      `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id)` +
+      ` WHERE EXISTS (SELECT 1 FROM unnest(${partners(true, "m.id")}) pid WHERE ${partnerMatches}))`
+    );
   }
   return `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND ${check})`;
 }

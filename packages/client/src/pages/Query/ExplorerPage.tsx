@@ -71,7 +71,7 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
-import { QueryValidity, QueryValidityProblem } from "./types";
+import { QueryValidity, QueryValidityProblem, queryWarnings } from "./types";
 import {
   buildQueryWithResultExpansion,
   invalidateAllExplorerQueries,
@@ -158,7 +158,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     // });
 
     return {
-      problems,
+      problems: [...problems, ...queryWarnings(queryState)],
       isValid,
     };
   }, [queryState]);
