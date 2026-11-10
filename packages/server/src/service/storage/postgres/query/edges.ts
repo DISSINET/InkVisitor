@@ -337,7 +337,13 @@ function anyRelation(e: SearchEdge, p: Params): string {
     );
   } else if (classes.length || hasFilters(filters)) {
     const partnerMatches = entityMatches(p, "pid", classes, filters);
-    check = `EXISTS (SELECT 1 FROM unnest(${partners(true)}) pid WHERE ${partnerMatches})`;
+    // the same semi-join: as an EXISTS per input row, a partner test the planner expects to
+    // pass rarely (a class, a less frequent creator) makes it compare every relation against
+    // every input row instead of probing the gin index, 12 s to minutes on 29k relations
+    return (
+      `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id)` +
+      ` WHERE EXISTS (SELECT 1 FROM unnest(${partners(true, "m.id")}) pid WHERE ${partnerMatches}))`
+    );
   }
   return `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND ${check})`;
 }
