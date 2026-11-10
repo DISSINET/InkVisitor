@@ -25,3 +25,20 @@ export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
   );
   grid-template-rows: repeat(${({ $nodeItems }) => $nodeItems.length}, ${QUERY_GRID_HEIGHT}px);
 `;
+
+interface StyledGridCellProps {
+  $column: number;
+  $row: number;
+  $hasNode: boolean;
+}
+
+export const StyledGridCell = styled.div<StyledGridCellProps>`
+  position: relative;
+  // a node's row (suggester, filters, add and remove buttons) runs past its
+  // cell into the next column, whose cells come later and would cover it
+  z-index: ${({ $hasNode }) => ($hasNode ? 1 : "auto")};
+  grid-column: ${({ $column }) => $column};
+  grid-row: ${({ $row }) => $row};
+  width: ${QUERY_GRID_WIDTH}px;
+  height: ${QUERY_GRID_HEIGHT}px;
+`;

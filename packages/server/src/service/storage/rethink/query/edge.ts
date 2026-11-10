@@ -8,6 +8,7 @@ import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
 import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
+import { auditAndCoOccurrenceIds, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
@@ -99,12 +100,16 @@ export default class SearchEdge implements Query.IEdge {
       // either takes the statuses into the id set with it. The conditions
       // nested under the target node always go through the set, as only the
       // node evaluator can test them.
+      const filteredIds = await auditAndCoOccurrenceIds(db, this.node.params);
       const constrained =
+        filteredIds !== null ||
         this.node.edges.length > 0 ||
         !!filters.label ||
         filters.languages.length > 0 ||
         (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
-      this.targetEntityIds = constrained ? await this.constrainedTargetIds(db, filters) : null;
+      this.targetEntityIds = constrained
+        ? await this.constrainedTargetIds(db, filters, filteredIds)
+        : null;
       return;
     }
 
@@ -124,15 +129,17 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Ids of entities passing `filters` (an empty list passes any) and the
-   * conditions nested under the target node, narrowed by the target node's
+   * Ids of entities passing `filters` (an empty list passes any), within
+   * `filteredIds` (the date, user and co-occurrence filters, null for none) and
+   * meeting the conditions nested under the target node, narrowed by the target node's
    * classes, else by the classes the edge's target can hold.
    * None of the filters has an index, so without a class this is a full scan
    * of the entity table.
    */
   private async constrainedTargetIds(
     db: Connection,
-    { statuses, languages, label }: TargetFilters
+    { statuses, languages, label }: TargetFilters,
+    filteredIds: string[] | null
   ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
@@ -147,7 +154,7 @@ export default class SearchEdge implements Query.IEdge {
     if (label) {
       q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
-    return this.node.match(db, q);
+    return this.node.match(db, withinIds(q, filteredIds));
   }
 
   /**

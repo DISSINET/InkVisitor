@@ -397,14 +397,14 @@ describe("explore: operators, nesting and target expansion", () => {
 });
 
 // the dates and users read the audits as the Explorer's created at / updated at / created by /
-// updated by / edited by filters do; RethinkDB leaves these params unread
+// updated by / edited by filters do
 describe("explore: audit and co-occurrence filters", () => {
   const audit = (id: string, modelId: string, type: string, user: string, date: string): Row => ({
     id,
     modelId,
     type,
     user,
-    date,
+    date: new Date(date),
     auditScope: "entity",
     changes: {},
   });
@@ -424,7 +424,7 @@ describe("explore: audit and co-occurrence filters", () => {
 
   const concepts = (params: Query.INodeParams) => explore({ entityClasses: [C.Concept], ...params });
 
-  itPg("created at reads the first audit, updated at the last, both ends inclusive", async () => {
+  it("created at reads the first audit, updated at the last, both ends inclusive", async () => {
     expect(await concepts({ createdAfter: "2024-06-01T00:00:00.000Z" })).toEqual(["c-2"]);
     expect(await concepts({ createdBefore: "2024-06-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
     expect(
@@ -434,7 +434,7 @@ describe("explore: audit and co-occurrence filters", () => {
     expect(await concepts({ updatedBefore: "2025-03-01T00:00:00.000Z" })).toEqual(["c-2"]);
   });
 
-  itPg("created by, updated by and edited by read the create and edit audits", async () => {
+  it("created by, updated by and edited by read the create and edit audits", async () => {
     expect(await concepts({ createdBy: "u-1" })).toEqual(["c-1", "c-3"]);
     expect(await concepts({ updatedBy: "u-2" })).toEqual(["c-1"]);
     expect(await concepts({ updatedBy: "u-1" })).toEqual(["c-3"]);
@@ -443,7 +443,7 @@ describe("explore: audit and co-occurrence filters", () => {
     expect(await concepts({ createdBy: "u-1", updatedBy: "u-2" })).toEqual(["c-1"]);
   });
 
-  itPg("co-occurrence keeps the entities sharing a statement with a listed one, a listed one only with another", async () => {
+  it("co-occurrence keeps the entities sharing a statement with a listed one, a listed one only with another", async () => {
     expect(await concepts({ coOccurrence: ["p-1"] })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
     expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1"] })).toEqual(["p-2"]);
     expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1", "p-2"] })).toEqual(["p-1", "p-2"]);
@@ -451,7 +451,7 @@ describe("explore: audit and co-occurrence filters", () => {
     expect(await explore({ coOccurrence: ["t-child"] })).toEqual(["p-1", "s-2"]);
   });
 
-  itPg("an unpinned target applies them on a statement edge and on a relation edge's partner", async () => {
+  it("an unpinned target applies them on a statement edge and on a relation edge's partner", async () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-1" })])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-2" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { createdBy: "u-2" })])).toEqual(["c-1"]);

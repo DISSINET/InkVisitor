@@ -6,6 +6,7 @@ import { unwrap } from "../conn";
 import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edge";
+import { auditAndCoOccurrenceIds, withinIds } from "./filters";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchNode implements Query.INode, ExplorePlan {
@@ -87,7 +88,9 @@ export default class SearchNode implements Query.INode, ExplorePlan {
    * @returns matching entity ids
    */
   async run(conn: Conn): Promise<string[]> {
-    return this.match(unwrap(conn), this.baseStream());
+    const db = unwrap(conn);
+    const filtered = await auditAndCoOccurrenceIds(db, this.params);
+    return this.match(db, withinIds(this.baseStream(), filtered));
   }
 
   /** ids of the entities in `stream` meeting this node's edges */
