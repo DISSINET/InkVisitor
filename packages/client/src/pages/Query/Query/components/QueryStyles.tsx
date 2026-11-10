@@ -91,7 +91,7 @@ export const StyledEdgePropPairSlot = styled.div<{ $color: string }>`
   display: flex;
   align-items: center;
   max-width: 100%;
-  padding: 1px ${({ theme }) => theme.space[2]} 2px;
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   line-height: 1.2;
   background-color: ${({ theme }) => theme.color["white"]};
   border: 2px solid ${({ $color }) => $color};
