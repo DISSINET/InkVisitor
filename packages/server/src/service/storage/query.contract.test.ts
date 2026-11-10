@@ -1,7 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { getSubordinateEntityIds } from "@models/relation/functions";
+import { filterEntityIdsByRowLabelFilter } from "@service/query/explore-label-filter";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import { Conn, ExploreResolvers, Row, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../test/db";
@@ -214,6 +215,142 @@ describe("entity search", () => {
     const rows = await storage.entities.labelsOf(conn, ["p-1", "p-2", "nope"]);
     expect(rows.sort((a, b) => a.id.localeCompare(b.id))).toEqual([{ id: "p-1", labels: ["Anna Nováková"] }, { id: "p-2" }]);
     expect(await storage.entities.labelsOf(conn, [])).toEqual([]);
+  });
+
+  describe("Czech accents", () => {
+    const labels = {
+      "d-1": "Evelín Teměř Jr.",
+      "d-2": "Karel Čapek",
+      "d-3": "Žďár nad Sázavou",
+      "d-4": "Příběh ťuhýka",
+      "d-5": "ŘÍP",
+      "d-6": "Řeč",
+    };
+    const seeded = Object.keys(labels);
+
+    beforeAll(async () => {
+      await storage.entities.insert(
+        conn,
+        Object.entries(labels).map(([id, label]) => entity(id, C.Concept, [label]))
+      );
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, seeded);
+    });
+
+    it("match accented labels when typing plain letters", async () => {
+      expect(await search({ label: "temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "evelin temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "capek" })).toEqual(["d-2"]);
+      expect(await search({ label: "zdar nad sazavou" })).toEqual(["d-3"]);
+      expect(await search({ label: "pribeh tuhyka" })).toEqual(["d-4"]);
+      expect(await search({ labelOrId: "tem*" })).toEqual(["d-1"]);
+    });
+
+    it("match accented capitals when typing plain letters", async () => {
+      expect(await search({ label: "rip" })).toEqual(["d-5"]);
+    });
+
+    it("count accented letters as part of a word", async () => {
+      expect(await search({ label: "tem" }, seeded)).toEqual([]);
+      expect(await search({ label: "r" }, seeded)).toEqual([]);
+      expect(await search({ label: "ec*" }, seeded)).toEqual([]);
+      expect(await search({ label: "*ec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "rec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "karel" }, seeded)).toEqual(["d-2"]);
+      expect(await search({ label: "evelin jr" }, seeded)).toEqual(["d-1"]);
+    });
+
+    it("still match when typing the accents", async () => {
+      expect(await search({ label: "Teměř" })).toEqual(["d-1"]);
+      expect(await search({ label: "Čapek" })).toEqual(["d-2"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      const explorerFilter = (label: string) =>
+        filterEntityIdsByRowLabelFilter(conn, seeded, { type: Explore.SearchOption.Label, label });
+      expect(await explorerFilter("temer")).toEqual(["d-1"]);
+      expect(await explorerFilter("zdar")).toEqual(["d-3"]);
+      for (const label of ["eme", "*eme", "eme*", "*eme*"]) {
+        expect([label, await explorerFilter(label)]).toEqual([label, ["d-1"]]);
+      }
+    });
+  });
+
+  describe("quote marks and apostrophes", () => {
+    beforeAll(async () => {
+      await storage.entities.insert(conn, [
+        entity("q-1", C.Concept, ["heretics\u2019 presence"]),
+        entity("q-2", C.Concept, ["\u201EPater noster\u201C prayer"]),
+        entity("q-3", C.Concept, ["Confession (oral) d'Arc"]),
+      ]);
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, ["q-1", "q-2", "q-3"]);
+    });
+
+    const explorerFilter = (label: string, useRegex = false) =>
+      filterEntityIdsByRowLabelFilter(conn, ["q-1", "q-2", "q-3"], {
+        type: Explore.SearchOption.Label,
+        label,
+        useRegex,
+      });
+
+    it("match a typographic apostrophe when typing a straight one", async () => {
+      expect(await search({ label: "heretics' presence" })).toEqual(["q-1"]);
+      expect(await search({ labelOrId: "heretics' pres*" })).toEqual(["q-1"]);
+    });
+
+    it("treat single and double quote marks as interchangeable", async () => {
+      for (const label of ['"Pater noster"', "'Pater noster'", "\u00ABPater*"]) {
+        expect([label, await search({ label })]).toEqual([label, ["q-2"]]);
+      }
+      expect(await search({ labelOrId: "'Pater*" })).toEqual(["q-2"]);
+    });
+
+    it("match in a query builder node label", async () => {
+      const plan = storage.explore.plan(
+        { id: "", type: Query.NodeType.E, params: { label: "heretics' pre" }, operator: Query.NodeOperator.And, edges: [] },
+        { expand: getNodeExpansionIds, subordinates: getSubordinateEntityIds, territoryPath: () => [] }
+      );
+      expect(sorted(await plan.run(conn))).toEqual(["q-1"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      expect(await explorerFilter("heretics' pres")).toEqual(["q-1"]);
+      expect(await explorerFilter('"Pater noster"')).toEqual(["q-2"]);
+      expect(await explorerFilter("d\u2019Arc")).toEqual(["q-3"]);
+    });
+
+    it("count quote marks as word breaks", async () => {
+      expect(await search({ label: "arc" })).toEqual(["q-3"]);
+      expect(await search({ label: "heretics" })).toEqual(["q-1"]);
+    });
+
+    it("read regex characters literally in the label search", async () => {
+      expect(await search({ label: '"Pater (noster' })).toEqual([]);
+      expect(await search({ label: "(oral" })).toEqual(["q-3"]);
+      expect(await search({ label: "o.al" })).toEqual([]);
+      expect(await search({ label: "heretics\\spresence" })).toEqual([]);
+    });
+
+    it("read regex characters literally in the Explorer label filter", async () => {
+      expect(await explorerFilter('"Pater (noster')).toEqual([]);
+      expect(await explorerFilter("(oral")).toEqual(["q-3"]);
+      expect(await explorerFilter("(noster)")).toEqual([]);
+      expect(await explorerFilter("o.al")).toEqual([]);
+      expect(await explorerFilter("*fession*")).toEqual(["q-3"]);
+    });
+
+    it("match parts of words and words in order in the Explorer label filter", async () => {
+      expect(await explorerFilter("onfess")).toEqual(["q-3"]);
+      expect(await explorerFilter("Confession Arc")).toEqual(["q-3"]);
+      expect(await explorerFilter("Arc Confession")).toEqual([]);
+    });
+
+    it("keep the regex mode of the Explorer label filter", async () => {
+      expect(await explorerFilter("^Conf.*Arc$", true)).toEqual(["q-3"]);
+    });
   });
 });
 

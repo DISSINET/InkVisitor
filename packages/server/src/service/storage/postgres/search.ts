@@ -1,43 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { prepareLabel } from "../../../common/searchLabel";
+import { labelPattern, prepareLabel } from "../../../common/searchLabel";
 import { TABLE } from "../names";
 import { SearchFilters } from "../types";
 import { Params, arr, ident } from "./sql";
-
-/**
- * The label regex of searchWordByWord in ../rethink/search.ts, as a string:
- * word boundaries on a side without a wildcard, a class per vowel (and c, n,
- * y) so accented and plain spellings find each other, glue between words.
- * RE2's `\w` is ASCII while PostgreSQL's follows the locale, so the glue
- * spells the class out. `(?i)` is an embedded option in both engines, which
- * is why the pattern is matched with `~`.
- */
-export function labelPattern(label: string, left: string, right: string): string {
-  if (left === "^") {
-    left = "(^|[^a-zA-Z0-9])";
-  }
-  if (right === "$") {
-    right = "($|[^a-zA-Z0-9])";
-  }
-  const map: Record<string, string> = {
-    a: "[aàáâãäå]",
-    e: "[eèéêë]",
-    i: "[iìíîï]",
-    o: "[oòóôõö]",
-    u: "[uùúûü]",
-    y: "[yýÿ]",
-    n: "[nñ]",
-    c: "[cç]",
-  };
-  const body = label
-    .toLowerCase()
-    .split("")
-    .map((char) => map[char] || char)
-    .join("")
-    .split(" ")
-    .join("([^a-zA-Z0-9]+[0-9A-Za-z_]+)*[^a-zA-Z0-9]+");
-  return `(?i)${left}${body}${right}`;
-}
 
 /**
  * true when one of the row's labels matches `pattern`; `labels` names the column, qualified
@@ -45,8 +10,6 @@ export function labelPattern(label: string, left: string, right: string): string
  */
 export const labelMatch = (p: Params, pattern: string, labels = "labels"): string =>
   `EXISTS (SELECT 1 FROM unnest(${labels}) l WHERE l ~ ${p.add(pattern)})`;
-
-const REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
 
 /**
  * WHERE clauses of the entity search, in the order fromFilters in
@@ -93,7 +56,7 @@ export function searchWhere(filters: SearchFilters, seedIds: string[] | undefine
     // the id is a prefix of the literal input, without the wildcard the client appends
     const idPrefix = filters.labelOrId.replace(/\*$/, "");
     where.push(
-      `(${labelMatch(p, labelPattern(label.replace(REGEX_CHARS, "\\$&"), left, right))} OR starts_with(id, ${p.add(idPrefix)}))`
+      `(${labelMatch(p, labelPattern(label, left, right))} OR starts_with(id, ${p.add(idPrefix)}))`
     );
   }
   if (filters.entityIds) {
