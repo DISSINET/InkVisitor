@@ -366,6 +366,9 @@ const node = (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], ope
 /** an edge to a target node given as node params (pinned entity, classes, toggles) or as a full node with edges of its own */
 const edge = (type: string, target: Query.INodeParams | Query.INode = {}, logic = Query.EdgeLogic.Positive): Partial<Query.IEdge> =>
   ({ id: "", type: type as Query.EdgeType, params: {}, logic, node: "type" in target ? (target as Query.INode) : node(target) });
+/** a prop edge whose propPair pins the other half of the matched prop */
+const pairedEdge = (type: string, target: Query.INodeParams, propPair: Query.IPropPair, logic = Query.EdgeLogic.Positive): Partial<Query.IEdge> =>
+  ({ ...edge(type, target, logic), params: { propPair } });
 const explore = async (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], operator = Query.NodeOperator.And) =>
   sorted(await storage.explore.plan(node(params, edges, operator), resolvers).run(conn));
 
@@ -400,6 +403,30 @@ describe("explore: relation, prop and reference edges", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("EP:T")])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { entityId: "c-3" })])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { entityId: "x-1" })])).toEqual([]);
+  });
+
+  it("a propPair on EP:T, HP:V, I_EP:T and I_HP:V needs both halves on the same top-level prop", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    expect(await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(
+      await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])
+    ).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityId: "c-3" }, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityId: "c-3" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("HP:V", {}, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityClasses: [C.Concept] }, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityClasses: [C.Person] }, { entityId: "c-2" })])).toEqual([]);
+    // the subprop x-1 / c-4 is not a top-level prop
+    expect(await explore(concepts, [pairedEdge("HP:V", {}, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("I_HP:V", { entityId: "c-1" }, { entityId: "c-2" })])).toEqual(["c-3"]);
+    expect(await explore(concepts, [pairedEdge("I_HP:V", { entityId: "c-1" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("I_EP:T", { entityId: "c-1" }, { entityId: "c-3" })])).toEqual(["c-2"]);
+    expect(await explore(concepts, [pairedEdge("I_EP:T", { entityId: "c-1" }, { entityId: "x-1" })])).toEqual([]);
+    expect(
+      await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["c-2", "c-3", "c-4"]);
   });
 
   it("HR:R and HR:V need a non-empty side without a target and ignore non-array references", async () => {
@@ -625,6 +652,28 @@ describe("explore: statement edges", () => {
     // an identification is not a classification
     expect(await explore({ entityClasses: [C.Person] }, [edge("I_SC", { entityId: "c-3" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Person] }, [edge("I_SC")])).toEqual(["p-1"]);
+  });
+
+  it("a propPair on SP:T, SP:V, I_SP:T and I_SP:V needs both halves on the same prop, at any of the three levels", async () => {
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["s-1"]);
+    // s-1 has a c-2 typed prop and a c-4 valued prop, but not one prop with both
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "x-2" }, { entityId: "c-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-4" }, { entityId: "x-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityId: "x-5" }, { entityId: "x-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityId: "x-5" }, { entityId: "c-2" })])).toEqual([]);
+    expect(await explore(S, [pairedEdge("SP:V", {}, { entityId: "x-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityClasses: [C.Concept] }, { entityId: "c-2" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityClasses: [C.Person] }, { entityId: "c-2" })])).toEqual([]);
+
+    const L = { entityClasses: [C.Location] };
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(L, [pairedEdge("I_SP:V", {}, { entityId: "x-2" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:V", { entityId: "c-4" }, { entityId: "x-2" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:V", { entityId: "c-4" }, { entityId: "c-2" })])).toEqual([]);
+    // an action prop belongs to no actant
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-4" }, { entityId: "x-3" })])).toEqual([]);
   });
 
   it("I_IS:S, I_IS:A1 and I_IS:A2 match by target, by class or by presence", async () => {

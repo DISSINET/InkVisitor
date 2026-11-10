@@ -12,6 +12,7 @@ import {
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
+import { EdgePropPairPicker } from "./EdgePropPairPicker";
 import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 import {
   StyledEdgeBox,
@@ -143,6 +144,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               });
             }}
           />
+          <EdgePropPairPicker edge={edge} dispatch={dispatch} />
           {warning && (
             <IconWithTooltip
               icon={<IcoWarning size={16} />}

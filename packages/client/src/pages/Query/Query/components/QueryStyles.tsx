@@ -73,6 +73,13 @@ export const StyledNodeExpansionToggles = styled.div`
   }
 `;
 
+// EQ / SUB of a prop edge's "of type" / "with value" picker, in its panel
+export const StyledPropPairToggles = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[4]};
+`;
+
 export const StyledNodeTypeSelect = styled.div`
   ${StyledControl} {
     background-color: transparent;

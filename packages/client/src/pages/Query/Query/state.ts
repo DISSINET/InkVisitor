@@ -68,6 +68,7 @@ enum QueryActionType {
   removeEdge,
   updateEdgeType,
   updateEdgeLogic,
+  updateEdgePropPair,
   updateNodeType,
   updateNodeClass,
   clearNodeFilters,
@@ -94,6 +95,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateEdgeLogic;
       payload: { edgeId: string; newLogic: Query.EdgeLogic };
+    }
+  | {
+      type: QueryActionType.updateEdgePropPair;
+      payload: { edgeId: string; propPair: Query.IPropPair | undefined };
     }
   | {
       type: QueryActionType.updateNodeType;
@@ -165,6 +170,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!edgeToUpdate) {
         return updatedStateUpdate;
       }
+      // the propPair pins one half of the prop, so it survives only a switch to
+      // an edge that pins the same half
+      if (Query.PropPairEdges[edgeToUpdate.type] !== Query.PropPairEdges[newType]) {
+        delete edgeToUpdate.params?.propPair;
+      }
       edgeToUpdate.type = newType;
 
       // the child node's params are edge-type specific. On a type switch, drop
@@ -213,6 +223,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       edgeToUpdateLogic.logic = newLogic;
       return updatedStateLogic;
 
+    case QueryActionType.updateEdgePropPair:
+      return updateEdgePropPair(state, action.payload.edgeId, action.payload.propPair);
+
     case QueryActionType.updateNodeType:
       return updateNodeType(state, action.payload.nodeId, action.payload.newType);
 
@@ -247,6 +260,26 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     default:
       return state;
   }
+};
+
+const updateEdgePropPair = (
+  state: Query.INode,
+  edgeId: string,
+  propPair: Query.IPropPair | undefined,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const edgeToUpdate = getAllEdges(updatedState).find((edge) => edge.id === edgeId);
+  if (!edgeToUpdate) {
+    return updatedState;
+  }
+  if (propPair) {
+    edgeToUpdate.params = { ...edgeToUpdate.params, propPair };
+  } else {
+    delete edgeToUpdate.params?.propPair;
+  }
+
+  return updatedState;
 };
 
 const updateNodeClass = (

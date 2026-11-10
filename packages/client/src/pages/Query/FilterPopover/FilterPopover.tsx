@@ -31,6 +31,8 @@ interface FilterPopover {
   /** panel heading */
   title: string;
   count: number;
+  /** appended to the button text in place of the count while `count` is above zero */
+  summary?: string;
   tooltipLabel?: string;
   /** shows a "clear all" control beside the button and in the panel header while `count` is above zero */
   onClear?: () => void;
@@ -51,6 +53,7 @@ export const FilterPopover: React.FC<FilterPopover> = ({
   label,
   title,
   count,
+  summary,
   tooltipLabel,
   onClear,
   placement = "bottom-start",
@@ -120,7 +123,7 @@ export const FilterPopover: React.FC<FilterPopover> = ({
         <Button
           size={buttonSize}
           icon={<IcoFilter size={14} />}
-          label={count > 0 ? `${label} · ${count}` : label}
+          label={count > 0 ? `${label} · ${summary ?? count}` : label}
           color="primary"
           inverted={count === 0 && !isOpen}
           tooltipLabel={tooltipLabel}

@@ -55,17 +55,19 @@ export const collect = (paths: string[], where = "v IS NOT NULL", doc = "doc"): 
   paths.map((p) => `jsonb_path_query_array(${doc}, '${p}', '{}', true)`).join("\n    || ") +
   `\n  ) AS v WHERE ${where})`;
 
+/** the prop objects under `root`, following `children` `depth` levels down */
+export const propLevels = (root: string, depth: number): string[] =>
+  Array.from({ length: depth }, (_, i) => root + ".children[*]".repeat(i));
+
 /**
  * value and type entity ids of every prop under `root`, following `children`
  * `depth` levels down; `kind` keeps one side only
  */
 export const propPaths = (root: string, depth: number, kind?: "type" | "value"): string[] => {
+  const sides = kind ? [kind] : ["value", "type"];
   const paths: string[] = [];
-  let level = root;
-  for (let i = 0; i < depth; i++) {
-    if (kind !== "type") paths.push(`${level}.value.entityId`);
-    if (kind !== "value") paths.push(`${level}.type.entityId`);
-    level = `${level}.children[*]`;
+  for (const level of propLevels(root, depth)) {
+    for (const side of sides) paths.push(`${level}.${side}.entityId`);
   }
   return paths;
 };
