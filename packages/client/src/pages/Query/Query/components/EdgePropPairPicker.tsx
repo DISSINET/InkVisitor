@@ -42,9 +42,10 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
   const entityId = propPair?.entityId;
 
   const [labelElement, setLabelElement] = useState<HTMLButtonElement | null>(null);
-  const [isLabelHovered, setIsLabelHovered] = useState(false);
+  const [clearElement, setClearElement] = useState<HTMLButtonElement | null>(null);
+  const [hovered, setHovered] = useState<"label" | "clear" | null>(null);
 
-  const { data: entity } = useQuery({
+  const { data: entity, isError } = useQuery({
     queryKey: ["entity", "query-edge-prop-pair", entityId],
     queryFn: async () => {
       const res = await api.entityGet(entityId!);
@@ -71,6 +72,9 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
 
   const pairLabel = half === "type" ? "of type" : "with value";
   const entityLabel = entity ? getEntityLabel(entity) : "";
+  // the pick filters by its id whether or not the entity loads, so the tab
+  // names it as picked while it loads and when it no longer exists
+  const pickedLabel = entityLabel || (isError ? "not found" : "…");
 
   return (
     <>
@@ -86,10 +90,10 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
               ref={setLabelElement}
               type="button"
               onClick={togglePanel}
-              onMouseEnter={() => setIsLabelHovered(true)}
-              onMouseLeave={() => setIsLabelHovered(false)}
+              onMouseEnter={() => setHovered("label")}
+              onMouseLeave={() => setHovered(null)}
             >
-              {entityLabel ? `${pairLabel}: ${entityLabel}` : `+ ${pairLabel}`}
+              {entityId ? `${pairLabel}: ${pickedLabel}` : `+ ${pairLabel}`}
             </StyledPropPairTabLabel>
             {entityId && (
               <StyledPropPairTabToggles>
@@ -120,7 +124,16 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
               </StyledPropPairTabToggles>
             )}
             {entityId && (
-              <StyledPropPairTabClear type="button" onClick={() => setPropPair(undefined)}>
+              <StyledPropPairTabClear
+                ref={setClearElement}
+                type="button"
+                onClick={() => {
+                  setHovered(null);
+                  setPropPair(undefined);
+                }}
+                onMouseEnter={() => setHovered("clear")}
+                onMouseLeave={() => setHovered(null)}
+              >
                 <IcoClose size={10} />
               </StyledPropPairTabClear>
             )}
@@ -132,12 +145,14 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
             <StyledRowHeader>{half}</StyledRowHeader>
             <StyledRowControl>
               {entityId ? (
-                entity && (
+                entity ? (
                   <EntityTag
                     entity={entity}
                     tagMaxWidth={220}
                     unlinkButton={{ onClick: () => setPropPair(undefined) }}
                   />
+                ) : (
+                  pickedLabel
                 )
               ) : (
                 <EntitySuggester
@@ -155,14 +170,16 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
         </StyledForm>
       </FilterPopover>
       <Tooltip
-        visible={isLabelHovered}
-        referenceElement={labelElement}
+        visible={hovered !== null}
+        referenceElement={hovered === "clear" ? clearElement : labelElement}
         position="top"
         portalId="page"
         label={
-          entityLabel
-            ? `only props of ${half} ${entityLabel}`
-            : `match only props that also have this ${half}`
+          hovered === "clear"
+            ? `remove the ${half}`
+            : entityId
+              ? `only props of ${half} ${pickedLabel}`
+              : `match only props that also have this ${half}`
         }
       />
     </>
