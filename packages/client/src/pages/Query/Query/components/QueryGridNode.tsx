@@ -474,13 +474,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               </StyledForm>
             </FilterPopover>
           )}
-          {!isRoot && !node.params.entityId && countNodeFilters(node.params) > 0 && (
-            <NodeFilterMatches
-              node={node}
-              edgeType={edgeType}
-              onOpenEntityInDetail={onOpenEntityInDetail}
-            />
-          )}
+          {!isRoot &&
+            !node.params.entityId &&
+            (countNodeFilters(node.params) > 0 || node.edges.length > 0) && (
+              <NodeFilterMatches
+                node={node}
+                edgeType={edgeType}
+                onOpenEntityInDetail={onOpenEntityInDetail}
+              />
+            )}
           {paramEntityId && (
             <div>
               {isRoot === false &&
