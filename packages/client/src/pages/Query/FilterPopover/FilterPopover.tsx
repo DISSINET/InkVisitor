@@ -31,14 +31,14 @@ interface FilterPopover {
   /** panel heading */
   title: string;
   count: number;
-  /** appended to the button text in place of the count while `count` is above zero */
-  summary?: string;
   tooltipLabel?: string;
   /** shows a "clear all" control beside the button and in the panel header while `count` is above zero */
   onClear?: () => void;
   placement?: Placement;
   width?: string;
   buttonSize?: ButtonSize;
+  /** renders the control that opens the panel in place of the filter button and its clear icon */
+  trigger?: (toggle: () => void) => ReactNode;
   children: ReactNode;
 }
 
@@ -53,12 +53,12 @@ export const FilterPopover: React.FC<FilterPopover> = ({
   label,
   title,
   count,
-  summary,
   tooltipLabel,
   onClear,
   placement = "bottom-start",
   width = "30rem",
   buttonSize = ButtonSize.Medium,
+  trigger,
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,26 +119,32 @@ export const FilterPopover: React.FC<FilterPopover> = ({
 
   return (
     <>
-      <StyledFilterPopoverTrigger ref={refs.setReference}>
-        <Button
-          size={buttonSize}
-          icon={<IcoFilter size={14} />}
-          label={count > 0 ? `${label} · ${summary ?? count}` : label}
-          color="primary"
-          inverted={count === 0 && !isOpen}
-          tooltipLabel={tooltipLabel}
-          onClick={() => setIsOpen((open) => !open)}
-        />
-        {onClear && count > 0 && (
-          <IconButton
-            size={buttonSize}
-            icon={<IcoClose size={14} />}
-            color="primary"
-            noBorder
-            noBackground
-            tooltipLabel="clear all"
-            onClick={onClear}
-          />
+      <StyledFilterPopoverTrigger ref={refs.setReference} $fluid={!!trigger}>
+        {trigger ? (
+          trigger(() => setIsOpen((open) => !open))
+        ) : (
+          <>
+            <Button
+              size={buttonSize}
+              icon={<IcoFilter size={14} />}
+              label={count > 0 ? `${label} · ${count}` : label}
+              color="primary"
+              inverted={count === 0 && !isOpen}
+              tooltipLabel={tooltipLabel}
+              onClick={() => setIsOpen((open) => !open)}
+            />
+            {onClear && count > 0 && (
+              <IconButton
+                size={buttonSize}
+                icon={<IcoClose size={14} />}
+                color="primary"
+                noBorder
+                noBackground
+                tooltipLabel="clear all"
+                onClick={onClear}
+              />
+            )}
+          </>
         )}
       </StyledFilterPopoverTrigger>
 

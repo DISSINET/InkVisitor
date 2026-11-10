@@ -18,7 +18,9 @@ import {
   StyledEdgeBox,
   StyledEdgeContainer,
   StyledEdgeControlsLayer,
+  StyledEdgePropPairSlot,
   StyledEdgeSvg,
+  StyledEdgeTypeCell,
 } from "./QueryStyles";
 
 interface QueryGridEdgeProps {
@@ -121,30 +123,36 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               });
             }}
           />
-          <Dropdown.Single.Basic
-            options={edgeTypeOptions}
-            width={212}
-            noDropDownIndicator
-            value={edge.type}
-            tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
-            onChange={(newValue) => {
-              dispatch({
-                type: QueryActionType.updateEdgeType,
-                payload: {
-                  edgeId: edge.id,
-                  newType: newValue,
-                },
-              });
-              dispatch({
-                type: QueryActionType.updateNodeEntityId,
-                payload: {
-                  nodeId: node.id,
-                  newEntityId: undefined,
-                },
-              });
-            }}
-          />
-          <EdgePropPairPicker edge={edge} dispatch={dispatch} />
+          <StyledEdgeTypeCell>
+            <Dropdown.Single.Basic
+              options={edgeTypeOptions}
+              width={212}
+              noDropDownIndicator
+              value={edge.type}
+              tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateEdgeType,
+                  payload: {
+                    edgeId: edge.id,
+                    newType: newValue,
+                  },
+                });
+                dispatch({
+                  type: QueryActionType.updateNodeEntityId,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityId: undefined,
+                  },
+                });
+              }}
+            />
+            {Query.PropPairEdges[edge.type] && (
+              <StyledEdgePropPairSlot $color={lineColor}>
+                <EdgePropPairPicker edge={edge} dispatch={dispatch} />
+              </StyledEdgePropPairSlot>
+            )}
+          </StyledEdgeTypeCell>
           {warning && (
             <IconWithTooltip
               icon={<IcoWarning size={16} />}

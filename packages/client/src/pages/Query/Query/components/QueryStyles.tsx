@@ -73,11 +73,80 @@ export const StyledNodeExpansionToggles = styled.div`
   }
 `;
 
-// EQ / SUB of a prop edge's "of type" / "with value" picker, in its panel
-export const StyledPropPairToggles = styled.div`
+// the edge type picker with the prop pick hanging below it
+export const StyledEdgeTypeCell = styled.div`
+  position: relative;
+`;
+
+// a prop edge's "of type" / "with value" pick: a tab hanging from the edge
+// box's bottom border, under the edge type it qualifies, so the box keeps its
+// width within the grid cell. It is filled like the edge type picker and framed
+// in the box's colour. The top offset is the box's bottom padding, which sits
+// between the picker and the border.
+export const StyledEdgePropPairSlot = styled.div<{ $color: string }>`
+  position: absolute;
+  top: calc(100% + ${({ theme }) => theme.space[1]});
+  left: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[4]};
+  max-width: 100%;
+  padding: 1px ${({ theme }) => theme.space[2]} 2px;
+  line-height: 1.2;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 2px solid ${({ $color }) => $color};
+  border-top: none;
+  border-radius: 0 0 ${({ theme }) => theme.borderRadius["sm"]}
+    ${({ theme }) => theme.borderRadius["sm"]};
+  white-space: nowrap;
+`;
+
+export const StyledPropPairTabLabel = styled.button`
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  line-height: inherit;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+// the EQ / SUB checkboxes in the tab, labelled as under a node
+export const StyledPropPairTabToggles = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-left: ${({ theme }) => theme.space[2]};
+
+  label {
+    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+    font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+    color: ${({ theme }) => theme.color["black"]};
+  }
+`;
+
+export const StyledPropPairTabClear = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
 `;
 
 export const StyledNodeTypeSelect = styled.div`
