@@ -1,4 +1,4 @@
-import { IResponseDetail } from "@inkvisitor/shared/types";
+import { IEntity } from "@inkvisitor/shared/types";
 import { Handle, NodeTypes, Position } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -7,7 +7,7 @@ import React from "react";
 import { StyledGraphVerticalHandle } from "../EntityDetailRelationTypeBlockStyles";
 
 export const GraphNode: React.FC<{
-  data: { entity: IResponseDetail; level: number };
+  data: { entity: IEntity; level: number };
 }> = ({ data }) => {
   if (!data.entity) {
     console.log("problem");

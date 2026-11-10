@@ -3,6 +3,7 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { ResponseEntityRelations } from "@models/entity/response-relations";
 import { ResponseSearch } from "@models/entity/response-search";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { getEntityClass, getRelationClass } from "@models/factory";
@@ -30,6 +31,7 @@ import {
   RequestSearch,
   AuditScope,
   EXPANSION_RESPONSE_MAX,
+  IResponseEntityRelations,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -754,6 +756,45 @@ export default Router()
       // enforced via entity.right in the response (write/admin vs read-only).
 
       const response = new ResponseEntityDetail(entity);
+
+      await response.prepare(request);
+
+      return response;
+    })
+  )
+  /**
+   * @openapi
+   * /entities/{entityId}/used-relations:
+   *   get:
+   *     description: Returns the entity with its relations and the entities they point to - the relations part of the detail
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseEntityRelations object for entity entry
+   */
+  .get(
+    "/:entityId/used-relations",
+    asyncRouteHandler<IResponseEntityRelations>(async (request: IRequest<{ entityId: string }>) => {
+      const entityId = request.params.entityId;
+
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
+      }
+
+      const entityData = await findEntityById(request.db, entityId);
+      if (!entityData) {
+        throw new EntityDoesNotExist(`entity ${entityId} was not found`, entityId);
+      }
+
+      const response = new ResponseEntityRelations(getEntityClass({ ...entityData }));
 
       await response.prepare(request);
 

@@ -84,6 +84,7 @@ import {
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorDetailSection } from "./StatementEditorDetailSection/StatementEditorDetailSection";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 import { useAuditQuery, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
@@ -930,6 +931,23 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               alwaysShowCreateModal
             />
           </StyledEditorSectionContent>
+        </StyledEditorSection>
+
+        {/* Detail */}
+        <StyledEditorSection
+          $metaSection
+          key="editor-section-detail"
+          $widthTooNarrow={editorWidthTooNarrow}
+        >
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Detail</StyledEditorSectionHeading>
+          </StyledEditorSectionHeader>
+          <StatementEditorDetailSection
+            statement={statement}
+            userCanEdit={userCanEdit}
+            widthTooNarrow={editorWidthTooNarrow}
+            handleAttributeChange={handleAttributeChange}
+          />
         </StyledEditorSection>
 
         {/* Tags */}

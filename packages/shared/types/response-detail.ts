@@ -33,6 +33,15 @@ export interface IResponseDetail extends IResponseEntity {
   legacyValidations?: ITerritoryValidationNode; // applicable only to T entities
 }
 
+/**
+ * The relations part of IResponseDetail, for views that show only the relations of an entity.
+ * In this response, entities holds only the entities the relations point to.
+ */
+export type IResponseEntityRelations = Pick<
+  IResponseDetail,
+  keyof IResponseEntity | "entities" | "relations"
+>;
+
 // legacy validations will be returned in a form of a tree / set of nodes ranging from the parent T to the root territory. In each node, there will be a list of validations for the territory.
 export interface ITerritoryValidationNode {
   territoryId: string;

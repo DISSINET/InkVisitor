@@ -4,7 +4,6 @@ import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
   entitiesDictKeys,
-  entityStatusDict,
 } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
@@ -33,7 +32,6 @@ import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
 import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { getEntityStatusIcon } from "utils/iconUtils";
 import { DUPLICATE_LABEL_MESSAGE, isDuplicateLabel } from "utils/entityLabels";
 import {
   StyledDetailContentRow,
@@ -44,6 +42,7 @@ import {
   StyledFormWrapper,
   StyledRelativePosition,
 } from "../EntityDetailStyles";
+import { EntityDetailStatusButtons } from "../EntityDetailStatusButtons/EntityDetailStatusButtons";
 import { EntityDetailFormSectionAlternativeLabels } from "./EntityDetailFormSectionAlternativeLabels/EntityDetailFormSectionAlternativeLabels";
 
 interface EntityDetailFormSection {
@@ -372,25 +371,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>Status</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
-              <AttributeButtonGroup
-                noMargin
-                iconsOnly={widthTooNarrow}
+              <EntityDetailStatusButtons
+                status={entity.status}
+                onChange={(status) => updateEntityMutation.mutate({ status })}
                 disabled={!userCanAdmin || (entity.id === rootTerritoryId && !isOwner)}
-                options={entityStatusDict.map((entityStatusOption) => {
-                  const icon = getEntityStatusIcon(entityStatusOption["value"]);
-
-                  return {
-                    longValue: entityStatusOption["label"],
-                    shortValue: entityStatusOption["label"],
-                    icon: widthTooNarrow ? icon : undefined,
-                    onClick: () => {
-                      updateEntityMutation.mutate({
-                        status: entityStatusOption["value"],
-                      });
-                    },
-                    selected: entityStatusOption["value"] === entity.status,
-                  };
-                })}
+                iconsOnly={widthTooNarrow}
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
