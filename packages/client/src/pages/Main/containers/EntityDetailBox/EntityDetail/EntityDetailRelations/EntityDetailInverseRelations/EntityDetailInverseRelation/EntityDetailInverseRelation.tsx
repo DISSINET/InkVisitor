@@ -1,8 +1,8 @@
 import {
   IEntity,
-  Relation
+  IResponseEntityRelations,
+  Relation,
 } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { LetterIcon } from "components";
 import { CopyUuidsButton, EntityTag, PaginationControls } from "components/advanced";
 import { usePagination } from "hooks/usePagination";

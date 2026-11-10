@@ -31,8 +31,8 @@ import {
   RequestSearch,
   AuditScope,
   EXPANSION_RESPONSE_MAX,
+  IResponseEntityRelations,
 } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import {
   AuditDoesNotExist,
   BadParams,

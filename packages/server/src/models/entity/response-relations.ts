@@ -1,7 +1,6 @@
 import { UsedRelations } from "@models/relation/relations";
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
+import { IEntity, IResponseEntityRelations } from "@inkvisitor/shared/types";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";

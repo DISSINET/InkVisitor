@@ -33,10 +33,10 @@ import {
   Query,
   Relation,
   RequestPermissionUpdate,
+  IResponseEntityRelations,
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
 import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";

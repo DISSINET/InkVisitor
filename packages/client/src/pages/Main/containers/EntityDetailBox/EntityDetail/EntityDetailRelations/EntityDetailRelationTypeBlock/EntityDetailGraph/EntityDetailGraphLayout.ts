@@ -1,5 +1,4 @@
-import { IEntity, Relation } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
+import { IEntity, IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
 import { Edge, Node, Position } from "reactflow";
 
 interface Graph {

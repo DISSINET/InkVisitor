@@ -1,6 +1,5 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity, Relation } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
+import { IEntity, IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
 import ReactFlow, { Background, Controls, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 

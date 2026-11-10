@@ -1,6 +1,5 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { Relation } from "@inkvisitor/shared/types";
-import { IResponseEntityRelations } from "@inkvisitor/shared/types/response-detail";
+import { IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
 import React, { useEffect, useState } from "react";
 import { getRelationInvertedRules } from "utils/utils";
 import {
