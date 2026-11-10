@@ -128,12 +128,16 @@ export const FilterPopover: React.FC<FilterPopover> = (props) => {
           props.trigger(toggle)
         ) : (
           <>
+            {/* filled like the query builder's pickers and framed in its blue;
+                filled with the blue while filters are set or the panel is open */}
             <Button
               size={props.buttonSize ?? ButtonSize.Medium}
               icon={<IcoFilter size={14} />}
               label={count > 0 ? `${props.label} · ${count}` : props.label}
-              color="primary"
-              inverted={count === 0 && !isOpen}
+              color={count > 0 || isOpen ? "query2" : "white"}
+              textColor={count > 0 || isOpen ? "query2Text" : "black"}
+              borderColor="query2"
+              textRegular
               tooltipLabel={props.tooltipLabel}
               onClick={toggle}
             />
@@ -141,7 +145,7 @@ export const FilterPopover: React.FC<FilterPopover> = (props) => {
               <IconButton
                 size={props.buttonSize ?? ButtonSize.Medium}
                 icon={<IcoClose size={14} />}
-                color="primary"
+                color="black"
                 noBorder
                 noBackground
                 tooltipLabel="clear all"

@@ -79,6 +79,8 @@ const theme = {
     /* query explorer colors */
     query1: "#E6F0FF",
     query2: "#6174C2",
+    // text on a query2 fill, the same in both themes as query2 is
+    query2Text: "#fff",
     query3: "#324185",
     query4: "#1A2332",
     queryInvalid: "#EF4444",
