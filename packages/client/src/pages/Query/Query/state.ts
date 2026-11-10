@@ -70,9 +70,6 @@ enum QueryActionType {
   updateEdgeLogic,
   updateNodeType,
   updateNodeClass,
-  updateNodeStatuses,
-  updateNodeLabel,
-  updateNodeLanguages,
   clearNodeFilters,
   updateNodeFilters,
   updateNodeEntityId,
@@ -105,18 +102,6 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeClass;
       payload: { nodeId: string; newEntityClasses: EntityEnums.Class[] };
-    }
-  | {
-      type: QueryActionType.updateNodeStatuses;
-      payload: { nodeId: string; newEntityStatuses: EntityEnums.Status[] };
-    }
-  | {
-      type: QueryActionType.updateNodeLabel;
-      payload: { nodeId: string; newLabel: string };
-    }
-  | {
-      type: QueryActionType.updateNodeLanguages;
-      payload: { nodeId: string; newEntityLanguages: EntityEnums.Language[] };
     }
   | {
       type: QueryActionType.clearNodeFilters;
@@ -234,15 +219,6 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeClass:
       return updateNodeClass(state, action.payload.nodeId, action.payload.newEntityClasses);
 
-    case QueryActionType.updateNodeStatuses:
-      return updateNodeStatuses(state, action.payload.nodeId, action.payload.newEntityStatuses);
-
-    case QueryActionType.updateNodeLabel:
-      return updateNodeLabel(state, action.payload.nodeId, action.payload.newLabel);
-
-    case QueryActionType.updateNodeLanguages:
-      return updateNodeLanguages(state, action.payload.nodeId, action.payload.newEntityLanguages);
-
     case QueryActionType.clearNodeFilters:
       return clearNodeFilters(state, action.payload.nodeId);
 
@@ -316,42 +292,6 @@ const reseedRelationTargetClasses = (root: Query.INode) => {
   }
 };
 
-const updateNodeStatuses = (
-  state: Query.INode,
-  nodeId: string,
-  newEntityStatuses: EntityEnums.Status[],
-): Query.INode => {
-  const updatedState = { ...state };
-
-  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
-  if (!nodeToUpdate) {
-    return updatedState;
-  }
-  if (newEntityStatuses.length === 0) {
-    delete nodeToUpdate.params.entityStatuses;
-  } else {
-    nodeToUpdate.params.entityStatuses = newEntityStatuses;
-  }
-
-  return updatedState;
-};
-
-const updateNodeLabel = (state: Query.INode, nodeId: string, newLabel: string): Query.INode => {
-  const updatedState = { ...state };
-
-  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
-  if (!nodeToUpdate) {
-    return updatedState;
-  }
-  if (newLabel === "") {
-    delete nodeToUpdate.params.label;
-  } else {
-    nodeToUpdate.params.label = newLabel;
-  }
-
-  return updatedState;
-};
-
 // every node filter, NODE_FILTER_KEYS
 const clearNodeFilters = (state: Query.INode, nodeId: string): Query.INode => {
   const updatedState = { ...state };
@@ -384,26 +324,6 @@ const updateNodeFilters = (
       params[key] = value;
     }
   });
-
-  return updatedState;
-};
-
-const updateNodeLanguages = (
-  state: Query.INode,
-  nodeId: string,
-  newEntityLanguages: EntityEnums.Language[],
-): Query.INode => {
-  const updatedState = { ...state };
-
-  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
-  if (!nodeToUpdate) {
-    return updatedState;
-  }
-  if (newEntityLanguages.length === 0) {
-    delete nodeToUpdate.params.entityLanguages;
-  } else {
-    nodeToUpdate.params.entityLanguages = newEntityLanguages;
-  }
 
   return updatedState;
 };

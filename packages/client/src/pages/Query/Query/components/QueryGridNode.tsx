@@ -369,12 +369,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                       placeholder="any label"
                       changeOnType
                       clearable
-                      onChangeFn={(newLabel: string) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeLabel,
-                          payload: { nodeId: node.id, newLabel },
-                        });
-                      }}
+                      onChangeFn={(newLabel: string) => updateFilters({ label: newLabel })}
                     />
                   </StyledRowControl>
                 </StyledRow>
@@ -392,15 +387,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         value: status.value,
                         label: status.label,
                       }))}
-                      onChange={(newValue) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeStatuses,
-                          payload: {
-                            nodeId: node.id,
-                            newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                          },
-                        });
-                      }}
+                      onChange={(newValue) =>
+                        updateFilters({
+                          entityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                        })
+                      }
                     />
                   </StyledRowControl>
                 </StyledRow>
@@ -413,17 +404,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                       isClearable
                       width="full"
                       options={orderedLanguageDict}
-                      onChange={(newValue) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeLanguages,
-                          payload: {
-                            nodeId: node.id,
-                            newEntityLanguages: newValue
-                              ? [newValue as EntityEnums.Language]
-                              : [],
-                          },
-                        });
-                      }}
+                      onChange={(newValue) =>
+                        updateFilters({
+                          entityLanguages: newValue ? [newValue as EntityEnums.Language] : [],
+                        })
+                      }
                     />
                   </StyledRowControl>
                 </StyledRow>
