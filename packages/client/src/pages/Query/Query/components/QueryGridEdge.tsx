@@ -36,6 +36,7 @@ interface QueryGridEdgeProps {
   // the pass-through (lower) part of the spine feeds the NEXT sibling, so it is
   // coloured by that sibling's logic - red when the sibling below is negative
   extendNegative?: boolean;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
@@ -47,6 +48,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   isRootEdge = false,
   extendVertical = false,
   extendNegative = false,
+  onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
   const sourceNode = isRootEdge ? rootNode : node;
@@ -149,7 +151,11 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             />
             {Query.PropPairEdges[edge.type] && (
               <StyledEdgePropPairSlot $color={lineColor}>
-                <EdgePropPairPicker edge={edge} dispatch={dispatch} />
+                <EdgePropPairPicker
+                  edge={edge}
+                  dispatch={dispatch}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
+                />
               </StyledEdgePropPairSlot>
             )}
           </StyledEdgeTypeCell>

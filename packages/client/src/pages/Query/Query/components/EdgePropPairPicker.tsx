@@ -17,8 +17,12 @@ import {
   StyledRowControl,
   StyledRowHeader,
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
+import { expansionCount } from "../nodeExpansion";
 import { QueryAction, QueryActionType } from "../state";
+import { useEntityExpansion } from "../useEntityExpansion";
+import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import {
+  StyledExpansionCountButton,
   StyledExpansionToggleGroup,
   StyledPropPairTabLabel,
   StyledPropPairTabClear,
@@ -28,18 +32,26 @@ import {
 interface EdgePropPairPicker {
   edge: Query.IEdge;
   dispatch: React.Dispatch<QueryAction>;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 /**
  * The "of type" / "with value" pick of a prop edge, the content of the tab
  * below the edge box: the other half of the matched prop, so only a prop whose
  * type and value both hold matches. The label opens the panel that picks the
- * entity; EQ / SUB widen the picked one.
+ * entity; EQ / SUB widen the picked one, and their counts open the entities
+ * they add, as under a node.
  */
-export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatch }) => {
+export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({
+  edge,
+  dispatch,
+  onOpenEntityInDetail,
+}) => {
   const half = Query.PropPairEdges[edge.type];
   const propPair = edge.params?.propPair;
   const entityId = propPair?.entityId;
+  const includeEquivalents = propPair?.includeEquivalents === true;
+  const includeSubordinates = propPair?.includeSubordinates === true;
 
   const [labelElement, setLabelElement] = useState<HTMLButtonElement | null>(null);
   const [clearElement, setClearElement] = useState<HTMLButtonElement | null>(null);
@@ -53,6 +65,17 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
     },
     enabled: !!entityId && api.isLoggedIn(),
   });
+
+  const {
+    dataExpansion,
+    isExpansionFetching,
+    isExpansionError,
+    openExpansionGroup,
+    setOpenExpansionGroup,
+    equivalentsBadgeRef,
+    subordinatesBadgeRef,
+    openExpansion,
+  } = useEntityExpansion(entityId, includeEquivalents, includeSubordinates);
 
   if (!half) {
     return null;
@@ -79,7 +102,6 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
   return (
     <>
       <FilterPopover
-        label={pairLabel}
         title={half === "type" ? "Prop type" : "Prop value"}
         count={entityId ? 1 : 0}
         width="24rem"
@@ -102,24 +124,42 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
                     label="EQ"
                     size={13}
                     color="info"
-                    value={propPair?.includeEquivalents === true}
+                    value={includeEquivalents}
                     tooltipLabel="include equivalents"
                     tooltipContent={`Also match a prop whose ${half} is equivalent (SYN, IDE, AEE) to this one.`}
                     onChangeFn={() => toggle("includeEquivalents")}
                     disableEnterKey
                   />
+                  {includeEquivalents && (
+                    <StyledExpansionCountButton
+                      ref={equivalentsBadgeRef}
+                      type="button"
+                      onClick={() => openExpansion("equivalents")}
+                    >
+                      {expansionCount(dataExpansion, "equivalents") ?? "…"}
+                    </StyledExpansionCountButton>
+                  )}
                 </StyledExpansionToggleGroup>
                 <StyledExpansionToggleGroup>
                   <Checkbox
                     label="SUB"
                     size={13}
                     color="warning"
-                    value={propPair?.includeSubordinates === true}
+                    value={includeSubordinates}
                     tooltipLabel="include subordinates"
                     tooltipContent={`Also match a prop whose ${half} is subordinate (subclasses, subordinates, meronyms, all levels) to this one.`}
                     onChangeFn={() => toggle("includeSubordinates")}
                     disableEnterKey
                   />
+                  {includeSubordinates && (
+                    <StyledExpansionCountButton
+                      ref={subordinatesBadgeRef}
+                      type="button"
+                      onClick={() => openExpansion("subordinates")}
+                    >
+                      {expansionCount(dataExpansion, "subordinates") ?? "…"}
+                    </StyledExpansionCountButton>
+                  )}
                 </StyledExpansionToggleGroup>
               </StyledPropPairTabToggles>
             )}
@@ -169,6 +209,21 @@ export const EdgePropPairPicker: React.FC<EdgePropPairPicker> = ({ edge, dispatc
           </StyledRow>
         </StyledForm>
       </FilterPopover>
+      {openExpansionGroup !== null && (
+        <NodeExpansionPopover
+          referenceElement={
+            openExpansionGroup === "equivalents"
+              ? equivalentsBadgeRef.current
+              : subordinatesBadgeRef.current
+          }
+          group={openExpansionGroup}
+          data={dataExpansion}
+          isLoading={isExpansionFetching}
+          isError={isExpansionError}
+          onClose={() => setOpenExpansionGroup(null)}
+          onOpenEntityInDetail={onOpenEntityInDetail}
+        />
+      )}
       <Tooltip
         visible={hovered !== null}
         referenceElement={hovered === "clear" ? clearElement : labelElement}

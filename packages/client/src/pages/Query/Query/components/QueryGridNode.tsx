@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
@@ -33,6 +33,7 @@ import {
   parseDate,
 } from "../../FloatingSearchContainer/DateRangeFilter";
 import { expansionCount } from "../nodeExpansion";
+import { useEntityExpansion } from "../useEntityExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { NodeFilterMatches } from "./NodeFilterMatches";
 import { NodeUserFilterRows } from "./NodeUserFilterRows";
@@ -146,59 +147,16 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const includeEquivalents = equivalentsApply && node.params.includeEquivalents === true;
   const includeSubordinates = subordinatesApply && node.params.includeSubordinates === true;
 
-  // The expansion is fetched only when the user asks for it, never as a side
-  // effect of editing the query: this signature identifies the toggle
-  // combination that was asked for, and the request runs only while the node
-  // still carries it. Flipping a toggle therefore costs nothing until the new
-  // combination is asked for in turn.
-  const expansionSignature = `${entityId}|${includeEquivalents}|${includeSubordinates}`;
-  const [requestedExpansionSignature, setRequestedExpansionSignature] = useState<
-    string | null
-  >(null);
-
   const {
-    data: dataExpansion,
-    isFetching: isExpansionFetching,
-    isError: isExpansionError,
-  } = useQuery({
-    queryKey: [
-      "node-expansion",
-      entityId,
-      includeEquivalents,
-      includeSubordinates,
-    ],
-    queryFn: async () => {
-      const res = await api.entityExpansion(entityId!, {
-        equivalents: includeEquivalents,
-        subordinates: includeSubordinates,
-      });
-      return res.data;
-    },
-    enabled:
-      !!entityId &&
-      requestedExpansionSignature === expansionSignature &&
-      api.isLoggedIn(),
-    // the relation graph does not move while a query is being built, so
-    // returning to a combination already asked for reads from the cache and
-    // shows its count without a second request
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const [openExpansionGroup, setOpenExpansionGroup] = useState<
-    "equivalents" | "subordinates" | null
-  >(null);
-  const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
-  const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
-
-  const openExpansion = (group: "equivalents" | "subordinates") => {
-    setRequestedExpansionSignature(expansionSignature);
-    setOpenExpansionGroup(openExpansionGroup === group ? null : group);
-  };
-
-  // a popover describes one toggle combination, so editing the node closes it
-  useEffect(() => {
-    setOpenExpansionGroup(null);
-  }, [expansionSignature]);
+    dataExpansion,
+    isExpansionFetching,
+    isExpansionError,
+    openExpansionGroup,
+    setOpenExpansionGroup,
+    equivalentsBadgeRef,
+    subordinatesBadgeRef,
+    openExpansion,
+  } = useEntityExpansion(entityId, includeEquivalents, includeSubordinates);
 
   // a node reached through a negative ("NOT") edge gets a red border to match
   // that edge; scoped to this node only - deeper nodes have their own edges
