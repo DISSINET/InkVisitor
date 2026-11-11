@@ -33,6 +33,7 @@ import {
 } from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledAnchorCount,
   StyledAnchorItem,
   StyledAnchorText,
   StyledBold,
@@ -78,6 +79,25 @@ interface EntityTooltip {
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
   isTemplate?: boolean;
 }
+
+// one entry per distinct key with the number of its occurrences, in the order
+// of first occurrence
+const groupAnchors = <T,>(
+  items: T[],
+  getKey: (item: T) => string
+): { item: T; count: number }[] => {
+  const groups = new Map<string, { item: T; count: number }>();
+  for (const item of items) {
+    const key = getKey(item);
+    const group = groups.get(key);
+    if (group) {
+      group.count++;
+    } else {
+      groups.set(key, { item, count: 1 });
+    }
+  }
+  return [...groups.values()];
+};
 
 interface IResponseWithAnchors extends EntityTooltipNamespace.IResponse {
   usedInDocuments: IResponseUsedInDocument[];
@@ -133,6 +153,20 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   });
 
   const anchors = data?.usedInDocuments;
+
+  // the same text anchored many times in one document is listed once
+  const groupedAnchors = useMemo(
+    () =>
+      groupAnchors(
+        anchors ?? [],
+        (anchor) => `${anchor.document.id}\u0000${anchor.anchorText}`
+      ),
+    [anchors]
+  );
+  const groupedAnchorTexts = useMemo(
+    () => groupAnchors(anchorTexts ?? [], (anchorText) => anchorText),
+    [anchorTexts]
+  );
 
   // the remaining rows (part of speech, items count, alternative labels...)
   // only render alongside one of these, so they do not count as content
@@ -230,15 +264,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
-            {anchors && anchors?.length > 0 ? (
+            {groupedAnchors.length > 0 ? (
               <StyledRow>
                 <StyledIconWrap>
                   <BsCardText />
                 </StyledIconWrap>
                 <StyledDetail>
-                  {anchors
+                  {groupedAnchors
                     .slice(0, maxTooltipAnchors)
-                    .map((documentAnchor, index) => {
+                    .map(({ item: documentAnchor, count }, index) => {
                       return (
                         <StyledAnchorItem key={index}>
                           <DocumentTitle
@@ -247,35 +281,41 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                           />
                           <StyledAnchorText>
                             {documentAnchor.anchorText}
+                            {count > 1 && (
+                              <StyledAnchorCount>×{count}</StyledAnchorCount>
+                            )}
                           </StyledAnchorText>
                         </StyledAnchorItem>
                       );
                     })}
-                  {anchors.length > maxTooltipAnchors && (
+                  {groupedAnchors.length > maxTooltipAnchors && (
                     <StyledMoreText>
-                      +{anchors.length - maxTooltipAnchors} more anchors
+                      +{groupedAnchors.length - maxTooltipAnchors} more anchors
                     </StyledMoreText>
                   )}
                 </StyledDetail>
               </StyledRow>
             ) : (
-              anchorTexts &&
-              anchorTexts.length > 0 && (
+              groupedAnchorTexts.length > 0 && (
                 <StyledRow>
                   <StyledIconWrap>
                     <BsCardText />
                   </StyledIconWrap>
                   <StyledDetail>
-                    {anchorTexts
+                    {groupedAnchorTexts
                       .slice(0, maxTooltipAnchors)
-                      .map((anchorText, index) => (
+                      .map(({ item: anchorText, count }, index) => (
                         <StyledAnchorText key={index}>
                           {anchorText}
+                          {count > 1 && (
+                            <StyledAnchorCount>×{count}</StyledAnchorCount>
+                          )}
                         </StyledAnchorText>
                       ))}
-                    {anchorTexts.length > maxTooltipAnchors && (
+                    {groupedAnchorTexts.length > maxTooltipAnchors && (
                       <StyledMoreText>
-                        +{anchorTexts.length - maxTooltipAnchors} more anchors
+                        +{groupedAnchorTexts.length - maxTooltipAnchors} more
+                        anchors
                       </StyledMoreText>
                     )}
                   </StyledDetail>
@@ -292,7 +332,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       detail,
       label,
       anchorTexts,
-      anchors,
+      groupedAnchors,
+      groupedAnchorTexts,
       itemsCount,
       tooltipData,
       language,
