@@ -89,3 +89,31 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
     expect(lvl1).toHaveLength(1); // relation2
   });
 });
+
+describe("test ResponseTooltip.groupUsedInDocuments", function () {
+  const docA = { id: "docA", title: "A" };
+  const docB = { id: "docB", title: "B" };
+  const use = (document: typeof docA, anchorText: string, anchorIndex: number) => ({
+    document,
+    anchorText,
+    resourceId: "",
+    parentTerritoryId: "",
+    anchorIndex,
+  });
+
+  it("should count the same text in the same document as one entry", () => {
+    const grouped = ResponseTooltip.groupUsedInDocuments([
+      use(docA, "same", 0),
+      use(docB, "same", 0),
+      use(docA, "other", 1),
+      use(docA, " same ", 2),
+    ]);
+
+    expect(grouped).toEqual([
+      // "same" and " same " in docA
+      { document: docA, anchorText: "same", count: 2 },
+      { document: docB, anchorText: "same", count: 1 },
+      { document: docA, anchorText: "other", count: 1 },
+    ]);
+  });
+});

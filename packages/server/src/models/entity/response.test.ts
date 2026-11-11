@@ -556,10 +556,12 @@ describe("models/entity/response", function () {
     const entityWithDoc = new Entity({ id: tagSafeId() });
     const doc1 = new Document({
       id: Math.random().toString(),
+      title: "B document",
       content: `text<${entityWithDoc.id}>some anchor</${entityWithDoc.id}>not anchor here<${entityWithDoc.id}>some anchor 2</${entityWithDoc.id}>end`,
     });
     const doc2 = new Document({
       id: Math.random().toString(),
+      title: "A document",
       content: `<${territory1.id}>text <${territory2.id}><${entityWithDoc.id}>anchor</${entityWithDoc.id}></${territory2.id}></${territory1.id}>`,
     });
     const resource1 = new Resource({
@@ -619,6 +621,14 @@ describe("models/entity/response", function () {
       expect(usedInDocs).toHaveLength(3);
     });
 
+    it("should order the documents by title", () => {
+      expect(usedInDocs.map((d) => d.document.id)).toEqual([doc2.id, doc1.id, doc1.id]);
+    });
+
+    it("should number the anchors within each document", () => {
+      expect(usedInDocs.map((d) => d.anchorIndex)).toEqual([0, 0, 1]);
+    });
+
     it("should have both anchors from first document", () => {
       const doc1Results = usedInDocs.filter((d) => d.document.id === doc1.id);
       expect(doc1Results).toHaveLength(2);
@@ -661,12 +671,13 @@ describe("models/entity/response", function () {
 
     const anchoredTwice = new Statement({ id: tagSafeId() });
     const anchoredOnce = new Statement({ id: tagSafeId() });
+    const anchoredSameText = new Statement({ id: tagSafeId() });
     const notAnchored = new Statement({ id: tagSafeId() });
     const rootStatement = new Statement({ id: tagSafeId() });
 
     const doc = new Document({
       id: Math.random().toString(),
-      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>x<${rootStatement.id}>root span</${rootStatement.id}>end`,
+      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>x<${rootStatement.id}>root span</${rootStatement.id}>y<${anchoredSameText.id}>same span</${anchoredSameText.id}>z<${anchoredSameText.id}>same span</${anchoredSameText.id}>w<${anchoredSameText.id}> same span </${anchoredSameText.id}>end`,
     });
 
     const detail = new Entity({ id: tagSafeId() });
@@ -680,6 +691,7 @@ describe("models/entity/response", function () {
       // documents.entityIds and the anchors resolve.
       await anchoredTwice.save(db.connection);
       await anchoredOnce.save(db.connection);
+      await anchoredSameText.save(db.connection);
       await notAnchored.save(db.connection);
       await rootStatement.save(db.connection);
       await doc.preprocess(db.connection);
@@ -689,6 +701,7 @@ describe("models/entity/response", function () {
       response.addLinkedEntities([
         anchoredTwice.id,
         anchoredOnce.id,
+        anchoredSameText.id,
         notAnchored.id,
       ]);
       entities = await response.populateEntitiesMap(db.connection);
@@ -711,6 +724,10 @@ describe("models/entity/response", function () {
 
     it("should stamp the single anchor span for a statement anchored once", () => {
       expect(entities[anchoredOnce.id]?.anchorTexts).toEqual(["only span"]);
+    });
+
+    it("should list the same text anchored repeatedly only once, ignoring surrounding spaces", () => {
+      expect(entities[anchoredSameText.id]?.anchorTexts).toEqual(["same span"]);
     });
 
     it("should leave anchorTexts undefined for a statement without anchors", () => {

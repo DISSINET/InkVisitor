@@ -448,28 +448,35 @@ export default class Document implements IDocument, IDbModel {
    * per-entity round-trip. Ids that are not anchored are absent from the result.
    * @param db
    * @param entityIds
-   * @returns map of entity id -> anchor contents (in document order)
+   * @returns map of entity id -> distinct anchor contents (in document order)
    */
   static async getAnchorTextsForEntities(
     db: Connection,
     entityIds: string[]
   ): Promise<Record<string, string[]>> {
-    const out: Record<string, string[]> = {};
     if (!entityIds.length) {
-      return out;
+      return {};
     }
 
+    // a Set per entity: the same text anchored many times is listed once
+    const texts: Record<string, Set<string>> = {};
     const idSet = new Set(entityIds);
-    const docs = await Document.findByEntityIds(db, entityIds);
+    // same document order as Entity.findUsedInDocuments, so the texts line up
+    // with the statement editor's anchor list
+    const docs = (await Document.findByEntityIds(db, entityIds)).sort(
+      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
+    );
     for (const docData of docs) {
       const doc = new Document(docData);
       const traverse = (nodes: AnchorsNode[]) => {
         for (const node of nodes) {
-          if (idSet.has(node.anchor)) {
-            if (!out[node.anchor]) {
-              out[node.anchor] = [];
+          // trimmed: every client surface trims anchor texts
+          const text = idSet.has(node.anchor) ? node.getShortContent().trim() : "";
+          if (text) {
+            if (!texts[node.anchor]) {
+              texts[node.anchor] = new Set();
             }
-            out[node.anchor].push(node.getShortContent());
+            texts[node.anchor].add(text);
           }
           traverse(node.children);
         }
@@ -477,6 +484,10 @@ export default class Document implements IDocument, IDbModel {
       traverse(doc.anchors);
     }
 
+    const out: Record<string, string[]> = {};
+    for (const [id, set] of Object.entries(texts)) {
+      out[id] = [...set];
+    }
     return out;
   }
 
