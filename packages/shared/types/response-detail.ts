@@ -43,7 +43,10 @@ export interface ITerritoryValidationNode {
 // model is reapeated for each anchor in each document,
 // so e.g., when the entity is used in 2 documents, and in one document it is used in 3 anchors, in the second is used in 1 anchor, model will be repeated 4 times
 export interface IResponseUsedInDocument {
-  document: IDocumentMeta;
+  // meta only, no anchors or entityIds: both grow with the document and the
+  // entry repeats per anchor, so carrying them multiplies megabytes by the
+  // anchor count and can exceed the JSON string limit
+  document: Pick<IDocumentMeta, "id" | "title" | "createdAt" | "updatedAt">;
   anchorText: string; // content of the anchor
   resourceId: string; // resource linked to the document
   parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found
