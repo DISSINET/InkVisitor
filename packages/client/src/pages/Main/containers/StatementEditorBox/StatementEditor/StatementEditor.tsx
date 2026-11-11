@@ -12,7 +12,11 @@ import {
   IStatementData,
 } from "@inkvisitor/shared/types";
 import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
-import { EDITOR_TOO_SMALL_BREAKPOINT, excludedSuggesterEntities } from "Theme/constants";
+import {
+  EDITOR_TOO_SMALL_BREAKPOINT,
+  excludedSuggesterEntities,
+  statementAnchorsPerPage,
+} from "Theme/constants";
 import api from "api";
 import { boxContentId, Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
@@ -23,6 +27,7 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
   JSONExplorer,
+  PaginationControls,
 } from "components/advanced";
 import {
   CClassification,
@@ -38,6 +43,7 @@ import {
   useWidthBreakpoint,
 } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
+import { usePagination } from "hooks/usePagination";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AiOutlineWarning } from "react-icons/ai";
@@ -65,6 +71,7 @@ import {
   StyledDetailWarnings,
   StyledEditorAnchorSectionAnchor,
   StyledEditorAnchorSectionContent,
+  StyledEditorAnchorPagination,
   StyledEditorContentLabel,
   StyledEditorContentRowValue,
   StyledEditorHeaderInputWrap,
@@ -239,6 +246,56 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
     return false;
   }, [territoryData, statement.id]);
+
+  const {
+    paginatedItems: pagedAnchors,
+    currentPage: anchorsPage,
+    totalPages: anchorsTotalPages,
+    showPagination: showAnchorsPagination,
+    handlePreviousPage: handlePreviousAnchorsPage,
+    handleNextPage: handleNextAnchorsPage,
+    resetPage: resetAnchorsPage,
+  } = usePagination({
+    items: statement.usedInDocuments,
+    itemsPerPage: statementAnchorsPerPage,
+    level: 1,
+  });
+
+  useEffect(() => {
+    resetAnchorsPage();
+  }, [statement.id]);
+
+  const anchorsSectionRef = useRef<HTMLDivElement>(null);
+  // both pagers bring the start of the section into view; after a page change
+  // from the pager below the list, the new page begins above the viewport
+  const scrollToAnchorsSection = () => {
+    const section = anchorsSectionRef.current;
+    // the editor content scrolls inside the custom scrollbar's scroller element
+    const scroller = section?.closest<HTMLElement>(".ScrollbarsCustom-Scroller");
+    if (!scroller || !section) {
+      return;
+    }
+    const offset = section.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+    scroller.scrollTo({ top: scroller.scrollTop + offset, behavior: "smooth" });
+  };
+
+  // rendered both above and below the anchors list
+  const anchorsPagination = showAnchorsPagination && (
+    <StyledEditorAnchorPagination>
+      <PaginationControls
+        currentPage={anchorsPage}
+        totalPages={anchorsTotalPages}
+        onPreviousPage={() => {
+          handlePreviousAnchorsPage();
+          scrollToAnchorsSection();
+        }}
+        onNextPage={() => {
+          handleNextAnchorsPage();
+          scrollToAnchorsSection();
+        }}
+      />
+    </StyledEditorAnchorPagination>
+  );
 
   // use cached tree to get all parents
   const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
@@ -698,12 +755,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorPreSection>
           )}
 
-          <StyledEditorPreSection>
+          <StyledEditorPreSection ref={anchorsSectionRef}>
             <StyledEditorContentLabel>Statement Anchors</StyledEditorContentLabel>
+            {anchorsPagination}
             <StyledEditorAnchorSectionContent>
               {statement.usedInDocuments.length > 0 ? (
-                statement.usedInDocuments.map((documentAnchor, dai) => (
-                  <StyledEditorAnchorSectionAnchor key={dai}>
+                pagedAnchors.map((documentAnchor) => (
+                  <StyledEditorAnchorSectionAnchor
+                    key={`${documentAnchor.document.id}-${documentAnchor.anchorIndex}`}
+                  >
                     <StyledAnchorText>{documentAnchor.anchorText}</StyledAnchorText>
                     <StyledAnchorMeta>
                       <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
@@ -738,6 +798,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <StyledAnchorEmptyState>No document anchors found</StyledAnchorEmptyState>
               )}
             </StyledEditorAnchorSectionContent>
+            {anchorsPagination}
           </StyledEditorPreSection>
 
           <StyledEditorPreSection>
