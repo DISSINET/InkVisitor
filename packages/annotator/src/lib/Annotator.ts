@@ -2563,10 +2563,11 @@ export class Annotator {
       }`;
     };
 
-    // Helper function to find the closest opening tag for a given tag name
     // Opening tags up to the end segment, grouped by name on first use: a
-    // document can hold hundreds of orphaned closing tags, each looked up here.
+    // document can hold hundreds of orphaned closing tags, each looked up below.
     let openingTagsByName: Map<string, Tag[]> | null = null;
+
+    // Helper function to find the closest opening tag for a given tag name
     const findClosestOpeningTag = (tagName: string, beforeAbsolutePosition: number): Tag | null => {
       if (!openingTagsByName) {
         openingTagsByName = new Map();
