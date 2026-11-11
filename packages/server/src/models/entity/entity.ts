@@ -744,15 +744,21 @@ export default class Entity implements IEntity, IDbModel {
 
         const resource = resources.length > 0 ? resources[0] : null;
 
+        // one shared object for every anchor of this document; it leaves out
+        // the anchor tree, which can run to megabytes per document
+        const document: IResponseUsedInDocument["document"] = {
+          id: docData.id,
+          title: docData.title,
+          createdAt: docData.createdAt,
+          updatedAt: docData.updatedAt,
+        };
+
         // traverse the tree, search for anchor that === this.id
         const traverse = (nodes: AnchorsNode[], parentT?: string) => {
           for (const node of nodes) {
             if (node.anchor === this.id) {
-              // docData is already IDocumentMeta (content dropped at the
-              // findByEntityId query), so it can be used as the response
-              // document directly.
               out.push({
-                document: docData,
+                document,
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
