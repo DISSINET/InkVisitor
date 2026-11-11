@@ -88,6 +88,7 @@ export const maxTooltipAnchors = 5;
 export const maxLongTooltipAnchors = 3;
 export const tooltipAnchorLines = 5;
 export const tooltipAnchorLinesCompact = 3;
+export const statementAnchorsPerPage = 5;
 
 export const tooltipLabelSeparator = " • ";
 
