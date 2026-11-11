@@ -70,6 +70,11 @@ export const StyledAnchorText = styled.div`
   padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 
+export const StyledAnchorCount = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  margin-left: ${({ theme }) => theme.space[1]};
+`;
+
 export const StyledAnchorEmptyState = styled.div`
   padding: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["gray"][600]};
