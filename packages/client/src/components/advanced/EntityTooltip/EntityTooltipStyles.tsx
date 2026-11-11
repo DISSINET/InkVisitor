@@ -63,6 +63,8 @@ export const StyledAnchorItem = styled.div`
 `;
 
 export const StyledAnchorText = styled.div`
+  display: flex;
+  align-items: flex-end;
   color: ${({ theme }) => theme.color["tooltipColor"]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
@@ -70,7 +72,15 @@ export const StyledAnchorText = styled.div`
   padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 
+export const StyledAnchorTextContent = styled.div<{ $lines: number }>`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: ${({ $lines }) => $lines};
+  overflow: hidden;
+`;
+
 export const StyledAnchorCount = styled.span`
+  flex-shrink: 0;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-left: ${({ theme }) => theme.space[1]};
 `;
