@@ -3470,17 +3470,6 @@ export class Annotator {
         const hlResult = this.onHighlightCb(tagName);
         const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
-          const occurences: IAbsCoordinates[][] = [];
-          let occurence: IAbsCoordinates[];
-          let i = 0;
-          do {
-            occurence = this.text.getTagPosition(tagName, i);
-            if (occurence.length > 1) {
-              occurences.push(occurence);
-            }
-            i++;
-          } while (!!occurence.length);
-
           // Each FOCUS item dims everything outside its own span, so with
           // several spans of one entity the washes stack over the whole text
           // and no line reads as "inside". The veil is drawn only for an entity
@@ -3488,6 +3477,13 @@ export class Annotator {
           // orphaned tag gets none.
           const tagCount = this.text.countTags(tagName);
           const isSingleAnchor = tagCount.opening === 1 && tagCount.closing === 1;
+          // An entity can hold hundreds of anchors across the document, and an
+          // anchor out of view paints nothing, so only the ones in view are
+          // resolved. A FOCUS veil dims the view even when its span is off
+          // screen, so a single anchor is always resolved.
+          const occurences = isSingleAnchor
+            ? this.text.getTagPositions(tagName)
+            : this.text.getTagPositions(tagName, this.viewport.lineStart, this.viewport.lineEnd);
           const spanSchemas = isSingleAnchor
             ? schemas
             : schemas.filter((s) => s.mode !== HighlightMode.FOCUS);
