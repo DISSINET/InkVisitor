@@ -52,11 +52,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
     // Display-friendly mirror of the statement's own anchor spans (see
     // IResponseStatement.anchorTexts); derived from the already-loaded documents.
-    const anchorTexts = this.usedInDocuments
-      .map((d) => d.anchorText)
-      .filter((t) => t);
-    if (anchorTexts.length) {
-      this.anchorTexts = anchorTexts;
+    const anchorTexts = new Set(
+      this.usedInDocuments.map((d) => d.anchorText.trim()).filter((t) => t)
+    );
+    if (anchorTexts.size) {
+      this.anchorTexts = [...anchorTexts];
     }
 
     await this.prepareEntities(req.db.connection);

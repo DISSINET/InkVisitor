@@ -733,11 +733,15 @@ export default class Entity implements IEntity, IDbModel {
   async findUsedInDocuments(
     conn: Conn
   ): Promise<IResponseUsedInDocument[]> {
-    const out: IResponseUsedInDocument[] = [];
-    await Promise.all(
-      (
-        await Document.findByEntityId(conn, this.id)
-      ).map(async (docData) => {
+    // neither storage orders the documents, and the per-document lookups below
+    // finish in any order, so the result is sorted by title for a stable order
+    // (the statement editor pages through it)
+    const docs = (await Document.findByEntityId(conn, this.id)).sort(
+      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
+    );
+    const perDocument = await Promise.all(
+      docs.map(async (docData) => {
+        const out: IResponseUsedInDocument[] = [];
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
         const resources = await storage.entities.resourcesByDocumentId(conn, docData.id);
@@ -762,8 +766,7 @@ export default class Entity implements IEntity, IDbModel {
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
-                anchorIndex: out.filter((o) => o.document.id === docData.id)
-                  .length,
+                anchorIndex: out.length,
               });
             }
 
@@ -775,10 +778,11 @@ export default class Entity implements IEntity, IDbModel {
         };
 
         traverse(doc.anchors);
+        return out;
       })
     );
 
-    return out;
+    return ([] as IResponseUsedInDocument[]).concat(...perDocument);
   }
 
   async getEntities(db: Conn): Promise<IEntity[]> {
