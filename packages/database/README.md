@@ -104,6 +104,20 @@ Cron can be set like this:
 - `crontab -e`
 - add line `0 0 * * * <path to sh script> >> <path to logfile> 2>&1`
 
+## PostgreSQL
+
+Instances running with `DB_ADAPTER=postgres` are dumped by [`backup-pg.sh`](./scripts/backup-pg.sh), which writes into the same `archives` directory with the same 3-day / first-of-month retention, so `sync.sh` ships both backends:
+
+- lists every database on the server and dumps each one with `pg_dump -Ft` gzipped to `backup_YYYY_MM_DD_DBNAME_pg.tar.gz` (the `.tar.gz` suffix is what the server's Backups page lists)
+- connection via the standard `PGHOST`, `PGPORT`, `PGUSER` (default `inkvisitor`), `PGPASSWORD` env vars
+- `PG_EXEC="podman exec inkvisitor-postgres"` runs the clients inside the database container when the host has none (the dump streams out, the archive still lands on the host)
+
+Cron line, same shape as above:
+
+- `0 1 * * * PG_EXEC="podman exec inkvisitor-postgres" <path to backup-pg.sh> >> <path to logfile> 2>&1`
+
+Restore into an existing (empty) database: `gunzip -c backup_YYYY_MM_DD_DBNAME_pg.tar.gz | pg_restore -d DBNAME`
+
 ## Google Cloud
 
 To be sure our backup files are stored securely, we can use some cloud storage.
