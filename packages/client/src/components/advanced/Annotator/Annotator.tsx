@@ -707,8 +707,8 @@ export const TextAnnotator = ({
   const { isFetching: isFetchingAnchorEntities } = useQuery({
     queryKey: ["anchorEntities", selectedAnchors],
     queryFn: async () => {
-      const uniqueAnchors = [...new Set(selectedAnchors)];
-      const entities = await api.entitiesGet(uniqueAnchors.map((anchor) => anchor.getTagName()));
+      const entityIds = [...new Set(selectedAnchors.map((anchor) => anchor.getTagName()))];
+      const entities = await api.entitiesGet(entityIds);
 
       const data = entities.data ?? [];
 
