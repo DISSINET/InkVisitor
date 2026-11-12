@@ -1,6 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
+  appendUndoOf,
   buildDraftDetail,
   createDraftRelation,
   createDraftWrites,
@@ -8,6 +9,7 @@ import {
   draftToImportJson,
   ImportDraft,
   issuesWithEntityIds,
+  leftOutDrafts,
   mergeChanges,
   missingEntityIds,
   missingSynonymGroupIds,
@@ -15,6 +17,8 @@ import {
   reorderDraftRelations,
   replaceEntityId,
   tabEntities,
+  toggleLeftOut,
+  undoAppend,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
@@ -369,5 +373,90 @@ describe("issuesWithEntityIds", () => {
       { message: "about the whole import" },
     ]);
     expect(issues.map((issue) => issue.entityId)).toEqual(["puppy", undefined]);
+  });
+});
+
+describe("leaving drafts out", () => {
+  const withLinks = (): ImportDraft => ({
+    ...baseDraft(),
+    entities: [
+      newEntity("dog"),
+      newEntity("puppy", { props: [{ type: "size", value: "v-small" }] }),
+      newEntity("kennel", { props: [{ type: "dog", value: "v-small" }] }),
+      newEntity("v-small", { class: "V", labels: ["small"] }),
+      newEntity("v-loud", { class: "V", labels: ["loud"] }),
+      newEntity("bark", { props: [{ type: "size", value: "v-loud" }] }),
+    ],
+  });
+  const jsonIds = (draft: ImportDraft) =>
+    draftToImportJson(draft).map((entity) => (entity as { id: string }).id);
+
+  it("leaves out the drafts pointing at a left-out one and the Values only they use", () => {
+    let draft = toggleLeftOut(withLinks(), "dog");
+    draft = toggleLeftOut(draft, "bark");
+
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({
+      dog: "dog",
+      // its metaprop type is the dog
+      kennel: "dog",
+      bark: "bark",
+      // only the left-out bark uses it
+      "v-loud": "bark",
+    });
+    expect(jsonIds(draft)).toEqual(["puppy", "v-small"]);
+    // puppy still uses the small Value, so it stays; the relations with the
+    // dog go, and its synonym cloud keeps too few members to stay
+    expect(
+      draftToImportJson(draft).flatMap((entity) => (entity as { relations: object[] }).relations)
+    ).toEqual([]);
+  });
+
+  it("brings the drafts left out with one back with it", () => {
+    const draft = toggleLeftOut(toggleLeftOut(withLinks(), "dog"), "dog");
+
+    expect(leftOutDrafts(draft).size).toBe(0);
+    expect(jsonIds(draft)).toEqual(["dog", "puppy", "kennel", "v-small", "v-loud", "bark"]);
+  });
+});
+
+describe("undoAppend", () => {
+  it("brings back the appended draft only, the other drafts keep their changes", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { detail: "from the import" }),
+        newEntity("puppy", { props: [{ type: "size", value: "dog" }] }),
+      ],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+
+    // the append: the draft takes the stored id and the stored entity's state
+    let appended = replaceEntityId(before, "dog", "stored-dog");
+    appended = {
+      ...appended,
+      entities: appended.entities.map((entity) =>
+        entity.id === "stored-dog" ? { ...entity, detail: "stored detail" } : entity
+      ),
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    // an edit to another draft made after the append
+    appended = updateDraftEntity(appended, "puppy", { detail: "edited later" });
+
+    const undone = undoAppend(appended, undo);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual(["dog", "puppy"]);
+    expect(undone.entities[0].detail).toBe("from the import");
+    expect(undone.entities[1].detail).toBe("edited later");
+    expect(undone.entities[1].props[0].value.entityId).toBe("dog");
+    expect(undone.appends).toEqual({});
+    expect(undone.relations.map((relation) => relation.entityIds).sort()).toEqual(
+      [
+        ["dog", "animal"],
+        ["hound", "dog"],
+        ["puppy", "dog"],
+      ].sort()
+    );
   });
 });

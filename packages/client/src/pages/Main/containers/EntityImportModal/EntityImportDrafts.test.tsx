@@ -95,7 +95,7 @@ const Harness = () => {
     <EntityImportDrafts
       draft={draft}
       onDraftChange={(change) => setDraft((current) => change(current))}
-      onCloseTab={(entityId) => closed.push(entityId)}
+      onToggleLeftOut={(entityId) => closed.push(entityId)}
       onConflictChoice={() => {}}
       onAppendTo={async () => false}
       undoableAppendIds={[]}

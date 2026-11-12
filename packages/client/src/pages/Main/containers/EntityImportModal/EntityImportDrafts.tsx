@@ -8,12 +8,15 @@ import {
   createDraftWrites,
   ImportDraft,
   ImportIssue,
+  leftOutDrafts,
   searchCandidates,
   tabEntities,
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
+import { getEntityLabel } from "utils/utils";
 import { canAppend, EntityImportAppendPanel } from "./EntityImportAppendPanel";
 import { EntityImportDraftList, groupDrafts } from "./EntityImportDraftList";
+import { EntityImportLeftOutPanel } from "./EntityImportLeftOutPanel";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
   StyledDraftBody,
@@ -28,8 +31,8 @@ const DRAFT_DETAIL_ELEMENT_ID = "entity-import-draft-detail";
 interface EntityImportDrafts {
   draft: ImportDraft;
   onDraftChange: (update: (draft: ImportDraft) => ImportDraft) => void;
-  // leaves the entity out of the import
-  onCloseTab: (entityId: string) => void;
+  // leaves the entity out of the import, or brings it back
+  onToggleLeftOut: (entityId: string) => void;
   onConflictChoice: (entityId: string, conflictIndex: number, useImported: boolean) => void;
   // resolves to whether the draft became an append to the stored entity
   onAppendTo: (entityId: string, storedId: string) => Promise<boolean>;
@@ -47,7 +50,7 @@ interface EntityImportDrafts {
 export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   draft,
   onDraftChange,
-  onCloseTab,
+  onToggleLeftOut,
   onConflictChoice,
   onAppendTo,
   undoableAppendIds,
@@ -71,6 +74,12 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       setSelectedId(tabs.some((entity) => entity.id === restoredId) ? restoredId : firstId());
     }
   }, [tabs, selectedId]);
+
+  const leftOut = useMemo(() => leftOutDrafts(draft), [draft]);
+  const labelOf = (entityId: string) => {
+    const entity = draft.entities.find((candidate) => candidate.id === entityId);
+    return entity ? getEntityLabel(entity) : entityId;
+  };
 
   const errorIds = useMemo(
     () =>
@@ -175,7 +184,9 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             errorIds={errorIds}
             selectedId={selectedId}
             onSelect={setSelectedId}
-            onLeaveOut={onCloseTab}
+            leftOut={leftOut}
+            labelOf={labelOf}
+            onToggleLeftOut={onToggleLeftOut}
           />
 
           <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
@@ -190,7 +201,16 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             )}
           </StyledDraftDetail>
 
-          {selected && (
+          {selected && leftOut.has(selected.id) && (
+            <EntityImportLeftOutPanel
+              entity={selected}
+              leftOut={leftOut}
+              labelOf={labelOf}
+              onToggleLeftOut={onToggleLeftOut}
+              onSelect={setSelectedId}
+            />
+          )}
+          {selected && !leftOut.has(selected.id) && (
             <EntityImportAppendPanel
               draft={draft}
               entity={selected}

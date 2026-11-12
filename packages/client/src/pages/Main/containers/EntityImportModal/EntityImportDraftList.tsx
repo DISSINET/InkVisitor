@@ -2,7 +2,14 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { IconWithTooltip, Tooltip, TypeBar } from "components";
 import React, { useEffect, useMemo, useState } from "react";
-import { IcoCaretDown, IcoCaretRight, IcoCloseCg, IcoExclamation, IcoWarning } from "Theme/icons";
+import {
+  IcoArrow90DegLeft,
+  IcoCaretDown,
+  IcoCaretRight,
+  IcoCloseCg,
+  IcoExclamation,
+  IcoWarning,
+} from "Theme/icons";
 import { ImportDraft } from "utils/entityImport";
 import { getEntityLabel } from "utils/utils";
 import { className } from "utils/entityImport/helpers";
@@ -23,9 +30,12 @@ interface EntityImportDraftList {
   entities: IEntity[];
   // drafts the last validation found an error in
   errorIds: Set<string>;
+  // every left-out draft with the draft that is the reason, see leftOutDrafts
+  leftOut: Map<string, string>;
+  labelOf: (entityId: string) => string;
   selectedId: string | undefined;
   onSelect: (entityId: string) => void;
-  onLeaveOut: (entityId: string) => void;
+  onToggleLeftOut: (entityId: string) => void;
 }
 
 /**
@@ -49,9 +59,11 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
   draft,
   entities,
   errorIds,
+  leftOut,
+  labelOf,
   selectedId,
   onSelect,
-  onLeaveOut,
+  onToggleLeftOut,
 }) => {
   const groups = useMemo(() => groupDrafts(entities), [entities]);
   const [folded, setFolded] = useState(() => new Set([EntityEnums.Class.Value]));
@@ -67,6 +79,14 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
   // the row under the pointer shows its whole label, as a Detail tab does
   const [hovered, setHovered] = useState<{ entity: IEntity; element: Element } | null>(null);
   useEffect(() => setHovered(null), [entities]);
+
+  // a draft left out with another one says which
+  const hoverLabel = (entity: IEntity) => {
+    const reason = leftOut.get(entity.id);
+    return reason && reason !== entity.id
+      ? `${getEntityLabel(entity)}; left out with "${labelOf(reason)}"`
+      : getEntityLabel(entity);
+  };
 
   const toggle = (entityClass: EntityEnums.Class) =>
     setFolded((current) => {
@@ -92,6 +112,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                 const append = draft.appends?.[entity.id];
                 const conflictCount = append?.conflicts.length ?? 0;
                 const isSelected = entity.id === selectedId;
+                const reason = leftOut.get(entity.id);
                 return (
                   <StyledDraftListRow
                     key={entity.id}
@@ -109,16 +130,18 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                     }}
                   >
                     <TypeBar entityLetter={entity.class} noMargin dimColor={!isSelected} />
-                    <StyledDraftListLabel>{getEntityLabel(entity)}</StyledDraftListLabel>
+                    <StyledDraftListLabel $leftOut={!!reason}>
+                      {getEntityLabel(entity)}
+                    </StyledDraftListLabel>
                     <StyledDraftListMarkers>
-                      {errorIds.has(entity.id) && (
+                      {!reason && errorIds.has(entity.id) && (
                         <IconWithTooltip
                           icon={<IcoExclamation />}
                           color="danger"
                           tooltipLabel="the import can't create it as it is; see the errors above"
                         />
                       )}
-                      {conflictCount > 0 && (
+                      {!reason && conflictCount > 0 && (
                         <IconWithTooltip
                           icon={<IcoWarning />}
                           color="warning"
@@ -127,17 +150,22 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                           } with the database`}
                         />
                       )}
-                      <StyledDraftListBadge>{append ? "append" : "new"}</StyledDraftListBadge>
-                      <StyledDraftListLeaveOut
-                        type="button"
-                        aria-label="leave out of the import"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onLeaveOut(entity.id);
-                        }}
-                      >
-                        <IcoCloseCg />
-                      </StyledDraftListLeaveOut>
+                      <StyledDraftListBadge>
+                        {reason ? "left out" : append ? "append" : "new"}
+                      </StyledDraftListBadge>
+                      {/* a draft left out with another one comes back with it */}
+                      {(!reason || reason === entity.id) && (
+                        <StyledDraftListLeaveOut
+                          type="button"
+                          aria-label={reason ? "bring back" : "leave out of the import"}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleLeftOut(entity.id);
+                          }}
+                        >
+                          {reason ? <IcoArrow90DegLeft /> : <IcoCloseCg />}
+                        </StyledDraftListLeaveOut>
+                      )}
                     </StyledDraftListMarkers>
                   </StyledDraftListRow>
                 );
@@ -149,7 +177,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
       <Tooltip
         visible={!!hovered}
         referenceElement={hovered?.element ?? null}
-        label={hovered ? getEntityLabel(hovered.entity) : undefined}
+        label={hovered ? hoverLabel(hovered.entity) : undefined}
         position="right"
       />
     </StyledDraftList>

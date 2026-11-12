@@ -133,6 +133,6 @@ describe("EntityImportModal", () => {
 
     expect(buttonNamed("undo append")).toBeUndefined();
     expect(buttonNamed("append to it")).toBeDefined();
-    expect(document.body.textContent).not.toContain("appended to");
+    expect(document.body.textContent).toContain('no longer appended to "TEST dog"');
   });
 });

@@ -114,7 +114,7 @@ export const StyledDraftList = styled.div`
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 24rem;
+  width: 25rem;
   min-height: 0;
   overflow-y: auto;
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
@@ -179,8 +179,10 @@ export const StyledDraftListRow = styled.div<{ $selected: boolean }>`
   }
 `;
 
-export const StyledDraftListLabel = styled.span`
+export const StyledDraftListLabel = styled.span<{ $leftOut: boolean }>`
   flex: 1;
+  text-decoration: ${({ $leftOut }) => ($leftOut ? "line-through" : "none")};
+  opacity: ${({ $leftOut }) => ($leftOut ? 0.6 : 1)};
   align-self: center;
   min-width: 0;
   padding: ${({ theme }) => `0 ${theme.space[2]}`};
@@ -281,7 +283,7 @@ export const StyledAppendPanel = styled.div`
   flex-direction: column;
   flex-shrink: 0;
   gap: ${({ theme }) => theme.space[4]};
-  width: 24rem;
+  width: 23rem;
   min-height: 0;
   margin-left: ${({ theme }) => theme.space[4]};
   overflow-y: auto;

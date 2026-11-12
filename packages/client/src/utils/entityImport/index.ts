@@ -10,6 +10,7 @@ export { describeSkips } from "./appendMerge";
 export type { AppendConflict, AppendInfo } from "./appendMerge";
 export {
   appendTargetsOf,
+  appendUndoOf,
   draftAfterAppend,
   buildDraftDetail,
   createDraftWrites,
@@ -18,14 +19,17 @@ export {
   draftFromPlan,
   draftToImportJson,
   issuesWithEntityIds,
+  leftOutDrafts,
   missingEntityIds,
   missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
   replaceEntityId,
   setConflictChoice,
+  toggleLeftOut,
+  undoAppend,
   tabEntities,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
-export type { DraftCleanup, ImportDraft } from "./draft";
+export type { AppendUndo, DraftCleanup, ImportDraft } from "./draft";
