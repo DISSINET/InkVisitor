@@ -11,6 +11,8 @@ export interface Violation {
   constraint: Constraint;
   id: string;
   detail: string;
+  /** unique only: the id of the first row holding the same key */
+  duplicateOf?: string;
 }
 
 /** calls `each` with every row of `table`, in any order; a table with no rows calls it never */
@@ -83,7 +85,7 @@ export async function checkConstraints(rows: RowSource, constraints = CONSTRAINT
         if (first === undefined) {
           seen.get(c)!.set(key, id);
         } else {
-          violations.push({ constraint: c, id, detail: `(${c.columns.join(", ")}) = ${key} duplicates row ${first}` });
+          violations.push({ constraint: c, id, detail: `(${c.columns.join(", ")}) = ${key} duplicates row ${first}`, duplicateOf: first });
         }
       }
     });
