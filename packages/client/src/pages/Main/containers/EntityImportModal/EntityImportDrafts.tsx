@@ -168,6 +168,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               title="Invalid input, nothing was created"
               issues={errors}
               isError
+              onSelectEntity={setSelectedId}
             />
             <EntityImportIssueList
               title="Changes the import made to the input"

@@ -107,25 +107,92 @@ export const StyledDraftDetail = styled.div`
   border-radius: ${({ theme }) => `0 ${theme.borderRadius.sm} ${theme.borderRadius.sm} 0`};
 `;
 
-// Left of the Detail: every draft, grouped by class, as tabs turned on their
-// side. Each child draws its piece of the edge shared with the Detail, so the
-// selected row can leave its piece out and open into the Detail.
-export const StyledDraftList = styled.div`
+// Left of the Detail: the tools to find a draft over every draft, grouped by
+// class, as tabs turned on their side. Each piece draws its part of the edge
+// shared with the Detail, so the selected row can leave its part out and open
+// into the Detail.
+export const StyledDraftListBox = styled.div<{ $width: number }>`
+  /* holds the resize handle on its right edge */
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 25rem;
+  width: ${({ $width }) => $width}px;
   min-height: 0;
-  overflow-y: auto;
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
   border-right: none;
   border-radius: ${({ theme }) => `${theme.borderRadius.sm} 0 0 ${theme.borderRadius.sm}`};
   background-color: ${({ theme }) => theme.color["gray"][100]};
+`;
+
+// dragged sideways, sets the width of the list; it straddles the edge the
+// list shares with the Detail
+export const StyledDraftListResize = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  z-index: 2;
+  width: 6px;
+  cursor: col-resize;
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    background-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledDraftListToolbar = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2]};
+  border-right: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][500]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][400]};
+`;
+
+export const StyledDraftListNav = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDraftListCount = styled.span`
+  flex-shrink: 0;
+  min-width: 3.6rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  text-align: center;
+`;
+
+export const StyledDraftListSummary = styled.p`
+  margin-left: auto;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  text-align: right;
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+export const StyledDraftList = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
 
   & > * {
     border-right: ${({ theme }) => theme.borderWidth[1]} solid
       ${({ theme }) => theme.color["gray"][500]};
   }
+`;
+
+export const StyledDraftListEmpty = styled.p`
+  padding: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
 `;
 
 // below the last row, carries the shared edge down to the bottom
@@ -403,6 +470,22 @@ export const StyledIssueList = styled.ul`
   gap: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[4]};
   list-style: disc;
+`;
+
+// an issue about one draft opens it
+export const StyledIssueLink = styled.button`
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
 `;
 
 // loop errors span several lines, one per edge

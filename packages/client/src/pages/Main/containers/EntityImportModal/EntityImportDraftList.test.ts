@@ -1,6 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { groupDrafts } from "./EntityImportDraftList";
+import { groupDrafts, matchesSearch } from "./EntityImportDraftList";
 
 const entity = (id: string, entityClass: EntityEnums.Class) =>
   ({ id, class: entityClass, labels: [id] }) as IEntity;
@@ -20,5 +20,19 @@ describe("groupDrafts", () => {
       [EntityEnums.Class.Concept, ["dog"]],
       [EntityEnums.Class.Value, ["v1", "v2"]],
     ]);
+  });
+});
+
+describe("matchesSearch", () => {
+  const augustine = {
+    ...entity("augustine", EntityEnums.Class.Person),
+    labels: ["Augustinus Hipponensis", "Aurèle"],
+  } as IEntity;
+
+  it("finds a text in any label, ignoring case and accents", () => {
+    expect(matchesSearch(augustine, "hippo")).toBe(true);
+    expect(matchesSearch(augustine, "AURELE")).toBe(true);
+    expect(matchesSearch(augustine, "monica")).toBe(false);
+    expect(matchesSearch(augustine, "  ")).toBe(true);
   });
 });
