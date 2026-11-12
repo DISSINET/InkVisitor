@@ -5,7 +5,7 @@ import { INodeItem, QueryValidity } from "../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
-import { StyledQueryBox } from "./QueryBoxStyles";
+import { StyledGridCell, StyledQueryBox } from "./QueryBoxStyles";
 import { QueryAction } from "./state";
 import { getAllEdges, getAllNodes } from "./utils";
 
@@ -138,15 +138,11 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
 
           return (
-            <div
+            <StyledGridCell
               key={`${wi}-${hi}`}
-              style={{
-                position: "relative",
-                gridColumn: wi + 1,
-                gridRow: hi + 1,
-                width: QUERY_GRID_WIDTH,
-                height: QUERY_GRID_HEIGHT,
-              }}
+              $column={wi + 1}
+              $row={hi + 1}
+              $hasNode={!!thisCellNode}
             >
               {showRail && (
                 <svg
@@ -221,7 +217,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   )}
                 />
               )}
-            </div>
+            </StyledGridCell>
           );
         });
       })}

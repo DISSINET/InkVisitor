@@ -11,11 +11,13 @@ import {
   IEntity,
   Relation,
 } from "@inkvisitor/shared/types";
-import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import { useQuery } from "@tanstack/react-query";
 import {
   maxTooltipAnchors,
   maxTooltipMultiRelations,
+  maxLongTooltipAnchors,
+  tooltipAnchorLines,
+  tooltipAnchorLinesCompact,
   tooltipLabelSeparator,
 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
@@ -33,8 +35,10 @@ import {
 } from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledAnchorCount,
   StyledAnchorItem,
   StyledAnchorText,
+  StyledAnchorTextContent,
   StyledBold,
   StyledDetail,
   StyledIconWrap,
@@ -79,9 +83,10 @@ interface EntityTooltip {
   isTemplate?: boolean;
 }
 
-interface IResponseWithAnchors extends EntityTooltipNamespace.IResponse {
-  usedInDocuments: IResponseUsedInDocument[];
-}
+const getAnchorLines = (distinctCount: number) =>
+  distinctCount > maxLongTooltipAnchors
+    ? tooltipAnchorLinesCompact
+    : tooltipAnchorLines;
 
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -132,7 +137,21 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
   });
 
-  const anchors = data?.usedInDocuments;
+  // one entry per distinct anchor text in a document, with its count
+  const anchors = useMemo(() => data?.usedInDocuments ?? [], [data]);
+  // the clamp follows distinct texts, as anchorTexts does before the fetch,
+  // so a text anchored in two documents does not shrink the open tooltip
+  const anchorLines = useMemo(
+    () => getAnchorLines(new Set(anchors.map((a) => a.anchorText)).size),
+    [anchors]
+  );
+  const hiddenAnchorsCount = useMemo(
+    () =>
+      anchors
+        .slice(maxTooltipAnchors)
+        .reduce((sum, anchor) => sum + anchor.count, 0),
+    [anchors]
+  );
 
   // the remaining rows (part of speech, items count, alternative labels...)
   // only render alongside one of these, so they do not count as content
@@ -230,7 +249,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
-            {anchors && anchors?.length > 0 ? (
+            {anchors.length > 0 ? (
               <StyledRow>
                 <StyledIconWrap>
                   <BsCardText />
@@ -246,14 +265,23 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                             size="sm"
                           />
                           <StyledAnchorText>
-                            {documentAnchor.anchorText}
+                            <StyledAnchorTextContent
+                              $lines={anchorLines}
+                            >
+                              {documentAnchor.anchorText}
+                            </StyledAnchorTextContent>
+                            {documentAnchor.count > 1 && (
+                              <StyledAnchorCount>
+                                ×{documentAnchor.count}
+                              </StyledAnchorCount>
+                            )}
                           </StyledAnchorText>
                         </StyledAnchorItem>
                       );
                     })}
-                  {anchors.length > maxTooltipAnchors && (
+                  {hiddenAnchorsCount > 0 && (
                     <StyledMoreText>
-                      +{anchors.length - maxTooltipAnchors} more anchors
+                      +{hiddenAnchorsCount} more anchors
                     </StyledMoreText>
                   )}
                 </StyledDetail>
@@ -270,12 +298,16 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                       .slice(0, maxTooltipAnchors)
                       .map((anchorText, index) => (
                         <StyledAnchorText key={index}>
-                          {anchorText}
+                          <StyledAnchorTextContent
+                            $lines={getAnchorLines(anchorTexts.length)}
+                          >
+                            {anchorText}
+                          </StyledAnchorTextContent>
                         </StyledAnchorText>
                       ))}
                     {anchorTexts.length > maxTooltipAnchors && (
                       <StyledMoreText>
-                        +{anchorTexts.length - maxTooltipAnchors} more anchors
+                        +{anchorTexts.length - maxTooltipAnchors} more texts
                       </StyledMoreText>
                     )}
                   </StyledDetail>
@@ -293,6 +325,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       label,
       anchorTexts,
       anchors,
+      anchorLines,
+      hiddenAnchorsCount,
       itemsCount,
       tooltipData,
       language,

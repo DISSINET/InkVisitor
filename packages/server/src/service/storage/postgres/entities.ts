@@ -2,7 +2,8 @@ import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { TABLE } from "../names";
 import { Conn, EntityStore, RelationStore, Row } from "../types";
-import { labelMatch, labelPattern, searchWhere } from "./search";
+import { labelPattern } from "../../../common/searchLabel";
+import { labelMatch, searchWhere } from "./search";
 import { Params, encode, ident, indexHolds, indexPredicate } from "./sql";
 import { docs, q, tableStore } from "./tables";
 

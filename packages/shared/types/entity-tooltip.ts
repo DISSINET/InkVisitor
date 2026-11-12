@@ -6,7 +6,15 @@ export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
     entities: Record<string, IEntity>; //  all entities mentioned in relations
     relations: RelationTypes.IUsedRelations;
-    usedInDocuments: IResponseUsedInDocument[];
+    usedInDocuments: IUsedInDocument[];
+  }
+
+  // one entry per distinct anchor text in a document; count is the number of
+  // anchors with that text
+  export interface IUsedInDocument {
+    document: IResponseUsedInDocument["document"];
+    anchorText: string;
+    count: number;
   }
 
   export type IIdentification = {

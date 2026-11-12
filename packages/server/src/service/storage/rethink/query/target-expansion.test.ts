@@ -6,7 +6,6 @@ import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import { getEdgeInstance } from "./edge";
 import { wrap } from "../conn";
 import QuerySearch from "@service/query/search";
-import { clearQueryBaseCache } from "@service/query/query-base-cache";
 import { getSubordinateEntityIds } from "@models/relation/functions";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import { ExploreResolvers } from "../../types";
@@ -329,10 +328,6 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
     const rowById = (rows: IResponseQueryEntity[], id: string) =>
       rows.find((row) => row.entity.id === id);
 
-    // the base-query cache is module-level and would otherwise leak identical
-    // queries between tests
-    beforeEach(() => clearQueryBaseCache());
-
     test("includeSubordinates: subordinates of the matches are appended after the direct matches", async () => {
       const ids = await runQuery({ entityId: TX, includeSubordinates: true });
       // direct match keeps first position; descendants (all levels) follow
@@ -407,24 +402,6 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
       expect(sorted(ids.slice(1))).toEqual(sorted([TX_CHILD, TX_GRAND]));
       // the other root territory (and thus its subtree) must be absent
       expect(ids).not.toContain(T_OTHER);
-    });
-
-    test("cache-hit path: a second identical query still filters first and expands after (regression)", async () => {
-      const labelFilter: Explore.IExploreSearchFilter = {
-        type: Explore.SearchOption.Label,
-        label: "call of",
-      };
-      const params: Query.INodeParams = {
-        entityClasses: [EntityEnums.Class.Territory],
-        includeSubordinates: true,
-      };
-      const first = await runQuery(params, [labelFilter]);
-      // second QuerySearch hits the base-query cache (raw unexpanded ids) and
-      // must produce the identical filtered-then-expanded result
-      const second = await runQuery(params, [labelFilter]);
-      expect(first[0]).toEqual(TX);
-      expect(sorted(first.slice(1))).toEqual(sorted([TX_CHILD, TX_GRAND]));
-      expect(second).toEqual(first);
     });
 
     // provenance flags on the response rows: entities APPENDED by the

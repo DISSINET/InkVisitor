@@ -2,7 +2,7 @@ import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
-  IResponseDetail,
+  IResponseEntityRelations,
   IResponseGeneric,
   Relation,
 } from "@inkvisitor/shared/types";
@@ -51,7 +51,7 @@ interface EntityDetailRelationTypeBlock {
     string,
     unknown
   >;
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   userCanEdit: boolean;
 }
 export const EntityDetailRelationTypeBlock: React.FC<

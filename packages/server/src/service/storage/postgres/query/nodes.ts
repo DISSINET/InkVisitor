@@ -1,11 +1,10 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
 import { TABLE } from "../../names";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { Params, ident } from "../sql";
-import { labelMatch, labelPattern } from "../search";
 import { q } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edges";
+import { filterParts, nodeFilters } from "./filters";
 
 /** the rows an edge runs over: the node's own params, or the ids earlier edges left */
 export type Input = { kind: "base"; params: Query.INodeParams } | { kind: "ids"; ids: string[] };
@@ -15,23 +14,10 @@ export function inputWhere(input: Input, p: Params): string {
   if (input.kind === "ids") {
     return `e.id = ANY(${p.add(input.ids)}::text[])`;
   }
-  const { entityClasses, entityStatuses, entityLanguages, entityId, label } = input.params;
-  const where: string[] = [];
-  if (entityClasses?.length) {
-    where.push(`e.class = ANY(${p.add(entityClasses)}::text[])`);
-  }
-  if (entityStatuses?.length) {
-    where.push(`e.status = ANY(${p.add(entityStatuses)}::text[])`);
-  }
-  if (entityLanguages?.length) {
-    where.push(`e.language = ANY(${p.add(entityLanguages)}::text[])`);
-  }
+  const { entityClasses, entityId } = input.params;
+  const where = filterParts(p, "e", entityClasses ?? [], nodeFilters(input.params));
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);
-  }
-  const prepared = nodeLabel(label);
-  if (prepared) {
-    where.push(labelMatch(p, labelPattern(...prepared)));
   }
   return where.length ? where.join(" AND ") : "TRUE";
 }
@@ -85,11 +71,15 @@ export default class SearchNode implements Query.INode, ExplorePlan {
    * @returns matching entity ids
    */
   async run(conn: Conn): Promise<string[]> {
-    const base: Input = { kind: "base", params: this.params };
+    return this.match(conn, { kind: "base", params: this.params });
+  }
+
+  /** ids of the input rows meeting this node's edges */
+  async match(conn: Conn, input: Input): Promise<string[]> {
     if (!this.edges.length) {
-      return this.selectIds(conn, base);
+      return this.selectIds(conn, input);
     }
-    return this.evaluateEdges(conn, base, this.edges, this.operator);
+    return this.evaluateEdges(conn, input, this.edges, this.operator);
   }
 
   /**
@@ -109,18 +99,14 @@ export default class SearchNode implements Query.INode, ExplorePlan {
    * - a Negative edge before any positive has seeded the set, or an OR node
    * that contains a negative edge. AND negations are taken against the running
    * accumulator, so the common (positive-seeded) case never fetches it.
-   *
-   * @param baseIdsKnown optional precomputed base ids (the caller already
-   * materialised the input's ids, e.g. nested edges reusing the parent match)
    */
   private async evaluateEdges(
     conn: Conn,
     input: Input,
     edges: SearchEdge[],
-    operator: Query.NodeOperator,
-    baseIdsKnown?: string[]
+    operator: Query.NodeOperator
   ): Promise<string[]> {
-    let baseIdsCache: string[] | null = baseIdsKnown ?? null;
+    let baseIdsCache: string[] | null = null;
     const getBaseIds = async (): Promise<string[]> => {
       if (baseIdsCache === null) {
         baseIdsCache = await this.selectIds(conn, input);
@@ -175,25 +161,13 @@ export default class SearchNode implements Query.INode, ExplorePlan {
   }
 
   /**
-   * Resolves the ids (subset of `input`) that satisfy a single edge,
-   * including any conditions nested under the edge's target node. The edge's
-   * own condition is matched first; if the target node has its own edges, they
-   * are evaluated recursively over just the matched entities, so nested
-   * constraints further narrow (or widen, via OR) the result.
+   * Resolves the ids (subset of `input`) that satisfy a single edge. The
+   * conditions nested under the edge's target node narrow the target's own
+   * entities, which prepare() resolves before the edge matches against them.
    */
   private async resolveEdgeMatch(conn: Conn, input: Input, edge: SearchEdge): Promise<string[]> {
     await edge.prepare(conn);
-    const directIds = await edge.run(conn, input);
-
-    const childNode = edge.node;
-    if (!childNode.edges.length || directIds.length === 0) {
-      return directIds;
-    }
-
-    // restrict the recursion to entities that matched this edge, then apply the
-    // child node's own edges (the child node params themselves were already
-    // consumed by this edge, so they are not re-applied as a filter)
-    return childNode.evaluateEdges(conn, { kind: "ids", ids: directIds }, childNode.edges, childNode.operator, directIds);
+    return edge.run(conn, input);
   }
 
   /**

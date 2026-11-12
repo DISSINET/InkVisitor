@@ -1,6 +1,6 @@
 import { FloatingPortal, autoUpdate, offset, size, useFloating } from "@floating-ui/react";
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
+import { IResponseEntity, ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
 import { SavedQueryNameNotUnique } from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +9,9 @@ import { Button, Checkbox, Input, Submit, Tooltip } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { getEntityLabel } from "utils/utils";
 import {
+  IcoArrowReturnRight,
   IcoChevronRight,
   IcoCloseMd,
   IcoEdit,
@@ -21,6 +23,7 @@ import {
 } from "Theme/icons";
 import { ExploreActionType } from "../Explorer/state";
 import { QueryAction, QueryActionType } from "../Query/state";
+import { QUERY_NAME_MAX_LENGTH, suggestQueryName } from "../Query/utils";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
 import {
   StyledCharCounter,
@@ -34,6 +37,7 @@ import {
   StyledFolderList,
   StyledLockIcon,
   StyledNameError,
+  StyledNameRow,
   StyledPanel,
   StyledPanelHeader,
   StyledPanelTitle,
@@ -71,10 +75,6 @@ const PANEL_OFFSET = 10;
 // nearest one because it sets overflow: hidden (see StyledPageContent), so in
 // practice this insets from its edges.
 const CLIPPING_INSET = 20;
-
-// keeps names within the two lines the query rows show (see StyledQueryName);
-// matters most for shared queries, which every user sees in their list
-const QUERY_NAME_MAX_LENGTH = 80;
 
 type FolderKey = "examples" | "mine" | "shared";
 
@@ -182,6 +182,17 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       (q) => q.id !== exceptId && normalizeName(q.name) === normalized,
     );
   };
+
+  // every node of the tree has loaded its pinned entity under this key (QueryGridNode)
+  const pinnedLabel = (entityId: string): string | undefined => {
+    const entity = queryClient.getQueryData<IResponseEntity>([
+      "entity",
+      "query-grid-node",
+      entityId,
+    ]);
+    return entity ? getEntityLabel(entity) : undefined;
+  };
+  const suggestedName = isOpen ? suggestQueryName(queryState, pinnedLabel) : "";
 
   const trimmedSaveName = saveName.trim();
   const saveNameTaken = !!trimmedSaveName && isNameTaken(trimmedSaveName, saveShared);
@@ -385,22 +396,35 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
             </StyledPanelHeader>
 
             <StyledSaveRow>
-              <Input
-                value={saveName}
-                placeholder="name for the current query"
-                changeOnType
-                width="full"
-                autoFocus
-                maxLength={QUERY_NAME_MAX_LENGTH}
-                borderColor={saveNameTaken ? "danger" : undefined}
-                rightContent={
-                  <StyledCharCounter>
-                    {saveName.length}/{QUERY_NAME_MAX_LENGTH}
-                  </StyledCharCounter>
-                }
-                onChangeFn={setSaveName}
-                onEnterPressFn={handleSave}
-              />
+              <StyledNameRow>
+                <Button
+                  icon={<IcoArrowReturnRight size={13} />}
+                  tooltipLabel="fill in a name from the query"
+                  tooltipPosition="top"
+                  onClick={() => setSaveName(suggestedName)}
+                  disabled={!suggestedName || saveName === suggestedName}
+                  noBorder
+                  noBackground
+                  color="black"
+                  inverted
+                />
+                <Input
+                  value={saveName}
+                  placeholder="name for the current query"
+                  changeOnType
+                  width="full"
+                  autoFocus
+                  maxLength={QUERY_NAME_MAX_LENGTH}
+                  borderColor={saveNameTaken ? "danger" : undefined}
+                  rightContent={
+                    <StyledCharCounter>
+                      {saveName.length}/{QUERY_NAME_MAX_LENGTH}
+                    </StyledCharCounter>
+                  }
+                  onChangeFn={setSaveName}
+                  onEnterPressFn={handleSave}
+                />
+              </StyledNameRow>
               {saveNameTaken && (
                 <StyledNameError role="alert">
                   Name already used in {saveShared ? SHARED_LABEL : MINE_LABEL}

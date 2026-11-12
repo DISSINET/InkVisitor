@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { STATEMENT_EDITOR_SCROLLER_ID } from "Theme/constants";
 import React, { useEffect, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -57,6 +58,17 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
       }
       if (statement && statement.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
+      }
+      const entityAttributeChanged =
+        variables.detail !== undefined ||
+        variables.status !== undefined ||
+        variables.language !== undefined;
+      if (entityAttributeChanged) {
+        queryClient.invalidateQueries({ queryKey: ["suggestion"] });
+        queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      }
+      if (entityAttributeChanged || variables.props !== undefined) {
+        invalidateAllExplorerQueries(queryClient);
       }
     },
     onError: (err, newTodo, context) => {
@@ -229,20 +241,13 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
   const checkValidActantPosition = async (
     changes: Partial<IStatementData>
   ): Promise<Partial<IStatementData>> => {
-    const oldActants = statement?.data.actants ?? [];
+    const oldActantIds = new Set(
+      (tempObjectRef.current ?? statement)?.data.actants.map((a) => a.id) ?? []
+    );
 
-    // check only the actantId that was added
-    const newActant = changes.actants?.find((newA, newAI) => {
-      //check if the actant is completely new
-      if (!newA.entityId) {
-        return false;
-      }
-      if (oldActants[newAI]) {
-        return newA.entityId !== oldActants[newAI].entityId;
-      } else {
-        return true;
-      }
-    });
+    // only a newly added actant row gets its position from the action valency;
+    // linking another entity into an existing row keeps the position chosen there
+    const newActant = changes.actants?.find((a) => a.entityId && !oldActantIds.has(a.id));
 
     if (newActant === undefined) {
       return changes;

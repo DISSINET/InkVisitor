@@ -54,7 +54,7 @@ export const NodeExpansionPopover: React.FC<NodeExpansionPopover> = ({
               <EntityTag
                 key={entity.id}
                 entity={entity}
-                tagMaxWidth={160}
+                fullWidth
                 disableDrag
                 isEquivalent={section.variant === "equivalent"}
                 isSubordinate={section.variant === "subordinate"}

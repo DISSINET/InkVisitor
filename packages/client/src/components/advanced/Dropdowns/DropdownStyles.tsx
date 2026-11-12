@@ -8,15 +8,28 @@ import styled from "styled-components";
 interface StyledEntityValue {
   /* flat palette only — nested scales (blue, gray, …) are not valid CSS values */
   color?: FlatThemeColor;
+  /* the bar stands clear of the menu edge (after a checkbox and letter), so
+     it is rounded on both sides */
+  $floating?: boolean;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
+  position: relative;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 5px;
-  border-left-style: solid;
-  border-left-width: 4px;
-  border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
+  padding: 5px 5px 5px 9px;
+  /* the class colour, flush left and rounded on its free side; the inset from
+     the row's top and bottom keeps the bars of adjacent options apart */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 4px;
+    border-radius: ${({ $floating }) => ($floating ? "2px" : "0 3px 3px 0")};
+    background-color: ${({ theme, color }) => (color ? theme.color[color] : "transparent")};
+  }
 `;
 /* entity single values sit one step further from the edge than plain ones;
    the wildcard "*" keeps the tight default */

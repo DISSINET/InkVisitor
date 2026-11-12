@@ -5,7 +5,7 @@ import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import { Button, Checkbox, IconWithTooltip, Input, SwitchGroup } from "components";
@@ -27,9 +27,15 @@ import {
   StyledRowControl,
   StyledRowHeader,
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
+import { CoOccurrencePicker } from "../../FloatingSearchContainer/CoOccurrencePicker";
+import {
+  DateRangeFilter,
+  parseDate,
+} from "../../FloatingSearchContainer/DateRangeFilter";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { NodeFilterMatches } from "./NodeFilterMatches";
+import { NodeUserFilterRows } from "./NodeUserFilterRows";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledExpansionCountButton,
@@ -63,7 +69,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
-  const isValid = problems.length === 0;
+  const isValid = problems.every((problem) => problem.warning);
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
     value: type,
@@ -118,6 +124,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const entityId = node.params.entityId;
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  const updateFilters = (changes: Partial<Query.INodeParams>) =>
+    dispatch({ type: QueryActionType.updateNodeFilters, payload: { nodeId: node.id, changes } });
 
   const { data: dataEntity } = useQuery({
     queryKey: ["entity", "query-grid-node", entityId],
@@ -344,7 +353,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               title="Node filters"
               count={countNodeFilters(node.params)}
               tooltipLabel="filters for the entities of this node"
-              width="26rem"
+              width="32rem"
               onClear={() =>
                 dispatch({ type: QueryActionType.clearNodeFilters, payload: { nodeId: node.id } })
               }
@@ -360,12 +369,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                       placeholder="any label"
                       changeOnType
                       clearable
-                      onChangeFn={(newLabel: string) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeLabel,
-                          payload: { nodeId: node.id, newLabel },
-                        });
-                      }}
+                      onChangeFn={(newLabel: string) => updateFilters({ label: newLabel })}
                     />
                   </StyledRowControl>
                 </StyledRow>
@@ -383,15 +387,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         value: status.value,
                         label: status.label,
                       }))}
-                      onChange={(newValue) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeStatuses,
-                          payload: {
-                            nodeId: node.id,
-                            newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                          },
-                        });
-                      }}
+                      onChange={(newValue) =>
+                        updateFilters({
+                          entityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                        })
+                      }
                     />
                   </StyledRowControl>
                 </StyledRow>
@@ -404,30 +404,70 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                       isClearable
                       width="full"
                       options={orderedLanguageDict}
-                      onChange={(newValue) => {
-                        dispatch({
-                          type: QueryActionType.updateNodeLanguages,
-                          payload: {
-                            nodeId: node.id,
-                            newEntityLanguages: newValue
-                              ? [newValue as EntityEnums.Language]
-                              : [],
-                          },
-                        });
-                      }}
+                      onChange={(newValue) =>
+                        updateFilters({
+                          entityLanguages: newValue ? [newValue as EntityEnums.Language] : [],
+                        })
+                      }
                     />
                   </StyledRowControl>
                 </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
+                  <StyledRowControl>
+                    <CoOccurrencePicker
+                      entityIds={node.params.coOccurrence ?? []}
+                      onChange={(coOccurrence) => updateFilters({ coOccurrence })}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader $belowFieldLabel>
+                    {Explore.SearchOption.CreatedAt}
+                  </StyledRowHeader>
+                  <StyledRowControl>
+                    <DateRangeFilter
+                      after={parseDate(node.params.createdAfter)}
+                      before={parseDate(node.params.createdBefore)}
+                      onChange={(after, before) =>
+                        updateFilters({
+                          createdAfter: after?.toISOString(),
+                          createdBefore: before?.toISOString(),
+                        })
+                      }
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader $belowFieldLabel>
+                    {Explore.SearchOption.UpdatedAt}
+                  </StyledRowHeader>
+                  <StyledRowControl>
+                    <DateRangeFilter
+                      after={parseDate(node.params.updatedAfter)}
+                      before={parseDate(node.params.updatedBefore)}
+                      onChange={(after, before) =>
+                        updateFilters({
+                          updatedAfter: after?.toISOString(),
+                          updatedBefore: before?.toISOString(),
+                        })
+                      }
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <NodeUserFilterRows params={node.params} onChange={updateFilters} />
               </StyledForm>
             </FilterPopover>
           )}
-          {!isRoot && !node.params.entityId && countNodeFilters(node.params) > 0 && (
-            <NodeFilterMatches
-              node={node}
-              edgeType={edgeType}
-              onOpenEntityInDetail={onOpenEntityInDetail}
-            />
-          )}
+          {!isRoot &&
+            !node.params.entityId &&
+            (countNodeFilters(node.params) > 0 || node.edges.length > 0) && (
+              <NodeFilterMatches
+                node={node}
+                edgeType={edgeType}
+                onOpenEntityInDetail={onOpenEntityInDetail}
+              />
+            )}
           {paramEntityId && (
             <div>
               {isRoot === false &&

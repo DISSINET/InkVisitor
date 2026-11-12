@@ -113,6 +113,12 @@ export const StyledNameError = styled.div`
   padding-left: 0.2rem;
 `;
 
+export const StyledNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+`;
+
 export const StyledSaveRow = styled.div`
   display: flex;
   flex-direction: column;

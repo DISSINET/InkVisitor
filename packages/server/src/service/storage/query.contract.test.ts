@@ -1,7 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
-import { Query } from "@inkvisitor/shared/types/query";
+import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { getSubordinateEntityIds } from "@models/relation/functions";
+import { filterEntityIdsByRowLabelFilter } from "@service/query/explore-label-filter";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import { Conn, ExploreResolvers, Row, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../test/db";
@@ -215,6 +216,142 @@ describe("entity search", () => {
     expect(rows.sort((a, b) => a.id.localeCompare(b.id))).toEqual([{ id: "p-1", labels: ["Anna Nováková"] }, { id: "p-2" }]);
     expect(await storage.entities.labelsOf(conn, [])).toEqual([]);
   });
+
+  describe("Czech accents", () => {
+    const labels = {
+      "d-1": "Evelín Teměř Jr.",
+      "d-2": "Karel Čapek",
+      "d-3": "Žďár nad Sázavou",
+      "d-4": "Příběh ťuhýka",
+      "d-5": "ŘÍP",
+      "d-6": "Řeč",
+    };
+    const seeded = Object.keys(labels);
+
+    beforeAll(async () => {
+      await storage.entities.insert(
+        conn,
+        Object.entries(labels).map(([id, label]) => entity(id, C.Concept, [label]))
+      );
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, seeded);
+    });
+
+    it("match accented labels when typing plain letters", async () => {
+      expect(await search({ label: "temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "evelin temer" })).toEqual(["d-1"]);
+      expect(await search({ label: "capek" })).toEqual(["d-2"]);
+      expect(await search({ label: "zdar nad sazavou" })).toEqual(["d-3"]);
+      expect(await search({ label: "pribeh tuhyka" })).toEqual(["d-4"]);
+      expect(await search({ labelOrId: "tem*" })).toEqual(["d-1"]);
+    });
+
+    it("match accented capitals when typing plain letters", async () => {
+      expect(await search({ label: "rip" })).toEqual(["d-5"]);
+    });
+
+    it("count accented letters as part of a word", async () => {
+      expect(await search({ label: "tem" }, seeded)).toEqual([]);
+      expect(await search({ label: "r" }, seeded)).toEqual([]);
+      expect(await search({ label: "ec*" }, seeded)).toEqual([]);
+      expect(await search({ label: "*ec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "rec" }, seeded)).toEqual(["d-6"]);
+      expect(await search({ label: "karel" }, seeded)).toEqual(["d-2"]);
+      expect(await search({ label: "evelin jr" }, seeded)).toEqual(["d-1"]);
+    });
+
+    it("still match when typing the accents", async () => {
+      expect(await search({ label: "Teměř" })).toEqual(["d-1"]);
+      expect(await search({ label: "Čapek" })).toEqual(["d-2"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      const explorerFilter = (label: string) =>
+        filterEntityIdsByRowLabelFilter(conn, seeded, { type: Explore.SearchOption.Label, label });
+      expect(await explorerFilter("temer")).toEqual(["d-1"]);
+      expect(await explorerFilter("zdar")).toEqual(["d-3"]);
+      for (const label of ["eme", "*eme", "eme*", "*eme*"]) {
+        expect([label, await explorerFilter(label)]).toEqual([label, ["d-1"]]);
+      }
+    });
+  });
+
+  describe("quote marks and apostrophes", () => {
+    beforeAll(async () => {
+      await storage.entities.insert(conn, [
+        entity("q-1", C.Concept, ["heretics\u2019 presence"]),
+        entity("q-2", C.Concept, ["\u201EPater noster\u201C prayer"]),
+        entity("q-3", C.Concept, ["Confession (oral) d'Arc"]),
+      ]);
+    });
+    afterAll(async () => {
+      await storage.entities.deleteMany(conn, ["q-1", "q-2", "q-3"]);
+    });
+
+    const explorerFilter = (label: string, useRegex = false) =>
+      filterEntityIdsByRowLabelFilter(conn, ["q-1", "q-2", "q-3"], {
+        type: Explore.SearchOption.Label,
+        label,
+        useRegex,
+      });
+
+    it("match a typographic apostrophe when typing a straight one", async () => {
+      expect(await search({ label: "heretics' presence" })).toEqual(["q-1"]);
+      expect(await search({ labelOrId: "heretics' pres*" })).toEqual(["q-1"]);
+    });
+
+    it("treat single and double quote marks as interchangeable", async () => {
+      for (const label of ['"Pater noster"', "'Pater noster'", "\u00ABPater*"]) {
+        expect([label, await search({ label })]).toEqual([label, ["q-2"]]);
+      }
+      expect(await search({ labelOrId: "'Pater*" })).toEqual(["q-2"]);
+    });
+
+    it("match in a query builder node label", async () => {
+      const plan = storage.explore.plan(
+        { id: "", type: Query.NodeType.E, params: { label: "heretics' pre" }, operator: Query.NodeOperator.And, edges: [] },
+        { expand: getNodeExpansionIds, subordinates: getSubordinateEntityIds, territoryPath: () => [] }
+      );
+      expect(sorted(await plan.run(conn))).toEqual(["q-1"]);
+    });
+
+    it("match in the Explorer label filter", async () => {
+      expect(await explorerFilter("heretics' pres")).toEqual(["q-1"]);
+      expect(await explorerFilter('"Pater noster"')).toEqual(["q-2"]);
+      expect(await explorerFilter("d\u2019Arc")).toEqual(["q-3"]);
+    });
+
+    it("count quote marks as word breaks", async () => {
+      expect(await search({ label: "arc" })).toEqual(["q-3"]);
+      expect(await search({ label: "heretics" })).toEqual(["q-1"]);
+    });
+
+    it("read regex characters literally in the label search", async () => {
+      expect(await search({ label: '"Pater (noster' })).toEqual([]);
+      expect(await search({ label: "(oral" })).toEqual(["q-3"]);
+      expect(await search({ label: "o.al" })).toEqual([]);
+      expect(await search({ label: "heretics\\spresence" })).toEqual([]);
+    });
+
+    it("read regex characters literally in the Explorer label filter", async () => {
+      expect(await explorerFilter('"Pater (noster')).toEqual([]);
+      expect(await explorerFilter("(oral")).toEqual(["q-3"]);
+      expect(await explorerFilter("(noster)")).toEqual([]);
+      expect(await explorerFilter("o.al")).toEqual([]);
+      expect(await explorerFilter("*fession*")).toEqual(["q-3"]);
+    });
+
+    it("match parts of words and words in order in the Explorer label filter", async () => {
+      expect(await explorerFilter("onfess")).toEqual(["q-3"]);
+      expect(await explorerFilter("Confession Arc")).toEqual(["q-3"]);
+      expect(await explorerFilter("Arc Confession")).toEqual([]);
+    });
+
+    it("keep the regex mode of the Explorer label filter", async () => {
+      expect(await explorerFilter("^Conf.*Arc$", true)).toEqual(["q-3"]);
+    });
+  });
 });
 
 /** the fixture's territory lineage, root first (t-grand is added by the last describe block) */
@@ -297,11 +434,28 @@ describe("explore: operators, nesting and target expansion", () => {
     ).toEqual(["c-2", "c-3", "c-4"]);
   });
 
-  it("a child node's edges run over the entities the edge matched", async () => {
-    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+  it("a child node's edges narrow the child's own entities, the edge then matches the survivors", async () => {
+    // pinned: c-3 is a subclass of c-2, not of c-1, and holds no reference
+    const hit = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", hit)])).toEqual(["c-2"]);
+    const notSubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", notSubclassOfC1)])).toEqual([]);
     const miss = node({ entityId: "c-3" }, [edge("HR:R", { entityId: "r-1" })]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", miss)])).toEqual([]);
+    // unpinned, on a relation edge: of the superclasses c-1 and c-2 only c-1 references r-1
+    const referencing = node({ entityClasses: [C.Concept] }, [edge("HR:R", { entityId: "r-1" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", referencing)])).toEqual(["c-2"]);
+    // unpinned, on a prop edge: c-1's prop value c-3 is a synonym of c-4
+    const synonym = node({}, [edge("R:SYN", { entityId: "c-4" })]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", synonym)])).toEqual(["c-1"]);
+    const notSynonym = node({}, [edge("R:SYN", { entityId: "c-4" }, Query.EdgeLogic.Negative)]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", notSynonym)])).toEqual([]);
+    // has relation: any looks for the survivors among the partners, so p-1 does not match
+    // itself; a pinned target is matched against the whole relation, the entity included
+    const classifiedAsC2 = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", classifiedAsC2)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Location] }, [edge("R:", classifiedAsC2)])).toEqual(["l-1"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:", { entityId: "p-1" })])).toEqual(["p-1"]);
   });
 
   it("a root without edges returns its base", async () => {
@@ -376,6 +530,70 @@ describe("explore: operators, nesting and target expansion", () => {
   // RethinkDB builds an ordered-relation edge for it: its dispatch reads the relation maps without an own-key check
   itPg("rejects an Object.prototype key as an edge type", () => {
     expect(() => storage.explore.plan(node({}, [edge("hasOwnProperty")]), resolvers)).toThrow(InternalServerError);
+  });
+});
+
+// the dates and users read the audits as the Explorer's created at / updated at / created by /
+// updated by / edited by filters do
+describe("explore: audit and co-occurrence filters", () => {
+  const audit = (id: string, modelId: string, type: string, user: string, date: string): Row => ({
+    id,
+    modelId,
+    type,
+    user,
+    date: new Date(date),
+    auditScope: "entity",
+    changes: {},
+  });
+
+  beforeAll(async () => {
+    await storage.users.insert(conn, ["u-1", "u-2"].map((id) => ({ id, name: id, email: `${id}@x` })));
+    await storage.audits.insert(conn, [
+      audit("au-1", "c-1", "create", "u-1", "2024-01-01T00:00:00.000Z"),
+      audit("au-2", "c-1", "edit", "u-2", "2025-06-01T00:00:00.000Z"),
+      audit("au-3", "c-2", "create", "u-2", "2025-01-01T00:00:00.000Z"),
+      audit("au-4", "c-3", "create", "u-1", "2024-03-01T00:00:00.000Z"),
+      audit("au-5", "c-3", "edit", "u-1", "2024-04-01T00:00:00.000Z"),
+      // the last audit for updated at, but neither an update nor an edit by u-2
+      audit("au-6", "c-3", "text_edit", "u-2", "2026-01-01T00:00:00.000Z"),
+    ]);
+  });
+
+  const concepts = (params: Query.INodeParams) => explore({ entityClasses: [C.Concept], ...params });
+
+  it("created at reads the first audit, updated at the last, both ends inclusive", async () => {
+    expect(await concepts({ createdAfter: "2024-06-01T00:00:00.000Z" })).toEqual(["c-2"]);
+    expect(await concepts({ createdBefore: "2024-06-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(
+      await concepts({ createdAfter: "2024-01-01T00:00:00.000Z", createdBefore: "2024-01-01T00:00:00.000Z" })
+    ).toEqual(["c-1"]);
+    expect(await concepts({ updatedAfter: "2025-03-01T00:00:00.000Z" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBefore: "2025-03-01T00:00:00.000Z" })).toEqual(["c-2"]);
+  });
+
+  it("created by, updated by and edited by read the create and edit audits", async () => {
+    expect(await concepts({ createdBy: "u-1" })).toEqual(["c-1", "c-3"]);
+    expect(await concepts({ updatedBy: "u-2" })).toEqual(["c-1"]);
+    expect(await concepts({ updatedBy: "u-1" })).toEqual(["c-3"]);
+    expect(await concepts({ editedBy: ["u-2"] })).toEqual(["c-1", "c-2"]);
+    expect(await concepts({ editedBy: ["u-1", "u-2"] })).toEqual(["c-1", "c-2", "c-3"]);
+    expect(await concepts({ createdBy: "u-1", updatedBy: "u-2" })).toEqual(["c-1"]);
+  });
+
+  it("co-occurrence keeps the entities sharing a statement with a listed one, a listed one only with another", async () => {
+    expect(await concepts({ coOccurrence: ["p-1"] })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1"] })).toEqual(["p-2"]);
+    expect(await explore({ entityClasses: [C.Person], coOccurrence: ["p-1", "p-2"] })).toEqual(["p-1", "p-2"]);
+    expect(await explore({ entityClasses: [C.Location], coOccurrence: ["p-2"] })).toEqual(["l-1"]);
+    expect(await explore({ coOccurrence: ["t-child"] })).toEqual(["p-1", "s-2"]);
+  });
+
+  it("an unpinned target applies them on a statement edge and on a relation edge's partner", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-1" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { createdBy: "u-2" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { createdBy: "u-2" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { editedBy: ["u-1"] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("R:CLA", { coOccurrence: ["l-1"] })])).toEqual(["p-1", "p-2"]);
   });
 });
 
