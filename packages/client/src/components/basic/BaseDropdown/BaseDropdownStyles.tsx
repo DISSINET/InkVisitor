@@ -323,7 +323,13 @@ export const StyledDefaultOptionRow = styled.div`
    group still shows which group the visible options belong to */
 export const StyledGroupHeading = styled.div`
   position: sticky;
-  top: 0;
+  /* sticky offsets count from inside the menu's top padding; the negative
+     offset, and the negative margin on a heading that opens the menu, cancel
+     that padding so the heading sits against the menu's edge */
+  top: -${({ theme }) => theme.space[1]};
+  &:first-child {
+    margin-top: -${({ theme }) => theme.space[1]};
+  }
   z-index: 1;
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
