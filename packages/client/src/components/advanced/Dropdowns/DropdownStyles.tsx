@@ -45,6 +45,9 @@ export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
   border-left-width: 4px;
   border-left-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
+  /* the chip's 2px radius minus its 1px border, so the bar follows the
+     chip's rounded corners */
+  border-radius: 1px 0 0 1px;
   color: ${({ theme }) => theme.color["black"]};
   font-weight: bold;
   font-size: 1.2rem;
