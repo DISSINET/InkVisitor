@@ -34,6 +34,9 @@ interface EntityImportDrafts {
   onConflictChoice: (entityId: string, conflictIndex: number, useImported: boolean) => void;
   // resolves to whether the draft became an append to the stored entity
   onAppendTo: (entityId: string, storedId: string) => Promise<boolean>;
+  // the stored ids of the appends made in the tabs, which can be undone
+  undoableAppendIds: string[];
+  onUndoAppend: (storedId: string) => void;
   errors: ImportIssue[];
   notes: ImportIssue[];
 }
@@ -49,16 +52,25 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   onMoveTab,
   onConflictChoice,
   onAppendTo,
+  undoableAppendIds,
+  onUndoAppend,
   errors,
   notes,
 }) => {
   const tabs = useMemo(() => tabEntities(draft), [draft]);
   const [selectedId, setSelectedId] = useState<string | undefined>(tabs[0]?.id);
 
-  // a closed tab hands the selection to the first tab left
+  // the import id of each draft appended in the tabs, by stored id
+  const appendedFrom = useRef<Record<string, string>>({});
+
+  // an undone append gives the tab its import id back; a closed tab hands the
+  // selection to the first tab left
   useEffect(() => {
     if (!tabs.some((entity) => entity.id === selectedId)) {
-      setSelectedId(tabs[0]?.id);
+      const restoredId = selectedId && appendedFrom.current[selectedId];
+      setSelectedId(
+        tabs.some((entity) => entity.id === restoredId) ? restoredId : tabs[0]?.id
+      );
     }
   }, [tabs, selectedId]);
 
@@ -122,6 +134,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   // the draft takes the id of the stored entity, so its tab stays selected
   const handleAppendTo = async (entityId: string, storedId: string) => {
     if (await onAppendTo(entityId, storedId)) {
+      appendedFrom.current[storedId] = entityId;
       setSelectedId(storedId);
     }
   };
@@ -153,6 +166,11 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               onConflictChoice(selected.id, conflictIndex, useImported)
             }
             onAppendTo={(storedId) => handleAppendTo(selected.id, storedId)}
+            onUndoAppend={
+              undoableAppendIds.includes(selected.id)
+                ? () => onUndoAppend(selected.id)
+                : undefined
+            }
           />
         )}
 

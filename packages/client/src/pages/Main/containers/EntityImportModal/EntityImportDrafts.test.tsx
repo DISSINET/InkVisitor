@@ -99,6 +99,8 @@ const Harness = () => {
       onMoveTab={() => {}}
       onConflictChoice={() => {}}
       onAppendTo={async () => false}
+      undoableAppendIds={[]}
+      onUndoAppend={() => {}}
       errors={[]}
       notes={[{ message: "a note" }]}
     />

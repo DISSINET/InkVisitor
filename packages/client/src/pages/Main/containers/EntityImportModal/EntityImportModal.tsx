@@ -73,6 +73,16 @@ const draftSnapshot = (draft: ImportDraft) =>
 
 const entityCount = (amount: number) => count(amount, "entity", "entities");
 
+// one "append to it", with the drafts and notes from just before it
+interface AppendStep {
+  storedId: string;
+  storedLabel?: string;
+  before: ImportDraft;
+  notesBefore: ImportIssue[];
+  // the drafts right after it, to tell whether anything changed since
+  after: string;
+}
+
 interface EntityImportModal {
   closeModal: () => void;
   onImported: (entities: IEntity[]) => void;
@@ -98,6 +108,10 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const validatedSnapshot = useRef("");
   const [draftErrors, setDraftErrors] = useState<ImportIssue[]>([]);
   const [draftNotes, setDraftNotes] = useState<ImportIssue[]>([]);
+  // every "append to it" still in the drafts, oldest first
+  const [appendSteps, setAppendSteps] = useState<AppendStep[]>([]);
+  // the undo waiting for the user to accept losing the changes made since
+  const [undoSubmitStep, setUndoSubmitStep] = useState<AppendStep | null>(null);
 
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [outcome, setOutcome] = useState<ImportWriteOutcome | null>(null);
@@ -229,6 +243,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setDraft(null);
     setDraftErrors([]);
     setDraftNotes([]);
+    setAppendSteps([]);
     setInputErrors([]);
     requestedIds.current.clear();
     requestedSynonymIds.current.clear();
@@ -292,14 +307,23 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         setDraftErrors(errors);
         return false;
       }
-      setDraft(draftAfterAppend(draft, plan));
+      const next = draftAfterAppend(draft, plan);
+      const storedLabel = plan.appends[storedId]?.stored.labels[0];
+      setDraft(next);
+      setAppendSteps((steps) => [
+        ...steps,
+        {
+          storedId,
+          storedLabel,
+          before: draft,
+          notesBefore: draftNotes,
+          after: draftSnapshot(next),
+        },
+      ]);
       setDraftErrors([]);
       setDraftNotes((notes) => [
         ...notes,
-        {
-          label,
-          message: `appended to "${plan.appends[storedId]?.stored.labels[0]}" in the database`,
-        },
+        { label, message: `appended to "${storedLabel}" in the database` },
       ]);
       return true;
     } catch (error) {
@@ -308,6 +332,36 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     } finally {
       setIsValidating(false);
     }
+  };
+
+  // The drafts go back to how they were just before the append, so the
+  // changes made since are lost, later appends included; the user is asked
+  // first when there are any.
+  const handleUndoAppend = (storedId: string) => {
+    const step = appendSteps.find((candidate) => candidate.storedId === storedId);
+    if (!step || !draft) {
+      return;
+    }
+    if (draftSnapshot(draft) === step.after) {
+      undoAppend(step);
+    } else {
+      setUndoSubmitStep(step);
+    }
+  };
+  const undoAppend = (step: AppendStep) => {
+    setUndoSubmitStep(null);
+    // the entities and synonym groups loaded since stay known
+    setDraft(
+      (current) =>
+        current && {
+          ...step.before,
+          existing: { ...step.before.existing, ...current.existing },
+          storedSynonyms: { ...step.before.storedSynonyms, ...current.storedSynonyms },
+        },
+    );
+    setDraftNotes(step.notesBefore);
+    setDraftErrors([]);
+    setAppendSteps((steps) => steps.slice(0, steps.indexOf(step)));
   };
 
   // the indexes count tabs; the Value copies, which have none, stay first
@@ -466,6 +520,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onMoveTab={handleMoveTab}
               onConflictChoice={handleConflictChoice}
               onAppendTo={handleAppendTo}
+              undoableAppendIds={appendSteps.map((step) => step.storedId)}
+              onUndoAppend={handleUndoAppend}
               errors={draftErrors}
               notes={draftNotes}
             />
@@ -555,6 +611,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         show={showBackSubmit}
         onSubmit={goBackToJson}
         onCancel={() => setShowBackSubmit(false)}
+      />
+      <Submit
+        title="Undo append"
+        text={`The tabs go back to how they were before the append to "${undoSubmitStep?.storedLabel}". The changes made in the tabs since then will be lost.`}
+        submitLabel="Undo append"
+        show={!!undoSubmitStep}
+        onSubmit={() => undoSubmitStep && undoAppend(undoSubmitStep)}
+        onCancel={() => setUndoSubmitStep(null)}
       />
     </Modal>
   );

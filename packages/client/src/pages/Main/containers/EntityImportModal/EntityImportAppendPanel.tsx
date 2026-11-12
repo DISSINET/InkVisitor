@@ -17,6 +17,8 @@ interface EntityImportAppendPanel {
   candidates: IEntity[] | undefined;
   onConflictChoice: (conflictIndex: number, useImported: boolean) => void;
   onAppendTo: (storedId: string) => void;
+  // given for a draft appended in the tabs
+  onUndoAppend?: () => void;
 }
 
 /**
@@ -30,6 +32,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
   candidates,
   onConflictChoice,
   onAppendTo,
+  onUndoAppend,
 }) => {
   const append = draft.appends?.[entity.id];
 
@@ -37,9 +40,14 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
     const skipped = describeSkips(append.skipped);
     return (
       <StyledAppendPanel>
-        <StyledAppendText>
-          {`Appends to "${append.stored.labels[0]}" in the database. Detail shows the stored entity with what the import adds; of its relations, only the new ones.`}
-        </StyledAppendText>
+        <StyledAppendRow>
+          <StyledAppendText>
+            {`Appends to "${append.stored.labels[0]}" in the database. Detail shows the stored entity with what the import adds; of its relations, only the new ones.`}
+          </StyledAppendText>
+          {onUndoAppend && (
+            <Button label="undo append" inverted color="primary" onClick={onUndoAppend} />
+          )}
+        </StyledAppendRow>
         {skipped && <StyledAppendText>{`Already stored, skipped: ${skipped}.`}</StyledAppendText>}
         {append.conflicts.map((conflict, conflictIndex) => (
           <StyledAppendRow key={conflict.path}>
