@@ -412,7 +412,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         {isWarningTBased(warning) && originEntity && (
           <StyledMessageOrigin>
             <b>Source</b>
-            <EntityTag entity={originEntity} showOnly="label" />
+            <EntityTag entity={originEntity} showOnly="label" fullWidth />
           </StyledMessageOrigin>
         )}
       </StyledMessageContent>

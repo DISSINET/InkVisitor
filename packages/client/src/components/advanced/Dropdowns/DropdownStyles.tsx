@@ -8,18 +8,15 @@ import styled from "styled-components";
 interface StyledEntityValue {
   /* flat palette only — nested scales (blue, gray, …) are not valid CSS values */
   color?: FlatThemeColor;
-  /* the bar stands clear of the menu edge (after a checkbox and letter), so
-     it is rounded on both sides */
-  $floating?: boolean;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   position: relative;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 5px 5px 5px 9px;
-  /* the class colour, flush left and rounded on its free side; the inset from
-     the row's top and bottom keeps the bars of adjacent options apart */
+  padding: 4px 5px 4px 7px;
+  /* the class colour; the inset from the row's top and bottom keeps the bars
+     of adjacent options apart */
   &::before {
     content: "";
     position: absolute;
@@ -27,7 +24,7 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
     top: 3px;
     bottom: 3px;
     width: 4px;
-    border-radius: ${({ $floating }) => ($floating ? "2px" : "0 3px 3px 0")};
+    border-radius: 2px;
     background-color: ${({ theme, color }) => (color ? theme.color[color] : "transparent")};
   }
 `;
@@ -58,6 +55,9 @@ export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
   border-left-width: 4px;
   border-left-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
+  /* the chip's 2px radius minus its 1px border, so the bar follows the
+     chip's rounded corners */
+  border-radius: 1px 0 0 1px;
   color: ${({ theme }) => theme.color["black"]};
   font-weight: bold;
   font-size: 1.2rem;
@@ -69,12 +69,15 @@ export const StyledOptionRow = styled.div`
   height: 3rem;
   padding: 2px 2px 2px 0;
 `;
-/* the class bar fills the row height, so the row padding leaves a gap
-   between neighbouring bars */
+/* shorter than the other menus' 3rem rows, so the hover background stays
+   near square */
 export const StyledEntitySingleOptionRow = styled.div`
   display: grid;
-  min-height: 3rem;
-  padding: 2px 2px 2px 0;
+  min-height: 2.7rem;
+  padding: 1px 2px 1px 1px;
+  ${StyledEntityValue} {
+    padding-left: 9px;
+  }
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;

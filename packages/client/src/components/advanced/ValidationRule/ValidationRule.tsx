@@ -6,7 +6,7 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoTrash } from "Theme/icons";
 import {
   StyledBorderLeft,
@@ -40,7 +40,7 @@ interface ValidationRule {
 export const ValidationRule: React.FC<ValidationRule> = ({
   validation,
   entities,
-  updateValidationRule,
+  updateValidationRule: saveValidationRule,
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
@@ -54,6 +54,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     entitySOEs,
     entityLanguages,
     entityStatuses,
+    entityLabelContains,
     tieType,
     propType,
     allowedClasses,
@@ -61,6 +62,34 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   } = validation;
 
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  // The label text saves on blur, so a click on another control sends a second
+  // change right behind it. The hosts build each change on the rule the server
+  // last returned, which still has the old text, so the text last sent rides
+  // along with every change until the saved rule shows it or a save fails.
+  const pendingLabel = useRef<string | null>(null);
+  useEffect(() => {
+    if (pendingLabel.current === (entityLabelContains ?? "")) {
+      pendingLabel.current = null;
+    }
+  }, [entityLabelContains]);
+
+  const updateValidationRule = (
+    changes: Partial<ITerritoryValidation>,
+    onError?: () => void,
+  ) => {
+    if ("entityLabelContains" in changes) {
+      pendingLabel.current = changes.entityLabelContains ?? "";
+    }
+    const withLabel =
+      pendingLabel.current === null
+        ? changes
+        : { entityLabelContains: pendingLabel.current, ...changes };
+    saveValidationRule(withLabel, () => {
+      pendingLabel.current = null;
+      onError?.();
+    });
+  };
 
   const disabledEntityClassesSection = useMemo<boolean>(() => {
     return allowedEntities !== undefined && allowedEntities.length > 0;
@@ -108,6 +137,15 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     // than fall back to the rule the server still holds
     setPendingExpansions(next ?? {});
     updateValidationRule({ ...changes, expansions: next }, () => setPendingExpansions(null));
+  };
+
+  // These fields save on blur, and Escape closes the Global validations window,
+  // which unmounts a field without blurring it. Blurring on Escape first lets
+  // the field save its text; the window's own Escape handler runs after this.
+  const blurOnEscape = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape" && e.target instanceof HTMLInputElement) {
+      e.target.blur();
+    }
   };
 
   // The tie decides what Prop type and the allowed list mean, so switching it
@@ -345,6 +383,18 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           />
         </div>
 
+        {/* Entity label */}
+        <StyledLabel>label or alternative label containing</StyledLabel>
+        <div onKeyDown={blurOnEscape}>
+          <Input
+            width="full"
+            value={entityLabelContains ?? ""}
+            placeholder="any label"
+            onChangeFn={(value) => updateValidationRule({ entityLabelContains: value })}
+            disabled={!userCanEdit}
+          />
+        </div>
+
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
         <AttributeButtonGroup
@@ -382,6 +432,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                 <EntityTag
                   key={key}
                   entity={entities[entityId]}
+                  fullWidth
                   unlinkButton={
                     userCanEdit && {
                       onClick: () =>
@@ -443,6 +494,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             <EntityTag
               key={key}
               entity={entities[entityId]}
+              fullWidth
               unlinkButton={
                 userCanEdit && {
                   onClick: () =>
@@ -485,12 +537,14 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Detail */}
         <StyledLabel>Detail / Notes</StyledLabel>
-        <Input
-          width="full"
-          value={detail}
-          onChangeFn={(value) => updateValidationRule({ detail: value })}
-          disabled={!userCanEdit}
-        />
+        <div onKeyDown={blurOnEscape}>
+          <Input
+            width="full"
+            value={detail}
+            onChangeFn={(value) => updateValidationRule({ detail: value })}
+            disabled={!userCanEdit}
+          />
+        </div>
       </StyledGrid>
       {userCanEdit && (
         <div

@@ -126,7 +126,6 @@ export const EntityMultiDropdown = <T extends string>({
               {isEntityClass && o.value}
             </StyledEntityOptionClass>
             <StyledEntityValue
-              $floating
               color={
                 o.value === EntityEnums.Extension.Empty
                   ? "transparent"
