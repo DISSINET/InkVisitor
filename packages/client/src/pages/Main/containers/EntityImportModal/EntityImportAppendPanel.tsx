@@ -1,14 +1,23 @@
+import { languageDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button } from "components";
-import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { describeSkips, ImportDraft } from "utils/entityImport";
 import {
+  StyledAppendHeading,
   StyledAppendPanel,
   StyledAppendRow,
   StyledAppendRowLabel,
+  StyledAppendSection,
   StyledAppendText,
+  StyledConflictOption,
+  StyledConflictSide,
 } from "./EntityImportModalStyles";
+
+// a Value is always created, never appended
+export const canAppend = (entity: IEntity) => entity.class !== EntityEnums.Class.Value;
 
 interface EntityImportAppendPanel {
   draft: ImportDraft;
@@ -22,9 +31,9 @@ interface EntityImportAppendPanel {
 }
 
 /**
- * Above the Detail of a draft: for an appended draft what was skipped and the
- * conflicts to settle, for a new one the database entities it may duplicate,
- * each of which it can be appended to instead.
+ * Beside the Detail of a draft: for an appended draft what was skipped and
+ * the conflicts to settle, for a new one the database entities it may
+ * duplicate, each of which it can be appended to instead.
  */
 export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
   draft,
@@ -36,41 +45,64 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
 }) => {
   const append = draft.appends?.[entity.id];
 
-  if (append) {
-    const skipped = describeSkips(append.skipped);
+  if (!canAppend(entity)) {
     return (
       <StyledAppendPanel>
-        <StyledAppendRow>
+        <StyledAppendText>{"A Value is always created new, never appended."}</StyledAppendText>
+      </StyledAppendPanel>
+    );
+  }
+
+  if (append) {
+    const skipped = describeSkips(append.skipped);
+    // a language shows by its name, as Detail's dropdown shows it
+    const shown = (path: string, value: string) =>
+      path === "language"
+        ? (languageDict.find((language) => language.value === value)?.label ?? value)
+        : value;
+    return (
+      <StyledAppendPanel>
+        {append.conflicts.length > 0 && (
+          <>
+            <StyledAppendHeading>
+              {`Conflicts (${append.conflicts.length}): pick what to keep`}
+            </StyledAppendHeading>
+            {append.conflicts.map((conflict, conflictIndex) => (
+              <StyledAppendSection key={conflict.path}>
+                <StyledAppendRowLabel>{conflict.label}</StyledAppendRowLabel>
+                {[false, true].map((useImported) => (
+                  <StyledConflictOption
+                    key={String(useImported)}
+                    type="button"
+                    $selected={conflict.useImported === useImported}
+                    aria-pressed={conflict.useImported === useImported}
+                    onClick={() => onConflictChoice(conflictIndex, useImported)}
+                  >
+                    <StyledConflictSide>{useImported ? "import" : "stored"}</StyledConflictSide>
+                    {shown(conflict.path, useImported ? conflict.imported : conflict.stored)}
+                  </StyledConflictOption>
+                ))}
+              </StyledAppendSection>
+            ))}
+          </>
+        )}
+        <StyledAppendSection>
           <StyledAppendText>
-            {`Appends to "${append.stored.labels[0]}" in the database. Detail shows the stored entity with what the import adds; of its relations, only the new ones.`}
+            {`Appends to "${append.stored.labels[0]}" in the database.`}
           </StyledAppendText>
           {onUndoAppend && (
             <Button label="undo append" inverted color="primary" onClick={onUndoAppend} />
           )}
-        </StyledAppendRow>
-        {skipped && <StyledAppendText>{`Already stored, skipped: ${skipped}.`}</StyledAppendText>}
-        {append.conflicts.map((conflict, conflictIndex) => (
-          <StyledAppendRow key={conflict.path}>
-            <StyledAppendRowLabel>{`${conflict.label}:`}</StyledAppendRowLabel>
-            <AttributeButtonGroup
-              noMargin
-              options={[
-                {
-                  longValue: `stored: ${conflict.stored}`,
-                  shortValue: "stored",
-                  onClick: () => onConflictChoice(conflictIndex, false),
-                  selected: !conflict.useImported,
-                },
-                {
-                  longValue: `import: ${conflict.imported}`,
-                  shortValue: "import",
-                  onClick: () => onConflictChoice(conflictIndex, true),
-                  selected: conflict.useImported,
-                },
-              ]}
-            />
-          </StyledAppendRow>
-        ))}
+        </StyledAppendSection>
+        <StyledAppendSection>
+          {skipped && (
+            <>
+              <StyledAppendRowLabel>{"Already stored, skipped:"}</StyledAppendRowLabel>
+              <StyledAppendText>{skipped}</StyledAppendText>
+            </>
+          )}
+          <StyledAppendRowLabel>{"Detail shows only its new relations."}</StyledAppendRowLabel>
+        </StyledAppendSection>
       </StyledAppendPanel>
     );
   }
@@ -80,10 +112,10 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
   return (
     <StyledAppendPanel>
       {candidates && candidates.length > 0 && (
-        <StyledAppendRow>
+        <StyledAppendSection>
           <StyledAppendRowLabel>{"Possibly already in the database:"}</StyledAppendRowLabel>
           {candidates.map((candidate) => (
-            <React.Fragment key={candidate.id}>
+            <StyledAppendRow key={candidate.id}>
               <EntityTag entity={candidate} />
               <Button
                 label="append to it"
@@ -91,11 +123,11 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
                 color="primary"
                 onClick={() => onAppendTo(candidate.id)}
               />
-            </React.Fragment>
+            </StyledAppendRow>
           ))}
-        </StyledAppendRow>
+        </StyledAppendSection>
       )}
-      <StyledAppendRow>
+      <StyledAppendSection>
         <StyledAppendRowLabel>{"Append to a database entity instead:"}</StyledAppendRowLabel>
         <EntitySuggester
           categoryTypes={[entity.class]}
@@ -109,7 +141,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
             }
           }}
         />
-      </StyledAppendRow>
+      </StyledAppendSection>
     </StyledAppendPanel>
   );
 };

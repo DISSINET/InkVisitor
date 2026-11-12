@@ -192,18 +192,80 @@ export const StyledLoadArea = styled.button`
   }
 `;
 
-// above the tabs: how the selected draft relates to the database
+// the tabs with the Detail, and the side column of the selected draft
+export const StyledDraftBody = styled.div`
+  display: flex;
+  flex: 1;
+  gap: ${({ theme }) => theme.space[4]};
+  min-height: 0;
+`;
+
+export const StyledDraftMain = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+`;
+
+// beside the Detail: how the selected draft relates to the database
 export const StyledAppendPanel = styled.div`
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[4]};
+  width: 30rem;
+  min-height: 0;
+  overflow-y: auto;
+`;
+
+export const StyledAppendSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: ${({ theme }) => theme.space[1]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledAppendHeading = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+// one side of a conflict: the value itself is what gets clicked
+export const StyledConflictOption = styled.button<{ $selected: boolean }>`
+  display: flex;
+  align-items: baseline;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: left;
+  overflow-wrap: anywhere;
+  color: ${({ theme, $selected }) => ($selected ? theme.color["white"] : theme.color["black"])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["primary"] : theme.color["white"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme, $selected }) => ($selected ? theme.color["primary"] : theme.color["gray"]["400"])};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledConflictSide = styled.span`
+  flex-shrink: 0;
+  width: 4.5rem;
+  opacity: 0.7;
 `;
 
 export const StyledAppendText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
+  overflow-wrap: anywhere;
 `;
 
 export const StyledAppendRow = styled.div`

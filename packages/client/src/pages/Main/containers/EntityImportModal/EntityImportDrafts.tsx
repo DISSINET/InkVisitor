@@ -2,6 +2,10 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { EntityEditing, EntityEditingContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
 import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
+import {
+  EntityDetailTabOverflow,
+} from "../EntityDetailBox/EntityDetailTabOverflow/EntityDetailTabOverflow";
+import { useTabOverflow } from "../EntityDetailBox/EntityDetailTabOverflow/useTabOverflow";
 import { IEntity } from "@inkvisitor/shared/types";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -13,10 +17,12 @@ import {
   tabEntities,
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
-import { EntityImportAppendPanel } from "./EntityImportAppendPanel";
+import { canAppend, EntityImportAppendPanel } from "./EntityImportAppendPanel";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
+  StyledDraftBody,
   StyledDraftDetail,
+  StyledDraftMain,
   StyledDraftIssues,
   StyledDrafts,
   StyledDraftTabGroup,
@@ -115,7 +121,12 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
     };
   }, []);
   useEffect(() => {
-    if (!selected || draft.appends?.[selected.id] || searchedIds.current.has(selected.id)) {
+    if (
+      !selected ||
+      !canAppend(selected) ||
+      draft.appends?.[selected.id] ||
+      searchedIds.current.has(selected.id)
+    ) {
       return;
     }
     searchedIds.current.add(selected.id);
@@ -130,6 +141,18 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
         }
       });
   }, [selected, draft.appends, draftEntityIds]);
+
+  const { tabGroupRef, visibleTabs, overflowEntities } = useTabOverflow(tabs, selectedId);
+
+  // a tab picked in the caret list moves to the front, so two picks from the
+  // list can sit side by side
+  const handleOverflowSelect = (entityId: string) => {
+    const index = tabs.findIndex((entity) => entity.id === entityId);
+    if (index > 0) {
+      onMoveTab(index, 0);
+    }
+    setSelectedId(entityId);
+  };
 
   // the draft takes the id of the stored entity, so its tab stays selected
   const handleAppendTo = async (entityId: string, storedId: string) => {
@@ -157,48 +180,59 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
           </StyledDraftIssues>
         )}
 
-        {selected && (
-          <EntityImportAppendPanel
-            draft={draft}
-            entity={selected}
-            candidates={candidates[selected.id]}
-            onConflictChoice={(conflictIndex, useImported) =>
-              onConflictChoice(selected.id, conflictIndex, useImported)
-            }
-            onAppendTo={(storedId) => handleAppendTo(selected.id, storedId)}
-            onUndoAppend={
-              undoableAppendIds.includes(selected.id)
-                ? () => onUndoAppend(selected.id)
-                : undefined
-            }
-          />
-        )}
+        <StyledDraftBody>
+          <StyledDraftMain>
+            <StyledDraftTabGroup ref={tabGroupRef}>
+              {visibleTabs.map(({ entity, index }) => (
+                <EntityDetailTab
+                  key={entity.id}
+                  index={index}
+                  entity={entity}
+                  isSelected={entity.id === selectedId}
+                  onClick={() => setSelectedId(entity.id)}
+                  onClose={() => onCloseTab(entity.id)}
+                  moveRow={onMoveTab}
+                />
+              ))}
+              {overflowEntities.length > 0 && (
+                <EntityDetailTabOverflow
+                  entities={overflowEntities}
+                  onSelect={handleOverflowSelect}
+                  onClose={onCloseTab}
+                />
+              )}
+            </StyledDraftTabGroup>
 
-        <StyledDraftTabGroup>
-          {tabs.map((entity, index) => (
-            <EntityDetailTab
-              key={entity.id}
-              index={index}
-              entity={entity}
-              isSelected={entity.id === selectedId}
-              onClick={() => setSelectedId(entity.id)}
-              onClose={() => onCloseTab(entity.id)}
-              moveRow={onMoveTab}
-            />
-          ))}
-        </StyledDraftTabGroup>
+            <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
+              {detail && (
+                <EntityDetail
+                  key={detail.id}
+                  detailId={detail.id}
+                  entity={detail}
+                  error={null}
+                  isFetching={false}
+                />
+              )}
+            </StyledDraftDetail>
+          </StyledDraftMain>
 
-        <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
-          {detail && (
-            <EntityDetail
-              key={detail.id}
-              detailId={detail.id}
-              entity={detail}
-              error={null}
-              isFetching={false}
+          {selected && (
+            <EntityImportAppendPanel
+              draft={draft}
+              entity={selected}
+              candidates={candidates[selected.id]}
+              onConflictChoice={(conflictIndex, useImported) =>
+                onConflictChoice(selected.id, conflictIndex, useImported)
+              }
+              onAppendTo={(storedId) => handleAppendTo(selected.id, storedId)}
+              onUndoAppend={
+                undoableAppendIds.includes(selected.id)
+                  ? () => onUndoAppend(selected.id)
+                  : undefined
+              }
             />
           )}
-        </StyledDraftDetail>
+        </StyledDraftBody>
       </StyledDrafts>
     </EntityEditingContext.Provider>
   );

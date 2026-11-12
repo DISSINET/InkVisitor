@@ -236,6 +236,25 @@ describe("validateImport appending to a stored entity", () => {
     expect(plan!.appends.augustine.skipped).toMatchObject({ labels: 1, props: 1, values: 1 });
   });
 
+  it("creates an input Value with a taken id under a new id, never appending it", async () => {
+    const context = contextWith([storedValue, existingEntity("born", EntityEnums.Class.Concept)]);
+    const text = JSON.stringify([
+      { id: "monica", class: "P", labels: ["Monica"], props: [{ type: "born", value: "v-354" }] },
+      { id: "v-354", class: "V", labels: ["332"] },
+    ]);
+
+    const { errors, notes, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    expect(plan!.appends).toEqual({});
+    const value = plan!.entities.find((entity) => entity.class === EntityEnums.Class.Value)!;
+    expect(value.id).not.toBe("v-354");
+    expect(value.labels).toEqual(["332"]);
+    const monica = plan!.entities.find((entity) => entity.id === "monica")!;
+    expect(monica.props[0].value.entityId).toBe(value.id);
+    expect(notes.map((note) => note.path)).toContain("id");
+  });
+
   it("refuses to append to an entity of another class", async () => {
     const context = contextWith([stored]);
     const { errors } = await validateImport(

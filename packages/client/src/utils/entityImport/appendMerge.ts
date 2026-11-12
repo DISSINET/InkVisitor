@@ -55,6 +55,7 @@ const SKIPPED_DATA_KEYS = ["parent", "validations", "documentId"];
 
 const FIELD_LABELS: Record<string, string> = {
   "labels[0]": "main label",
+  language: "label language",
   legacyId: "legacy id",
   "data.pos": "part of speech",
   "data.logicalType": "logical type",

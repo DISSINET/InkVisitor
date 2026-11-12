@@ -1,5 +1,6 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
+import { v4 as uuidv4 } from "uuid";
 import {
   AppendInfo,
   emptySkips,
@@ -104,13 +105,53 @@ export const validateImport = async (
 
   // one request answers both which input ids are taken and which referenced
   // entities exist
-  const refs = collectEntityRefs(entities);
+  let refs = collectEntityRefs(entities);
   const referencedIds = unique([
     ...refs.map((ref) => ref.id),
     ...relationItems.items.flatMap((item) => item.relation.entityIds),
   ]).filter((entityId) => !batch.has(entityId));
   const requestedIds = unique([...batchIds, ...referencedIds]);
   const found = requestedIds.length ? await context.source.getEntities(requestedIds) : [];
+
+  // A Value is never appended: an input Value with a taken id is created under
+  // a new id, and the links of the input to it follow.
+  const newValueIds = new Map<string, string>();
+  for (const stored of found) {
+    if (batch.get(stored.id)?.class === EntityEnums.Class.Value) {
+      newValueIds.set(stored.id, uuidv4());
+    }
+  }
+  if (newValueIds.size) {
+    entities.forEach((item) => {
+      const newId = newValueIds.get(item.entity.id);
+      if (newId) {
+        notes.push({
+          entityIndex: item.index,
+          label: item.entity.labels[0],
+          path: "id",
+          message: `the id is in the database, so the Value gets a new id ${quote(newId)}; a Value is never appended`,
+        });
+        item.entity.id = newId;
+      }
+    });
+    refs.forEach((ref) => {
+      const newId = newValueIds.get(ref.id);
+      if (newId) {
+        const owner = entities.find((item) => item.index === ref.entityIndex)!;
+        setAtPath(owner.entity, ref.path, newId);
+      }
+    });
+    relationItems.items.forEach(({ relation }) => {
+      relation.entityIds = relation.entityIds.map(
+        (entityId) => newValueIds.get(entityId) ?? entityId
+      );
+    });
+    newValueIds.forEach((newId, oldId) => {
+      batch.set(newId, batch.get(oldId)!);
+      batch.delete(oldId);
+    });
+    refs = collectEntityRefs(entities);
+  }
 
   const existing = new Map(
     found.filter((entity) => !batch.has(entity.id)).map((entity) => [entity.id, entity])

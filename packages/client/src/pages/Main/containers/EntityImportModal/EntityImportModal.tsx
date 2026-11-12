@@ -477,7 +477,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         title="Import entities from JSON"
         onClose={isWriting ? undefined : handleClose}
       />
-      <ModalContent column enableScroll={step !== "drafts"}>
+      {/* only a scrolling body shrinks below its content, so the Detail of the
+          drafts fits the window instead of pushing the footer out of it */}
+      <ModalContent column enableScroll>
         {step === "input" && (
           <StyledStep>
             <StyledEditorArea>
