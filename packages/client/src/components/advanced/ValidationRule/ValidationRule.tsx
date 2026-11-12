@@ -393,6 +393,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                 <EntityTag
                   key={key}
                   entity={entities[entityId]}
+                  fullWidth
                   unlinkButton={
                     userCanEdit && {
                       onClick: () =>
@@ -454,6 +455,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             <EntityTag
               key={key}
               entity={entities[entityId]}
+              fullWidth
               unlinkButton={
                 userCanEdit && {
                   onClick: () =>
