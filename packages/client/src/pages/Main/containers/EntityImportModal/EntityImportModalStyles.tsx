@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { StyledTabGroup } from "../EntityDetailBox/EntityDetailBoxStyles";
 
+const LOAD_AREA_HEIGHT = "5rem";
+
 // fills the full-height modal, so the JSON field gets all the room left
 export const StyledStep = styled.div`
   display: flex;
@@ -135,12 +137,59 @@ export const StyledHiddenFileInput = styled.input`
   display: none;
 `;
 
-// the load button sits above the JSON field, next to the hint
-export const StyledInputHeader = styled.div`
+// left of the buttons in the footer of the JSON step
+export const StyledInputHint = styled(StyledDraftModeHint)`
+  margin-left: 0;
+  text-align: left;
+`;
+
+// the JSON field with the load area floating over its bottom
+export const StyledEditorArea = styled.div`
+  position: relative;
   display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+
+  ${StyledJsonEditor} {
+    /* the last lines scroll up above the load area */
+    padding-bottom: calc(${LOAD_AREA_HEIGHT} + ${({ theme }) => theme.space[8]});
+  }
+`;
+
+// striped like the upload area of the documents page
+export const StyledLoadArea = styled.button`
+  position: absolute;
+  bottom: ${({ theme }) => theme.space[4]};
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(40rem, calc(100% - 2 * ${({ theme }) => theme.space[4]}));
+  height: ${LOAD_AREA_HEIGHT};
+  display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.space[3]};
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"]["400"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  cursor: pointer;
+  background: ${({ theme }) => `
+    repeating-linear-gradient(
+      -45deg,
+      ${theme.color.white},
+      ${theme.color.white},
+      2px,
+      ${theme.color.uploadDocumentBg} 1px,
+      ${theme.color.uploadDocumentBg} 12px
+    )
+  `};
+
+  &:hover,
+  &:focus-visible {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
 `;
 
 // above the tabs: how the selected draft relates to the database

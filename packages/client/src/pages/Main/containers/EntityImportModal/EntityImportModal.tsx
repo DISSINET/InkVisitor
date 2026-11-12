@@ -45,7 +45,9 @@ import {
   StyledDraftModeHint,
   StyledHiddenFileInput,
   StyledHint,
-  StyledInputHeader,
+  StyledEditorArea,
+  StyledInputHint,
+  StyledLoadArea,
   StyledProgress,
   StyledResult,
   StyledResultFailure,
@@ -478,22 +480,17 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <ModalContent column enableScroll={step !== "drafts"}>
         {step === "input" && (
           <StyledStep>
-            <StyledInputHeader>
-              <StyledHint>
-                {`Load a .json file or paste up to ${maxImportEntities(role)} entities as a JSON object or array. Detail's JSON section shows this format. An entity whose id is in the database is appended to it.`}
-              </StyledHint>
-              <Button
-                label="load file"
-                icon={<IcoFileText />}
-                color="primary"
-                onClick={() => fileInputRef.current?.click()}
+            <StyledEditorArea>
+              <EntityImportJsonEditor
+                value={text}
+                onChange={setText}
+                placeholder={INPUT_PLACEHOLDER}
               />
-            </StyledInputHeader>
-            <EntityImportJsonEditor
-              value={text}
-              onChange={setText}
-              placeholder={INPUT_PLACEHOLDER}
-            />
+              <StyledLoadArea type="button" onClick={() => fileInputRef.current?.click()}>
+                <IcoFileText />
+                {"Load a .json file"}
+              </StyledLoadArea>
+            </StyledEditorArea>
             <StyledHiddenFileInput
               ref={fileInputRef}
               type="file"
@@ -552,17 +549,22 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         )}
       </ModalContent>
 
-      <ModalFooter spaceBetween={step === "drafts"}>
+      <ModalFooter spaceBetween={step === "input" || step === "drafts"}>
         {step === "input" && (
-          <ButtonGroup>
-            <CancelButton onClick={handleClose} />
-            <Button
-              label="Validate"
-              color="info"
-              disabled={!text.trim() || text === refusedText || isValidating || !user}
-              onClick={handleValidate}
-            />
-          </ButtonGroup>
+          <>
+            <StyledInputHint>
+              {`Load a .json file or paste up to ${maxImportEntities(role)} entities as a JSON object or array. Detail's JSON section shows this format. An entity whose id is in the database is appended to it.`}
+            </StyledInputHint>
+            <ButtonGroup>
+              <CancelButton onClick={handleClose} />
+              <Button
+                label="Validate"
+                color="info"
+                disabled={!text.trim() || text === refusedText || isValidating || !user}
+                onClick={handleValidate}
+              />
+            </ButtonGroup>
+          </>
         )}
         {step === "drafts" && (
           <>
