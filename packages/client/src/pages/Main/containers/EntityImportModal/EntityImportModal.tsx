@@ -288,6 +288,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       const { errors, plan } = await validateImport(json, {
         ...validationContext(),
         appendTargets: appendTargetsOf(draft),
+        fromDrafts: true,
       });
       if (!plan) {
         setDraftErrors(issuesWithEntityIds(everyDraft, errors));

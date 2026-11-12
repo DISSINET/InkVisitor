@@ -338,12 +338,6 @@ export const deleteDraftRelation = (draft: ImportDraft, relationId: string): Imp
   relations: draft.relations.filter((relation) => relation.id !== relationId),
 });
 
-/** What leaving an entity out changed in one of the remaining drafts. */
-export interface DraftCleanup {
-  entityId: string;
-  changes: string[];
-}
-
 /**
  * Removes every link to `removedId` from one draft: a metaprop typed by it
  * goes (with its children), a metaprop or reference value pointing at it is
@@ -426,52 +420,6 @@ export const unlinkEntity = (
   }
 
   return { entity: changes.length ? { ...entity, props, references, data } : entity, changes };
-};
-
-/**
- * Leaves an entity out of the import: every relation it is in goes with it,
- * and the other drafts lose their links to it, so what remains can still be
- * created.
- */
-export const removeDraftEntity = (
-  draft: ImportDraft,
-  entityId: string
-): { draft: ImportDraft; removedRelations: Relation.IRelation[]; cleanups: DraftCleanup[] } => {
-  const removed = draft.entities.find((entity) => entity.id === entityId);
-  // a territory under the left-out one keeps a place in the tree
-  const removedParent =
-    removed?.class === EntityEnums.Class.Territory
-      ? (removed as ITerritory).data.parent || undefined
-      : undefined;
-
-  const removedRelations = draft.relations.filter((relation) =>
-    relation.entityIds.includes(entityId)
-  );
-
-  const cleanups: DraftCleanup[] = [];
-  const entities = draft.entities
-    .filter((entity) => entity.id !== entityId)
-    .map((entity) => {
-      const result = unlinkEntity(entity, entityId, removedParent?.territoryId);
-      if (result.changes.length) {
-        cleanups.push({ entityId: entity.id, changes: result.changes });
-      }
-      return result.entity;
-    });
-
-  const appends = { ...draft.appends };
-  delete appends[entityId];
-
-  return {
-    draft: {
-      ...draft,
-      entities,
-      relations: draft.relations.filter((relation) => !removedRelations.includes(relation)),
-      appends,
-    },
-    removedRelations,
-    cleanups,
-  };
 };
 
 const isAsymmetrical = (type: RelationEnums.Type) =>

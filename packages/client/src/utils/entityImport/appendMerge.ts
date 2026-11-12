@@ -48,14 +48,25 @@ export const emptySkips = (): AppendSkips => ({
   values: 0,
 });
 
-// Detail lets the user edit these; the status stays as stored, a territory
-// keeps its place in the tree and a resource its document
-const SCALAR_FIELDS = ["detail", "language", "legacyId"] as const;
+// Detail lets the user edit these; a territory keeps its place in the tree
+// and a resource its document
+const SCALAR_FIELDS = ["detail", "language", "status", "legacyId"] as const;
+
+/**
+ * The fields the input set itself. A field it leaves out is filled with a
+ * default, the user's language or the pending status, which must not compete
+ * with the stored value.
+ */
+export interface GivenFields {
+  language?: boolean;
+  status?: boolean;
+}
 const SKIPPED_DATA_KEYS = ["parent", "validations", "documentId"];
 
 const FIELD_LABELS: Record<string, string> = {
   "labels[0]": "main label",
   language: "label language",
+  status: "status",
   legacyId: "legacy id",
   "data.pos": "part of speech",
   "data.logicalType": "logical type",
@@ -223,15 +234,13 @@ const mergeData = (
  * and counted; a field holding one value that both set differently becomes a
  * conflict, resolved to the stored value until the user picks the other.
  *
- * @param givenLanguage whether the input set the language; a missing one is
- * filled with the user's default language, which must not compete with the
- * stored one
+ * @param given the fields with a default that the input set itself
  */
 export const mergeIntoStored = (
   stored: IEntity,
   imported: IEntity,
   same: SameEntity,
-  givenLanguage: boolean
+  given: GivenFields
 ): { entity: IEntity; conflicts: AppendConflict[]; skipped: AppendSkips } => {
   const skipped = emptySkips();
   const conflicts: AppendConflict[] = [];
@@ -268,7 +277,7 @@ export const mergeIntoStored = (
 
   for (const field of SCALAR_FIELDS) {
     const value = imported[field];
-    if (isEmpty(value) || (field === "language" && !givenLanguage)) {
+    if (isEmpty(value) || ((field === "language" || field === "status") && !given[field])) {
       continue;
     }
     (entity as unknown as Record<string, unknown>)[field] = mergeScalar(

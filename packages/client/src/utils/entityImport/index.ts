@@ -22,7 +22,6 @@ export {
   leftOutDrafts,
   missingEntityIds,
   missingSynonymGroupIds,
-  removeDraftEntity,
   reorderDraftRelations,
   replaceEntityId,
   setConflictChoice,
@@ -32,4 +31,4 @@ export {
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
-export type { AppendUndo, DraftCleanup, ImportDraft } from "./draft";
+export type { AppendUndo, ImportDraft } from "./draft";

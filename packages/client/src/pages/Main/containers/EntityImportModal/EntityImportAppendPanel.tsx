@@ -1,4 +1,4 @@
-import { languageDict } from "@inkvisitor/shared/dictionaries";
+import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button } from "components";
@@ -55,11 +55,13 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
 
   if (append) {
     const skipped = describeSkips(append.skipped);
-    // a language shows by its name, as Detail's dropdown shows it
+    // a language and a status show by their names, as Detail shows them
     const shown = (path: string, value: string) =>
-      path === "language"
-        ? (languageDict.find((language) => language.value === value)?.label ?? value)
-        : value;
+      (path === "language"
+        ? languageDict.find((language) => language.value === value)?.label
+        : path === "status"
+          ? entityStatusDict.find((status) => status.value === value)?.label
+          : undefined) ?? value;
     return (
       <StyledAppendPanel>
         {append.conflicts.length > 0 && (

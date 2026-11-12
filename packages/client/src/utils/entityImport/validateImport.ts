@@ -37,6 +37,9 @@ export interface ImportValidationContext {
   appendTargets?: Record<string, IEntity>;
   // false: a taken id not among appendTargets is an error, not a new append
   allowAppend?: boolean;
+  // The input was written from the drafts, where every field holds a value,
+  // given or a default, so no field counts as set by the user in a merge.
+  fromDrafts?: boolean;
 }
 
 /** Ids of every entity the stored version of an entity points at. */
@@ -273,7 +276,10 @@ export const validateImport = async (
     }
     if (toMerge.has(item.entity.id)) {
       const raw = parsed.items[item.index - 1] as Record<string, unknown>;
-      const result = mergeIntoStored(stored, item.entity, same, raw.language !== undefined);
+      const given = context.fromDrafts
+        ? {}
+        : { language: raw.language !== undefined, status: raw.status !== undefined };
+      const result = mergeIntoStored(stored, item.entity, same, given);
       merged.set(item.entity.id, result.entity);
       appends[item.entity.id].conflicts = result.conflicts;
       appends[item.entity.id].skipped = result.skipped;

@@ -58,7 +58,9 @@ describe("mergeIntoStored", () => {
       references: [CReference("book", "p1"), CReference("book", "p2")],
     });
 
-    const { entity, conflicts, skipped } = mergeIntoStored(stored, imported, same, true);
+    const { entity, conflicts, skipped } = mergeIntoStored(stored, imported, same, {
+      language: true,
+    });
 
     expect(entity.labels).toEqual(["Augustine", "Augustinus", "Aurelius Augustinus"]);
     expect(entity.notes).toEqual(["bishop", "of Hippo"]);
@@ -77,7 +79,7 @@ describe("mergeIntoStored", () => {
       props: [prop("born", "v-354", [prop("place", "thagaste", [prop("source", "confessions")])])],
     });
 
-    const { entity, skipped } = mergeIntoStored(stored, imported, same, false);
+    const { entity, skipped } = mergeIntoStored(stored, imported, same, {});
 
     expect(entity.props).toHaveLength(1);
     expect(entity.props[0].id).toBe(stored.props[0].id);
@@ -93,7 +95,7 @@ describe("mergeIntoStored", () => {
       stored,
       concept({ props: [prop("born", "v-430")] }),
       same,
-      false
+      {}
     );
     expect(entity.props).toHaveLength(2);
     expect(conflicts).toEqual([]);
@@ -114,7 +116,7 @@ describe("mergeIntoStored", () => {
       data: { pos: EntityEnums.ConceptPartOfSpeech.Noun },
     });
 
-    const { entity, conflicts } = mergeIntoStored(stored, imported, same, true);
+    const { entity, conflicts } = mergeIntoStored(stored, imported, same, { language: true });
 
     expect(entity.data.pos).toBe(EntityEnums.ConceptPartOfSpeech.Noun);
     expect(entity.detail).toBe("caritas");
@@ -126,12 +128,22 @@ describe("mergeIntoStored", () => {
     ]);
   });
 
+  it("compares the status only when the input set it", () => {
+    const stored = concept({ status: EntityEnums.Status.Approved });
+    const imported = concept({ status: EntityEnums.Status.Pending });
+
+    expect(mergeIntoStored(stored, imported, same, {}).conflicts).toEqual([]);
+    expect(mergeIntoStored(stored, imported, same, { status: true }).conflicts).toMatchObject([
+      { path: "status", stored: EntityEnums.Status.Approved, imported: EntityEnums.Status.Pending },
+    ]);
+  });
+
   it("ignores a language the input did not set", () => {
     const { conflicts } = mergeIntoStored(
       concept(),
       concept({ language: EntityEnums.Language.English }),
       same,
-      false
+      {}
     );
     expect(conflicts).toEqual([]);
   });
