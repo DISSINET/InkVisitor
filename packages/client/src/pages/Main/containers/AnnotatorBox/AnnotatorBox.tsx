@@ -1,7 +1,6 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
-  IDocument,
   IResponseEntity,
   IResponseStatement,
   IResponseTerritory,
@@ -217,10 +216,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
         territoryId,
         statementListOpened,
       ]);
-      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
-        "document",
-        selectedDocumentId,
-      ]);
       if (previousTerritory && newStatement.data.territory) {
         const optimisticStatement: IResponseStatement = {
           ...newStatement,
@@ -241,32 +236,20 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
           { ...previousTerritory, statements: updatedStatements },
         );
       }
-      if (previousDocument && selectedDocumentId) {
-        const sId = newStatement.id;
-        const currentStatementIds = previousDocument.entityIds[EntityEnums.Class.Statement] || [];
-        if (!currentStatementIds.includes(sId)) {
-          queryClient.setQueryData<IDocument>(["document", selectedDocumentId], {
-            ...previousDocument,
-            entityIds: {
-              ...previousDocument.entityIds,
-              [EntityEnums.Class.Statement]: [...currentStatementIds, sId],
-            },
-          });
-        }
-      }
-      return { previousTerritory, previousDocument };
+      // Deliberately NOT optimistically inserting the new Statement id into the
+      // document's entityIds here. That drove the anchor's highlight on-screen
+      // before the anchor was actually saved, and a subsequent document refetch
+      // (which momentarily lacks it) toggled it back off — the highlight blinked.
+      // The anchor is added and saved right after (handleAddAnchor → document
+      // save + refetch); letting it appear only once that fetch lands is smoother
+      // than an optimistic flash that has to be corrected (#2885 follow-up).
+      return { previousTerritory };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousTerritory) {
         queryClient.setQueryData<IResponseTerritory>(
           ["territory", "statement-list", territoryId, statementListOpened],
           context.previousTerritory,
-        );
-      }
-      if (context?.previousDocument) {
-        queryClient.setQueryData<IDocument | undefined>(
-          ["document", selectedDocumentId],
-          context.previousDocument,
         );
       }
     },
