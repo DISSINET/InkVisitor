@@ -7,7 +7,7 @@ import { buildEntityJson } from "./entityJson";
 import { count, isPlainObject, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { collectEntityRefs } from "./references";
-import { ImportPlan } from "./types";
+import { ImportIssue, ImportPlan } from "./types";
 
 /**
  * The entities of an import while they are edited in the modal, before any of
@@ -481,28 +481,43 @@ const relationOwner = (draft: ImportDraft, relation: Relation.IRelation): string
  * it belongs to, so the edited drafts pass through the same validation as
  * pasted JSON.
  */
-export const draftToImportJson = (draft: ImportDraft): object[] => {
+// the entities draftToImportJson lists, in its order
+const importJsonEntities = (draft: ImportDraft): IEntity[] => {
   // a Value copy no draft points at any more is not created
   const pointedAt = new Set(
     collectEntityRefs(
       tabEntities(draft).map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
     ).map((ref) => ref.id)
   );
-  return draft.entities
-    .filter((entity) => !isValueCopy(draft, entity.id) || pointedAt.has(entity.id))
-    .map((entity) => ({
-      ...buildEntityJson(entity, undefined),
-      relations: draft.relations
-        .filter((relation) => relationOwner(draft, relation) === entity.id)
-        .map((relation) => ({
-          type: relation.type,
-          entityIds: relation.entityIds,
-          ...(relation.type === RelationEnums.Type.Identification
-            ? { certainty: (relation as Relation.IIdentification).certainty }
-            : {}),
-        })),
-    }));
+  return draft.entities.filter(
+    (entity) => !isValueCopy(draft, entity.id) || pointedAt.has(entity.id)
+  );
 };
+
+/**
+ * The issues of a validation of draftToImportJson(draft), each with the id of
+ * the draft it is about; the ids stay right when tabs close afterwards.
+ */
+export const issuesWithEntityIds = (draft: ImportDraft, issues: ImportIssue[]): ImportIssue[] => {
+  const entities = importJsonEntities(draft);
+  return issues.map((issue) =>
+    issue.entityIndex ? { ...issue, entityId: entities[issue.entityIndex - 1]?.id } : issue
+  );
+};
+
+export const draftToImportJson = (draft: ImportDraft): object[] =>
+  importJsonEntities(draft).map((entity) => ({
+    ...buildEntityJson(entity, undefined),
+    relations: draft.relations
+      .filter((relation) => relationOwner(draft, relation) === entity.id)
+      .map((relation) => ({
+        type: relation.type,
+        entityIds: relation.entityIds,
+        ...(relation.type === RelationEnums.Type.Identification
+          ? { certainty: (relation as Relation.IIdentification).certainty }
+          : {}),
+      })),
+  }));
 
 /** Entities the drafts refer to that are neither drafts nor loaded yet. */
 export const missingEntityIds = (draft: ImportDraft): string[] => {

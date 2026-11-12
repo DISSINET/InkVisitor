@@ -18,6 +18,8 @@ export interface ImportIssue {
   // field path inside the entity, e.g. "props[1].type.entityId"
   path?: string;
   message: string;
+  // the draft the issue is about, once the drafts are open
+  entityId?: string;
 }
 
 /** A relation as written in the input, with where it was written. */

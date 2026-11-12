@@ -17,6 +17,7 @@ export {
   deleteDraftRelation,
   draftFromPlan,
   draftToImportJson,
+  issuesWithEntityIds,
   missingEntityIds,
   missingSynonymGroupIds,
   removeDraftEntity,

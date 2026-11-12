@@ -7,6 +7,7 @@ import {
   deleteDraftRelation,
   draftToImportJson,
   ImportDraft,
+  issuesWithEntityIds,
   mergeChanges,
   missingEntityIds,
   missingSynonymGroupIds,
@@ -358,5 +359,15 @@ describe("replaceEntityId", () => {
       ["puppy", "stored-dog"],
       ["hound", "stored-dog"],
     ]);
+  });
+});
+
+describe("issuesWithEntityIds", () => {
+  it("names the draft of each issue by its position in the import JSON", () => {
+    const issues = issuesWithEntityIds(baseDraft(), [
+      { entityIndex: 2, message: "broken" },
+      { message: "about the whole import" },
+    ]);
+    expect(issues.map((issue) => issue.entityId)).toEqual(["puppy", undefined]);
   });
 });

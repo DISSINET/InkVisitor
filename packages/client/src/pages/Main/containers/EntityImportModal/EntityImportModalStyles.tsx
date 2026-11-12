@@ -1,7 +1,4 @@
 import styled from "styled-components";
-import { StyledTabGroup } from "../EntityDetailBox/EntityDetailBoxStyles";
-
-const LOAD_AREA_HEIGHT = "5rem";
 
 // fills the full-height modal, so the JSON field gets all the room left
 export const StyledStep = styled.div`
@@ -97,31 +94,128 @@ export const StyledDraftIssues = styled.div`
   overflow: auto;
 `;
 
-// the bottom edges of the other tabs draw the top line of the box, and the
-// selected tab, which has none, opens into it
-export const StyledDraftTabGroup = styled(StyledTabGroup)`
-  margin-bottom: 0;
-  /* the selected tab takes the background of the Detail it opens into */
-  & > [data-selected="true"] {
-    background-color: ${({ theme }) => theme.color["white"]};
-  }
-  /* the last tab ends on the right edge of the box below */
-  & > *:last-child {
-    margin-right: 0;
-  }
-`;
-
 export const StyledDraftDetail = styled.div`
   position: relative;
   flex: 1;
+  min-width: 0;
   min-height: ${({ theme }) => theme.space[64]};
   overflow: hidden;
   background-color: ${({ theme }) => theme.color["white"]};
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
-  border-top: none;
-  /* matches the rounding of the tabs on top */
-  border-bottom-left-radius: ${({ theme }) => theme.borderRadius.sm};
-  border-bottom-right-radius: ${({ theme }) => theme.borderRadius.sm};
+  /* the list on the left draws this edge, open where the selected row is */
+  border-left: none;
+  border-radius: ${({ theme }) => `0 ${theme.borderRadius.sm} ${theme.borderRadius.sm} 0`};
+`;
+
+// Left of the Detail: every draft, grouped by class, as tabs turned on their
+// side. Each child draws its piece of the edge shared with the Detail, so the
+// selected row can leave its piece out and open into the Detail.
+export const StyledDraftList = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 24rem;
+  min-height: 0;
+  overflow-y: auto;
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
+  border-right: none;
+  border-radius: ${({ theme }) => `${theme.borderRadius.sm} 0 0 ${theme.borderRadius.sm}`};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+
+  & > * {
+    border-right: ${({ theme }) => theme.borderWidth[1]} solid
+      ${({ theme }) => theme.color["gray"][500]};
+  }
+`;
+
+// below the last row, carries the shared edge down to the bottom
+export const StyledDraftListEnd = styled.div`
+  flex: 1;
+`;
+
+export const StyledDraftListGroup = styled.button`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  flex-shrink: 0;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+  text-align: left;
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  border: none;
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+  cursor: pointer;
+`;
+
+export const StyledDraftListRow = styled.div<{ $selected: boolean }>`
+  /* holds the class bar, which sits on its left edge */
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  min-height: 2.6rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  /* the colors of a Detail tab */
+  color: ${({ theme, $selected }) => ($selected ? theme.color["black"] : theme.color["gray"][700])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["white"] : theme.color["gray"][100]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+  cursor: pointer;
+
+  && {
+    border-right-color: ${({ $selected }) => ($selected ? "transparent" : "")};
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ theme, $selected }) =>
+      $selected ? theme.color["white"] : theme.color["gray"][200]};
+  }
+`;
+
+export const StyledDraftListLabel = styled.span`
+  flex: 1;
+  align-self: center;
+  min-width: 0;
+  padding: ${({ theme }) => `0 ${theme.space[2]}`};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const StyledDraftListMarkers = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDraftListBadge = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+export const StyledDraftListLeaveOut = styled.button`
+  display: flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["greyer"]};
+  background: none;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ theme }) => theme.color["gray"][300]};
+  }
 `;
 
 // between the footer's left and right buttons
@@ -143,28 +237,11 @@ export const StyledInputHint = styled(StyledDraftModeHint)`
   text-align: left;
 `;
 
-// the JSON field with the load area floating over its bottom
-export const StyledEditorArea = styled.div`
-  position: relative;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-
-  ${StyledJsonEditor} {
-    /* the last lines scroll up above the load area */
-    padding-bottom: calc(${LOAD_AREA_HEIGHT} + ${({ theme }) => theme.space[8]});
-  }
-`;
-
 // striped like the upload area of the documents page
 export const StyledLoadArea = styled.button`
-  position: absolute;
-  bottom: ${({ theme }) => theme.space[4]};
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(40rem, calc(100% - 2 * ${({ theme }) => theme.space[4]}));
-  height: ${LOAD_AREA_HEIGHT};
+  flex-shrink: 0;
+  width: 100%;
+  height: 3.6rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -173,7 +250,6 @@ export const StyledLoadArea = styled.button`
   color: ${({ theme }) => theme.color["black"]};
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"]["400"]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
-  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   cursor: pointer;
   background: ${({ theme }) => `
     repeating-linear-gradient(
@@ -192,19 +268,10 @@ export const StyledLoadArea = styled.button`
   }
 `;
 
-// the tabs with the Detail, and the side column of the selected draft
+// the list, the Detail and the side column of the selected draft
 export const StyledDraftBody = styled.div`
   display: flex;
   flex: 1;
-  gap: ${({ theme }) => theme.space[4]};
-  min-height: 0;
-`;
-
-export const StyledDraftMain = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
   min-height: 0;
 `;
 
@@ -214,8 +281,9 @@ export const StyledAppendPanel = styled.div`
   flex-direction: column;
   flex-shrink: 0;
   gap: ${({ theme }) => theme.space[4]};
-  width: 30rem;
+  width: 24rem;
   min-height: 0;
+  margin-left: ${({ theme }) => theme.space[4]};
   overflow-y: auto;
 `;
 

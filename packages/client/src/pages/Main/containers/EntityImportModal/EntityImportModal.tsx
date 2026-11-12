@@ -11,7 +11,6 @@ import {
   ModalHeader,
 } from "components";
 import { useUserQuery } from "hooks/react-query";
-import update from "immutability-helper";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
@@ -25,6 +24,7 @@ import {
   ImportDraft,
   ImportIssue,
   ImportWriteOutcome,
+  issuesWithEntityIds,
   importDataSource,
   importWriteApi,
   maxImportEntities,
@@ -45,7 +45,6 @@ import {
   StyledDraftModeHint,
   StyledHiddenFileInput,
   StyledHint,
-  StyledEditorArea,
   StyledInputHint,
   StyledLoadArea,
   StyledProgress,
@@ -306,7 +305,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         appendTargets: appendTargetsOf(draft),
       });
       if (!plan) {
-        setDraftErrors(errors);
+        setDraftErrors(issuesWithEntityIds(draft, errors));
         return false;
       }
       const next = draftAfterAppend(draft, plan);
@@ -366,31 +365,6 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setAppendSteps((steps) => steps.slice(0, steps.indexOf(step)));
   };
 
-  // the indexes count tabs; the Value copies, which have none, stay first
-  const handleMoveTab = useCallback(
-    (dragIndex: number, hoverIndex: number) =>
-      setDraft((current) => {
-        if (!current) {
-          return current;
-        }
-        const tabs = tabEntities(current);
-        const copies = current.entities.filter((entity) => !tabs.includes(entity));
-        return {
-          ...current,
-          entities: [
-            ...copies,
-            ...update(tabs, {
-              $splice: [
-                [dragIndex, 1],
-                [hoverIndex, 0, tabs[dragIndex]],
-              ],
-            }),
-          ],
-        };
-      }),
-    [],
-  );
-
   const handleCreate = async () => {
     if (!draft || !user) {
       return;
@@ -406,7 +380,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         appendTargets: appendTargetsOf(draft),
         allowAppend: false,
       });
-      setDraftErrors(result.errors);
+      setDraftErrors(issuesWithEntityIds(draft, result.errors));
       plan = result.plan;
     } catch (error) {
       setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
@@ -462,8 +436,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   return (
     <Modal
       showModal={showModal}
-      // wide enough for a relation line with two ids to fit unwrapped
-      width="fat"
+      // the list, Detail and the append column side by side
+      width="full"
       // the JSON field and the Detail of the drafts fill the height; the
       // result keeps the height of its content
       fullHeight={step === "input" || step === "drafts"}
@@ -482,17 +456,15 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <ModalContent column enableScroll>
         {step === "input" && (
           <StyledStep>
-            <StyledEditorArea>
-              <EntityImportJsonEditor
-                value={text}
-                onChange={setText}
-                placeholder={INPUT_PLACEHOLDER}
-              />
-              <StyledLoadArea type="button" onClick={() => fileInputRef.current?.click()}>
-                <IcoFileText />
-                {"Load a .json file"}
-              </StyledLoadArea>
-            </StyledEditorArea>
+            <StyledLoadArea type="button" onClick={() => fileInputRef.current?.click()}>
+              <IcoFileText />
+              {"Load a .json file"}
+            </StyledLoadArea>
+            <EntityImportJsonEditor
+              value={text}
+              onChange={setText}
+              placeholder={INPUT_PLACEHOLDER}
+            />
             <StyledHiddenFileInput
               ref={fileInputRef}
               type="file"
@@ -516,7 +488,6 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               draft={draft}
               onDraftChange={handleDraftChange}
               onCloseTab={handleCloseTab}
-              onMoveTab={handleMoveTab}
               onConflictChoice={handleConflictChoice}
               onAppendTo={handleAppendTo}
               undoableAppendIds={appendSteps.map((step) => step.storedId)}
@@ -579,7 +550,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             />
             <StyledDraftModeHint>
               {
-                "Draft mode. Nothing is saved until Import, so suggesters can't create new entities. Close a tab to leave its entity out."
+                "Draft mode. Nothing is saved until Import, so suggesters can't create new entities. The × on a row leaves its entity out."
               }
             </StyledDraftModeHint>
             <ButtonGroup>

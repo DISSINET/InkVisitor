@@ -96,7 +96,6 @@ const Harness = () => {
       draft={draft}
       onDraftChange={(change) => setDraft((current) => change(current))}
       onCloseTab={(entityId) => closed.push(entityId)}
-      onMoveTab={() => {}}
       onConflictChoice={() => {}}
       onAppendTo={async () => false}
       undoableAppendIds={[]}

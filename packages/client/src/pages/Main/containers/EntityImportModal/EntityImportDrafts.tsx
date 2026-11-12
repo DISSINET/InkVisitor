@@ -1,11 +1,6 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { EntityEditing, EntityEditingContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
-import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
-import {
-  EntityDetailTabOverflow,
-} from "../EntityDetailBox/EntityDetailTabOverflow/EntityDetailTabOverflow";
-import { useTabOverflow } from "../EntityDetailBox/EntityDetailTabOverflow/useTabOverflow";
 import { IEntity } from "@inkvisitor/shared/types";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -18,14 +13,13 @@ import {
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
 import { canAppend, EntityImportAppendPanel } from "./EntityImportAppendPanel";
+import { EntityImportDraftList, groupDrafts } from "./EntityImportDraftList";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
   StyledDraftBody,
   StyledDraftDetail,
-  StyledDraftMain,
   StyledDraftIssues,
   StyledDrafts,
-  StyledDraftTabGroup,
 } from "./EntityImportModalStyles";
 
 // Detail decides its narrow layout from the width of this element
@@ -36,7 +30,6 @@ interface EntityImportDrafts {
   onDraftChange: (update: (draft: ImportDraft) => ImportDraft) => void;
   // leaves the entity out of the import
   onCloseTab: (entityId: string) => void;
-  onMoveTab: (dragIndex: number, hoverIndex: number) => void;
   onConflictChoice: (entityId: string, conflictIndex: number, useImported: boolean) => void;
   // resolves to whether the draft became an append to the stored entity
   onAppendTo: (entityId: string, storedId: string) => Promise<boolean>;
@@ -48,14 +41,13 @@ interface EntityImportDrafts {
 }
 
 /**
- * The entities of an import as tabs, each shown and edited in Detail. Every
- * edit stays in the draft until the import creates the entities.
+ * The entities of an import as a list, the selected one shown and edited in
+ * Detail. Every edit stays in the draft until the import creates the entities.
  */
 export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   draft,
   onDraftChange,
   onCloseTab,
-  onMoveTab,
   onConflictChoice,
   onAppendTo,
   undoableAppendIds,
@@ -64,21 +56,29 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   notes,
 }) => {
   const tabs = useMemo(() => tabEntities(draft), [draft]);
-  const [selectedId, setSelectedId] = useState<string | undefined>(tabs[0]?.id);
+  // the first row of the list, where the selection goes when it has none
+  const firstId = () => groupDrafts(tabs)[0]?.[1][0]?.id;
+  const [selectedId, setSelectedId] = useState<string | undefined>(firstId);
 
   // the import id of each draft appended in the tabs, by stored id
   const appendedFrom = useRef<Record<string, string>>({});
 
-  // an undone append gives the tab its import id back; a closed tab hands the
-  // selection to the first tab left
+  // an undone append gives the draft its import id back; a draft left out
+  // hands the selection to the first row
   useEffect(() => {
     if (!tabs.some((entity) => entity.id === selectedId)) {
       const restoredId = selectedId && appendedFrom.current[selectedId];
-      setSelectedId(
-        tabs.some((entity) => entity.id === restoredId) ? restoredId : tabs[0]?.id
-      );
+      setSelectedId(tabs.some((entity) => entity.id === restoredId) ? restoredId : firstId());
     }
   }, [tabs, selectedId]);
+
+  const errorIds = useMemo(
+    () =>
+      new Set(
+        errors.flatMap((issue) => (issue.entityId ? [issue.entityId] : []))
+      ),
+    [errors]
+  );
 
   const right = [UserEnums.Role.Admin, UserEnums.Role.Owner].includes(
     getStoredUserRole() as UserEnums.Role
@@ -142,19 +142,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       });
   }, [selected, draft.appends, draftEntityIds]);
 
-  const { tabGroupRef, visibleTabs, overflowEntities } = useTabOverflow(tabs, selectedId);
-
-  // a tab picked in the caret list moves to the front, so two picks from the
-  // list can sit side by side
-  const handleOverflowSelect = (entityId: string) => {
-    const index = tabs.findIndex((entity) => entity.id === entityId);
-    if (index > 0) {
-      onMoveTab(index, 0);
-    }
-    setSelectedId(entityId);
-  };
-
-  // the draft takes the id of the stored entity, so its tab stays selected
+  // the draft takes the id of the stored entity, so its row stays selected
   const handleAppendTo = async (entityId: string, storedId: string) => {
     if (await onAppendTo(entityId, storedId)) {
       appendedFrom.current[storedId] = entityId;
@@ -181,40 +169,26 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
         )}
 
         <StyledDraftBody>
-          <StyledDraftMain>
-            <StyledDraftTabGroup ref={tabGroupRef}>
-              {visibleTabs.map(({ entity, index }) => (
-                <EntityDetailTab
-                  key={entity.id}
-                  index={index}
-                  entity={entity}
-                  isSelected={entity.id === selectedId}
-                  onClick={() => setSelectedId(entity.id)}
-                  onClose={() => onCloseTab(entity.id)}
-                  moveRow={onMoveTab}
-                />
-              ))}
-              {overflowEntities.length > 0 && (
-                <EntityDetailTabOverflow
-                  entities={overflowEntities}
-                  onSelect={handleOverflowSelect}
-                  onClose={onCloseTab}
-                />
-              )}
-            </StyledDraftTabGroup>
+          <EntityImportDraftList
+            draft={draft}
+            entities={tabs}
+            errorIds={errorIds}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onLeaveOut={onCloseTab}
+          />
 
-            <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
-              {detail && (
-                <EntityDetail
-                  key={detail.id}
-                  detailId={detail.id}
-                  entity={detail}
-                  error={null}
-                  isFetching={false}
-                />
-              )}
-            </StyledDraftDetail>
-          </StyledDraftMain>
+          <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
+            {detail && (
+              <EntityDetail
+                key={detail.id}
+                detailId={detail.id}
+                entity={detail}
+                error={null}
+                isFetching={false}
+              />
+            )}
+          </StyledDraftDetail>
 
           {selected && (
             <EntityImportAppendPanel
