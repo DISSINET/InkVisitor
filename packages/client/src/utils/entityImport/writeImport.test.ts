@@ -1,5 +1,6 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
+import { emptySkips } from "./appendMerge";
 import { ImportPlan } from "./types";
 import { ImportWriteApi, writeImport } from "./writeImport";
 
@@ -17,6 +18,7 @@ const fakeServer = (options: {
   existing?: IEntity[];
   relations?: Relation.IRelation[];
   failEntity?: string;
+  failUpdate?: string;
   failRelation?: string;
   keepEntities?: string[];
 }) => {
@@ -36,6 +38,13 @@ const fakeServer = (options: {
         throw { error: "PermissionDeniedError", message: "entity cannot be created" };
       }
       entities.set(item.id, item);
+    },
+    updateEntity: async (entityId, changes) => {
+      calls.push(`update entity ${entityId} ${Object.keys(changes).join(",")}`);
+      if (entityId === options.failUpdate) {
+        throw { error: "ModelNotValidError", message: "update refused" };
+      }
+      entities.set(entityId, { ...entities.get(entityId)!, ...changes });
     },
     createRelation: async (item) => {
       calls.push(`create relation ${item.id}`);
@@ -70,11 +79,16 @@ const fakeServer = (options: {
   return { api, calls, entities, relations };
 };
 
-const plan = (entities: IEntity[], relations: Relation.IRelation[] = []): ImportPlan => ({
+const plan = (
+  entities: IEntity[],
+  relations: Relation.IRelation[] = [],
+  appends: ImportPlan["appends"] = {}
+): ImportPlan => ({
   entities,
   relations,
   existingEntities: { animal: entity("animal"), hound: entity("hound") },
   valueCopyIds: [],
+  appends,
 });
 
 describe("writeImport", () => {
@@ -88,7 +102,12 @@ describe("writeImport", () => {
       onProgress
     );
 
-    expect(outcome).toEqual({ status: "created", entityIds: ["dog", "cat"], relationCount: 1 });
+    expect(outcome).toEqual({
+      status: "created",
+      entityIds: ["dog", "cat"],
+      appendedIds: [],
+      relationCount: 1,
+    });
     expect(server.calls).toEqual(["create entity dog", "create entity cat", "create relation r1"]);
     expect(onProgress.mock.calls).toEqual([
       [1, 3],
@@ -116,6 +135,7 @@ describe("writeImport", () => {
       status: "rolledBack",
       failure: 'Failed at entity "cat": entity cannot be created',
       entityCount: 1,
+      appendCount: 0,
       relationCount: 0,
     });
     expect(server.calls.slice(-1)).toEqual(["delete entities dog"]);
@@ -193,6 +213,54 @@ describe("writeImport", () => {
       "delete relation r2",
     ]);
     expect(server.relations.size).toBe(0);
+  });
+
+  it("appends to a stored entity after creating the new ones, and only what changed", async () => {
+    const stored = { ...entity("wolf"), notes: ["old"], updatedAt: "t1" } as unknown as IEntity;
+    const server = fakeServer({ existing: [stored] });
+
+    const outcome = await writeImport(
+      plan([entity("dog"), { ...stored, notes: ["old", "new"] }], [], {
+        wolf: { stored, conflicts: [], skipped: emptySkips() },
+      }),
+      server.api
+    );
+
+    expect(outcome).toMatchObject({ status: "created", entityIds: ["dog"], appendedIds: ["wolf"] });
+    expect(server.calls).toEqual(["create entity dog", "update entity wolf notes"]);
+    expect(server.entities.get("wolf")!.notes).toEqual(["old", "new"]);
+  });
+
+  it("stops before writing when an appended entity changed meanwhile", async () => {
+    const stored = { ...entity("wolf"), updatedAt: "t1" } as unknown as IEntity;
+    const server = fakeServer({ existing: [{ ...stored, updatedAt: "t2" } as unknown as IEntity] });
+
+    const outcome = await writeImport(
+      plan([{ ...stored, notes: ["new"] }], [], {
+        wolf: { stored, conflicts: [], skipped: emptySkips() },
+      }),
+      server.api
+    );
+
+    expect(outcome.status).toBe("conflict");
+    expect(server.calls).toEqual([]);
+  });
+
+  it("undoes an append when a later write fails", async () => {
+    const stored = { ...entity("wolf"), notes: ["old"], updatedAt: "t1" } as unknown as IEntity;
+    const server = fakeServer({ existing: [stored], failRelation: "r1" });
+
+    const outcome = await writeImport(
+      plan(
+        [{ ...stored, notes: ["old", "new"] }],
+        [relation("r1", RelationEnums.Type.Superclass, "wolf", "animal")],
+        { wolf: { stored, conflicts: [], skipped: emptySkips() } }
+      ),
+      server.api
+    );
+
+    expect(outcome).toMatchObject({ status: "rolledBack", appendCount: 1 });
+    expect(server.entities.get("wolf")!.notes).toEqual(["old"]);
   });
 
   it("lists what the rollback could not remove", async () => {

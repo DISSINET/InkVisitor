@@ -2,15 +2,18 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { EntityEditing, EntityEditingContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
 import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
-import React, { useEffect, useMemo, useState } from "react";
+import { IEntity } from "@inkvisitor/shared/types";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildDraftDetail,
   createDraftWrites,
   ImportDraft,
   ImportIssue,
+  searchCandidates,
   tabEntities,
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
+import { EntityImportAppendPanel } from "./EntityImportAppendPanel";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
   StyledDraftDetail,
@@ -28,6 +31,9 @@ interface EntityImportDrafts {
   // leaves the entity out of the import
   onCloseTab: (entityId: string) => void;
   onMoveTab: (dragIndex: number, hoverIndex: number) => void;
+  onConflictChoice: (entityId: string, conflictIndex: number, useImported: boolean) => void;
+  // resolves to whether the draft became an append to the stored entity
+  onAppendTo: (entityId: string, storedId: string) => Promise<boolean>;
   errors: ImportIssue[];
   notes: ImportIssue[];
 }
@@ -41,6 +47,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   onDraftChange,
   onCloseTab,
   onMoveTab,
+  onConflictChoice,
+  onAppendTo,
   errors,
   notes,
 }) => {
@@ -79,6 +87,44 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;
+  const selected = tabs.find((entity) => entity.id === selectedId);
+
+  // A new draft is searched by its labels for an entity already in the
+  // database when its tab is first opened. The search outlives a tab switch,
+  // so its results are kept by draft id; it is dropped only when the drafts
+  // close.
+  const [candidates, setCandidates] = useState<Record<string, IEntity[]>>({});
+  const searchedIds = useRef(new Set<string>());
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!selected || draft.appends?.[selected.id] || searchedIds.current.has(selected.id)) {
+      return;
+    }
+    searchedIds.current.add(selected.id);
+    searchCandidates(selected)
+      .catch(() => [])
+      .then((found) => {
+        if (isMounted.current) {
+          setCandidates((current) => ({
+            ...current,
+            [selected.id]: found.filter((candidate) => !draftEntityIds.has(candidate.id)),
+          }));
+        }
+      });
+  }, [selected, draft.appends, draftEntityIds]);
+
+  // the draft takes the id of the stored entity, so its tab stays selected
+  const handleAppendTo = async (entityId: string, storedId: string) => {
+    if (await onAppendTo(entityId, storedId)) {
+      setSelectedId(storedId);
+    }
+  };
 
   return (
     <EntityEditingContext.Provider value={editing}>
@@ -96,6 +142,18 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               collapsible
             />
           </StyledDraftIssues>
+        )}
+
+        {selected && (
+          <EntityImportAppendPanel
+            draft={draft}
+            entity={selected}
+            candidates={candidates[selected.id]}
+            onConflictChoice={(conflictIndex, useImported) =>
+              onConflictChoice(selected.id, conflictIndex, useImported)
+            }
+            onAppendTo={(storedId) => handleAppendTo(selected.id, storedId)}
+          />
         )}
 
         <StyledDraftTabGroup>

@@ -1,5 +1,5 @@
 import { isPlainObject } from "./helpers";
-import { ImportIssue, MAX_IMPORT_ENTITIES } from "./types";
+import { ImportIssue } from "./types";
 
 /** The text without commas that close a list or an object, as in `[1, 2,]`. */
 const removeTrailingCommas = (text: string): string => {
@@ -31,10 +31,13 @@ const removeTrailingCommas = (text: string): string => {
 
 /**
  * Reads the pasted text into a list of entity objects: a single object or an
- * array of 1 to MAX_IMPORT_ENTITIES objects. Trailing commas, which language
+ * array of 1 to `maxEntities` objects. Trailing commas, which language
  * models often leave, are accepted.
  */
-export const parseImportInput = (text: string): { items: unknown[]; errors: ImportIssue[] } => {
+export const parseImportInput = (
+  text: string,
+  maxEntities: number
+): { items: unknown[]; errors: ImportIssue[] } => {
   if (!text.trim()) {
     return { items: [], errors: [{ message: "Paste JSON or load a .json file" }] };
   }
@@ -60,12 +63,12 @@ export const parseImportInput = (text: string): { items: unknown[]; errors: Impo
   if (items.length === 0) {
     return { items: [], errors: [{ message: "The input holds no entity" }] };
   }
-  if (items.length > MAX_IMPORT_ENTITIES) {
+  if (items.length > maxEntities) {
     return {
       items: [],
       errors: [
         {
-          message: `The input holds ${items.length} entities; at most ${MAX_IMPORT_ENTITIES} can be imported at once`,
+          message: `The input holds ${items.length} entities; at most ${maxEntities} can be imported at once`,
         },
       ],
     };

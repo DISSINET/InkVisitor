@@ -12,6 +12,7 @@ import {
   missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
+  replaceEntityId,
   tabEntities,
   updateDraftEntity,
   updateDraftRelation,
@@ -333,5 +334,29 @@ describe("createDraftWrites", () => {
     await writes.updateRelation("r3", { entityIds: ["hound", "canine"] });
 
     expect(draft().relations.map((item) => item.id)).toEqual(["r1", "r2"]);
+  });
+});
+
+describe("replaceEntityId", () => {
+  it("swaps the id of a draft wherever the drafts use it, and nothing else", () => {
+    const draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { notes: ["dog"] }),
+        newEntity("puppy", { props: [{ type: "size", value: "dog" }] }),
+      ],
+    };
+
+    const swapped = replaceEntityId(draft, "dog", "stored-dog");
+
+    expect(swapped.entities.map((entity) => entity.id)).toEqual(["stored-dog", "puppy"]);
+    // a note that holds the same text is no link
+    expect(swapped.entities[0].notes).toEqual(["dog"]);
+    expect(swapped.entities[1].props[0].value.entityId).toBe("stored-dog");
+    expect(swapped.relations.map((item) => item.entityIds)).toEqual([
+      ["stored-dog", "animal"],
+      ["puppy", "stored-dog"],
+      ["hound", "stored-dog"],
+    ]);
   });
 });

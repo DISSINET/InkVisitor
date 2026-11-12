@@ -1,12 +1,16 @@
-export { importDataSource, importWriteApi } from "./apiAdapters";
+export { importDataSource, importWriteApi, searchCandidates } from "./apiAdapters";
 export { buildEntityJson } from "./entityJson";
-export { errorMessage, formatIssue } from "./helpers";
-export { MAX_IMPORT_ENTITIES } from "./types";
+export { count, errorMessage, formatIssue } from "./helpers";
+export { maxImportEntities } from "./types";
 export type { ImportIssue, ImportPlan, ImportValidation } from "./types";
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
+export { describeSkips } from "./appendMerge";
+export type { AppendConflict, AppendInfo } from "./appendMerge";
 export {
+  appendTargetsOf,
+  draftAfterAppend,
   buildDraftDetail,
   createDraftWrites,
   createDraftRelation,
@@ -17,6 +21,8 @@ export {
   missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
+  replaceEntityId,
+  setConflictChoice,
   tabEntities,
   updateDraftEntity,
   updateDraftRelation,

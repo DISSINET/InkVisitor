@@ -16,6 +16,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
 import {
+  appendTargetsOf,
+  count,
+  draftAfterAppend,
   draftFromPlan,
   draftToImportJson,
   errorMessage,
@@ -24,10 +27,12 @@ import {
   ImportWriteOutcome,
   importDataSource,
   importWriteApi,
-  MAX_IMPORT_ENTITIES,
+  maxImportEntities,
   missingEntityIds,
   missingSynonymGroupIds,
   removeDraftEntity,
+  replaceEntityId,
+  setConflictChoice,
   tabEntities,
   validateImport,
   writeImport,
@@ -40,6 +45,7 @@ import {
   StyledDraftModeHint,
   StyledHiddenFileInput,
   StyledHint,
+  StyledInputHeader,
   StyledProgress,
   StyledResult,
   StyledResultFailure,
@@ -65,7 +71,7 @@ const draftSnapshot = (draft: ImportDraft) =>
     ),
   );
 
-const entityCount = (count: number) => `${count} ${count === 1 ? "entity" : "entities"}`;
+const entityCount = (amount: number) => count(amount, "entity", "entities");
 
 interface EntityImportModal {
   closeModal: () => void;
@@ -84,6 +90,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const [text, setText] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
+  // the text Validate last refused; Validate stays off until it is changed
+  const [refusedText, setRefusedText] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<ImportDraft | null>(null);
   // the drafts as Validate opened them, to tell whether they were edited
@@ -98,7 +106,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   // a write in progress must finish or roll back before the modal can close
   const isWriting = step === "writing";
 
-  // Closing the modal while Create still checks the drafts cancels the
+  // Closing the modal while Import still checks the drafts cancels the
   // import: the check runs on, but nothing is written once it is done.
   const isClosedRef = useRef(false);
   const handleClose = () => {
@@ -106,8 +114,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     closeModal();
   };
 
+  const role = getStoredUserRole() as UserEnums.Role;
   const validationContext = () => ({
-    role: getStoredUserRole() as UserEnums.Role,
+    role,
     defaultLanguage: user!.options.defaultLanguage,
     source: importDataSource,
   });
@@ -187,6 +196,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     try {
       const result = await validateImport(text, validationContext());
       setInputErrors(result.errors);
+      setRefusedText(result.plan ? null : text);
       if (result.plan) {
         const validatedDraft = draftFromPlan(result.plan);
         validatedSnapshot.current = draftSnapshot(validatedDraft);
@@ -260,6 +270,46 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     ]);
   };
 
+  const handleConflictChoice = (entityId: string, conflictIndex: number, useImported: boolean) =>
+    setDraft((current) => current && setConflictChoice(current, entityId, conflictIndex, useImported));
+
+  // The draft takes the id of the stored entity everywhere in the drafts, and
+  // the drafts are validated again: the draft is merged into the stored
+  // entity, the drafts already appended keep their final state.
+  const handleAppendTo = async (entityId: string, storedId: string): Promise<boolean> => {
+    if (!draft || !user) {
+      return false;
+    }
+    const label = draft.entities.find((entity) => entity.id === entityId)?.labels[0];
+    const json = JSON.stringify(draftToImportJson(replaceEntityId(draft, entityId, storedId)));
+    setIsValidating(true);
+    try {
+      const { errors, plan } = await validateImport(json, {
+        ...validationContext(),
+        appendTargets: appendTargetsOf(draft),
+      });
+      if (!plan) {
+        setDraftErrors(errors);
+        return false;
+      }
+      setDraft(draftAfterAppend(draft, plan));
+      setDraftErrors([]);
+      setDraftNotes((notes) => [
+        ...notes,
+        {
+          label,
+          message: `appended to "${plan.appends[storedId]?.stored.labels[0]}" in the database`,
+        },
+      ]);
+      return true;
+    } catch (error) {
+      setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   // the indexes count tabs; the Value copies, which have none, stay first
   const handleMoveTab = useCallback(
     (dragIndex: number, hoverIndex: number) =>
@@ -295,10 +345,11 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setIsValidating(true);
     let plan;
     try {
-      const result = await validateImport(
-        JSON.stringify(draftToImportJson(draft)),
-        validationContext(),
-      );
+      const result = await validateImport(JSON.stringify(draftToImportJson(draft)), {
+        ...validationContext(),
+        appendTargets: appendTargetsOf(draft),
+        allowAppend: false,
+      });
       setDraftErrors(result.errors);
       plan = result.plan;
     } catch (error) {
@@ -329,17 +380,16 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     if (result.status === "created") {
       onImported(plan.entities);
       // the Value copies were made by the import, not given in the input
-      const copyCount = plan.entities.filter((entity) =>
-        draft.valueCopyIds?.includes(entity.id),
-      ).length;
-      const relations = `${result.relationCount} ${
-        result.relationCount === 1 ? "relation" : "relations"
-      }`;
+      const copyCount = result.entityIds.filter((id) => draft.valueCopyIds?.includes(id)).length;
+      const relations = count(result.relationCount, "relation", "relations");
+      const appended = result.appendedIds.length
+        ? `, appended to ${entityCount(result.appendedIds.length)}`
+        : "";
       const copies = copyCount
-        ? `; ${copyCount} ${copyCount === 1 ? "Value" : "Values"} created`
+        ? `; ${count(copyCount, "Value", "Values")} created`
         : "";
       toast.info(
-        `Imported ${entityCount(plan.entities.length - copyCount)}, ${relations}${copies}`,
+        `Imported ${entityCount(result.entityIds.length - copyCount)}${appended}, ${relations}${copies}`,
       );
       closeModal();
     } else if (result.status === "conflict") {
@@ -374,9 +424,17 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <ModalContent column enableScroll={step !== "drafts"}>
         {step === "input" && (
           <StyledStep>
-            <StyledHint>
-              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. Detail's JSON section shows this format; give a copy a new id.`}
-            </StyledHint>
+            <StyledInputHeader>
+              <StyledHint>
+                {`Load a .json file or paste up to ${maxImportEntities(role)} entities as a JSON object or array. Detail's JSON section shows this format. An entity whose id is in the database is appended to it.`}
+              </StyledHint>
+              <Button
+                label="load file"
+                icon={<IcoFileText />}
+                color="primary"
+                onClick={() => fileInputRef.current?.click()}
+              />
+            </StyledInputHeader>
             <EntityImportJsonEditor
               value={text}
               onChange={setText}
@@ -406,6 +464,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onDraftChange={handleDraftChange}
               onCloseTab={handleCloseTab}
               onMoveTab={handleMoveTab}
+              onConflictChoice={handleConflictChoice}
+              onAppendTo={handleAppendTo}
               errors={draftErrors}
               notes={draftNotes}
             />
@@ -420,7 +480,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           <StyledResult>
             <StyledResultFailure>{outcome.failure}</StyledResultFailure>
             <p>
-              {`Rolled back: ${outcome.entityCount} entities, ${outcome.relationCount} relations. Nothing was imported.`}
+              {`Rolled back: ${outcome.entityCount} entities, ${outcome.appendCount} appends, ${outcome.relationCount} relations. Nothing was imported.`}
             </p>
           </StyledResult>
         )}
@@ -436,25 +496,17 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         )}
       </ModalContent>
 
-      <ModalFooter spaceBetween={step === "input" || step === "drafts"}>
+      <ModalFooter spaceBetween={step === "drafts"}>
         {step === "input" && (
-          <>
+          <ButtonGroup>
+            <CancelButton onClick={handleClose} />
             <Button
-              label="load file"
-              icon={<IcoFileText />}
-              inverted
-              onClick={() => fileInputRef.current?.click()}
+              label="Validate"
+              color="info"
+              disabled={!text.trim() || text === refusedText || isValidating || !user}
+              onClick={handleValidate}
             />
-            <ButtonGroup>
-              <CancelButton onClick={handleClose} />
-              <Button
-                label="Validate"
-                color="info"
-                disabled={!text.trim() || isValidating || !user}
-                onClick={handleValidate}
-              />
-            </ButtonGroup>
-          </>
+          </ButtonGroup>
         )}
         {step === "drafts" && (
           <>
@@ -467,13 +519,13 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             />
             <StyledDraftModeHint>
               {
-                "Draft mode. Nothing is saved until Create, so suggesters can't create new entities."
+                "Draft mode. Nothing is saved until Import, so suggesters can't create new entities. Close a tab to leave its entity out."
               }
             </StyledDraftModeHint>
             <ButtonGroup>
               <CancelButton onClick={handleClose} />
               <Button
-                label={`Create ${entityCount(draftCount)}`}
+                label={`Import ${entityCount(draftCount)}`}
                 color="info"
                 disabled={draftCount === 0 || isValidating}
                 onClick={handleCreate}

@@ -135,6 +135,40 @@ export const StyledHiddenFileInput = styled.input`
   display: none;
 `;
 
+// the load button sits above the JSON field, next to the hint
+export const StyledInputHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+
+// above the tabs: how the selected draft relates to the database
+export const StyledAppendPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledAppendText = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledAppendRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledAppendRowLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
 export const StyledProgress = styled.p`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["black"]};

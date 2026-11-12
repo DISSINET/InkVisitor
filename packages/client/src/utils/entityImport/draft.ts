@@ -2,8 +2,9 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { IEntity, IProp, IResponseDetail, ITerritory, Relation } from "@inkvisitor/shared/types";
 import { EntityWrites, LOCAL_WRITE_RESPONSE } from "hooks/useEntityEditing";
 import { v4 as uuidv4 } from "uuid";
+import { AppendInfo, applyConflictChoice } from "./appendMerge";
 import { buildEntityJson } from "./entityJson";
-import { isPlainObject, unique } from "./helpers";
+import { count, isPlainObject, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { collectEntityRefs } from "./references";
 import { ImportPlan } from "./types";
@@ -27,6 +28,9 @@ export interface ImportDraft {
   // drop, they get no tab, show in their slot and are created only while a
   // draft still points at them
   valueCopyIds?: string[];
+  // drafts whose id is taken: the stored entity with what the import adds;
+  // their relations here are only the new ones
+  appends?: Record<string, AppendInfo>;
 }
 
 export const draftFromPlan = (plan: ImportPlan): ImportDraft => ({
@@ -34,7 +38,115 @@ export const draftFromPlan = (plan: ImportPlan): ImportDraft => ({
   relations: plan.relations,
   existing: plan.existingEntities,
   valueCopyIds: plan.valueCopyIds,
+  appends: plan.appends,
 });
+
+/** The stored entities the drafts append to, as they were when merged. */
+export const appendTargetsOf = (draft: ImportDraft): Record<string, IEntity> =>
+  Object.fromEntries(
+    Object.entries(draft.appends ?? {}).map(([entityId, append]) => [entityId, append.stored])
+  );
+
+/**
+ * The drafts with one entity id replaced by another wherever it appears: as an
+ * entity's own id, in metaprops, references, territory data and relations.
+ */
+export const replaceEntityId = (draft: ImportDraft, fromId: string, toId: string): ImportDraft => {
+  const swap = (id: string) => (id === fromId ? toId : id);
+  const swapProps = (props: IProp[]): IProp[] =>
+    props.map((prop) => ({
+      ...prop,
+      type: { ...prop.type, entityId: swap(prop.type.entityId) },
+      value: { ...prop.value, entityId: swap(prop.value.entityId) },
+      children: swapProps(prop.children),
+    }));
+  const swapData = (entity: IEntity) => {
+    if (entity.class !== EntityEnums.Class.Territory) {
+      return entity.data;
+    }
+    const { parent, protocol } = (entity as ITerritory).data;
+    return {
+      ...entity.data,
+      ...(parent ? { parent: { ...parent, territoryId: swap(parent.territoryId) } } : {}),
+      ...(protocol
+        ? {
+            protocol: Object.fromEntries(
+              Object.entries(protocol).map(([key, value]) => [
+                key,
+                Array.isArray(value) ? value.map(swap) : swap(value as string),
+              ])
+            ),
+          }
+        : {}),
+    };
+  };
+  return {
+    ...draft,
+    entities: draft.entities.map((entity) => ({
+      ...entity,
+      id: swap(entity.id),
+      props: swapProps(entity.props),
+      references: entity.references.map((reference) => ({
+        ...reference,
+        resource: swap(reference.resource),
+        value: swap(reference.value),
+      })),
+      data: swapData(entity),
+    })),
+    relations: draft.relations.map((relation) => ({
+      ...relation,
+      entityIds: relation.entityIds.map(swap),
+    })),
+  };
+};
+
+/**
+ * The drafts validated again after one was appended to a stored entity. The
+ * copies of stored Values come back as Values of the input and keep being
+ * copies; the drafts appended before keep their settled conflicts.
+ */
+export const draftAfterAppend = (previous: ImportDraft, plan: ImportPlan): ImportDraft => {
+  const ids = new Set(plan.entities.map((entity) => entity.id));
+  const keptAppends = Object.entries(previous.appends ?? {}).filter(([id]) => id in plan.appends);
+  return {
+    ...draftFromPlan(plan),
+    valueCopyIds: [
+      ...(previous.valueCopyIds ?? []).filter((id) => ids.has(id)),
+      ...plan.valueCopyIds,
+    ],
+    appends: { ...plan.appends, ...Object.fromEntries(keptAppends) },
+    storedSynonyms: previous.storedSynonyms,
+  };
+};
+
+/** Settles one conflict of an appended draft to the stored or the imported value. */
+export const setConflictChoice = (
+  draft: ImportDraft,
+  entityId: string,
+  conflictIndex: number,
+  useImported: boolean
+): ImportDraft => {
+  const append = draft.appends?.[entityId];
+  const conflict = append?.conflicts[conflictIndex];
+  if (!append || !conflict) {
+    return draft;
+  }
+  return {
+    ...draft,
+    entities: draft.entities.map((entity) =>
+      entity.id === entityId ? applyConflictChoice(entity, conflict, useImported) : entity
+    ),
+    appends: {
+      ...draft.appends,
+      [entityId]: {
+        ...append,
+        conflicts: append.conflicts.map((candidate, index) =>
+          index === conflictIndex ? { ...candidate, useImported } : candidate
+        ),
+      },
+    },
+  };
+};
 
 const isValueCopy = (draft: ImportDraft, entityId: string) =>
   !!draft.valueCopyIds?.includes(entityId);
@@ -126,9 +238,6 @@ export interface DraftCleanup {
   entityId: string;
   changes: string[];
 }
-
-const count = (amount: number, singular: string, plural: string) =>
-  `${amount} ${amount === 1 ? singular : plural}`;
 
 /**
  * Removes every link to `removedId` from one draft: a metaprop typed by it
@@ -245,11 +354,15 @@ export const removeDraftEntity = (
       return result.entity;
     });
 
+  const appends = { ...draft.appends };
+  delete appends[entityId];
+
   return {
     draft: {
       ...draft,
       entities,
       relations: draft.relations.filter((relation) => !removedRelations.includes(relation)),
+      appends,
     },
     removedRelations,
     cleanups,

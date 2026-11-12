@@ -43,6 +43,26 @@ export const enumList = (enumObject: Record<string, string | number>): string =>
 
 export const unique = <T,>(values: T[]): T[] => [...new Set(values)];
 
+/** "1 metaprop", "2 metaprops" */
+export const count = (amount: number, singular: string, plural: string) =>
+  `${amount} ${amount === 1 ? singular : plural}`;
+
+const pathKeys = (path: string) => path.match(/[^.[\]]+/g)!;
+
+/** The field at a path such as "props[0].value.entityId". */
+export const getAtPath = (target: object, path: string): unknown =>
+  pathKeys(path).reduce<unknown>((node, key) => (node as Record<string, unknown>)?.[key], target);
+
+/** Sets the field at a path such as "props[0].value.entityId", in place. */
+export const setAtPath = (target: object, path: string, value: unknown) => {
+  const keys = pathKeys(path);
+  let node = target as Record<string, unknown>;
+  keys.slice(0, -1).forEach((key) => {
+    node = node[key] as Record<string, unknown>;
+  });
+  node[keys[keys.length - 1]] = value;
+};
+
 /** `Entity 3 "sacral kingship" › props[1].type.entityId: <message>` */
 export const formatIssue = (issue: ImportIssue): string => {
   const location: string[] = [];

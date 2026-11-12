@@ -81,12 +81,12 @@ describe("EntityImportModal", () => {
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
     });
     await act(async () => buttonNamed("Validate").click());
-    expect(buttonNamed("Create 1 entity")).toBeDefined();
+    expect(buttonNamed("Import 1 entity")).toBeDefined();
 
     // Create: the check waits on the server, and the modal is closed meanwhile
     let answerCheck: (value: { data: never[] }) => void = () => {};
     entitiesGet.mockImplementationOnce(() => new Promise((resolve) => (answerCheck = resolve)));
-    await act(async () => buttonNamed("Create 1 entity").click());
+    await act(async () => buttonNamed("Import 1 entity").click());
     await act(async () => buttonNamed("Cancel").click());
     expect(closeModal).toHaveBeenCalled();
 

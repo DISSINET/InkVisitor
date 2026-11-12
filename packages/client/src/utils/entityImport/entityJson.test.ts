@@ -1,6 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import { CMetaProp, CReference } from "constructors";
+import { appendChanges } from "./appendMerge";
 import { buildEntityJson } from "./entityJson";
 import { validateImport } from "./validateImport";
 
@@ -54,13 +55,19 @@ const database = [
   existingEntity("catalogue", EntityEnums.Class.Territory),
 ];
 
+// relations the database holds, for an import appending to a stored entity
+const storedRelations: Relation.IRelation[] = [];
+
 const importJson = (json: object) =>
   validateImport(JSON.stringify(json), {
     role: UserEnums.Role.Admin,
     defaultLanguage: EntityEnums.Language.English,
     source: {
       getEntities: async (ids: string[]) => database.filter((entity) => ids.includes(entity.id)),
-      getForwardRelations: async () => [],
+      getForwardRelations: async (entityId: string, type: RelationEnums.Type) =>
+        storedRelations.filter(
+          (relation) => relation.type === type && relation.entityIds.includes(entityId)
+        ),
     },
   });
 
@@ -98,13 +105,31 @@ describe("buildEntityJson", () => {
     ]);
   });
 
-  it("imported unchanged, reports the existing id", async () => {
+  it("imported unchanged onto the stored entity, appends nothing", async () => {
     const json = buildEntityJson(dog, dogRelations);
-    database.push(existingEntity("dog"));
-    const { errors } = await importJson(json);
+    database.push(dog);
+    storedRelations.push(
+      { id: "scl-1", type: RelationEnums.Type.Superclass, entityIds: ["dog", "animal"] },
+      { id: "syn-1", type: RelationEnums.Type.Synonym, entityIds: ["hound", "dog"] }
+    );
+    const { errors, plan } = await importJson(json);
     database.pop();
+    storedRelations.length = 0;
 
-    expect(errors.map((error) => error.path)).toEqual(["id"]);
+    expect(errors).toEqual([]);
+    expect(plan!.relations).toEqual([]);
+    expect(plan!.appends.dog.conflicts).toEqual([]);
+    expect(plan!.appends.dog.skipped).toEqual({
+      labels: 1,
+      notes: 1,
+      // detail, language, legacy id and part of speech
+      fields: 4,
+      props: 1,
+      references: 1,
+      relations: 2,
+      values: 0,
+    });
+    expect(appendChanges(dog, plan!.entities.find((entity) => entity.id === "dog")!)).toEqual({});
   });
 
   it("shows a territory without its order, and its validation rules are ignored on import", async () => {
