@@ -6,7 +6,7 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoTrash } from "Theme/icons";
 import {
   StyledBorderLeft,
@@ -40,7 +40,7 @@ interface ValidationRule {
 export const ValidationRule: React.FC<ValidationRule> = ({
   validation,
   entities,
-  updateValidationRule,
+  updateValidationRule: saveValidationRule,
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
@@ -62,6 +62,34 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   } = validation;
 
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  // The label text saves on blur, so a click on another control sends a second
+  // change right behind it. The hosts build each change on the rule the server
+  // last returned, which still has the old text, so the text last sent rides
+  // along with every change until the saved rule shows it or a save fails.
+  const pendingLabel = useRef<string | null>(null);
+  useEffect(() => {
+    if (pendingLabel.current === (entityLabelContains ?? "")) {
+      pendingLabel.current = null;
+    }
+  }, [entityLabelContains]);
+
+  const updateValidationRule = (
+    changes: Partial<ITerritoryValidation>,
+    onError?: () => void,
+  ) => {
+    if ("entityLabelContains" in changes) {
+      pendingLabel.current = changes.entityLabelContains ?? "";
+    }
+    const withLabel =
+      pendingLabel.current === null
+        ? changes
+        : { entityLabelContains: pendingLabel.current, ...changes };
+    saveValidationRule(withLabel, () => {
+      pendingLabel.current = null;
+      onError?.();
+    });
+  };
 
   const disabledEntityClassesSection = useMemo<boolean>(() => {
     return allowedEntities !== undefined && allowedEntities.length > 0;

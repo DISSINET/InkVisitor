@@ -298,7 +298,7 @@ interface StyledOption {
 }
 export const StyledOption = styled.div<StyledOption>`
   cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
-  margin: 0 ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space["px"]};
+  margin: 0 ${({ theme }) => theme.space["px"]};
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   background-color: ${({ theme, $highlighted }) =>
     $highlighted ? theme.color["invertedBg"]["primary"] : "transparent"};

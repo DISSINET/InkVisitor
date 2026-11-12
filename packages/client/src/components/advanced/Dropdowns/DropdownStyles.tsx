@@ -14,7 +14,7 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 5px 5px 5px 7px;
+  padding: 4px 5px 4px 7px;
   /* the class colour; the inset from the row's top and bottom keeps the bars
      of adjacent options apart */
   &::before {
@@ -69,12 +69,12 @@ export const StyledOptionRow = styled.div`
   height: 3rem;
   padding: 2px 2px 2px 0;
 `;
-/* the class bar fills the row height, so the row padding leaves a gap
-   between neighbouring bars */
+/* shorter than the other menus' 3rem rows, so the hover background stays
+   near square */
 export const StyledEntitySingleOptionRow = styled.div`
   display: grid;
-  min-height: 3rem;
-  padding: 2px 2px 2px 1px;
+  min-height: 2.7rem;
+  padding: 1px 2px 1px 1px;
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;

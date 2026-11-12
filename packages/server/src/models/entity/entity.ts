@@ -9,6 +9,7 @@ import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import {
   DbEnums,
   EntityEnums,
@@ -597,12 +598,11 @@ export default class Entity implements IEntity, IDbModel {
           soeEs.map((e) => e.id)
         ).some((id) => acceptedSOEs.includes(id));
 
-      const labelText = entityLabelContains?.trim().toLowerCase();
+      // quote marks fold to one char on both sides, as in the label search
+      const labelText = foldQuotes(entityLabelContains?.trim() ?? "").toLowerCase();
       const labelCheck =
         !labelText ||
-        (this.labels ?? []).some((label) =>
-          label.toLowerCase().includes(labelText)
-        );
+        this.labels.some((label) => foldQuotes(label).toLowerCase().includes(labelText));
 
       if (
         entityCheck &&

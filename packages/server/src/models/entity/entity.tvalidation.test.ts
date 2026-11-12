@@ -428,6 +428,17 @@ describe("models/entity getTBasedWarnings with a label condition", () => {
     ).toEqual([]);
   });
 
+  it("treats every quote mark as the same", () => {
+    expect(
+      warningTypes(
+        labelled(["Jeanne d’Arc"]),
+        territoryWith({ ...rule, entityLabelContains: "d'arc" }),
+        [],
+        []
+      )
+    ).toEqual([WarningTypeEnums.TVER]);
+  });
+
   it("ignores a blank text", () => {
     expect(
       warningTypes(
