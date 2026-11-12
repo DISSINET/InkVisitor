@@ -8,18 +8,15 @@ import styled from "styled-components";
 interface StyledEntityValue {
   /* flat palette only — nested scales (blue, gray, …) are not valid CSS values */
   color?: FlatThemeColor;
-  /* the bar stands clear of the menu edge (after a checkbox and letter), so
-     it is rounded on both sides */
-  $floating?: boolean;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   position: relative;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 5px 5px 5px 9px;
-  /* the class colour, flush left and rounded on its free side; the inset from
-     the row's top and bottom keeps the bars of adjacent options apart */
+  padding: 5px 5px 5px 7px;
+  /* the class colour; the inset from the row's top and bottom keeps the bars
+     of adjacent options apart */
   &::before {
     content: "";
     position: absolute;
@@ -27,7 +24,7 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
     top: 3px;
     bottom: 3px;
     width: 4px;
-    border-radius: ${({ $floating }) => ($floating ? "2px" : "0 3px 3px 0")};
+    border-radius: 2px;
     background-color: ${({ theme, color }) => (color ? theme.color[color] : "transparent")};
   }
 `;
@@ -77,7 +74,7 @@ export const StyledOptionRow = styled.div`
 export const StyledEntitySingleOptionRow = styled.div`
   display: grid;
   min-height: 3rem;
-  padding: 2px 2px 2px 0;
+  padding: 2px 2px 2px 1px;
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;

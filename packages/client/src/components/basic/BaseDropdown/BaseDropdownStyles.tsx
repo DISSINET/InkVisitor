@@ -283,6 +283,7 @@ export const StyledMenu = styled.div<{ $minWidth?: number }>`
   &::-webkit-scrollbar-thumb {
     border-width: 1px;
   }
+  padding: ${({ theme }) => theme.space[1]} 0;
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   background-color: ${({ theme }) => theme.color["white"]};
@@ -297,8 +298,10 @@ interface StyledOption {
 }
 export const StyledOption = styled.div<StyledOption>`
   cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  margin: 0 ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space["px"]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   background-color: ${({ theme, $highlighted }) =>
-    $highlighted ? theme.color["invertedBg"]["primary"] : theme.color["white"]};
+    $highlighted ? theme.color["invertedBg"]["primary"] : "transparent"};
   font-weight: ${({ $selected }) => ($selected ? "bold" : "normal")};
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.color["gray"][500] : theme.color["black"]};
