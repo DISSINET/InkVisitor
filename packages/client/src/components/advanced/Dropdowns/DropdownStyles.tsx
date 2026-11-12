@@ -75,6 +75,9 @@ export const StyledEntitySingleOptionRow = styled.div`
   display: grid;
   min-height: 2.7rem;
   padding: 1px 2px 1px 1px;
+  ${StyledEntityValue} {
+    padding-left: 9px;
+  }
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;
