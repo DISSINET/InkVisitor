@@ -89,6 +89,41 @@ export class PostgresTarget implements SeedTarget {
     console.log(colors.green(`Database ${this.dbName} dropped (postgres)`));
   }
 
+  /** how many clients are connected to the database `name` */
+  async connections(name: string): Promise<number> {
+    const { rows } = await this.admin!.query(
+      "SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname = $1 AND backend_type = 'client backend'",
+      [name]
+    );
+    return rows[0].n;
+  }
+
+  /**
+   * Gives the selected database the name `to`. A database already holding that
+   * name is renamed to `aside` in the same transaction, so `to` never names a
+   * missing or half-loaded database. PostgreSQL renames a database only while
+   * nothing is connected to it; a connection would follow the database to its
+   * new name.
+   */
+  async dbPromote(to: string, aside?: string): Promise<void> {
+    await this.db?.end();
+    this.db = undefined;
+    const admin = this.admin!;
+    await admin.query("BEGIN");
+    try {
+      if (aside) {
+        await admin.query(`ALTER DATABASE ${ident(to)} RENAME TO ${ident(aside)}`);
+      }
+      await admin.query(`ALTER DATABASE ${ident(this.dbName)} RENAME TO ${ident(to)}`);
+      await admin.query("COMMIT");
+    } catch (e) {
+      await admin.query("ROLLBACK");
+      throw e;
+    }
+    console.log(colors.green(`Database ${this.dbName} renamed to ${to} (postgres)`));
+    this.dbName = to;
+  }
+
   /** code-point ordering like RethinkDB, Unicode-aware lower/upper */
   async dbCreate(): Promise<void> {
     await this.admin!.query(

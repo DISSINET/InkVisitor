@@ -11,6 +11,7 @@ import { RethinkTarget } from "../import/targets/rethinkdb";
 import { diffDatabases, hasDifferences, lenientCount, printReports } from "../storage-diff/diff";
 import { KEEP_FIRST, planSkips, skippedIds } from "./duplicates";
 import { exportTable, writeJsonArray } from "./export";
+import { workNames } from "./names";
 import { checkConstraints, RowSource } from "./preflight";
 
 /**
@@ -18,13 +19,15 @@ import { checkConstraints, RowSource } from "./preflight";
  * exported into datasets/<out>/<table>.json, the export is checked against
  * the PostgreSQL constraints, the PostgreSQL database is created with the
  * schema, the export is imported through the seeder and the two databases are
- * diffed. RethinkDB is only read. --skip-duplicates imports a database whose
- * duplicate relations and acl_permissions rows are not removed yet.
- *   pnpm migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [--skip-duplicates] [env]
+ * diffed. The database and the export take their names when every check
+ * passed; a database replaced with --replace is renamed and kept. RethinkDB is
+ * only read. --skip-duplicates imports a database whose duplicate relations
+ * and acl_permissions rows are not removed yet.
+ *   pnpm migrate --db=<name> [--pg=<name>] [--out=<dir>] [--replace] [--no-diff] [--skip-duplicates] [env]
  */
-const USAGE = "usage: migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [--skip-duplicates] [env]";
+const USAGE = "usage: migrate --db=<name> [--pg=<name>] [--out=<dir>] [--replace] [--no-diff] [--skip-duplicates] [env]";
 
-const FLAGS = ["db", "pg", "out", "drop", "no-diff", "skip-duplicates"];
+const FLAGS = ["db", "pg", "out", "replace", "no-diff", "skip-duplicates"];
 
 /** a mistyped flag must not fall through to a default that names another database */
 function assertKnownFlags(): void {
@@ -57,7 +60,14 @@ async function main(): Promise<void> {
     throw new Error(`--out must be a plain name starting with export-, got "${out}"`);
   }
   const dir = path.join(DATASETS_DIR, out);
+  // the export and the database carry these names until every check passed, so a
+  // run that stops halfway leaves datasets/<out> and the database <pg> as they were
+  const buildOut = `${out}-migrating`;
+  const buildDir = path.join(DATASETS_DIR, buildOut);
+  const names = workNames(pgName, new Date());
   const started = Date.now();
+  let building = false;
+  let promoted = false;
 
   const rethink = new RethinkTarget();
   const postgres = new PostgresTarget();
@@ -68,17 +78,25 @@ async function main(): Promise<void> {
       throw new Error(`RethinkDB database ${dbName} does not exist`);
     }
     rethink.useDb(dbName);
-    postgres.useDb(pgName);
-    const replace = (await postgres.dbList()).includes(pgName);
-    if (replace && !has("drop")) {
-      throw new Error(`PostgreSQL database ${pgName} exists, pass --drop to replace it`);
+    const existing = await postgres.dbList();
+    const taken = existing.includes(pgName);
+    if (taken && !has("replace")) {
+      throw new Error(`PostgreSQL database ${pgName} exists, pass --replace to replace it`);
     }
+    if (taken) {
+      // a connection follows a renamed database, so a running API would keep writing into the replaced one
+      const open = await postgres.connections(pgName);
+      if (open) {
+        throw new Error(`PostgreSQL database ${pgName} has ${open} open connection${open === 1 ? "" : "s"}, stop the API before replacing it`);
+      }
+    }
+    postgres.useDb(names.build);
 
     const conn = rethink.getConnection();
     const present = (await r.tableList().run(conn)) as string[];
     // the directory belongs to this run; a file left by an earlier run would be imported too
-    fs.rmSync(dir, { recursive: true, force: true });
-    fs.mkdirSync(dir, { recursive: true });
+    fs.rmSync(buildDir, { recursive: true, force: true });
+    fs.mkdirSync(buildDir, { recursive: true });
     const exported = new Map<string, number>();
     for (const table of Object.keys(TABLES)) {
       if (!present.includes(table)) {
@@ -86,7 +104,7 @@ async function main(): Promise<void> {
         continue;
       }
       const exportStarted = Date.now();
-      const n = await exportTable(conn, table, path.join(dir, `${table}.json`));
+      const n = await exportTable(conn, table, path.join(buildDir, `${table}.json`));
       exported.set(table, n);
       console.log(colors.cyan(`exported ${n} rows of ${table} (${seconds(exportStarted)} s)`));
     }
@@ -99,7 +117,7 @@ async function main(): Promise<void> {
     // RethinkDB, and the whole list is worth more than the first hit
     const preflightStarted = Date.now();
     const exportedRows: RowSource = (table, each) => {
-      const file = path.join(dir, `${table}.json`);
+      const file = path.join(buildDir, `${table}.json`);
       return fs.existsSync(file) ? streamFile(file, async (rows) => rows.forEach(each)) : Promise.resolve();
     };
     const { skipped, blocking } = has("skip-duplicates")
@@ -125,7 +143,7 @@ async function main(): Promise<void> {
     for (const table of leftOut.keys()) {
       // the export stays the whole snapshot; the seeder reads <table>.json only
       const rows = skipped.filter((s) => s.table === table).map((s) => s.row);
-      await writeJsonArray(rows, path.join(dir, `${table}.skipped.json`));
+      await writeJsonArray(rows, path.join(buildDir, `${table}.skipped.json`));
     }
     for (const s of skipped) {
       console.log(colors.yellow(`${s.table} ${s.row.id}: left out of the import, duplicate of ${s.kept}`));
@@ -136,14 +154,16 @@ async function main(): Promise<void> {
         : colors.green(`constraints hold on every exported row (${seconds(preflightStarted)} s)`)
     );
 
-    if (replace) {
+    // a build under this name is what an earlier run left behind
+    if (existing.includes(names.build)) {
       await postgres.dbDrop();
     }
     await postgres.dbCreate();
+    building = true;
     await postgres.createTables();
 
     const importStarted = Date.now();
-    const dataset = await prepareRawDataset(out);
+    const dataset = await prepareRawDataset(buildOut);
     let total = noRows();
     for (const table of Object.values(dataset)) {
       const ids = leftOut.get(table.tableName);
@@ -153,7 +173,7 @@ async function main(): Promise<void> {
           this.data = this.data.filter((row: { id: unknown }) => !ids.has(String(row.id)));
         };
       }
-      const [counts] = await feedTable([postgres], table, dataFilePath(out, table));
+      const [counts] = await feedTable([postgres], table, dataFilePath(buildOut, table));
       total = addCounts(total, counts);
       // a row PostgreSQL skipped over a repeated id or refused shows up here
       const expected = (exported.get(table.tableName) ?? 0) - (ids?.size ?? 0);
@@ -191,9 +211,27 @@ async function main(): Promise<void> {
       process.exitCode = 1;
     }
 
-    const line = `migrated ${dbName} -> ${pgName} (postgres) through datasets/${out} in ${seconds(started)} s`;
-    console.log(process.exitCode ? colors.red(line) : colors.green(line));
+    if (process.exitCode) {
+      return;
+    }
+    await postgres.dbPromote(pgName, taken ? names.aside : undefined);
+    promoted = true;
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.renameSync(buildDir, dir);
+    if (taken) {
+      console.log(colors.yellow(`the replaced ${pgName} is kept as ${names.aside}, drop it once it is not needed`));
+    }
+    console.log(colors.green(`migrated ${dbName} -> ${pgName} (postgres) through datasets/${out} in ${seconds(started)} s`));
   } finally {
+    if (!promoted && fs.existsSync(buildDir)) {
+      const kept = [`datasets/${buildOut}`, ...(building ? [`database ${names.build}`] : [])];
+      console.log(
+        colors.red(
+          `not migrated: database ${pgName} and datasets/${out} are as they were. ` +
+            `This run is kept as ${kept.join(" and ")} until the next run replaces it.`
+        )
+      );
+    }
     await rethink.end();
     await postgres.end();
   }
