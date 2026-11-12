@@ -135,4 +135,23 @@ describe("EntityImportModal", () => {
     expect(buttonNamed("append to it")).toBeDefined();
     expect(document.body.textContent).toContain('no longer appended to "TEST dog"');
   });
+
+  it("asks before closing when the drafts were changed", async () => {
+    closeModal.mockClear();
+    entitiesGet.mockResolvedValue({ data: [] });
+    await pasteAndValidate([
+      { class: "C", labels: ["TEST dog"] },
+      { class: "C", labels: ["TEST cat"] },
+    ]);
+    const leaveOut = document.querySelector(
+      'button[aria-label="leave out of the import"]'
+    ) as HTMLButtonElement;
+    await act(async () => leaveOut.click());
+
+    await act(async () => buttonNamed("Cancel").click());
+    expect(closeModal).not.toHaveBeenCalled();
+
+    await act(async () => buttonNamed("Close").click());
+    expect(closeModal).toHaveBeenCalled();
+  });
 });

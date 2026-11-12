@@ -122,9 +122,19 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   // Closing the modal while Import still checks the drafts cancels the
   // import: the check runs on, but nothing is written once it is done.
   const isClosedRef = useRef(false);
-  const handleClose = () => {
+  // drafts changed since Validate are lost on close, so the user is asked first
+  const [showCloseSubmit, setShowCloseSubmit] = useState(false);
+  const closeNow = () => {
+    setShowCloseSubmit(false);
     isClosedRef.current = true;
     closeModal();
+  };
+  const handleClose = () => {
+    if (step === "drafts" && draft && draftSnapshot(draft) !== validatedSnapshot.current) {
+      setShowCloseSubmit(true);
+    } else {
+      closeNow();
+    }
   };
 
   const role = getStoredUserRole() as UserEnums.Role;
@@ -548,11 +558,19 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
       <Submit
         title="Back to JSON"
-        text="The JSON field shows the input as you pasted it. Your changes in the tabs will be lost."
+        text="The JSON field shows the input as you pasted it. Your changes in the drafts will be lost."
         submitLabel="Back to JSON"
         show={showBackSubmit}
         onSubmit={goBackToJson}
         onCancel={() => setShowBackSubmit(false)}
+      />
+      <Submit
+        title="Close the import"
+        text="Nothing has been imported. Your changes in the drafts will be lost."
+        submitLabel="Close"
+        show={showCloseSubmit}
+        onSubmit={closeNow}
+        onCancel={() => setShowCloseSubmit(false)}
       />
     </Modal>
   );
