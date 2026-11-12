@@ -406,7 +406,7 @@ describe("models/entity getTBasedWarnings with a label condition", () => {
     ).toEqual([WarningTypeEnums.TVER]);
   });
 
-  it("applies the rule when only an alt label contains the text", () => {
+  it("applies the rule when only an alternative label contains the text", () => {
     expect(
       warningTypes(
         labelled(["heresy charge", "a POLEMICAL CHARGE OF heresy"]),

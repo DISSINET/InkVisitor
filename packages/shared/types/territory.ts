@@ -102,7 +102,8 @@ export interface ITerritoryValidation {
   entitySOEs?: string[];
   entityLanguages?: EntityEnums.Language[];
   entityStatuses?: EntityEnums.Status[];
-  // matched case-insensitively as a substring of the label or any alt label
+  // matched as a substring of the label or any alternative label, ignoring
+  // case and treating all quote marks as one
   entityLabelContains?: string;
 
   tieType: EProtocolTieType; // default is property

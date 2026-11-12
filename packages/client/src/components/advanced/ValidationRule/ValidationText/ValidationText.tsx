@@ -181,7 +181,7 @@ export const ValidationText: React.FC<ValidationText> = ({
       )}
       {entityLabelContains?.trim() && (
         <>
-          {` with label or alt label containing `}
+          {` with label or alternative label containing `}
           <StyledSentenceEntity>{`"${entityLabelContains.trim()}"`}</StyledSentenceEntity>
         </>
       )}

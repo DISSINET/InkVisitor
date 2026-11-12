@@ -139,6 +139,15 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     updateValidationRule({ ...changes, expansions: next }, () => setPendingExpansions(null));
   };
 
+  // These fields save on blur, and Escape closes the Global validations window,
+  // which unmounts a field without blurring it. Blurring on Escape first lets
+  // the field save its text; the window's own Escape handler runs after this.
+  const blurOnEscape = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape" && e.target instanceof HTMLInputElement) {
+      e.target.blur();
+    }
+  };
+
   // The tie decides what Prop type and the allowed list mean, so switching it
   // empties those fields - and with them their expansions, while the condition
   // fields keep theirs.
@@ -375,14 +384,16 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         </div>
 
         {/* Entity label */}
-        <StyledLabel>label or alt label containing</StyledLabel>
-        <Input
-          width="full"
-          value={entityLabelContains ?? ""}
-          placeholder="any label"
-          onChangeFn={(value) => updateValidationRule({ entityLabelContains: value })}
-          disabled={!userCanEdit}
-        />
+        <StyledLabel>label or alternative label containing</StyledLabel>
+        <div onKeyDown={blurOnEscape}>
+          <Input
+            width="full"
+            value={entityLabelContains ?? ""}
+            placeholder="any label"
+            onChangeFn={(value) => updateValidationRule({ entityLabelContains: value })}
+            disabled={!userCanEdit}
+          />
+        </div>
 
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
@@ -526,12 +537,14 @@ export const ValidationRule: React.FC<ValidationRule> = ({
 
         {/* Detail */}
         <StyledLabel>Detail / Notes</StyledLabel>
-        <Input
-          width="full"
-          value={detail}
-          onChangeFn={(value) => updateValidationRule({ detail: value })}
-          disabled={!userCanEdit}
-        />
+        <div onKeyDown={blurOnEscape}>
+          <Input
+            width="full"
+            value={detail}
+            onChangeFn={(value) => updateValidationRule({ detail: value })}
+            disabled={!userCanEdit}
+          />
+        </div>
       </StyledGrid>
       {userCanEdit && (
         <div
