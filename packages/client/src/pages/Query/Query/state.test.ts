@@ -248,3 +248,40 @@ describe("queryReducer removeEdge", () => {
     expect(next.edges.map((e) => e.id)).toEqual(["e3"]);
   });
 });
+
+describe("queryReducer propPair", () => {
+  const withPropEdge = (type: Query.EdgeType): Query.INode =>
+    makeNode("root", [
+      {
+        id: "e1",
+        type,
+        params: { propPair: { entityId: "c-sex", includeEquivalents: true } },
+        logic: Query.EdgeLogic.Positive,
+        node: makeNode("n1"),
+      },
+    ]);
+
+  it("updateEdgePropPair sets and removes the propPair", () => {
+    const set = queryReducer(withPropEdge(Query.EdgeType["HP:V"]), {
+      type: QueryActionType.updateEdgePropPair,
+      payload: { edgeId: "e1", propPair: { entityId: "c-age" } },
+    });
+    expect(set.edges[0].params).toEqual({ propPair: { entityId: "c-age" } });
+    const removed = queryReducer(set, {
+      type: QueryActionType.updateEdgePropPair,
+      payload: { edgeId: "e1", propPair: undefined },
+    });
+    expect(removed.edges[0].params).toEqual({});
+  });
+
+  it("an edge type switch keeps the propPair only when the new edge pins the same half", () => {
+    const switchTo = (newType: Query.EdgeType) =>
+      queryReducer(withPropEdge(Query.EdgeType["HP:V"]), {
+        type: QueryActionType.updateEdgeType,
+        payload: { edgeId: "e1", newType },
+      }).edges[0].params.propPair;
+    expect(switchTo(Query.EdgeType["SP:V"])?.entityId).toBe("c-sex");
+    expect(switchTo(Query.EdgeType["EP:T"])).toBeUndefined();
+    expect(switchTo(Query.EdgeType["R:CLA"])).toBeUndefined();
+  });
+});

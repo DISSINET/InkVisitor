@@ -215,6 +215,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   problems={queryStateValidity.problems.filter(
                     (problem) => problem.source === nextCellAssociatedEdge.id,
                   )}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
             </StyledGridCell>

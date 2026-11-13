@@ -12,12 +12,15 @@ import {
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
+import { EdgePropPairPicker } from "./EdgePropPairPicker";
 import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 import {
   StyledEdgeBox,
   StyledEdgeContainer,
   StyledEdgeControlsLayer,
+  StyledEdgePropPairSlot,
   StyledEdgeSvg,
+  StyledEdgeTypeCell,
 } from "./QueryStyles";
 
 interface QueryGridEdgeProps {
@@ -33,6 +36,7 @@ interface QueryGridEdgeProps {
   // the pass-through (lower) part of the spine feeds the NEXT sibling, so it is
   // coloured by that sibling's logic - red when the sibling below is negative
   extendNegative?: boolean;
+  onOpenEntityInDetail?: (entityId: string) => void;
 }
 
 export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
@@ -44,6 +48,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   isRootEdge = false,
   extendVertical = false,
   extendNegative = false,
+  onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
   const sourceNode = isRootEdge ? rootNode : node;
@@ -120,29 +125,40 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               });
             }}
           />
-          <Dropdown.Single.Basic
-            options={edgeTypeOptions}
-            width={212}
-            noDropDownIndicator
-            value={edge.type}
-            tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
-            onChange={(newValue) => {
-              dispatch({
-                type: QueryActionType.updateEdgeType,
-                payload: {
-                  edgeId: edge.id,
-                  newType: newValue,
-                },
-              });
-              dispatch({
-                type: QueryActionType.updateNodeEntityId,
-                payload: {
-                  nodeId: node.id,
-                  newEntityId: undefined,
-                },
-              });
-            }}
-          />
+          <StyledEdgeTypeCell>
+            <Dropdown.Single.Basic
+              options={edgeTypeOptions}
+              width={212}
+              noDropDownIndicator
+              value={edge.type}
+              tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateEdgeType,
+                  payload: {
+                    edgeId: edge.id,
+                    newType: newValue,
+                  },
+                });
+                dispatch({
+                  type: QueryActionType.updateNodeEntityId,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityId: undefined,
+                  },
+                });
+              }}
+            />
+            {Query.PropPairEdges[edge.type] && (
+              <StyledEdgePropPairSlot $color={lineColor}>
+                <EdgePropPairPicker
+                  edge={edge}
+                  dispatch={dispatch}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
+                />
+              </StyledEdgePropPairSlot>
+            )}
+          </StyledEdgeTypeCell>
           {warning && (
             <IconWithTooltip
               icon={<IcoWarning size={16} />}

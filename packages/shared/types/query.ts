@@ -42,7 +42,32 @@ export namespace Query {
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;
   }
-  export interface IEdgeParams {}
+  export interface IEdgeParams {
+    // prop edges (PropPairEdges) only: the other half of the matched prop, so
+    // a prop matches only when its type and its value both hold
+    propPair?: IPropPair;
+  }
+
+  export interface IPropPair {
+    entityId: string;
+    includeEquivalents?: boolean;
+    includeSubordinates?: boolean;
+  }
+
+  /**
+   * The prop edges whose propPair pins the other half of the same prop, by the
+   * half it pins: the type for the value edges, the value for the type edges.
+   */
+  export const PropPairEdges: Partial<Record<EdgeType, "type" | "value">> = {
+    "HP:V": "type",
+    "I_HP:V": "type",
+    "SP:V": "type",
+    "I_SP:V": "type",
+    "EP:T": "value",
+    "I_EP:T": "value",
+    "SP:T": "value",
+    "I_SP:T": "value",
+  };
 
   export enum NodeType {
     E = "Entity",

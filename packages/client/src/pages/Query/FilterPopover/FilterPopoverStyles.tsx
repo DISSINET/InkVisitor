@@ -1,9 +1,18 @@
 import styled from "styled-components";
 
-export const StyledFilterPopoverTrigger = styled.span`
+// `$fluid`: a custom trigger may shrink to its container, so its text can be cut
+export const StyledFilterPopoverTrigger = styled.span<{ $fluid?: boolean }>`
   display: inline-flex;
   flex-shrink: 0;
   gap: ${({ theme }) => theme.space[1]};
+  ${({ $fluid }) =>
+    $fluid &&
+    `
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 100%;
+  `}
 `;
 
 // Portaled into #page; position comes from floating-ui. maxHeight is applied
