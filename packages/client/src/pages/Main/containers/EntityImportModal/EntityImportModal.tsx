@@ -283,10 +283,10 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       return false;
     }
     const label = draft.entities.find((entity) => entity.id === entityId)?.labels[0];
+    // the left-out drafts skip the validation, so an error in them blocks
+    // nothing; draftAfterAppend brings them back unchanged
     const replaced = replaceEntityId(draft, entityId, storedId);
-    // the drafts left out are validated too, so they stay in the drafts
-    const everyDraft = { ...replaced, leftOutIds: [] };
-    const json = JSON.stringify(draftToImportJson(everyDraft));
+    const json = JSON.stringify(draftToImportJson(replaced));
     setIsValidating(true);
     try {
       const { errors, plan } = await validateImport(json, {
@@ -296,7 +296,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         valueCopyIds: draft.valueCopyIds,
       });
       if (!plan) {
-        setDraftErrors(issuesWithEntityIds(everyDraft, errors));
+        setDraftErrors(issuesWithEntityIds(replaced, errors));
         return false;
       }
       const next = draftAfterAppend(replaced, plan);

@@ -107,14 +107,58 @@ export const replaceEntityId = (draft: ImportDraft, fromId: string, toId: string
 /**
  * The drafts validated again after one was appended to a stored entity. The
  * copies of stored Values come back as Values of the input and keep being
- * copies; the drafts appended before keep their settled conflicts; the drafts
- * left out stay left out, so the validation has to include them.
+ * copies; the drafts appended before keep their settled conflicts. The
+ * validation skips the left-out drafts, so they come back from `previous` as
+ * they were, with their relations and the Value copies they use.
  */
 export const draftAfterAppend = (previous: ImportDraft, plan: ImportPlan): ImportDraft => {
-  const ids = new Set(plan.entities.map((entity) => entity.id));
-  const keptAppends = Object.entries(previous.appends ?? {}).filter(([id]) => id in plan.appends);
+  const leftOut = leftOutDrafts(previous);
+  const planIds = new Set(plan.entities.map((entity) => entity.id));
+  const leftOutEntities = previous.entities.filter(
+    (entity) => !planIds.has(entity.id) && leftOut.has(entity.id)
+  );
+  const leftOutRefs = new Set(
+    collectEntityRefs(
+      leftOutEntities.map((entity, position) => ({
+        index: position + 1,
+        entity,
+        rawRelations: [],
+      }))
+    ).map((ref) => ref.id)
+  );
+  const leftOutCopies = previous.entities.filter(
+    (entity) =>
+      !planIds.has(entity.id) && isValueCopy(previous, entity.id) && leftOutRefs.has(entity.id)
+  );
+  const kept = [...leftOutEntities, ...leftOutCopies];
+  const ids = new Set([...planIds, ...kept.map((entity) => entity.id)]);
+
+  // a relation with a left-out member went to the validation without it, a
+  // synonym cloud as its other members; the relation as it was replaces that
+  const leftOutRelations = previous.relations.filter((relation) =>
+    relation.entityIds.some((id) => leftOut.has(id))
+  );
+  const sentAs = (relation: Relation.IRelation) =>
+    relation.entityIds.filter((id) => !leftOut.has(id));
+  const relations = plan.relations.filter(
+    (relation) =>
+      !leftOutRelations.some(
+        (original) =>
+          original.type === relation.type &&
+          sentAs(original).length === relation.entityIds.length &&
+          sentAs(original).every((id) => relation.entityIds.includes(id))
+      )
+  );
+
+  const keptAppends = Object.entries(previous.appends ?? {}).filter(
+    ([id]) => id in plan.appends || leftOut.has(id)
+  );
+  const next = draftFromPlan(plan);
   return {
-    ...draftFromPlan(plan),
+    ...next,
+    entities: [...next.entities, ...kept],
+    relations: [...relations, ...leftOutRelations],
+    existing: { ...previous.existing, ...next.existing },
     valueCopyIds: [
       ...(previous.valueCopyIds ?? []).filter((id) => ids.has(id)),
       ...plan.valueCopyIds,

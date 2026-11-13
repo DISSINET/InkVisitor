@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
 import { isDuplicateLabel } from "utils/entityLabels";
-import { count, getAtPath, isPlainObject, setAtPath } from "./helpers";
+import { count, isPlainObject, setAtPath } from "./helpers";
 
 /**
  * A field that holds one value, set differently in the database and in the
@@ -12,8 +12,12 @@ export interface AppendConflict {
   // "detail", "language", "legacyId", "labels[0]" or a data path like "data.pos"
   path: string;
   label: string;
+  // the two values as shown
   stored: string;
   imported: string;
+  // the two values as held, written back with their own type
+  storedValue: unknown;
+  importedValue: unknown;
   useImported: boolean;
 }
 
@@ -159,6 +163,19 @@ const mergeReferences = (
 
 const display = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
 
+const conflictOf = (path: string, stored: unknown, imported: unknown): AppendConflict => ({
+  path,
+  label: FIELD_LABELS[path] ?? path,
+  stored: display(stored),
+  imported: display(imported),
+  storedValue: stored,
+  importedValue: imported,
+  useImported: false,
+});
+
+const shapeOf = (value: unknown) =>
+  Array.isArray(value) ? "list" : isPlainObject(value) ? "object" : "value";
+
 /**
  * One value against the stored one: an empty stored value is filled, an equal
  * one skipped, a different one a conflict. Returns the value to keep.
@@ -176,13 +193,7 @@ const mergeScalar = (
   if (current === value) {
     skips.fields++;
   } else {
-    conflicts.push({
-      path,
-      label: FIELD_LABELS[path] ?? path,
-      stored: display(current),
-      imported: display(value),
-      useImported: false,
-    });
+    conflicts.push(conflictOf(path, current, value));
   }
   return current;
 };
@@ -206,6 +217,11 @@ const mergeData = (
       continue;
     }
     const current = stored[key];
+    // a stored value of another shape is never merged into, only chosen over
+    if (!isEmpty(current) && shapeOf(current) !== shapeOf(value)) {
+      conflicts.push(conflictOf(keyPath, current, value));
+      continue;
+    }
     if (isPlainObject(value)) {
       merged[key] = mergeData(
         isPlainObject(current) ? current : {},
@@ -254,13 +270,7 @@ export const mergeIntoStored = (
     }
     labels.push(label);
     if (labelIndex === 0) {
-      conflicts.push({
-        path: "labels[0]",
-        label: FIELD_LABELS["labels[0]"],
-        stored: stored.labels[0],
-        imported: label,
-        useImported: false,
-      });
+      conflicts.push(conflictOf("labels[0]", stored.labels[0], label));
     }
   });
   entity.labels = labels;
@@ -314,9 +324,11 @@ export const applyConflictChoice = (
   // conflicts sit on top-level fields or in data, so copying data keeps the
   // entity given unchanged
   const out = { ...entity, data: structuredClone(entity.data) };
-  const current = getAtPath(out, conflict.path);
-  // a list or number was shown as JSON
-  setAtPath(out, conflict.path, typeof current === "string" ? value : JSON.parse(value));
+  setAtPath(
+    out,
+    conflict.path,
+    structuredClone(useImported ? conflict.importedValue : conflict.storedValue)
+  );
   return out;
 };
 

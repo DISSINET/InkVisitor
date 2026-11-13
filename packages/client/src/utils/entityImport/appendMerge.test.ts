@@ -156,6 +156,8 @@ describe("applyConflictChoice", () => {
       label: "main label",
       stored: "love",
       imported: "amor",
+      storedValue: "love",
+      importedValue: "amor",
       useImported: false,
     };
     const entity = concept({ labels: ["love", "caritas", "amor"] });
@@ -174,10 +176,41 @@ describe("applyConflictChoice", () => {
       label: "logical type",
       stored: "1",
       imported: "2",
+      storedValue: "1",
+      importedValue: "2",
       useImported: false,
     };
     const entity = concept({ data: { logicalType: "1" } });
     expect(applyConflictChoice(entity, conflict, true).data).toEqual({ logicalType: "2" });
+  });
+
+  it("raises a conflict on a stored value of another shape, and writes either side as held", () => {
+    const stored = concept({
+      data: { url: 3, logicalType: "1", partValueLabel: { old: true } },
+    });
+    const imported = concept({
+      data: { url: "https://example.org", logicalType: ["2"], partValueLabel: "page" },
+    });
+
+    const { entity, conflicts } = mergeIntoStored(stored, imported, sameEntityBy(() => undefined), {});
+
+    // nothing is merged into the stored values
+    expect(entity.data).toEqual(stored.data);
+    expect(conflicts.map((conflict) => conflict.path)).toEqual([
+      "data.url",
+      "data.logicalType",
+      "data.partValueLabel",
+    ]);
+    const settled = conflicts.reduce(
+      (current, conflict) => applyConflictChoice(current, conflict, true),
+      entity
+    );
+    expect(settled.data).toEqual(imported.data);
+    const kept = conflicts.reduce(
+      (current, conflict) => applyConflictChoice(current, conflict, false),
+      settled
+    );
+    expect(kept.data).toEqual(stored.data);
   });
 });
 

@@ -24,6 +24,9 @@ interface EntityImportAppendPanel {
   entity: IEntity;
   // database entities that may be this draft; undefined while searching
   candidates: IEntity[] | undefined;
+  // the search for candidates failed, so no list says nothing about duplicates
+  searchFailed: boolean;
+  onSearchAgain: () => void;
   onConflictChoice: (conflictIndex: number, useImported: boolean) => void;
   onAppendTo: (storedId: string) => void;
   // given for a draft appended in the tabs
@@ -39,6 +42,8 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
   draft,
   entity,
   candidates,
+  searchFailed,
+  onSearchAgain,
   onConflictChoice,
   onAppendTo,
   onUndoAppend,
@@ -113,6 +118,16 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
 
   return (
     <StyledAppendPanel>
+      {searchFailed && (
+        <StyledAppendSection>
+          <StyledAppendText>
+            {"The search for this entity in the database failed."}
+          </StyledAppendText>
+          <StyledAppendRow>
+            <Button label="search again" inverted color="primary" onClick={onSearchAgain} />
+          </StyledAppendRow>
+        </StyledAppendSection>
+      )}
       {candidates && candidates.length > 0 && (
         <StyledAppendSection>
           <StyledAppendRowLabel>{"Possibly already in the database:"}</StyledAppendRowLabel>

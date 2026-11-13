@@ -16,12 +16,21 @@ import { normalizeEntities } from "utils/entityImport/normalizeEntities";
 import { saveStoredUser } from "utils/userStorage";
 import { EntityImportDrafts } from "./EntityImportDrafts";
 
+// the search for database entities a draft may duplicate fails while set
+const search = vi.hoisted(() => ({ fails: false }));
+
 // Detail renders with no server behind it: every api call answers empty,
 // except the signed-in user, whose options Detail reads
 vi.mock("api", () => {
   const answer = async () => ({ data: [] });
   const calls: Record<string, unknown> = {
     isLoggedIn: () => true,
+    entitiesSearch: async () => {
+      if (search.fails) {
+        throw new Error("network");
+      }
+      return { data: [] };
+    },
     usersGet: async () => ({ data: { options: { defaultLanguage: "eng", workingLanguages: [] } } }),
   };
   return {
@@ -196,6 +205,33 @@ describe("EntityImportDrafts", () => {
     });
 
     expect(latestDraft.entities[0].detail).toBe("edited in the draft");
+  });
+});
+
+describe("EntityImportDrafts when the search for duplicates fails", () => {
+  beforeEach(async () => {
+    search.fails = true;
+    await renderDrafts();
+  });
+
+  afterEach(() => {
+    search.fails = false;
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it("says so and searches again on request", async () => {
+    const failure = "The search for this entity in the database failed.";
+    expect(container.textContent).toContain(failure);
+
+    search.fails = false;
+    const button = [...container.querySelectorAll("button")].find(
+      (element) => element.textContent === "search again"
+    );
+    expect(button).toBeDefined();
+    await act(async () => button!.click());
+
+    expect(container.textContent).not.toContain(failure);
   });
 });
 

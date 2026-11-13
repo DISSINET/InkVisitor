@@ -135,6 +135,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   // close.
   const [candidates, setCandidates] = useState<Record<string, IEntity[]>>({});
   const searchedIds = useRef(new Set<string>());
+  // drafts whose search failed; they are searched again only on request
+  const [failedSearchIds, setFailedSearchIds] = useState<Set<string>>(new Set());
   const isMounted = useRef(true);
   useEffect(() => {
     isMounted.current = true;
@@ -142,27 +144,42 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       isMounted.current = false;
     };
   }, []);
+  const searchFor = (entity: IEntity) => {
+    searchedIds.current.add(entity.id);
+    setFailedSearchIds((current) => {
+      const next = new Set(current);
+      next.delete(entity.id);
+      return next;
+    });
+    searchCandidates(entity).then(
+      (found) => {
+        if (isMounted.current) {
+          setCandidates((current) => ({
+            ...current,
+            [entity.id]: found.filter((candidate) => !draftEntityIds.has(candidate.id)),
+          }));
+        }
+      },
+      () => {
+        searchedIds.current.delete(entity.id);
+        if (isMounted.current) {
+          setFailedSearchIds((current) => new Set(current).add(entity.id));
+        }
+      }
+    );
+  };
   useEffect(() => {
     if (
       !selected ||
       !canAppend(selected) ||
       draft.appends?.[selected.id] ||
-      searchedIds.current.has(selected.id)
+      searchedIds.current.has(selected.id) ||
+      failedSearchIds.has(selected.id)
     ) {
       return;
     }
-    searchedIds.current.add(selected.id);
-    searchCandidates(selected)
-      .catch(() => [])
-      .then((found) => {
-        if (isMounted.current) {
-          setCandidates((current) => ({
-            ...current,
-            [selected.id]: found.filter((candidate) => !draftEntityIds.has(candidate.id)),
-          }));
-        }
-      });
-  }, [selected, draft.appends, draftEntityIds]);
+    searchFor(selected);
+  }, [selected, draft.appends, draftEntityIds, failedSearchIds]);
 
   // the draft takes the id of the stored entity, so its row stays selected
   const handleAppendTo = async (entityId: string, storedId: string) => {
@@ -231,6 +248,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               draft={draft}
               entity={selected}
               candidates={candidates[selected.id]}
+              searchFailed={failedSearchIds.has(selected.id)}
+              onSearchAgain={() => searchFor(selected)}
               onConflictChoice={(conflictIndex, useImported) =>
                 onConflictChoice(selected.id, conflictIndex, useImported)
               }

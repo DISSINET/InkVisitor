@@ -3,6 +3,7 @@ import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
   appendUndoOf,
   buildDraftDetail,
+  draftAfterAppend,
   createDraftRelation,
   createDraftWrites,
   deleteDraftRelation,
@@ -441,6 +442,62 @@ describe("undoAppend", () => {
   });
 });
 
+describe("draftAfterAppend", () => {
+  it("appends while a left-out draft fails the checks, and keeps that draft as it was", async () => {
+    const storedDog = {
+      ...existingEntity("stored-dog"),
+      detail: "",
+      language: EntityEnums.Language.English,
+      status: EntityEnums.Status.Approved,
+      notes: [],
+      data: {},
+      references: [],
+      props: [],
+      updatedAt: "t1",
+    } as unknown as IEntity;
+    const stored = [storedDog, existingEntity("hound")];
+    const context = {
+      role: UserEnums.Role.Admin,
+      defaultLanguage: EntityEnums.Language.English,
+      source: {
+        getEntities: async (ids: string[]) => stored.filter((entity) => ids.includes(entity.id)),
+        getForwardRelations: async () => [],
+      },
+      fromDrafts: true,
+    };
+    const draft: ImportDraft = {
+      entities: [
+        newEntity("dog"),
+        // points at an entity that exists nowhere
+        newEntity("monica", { props: [{ type: "missing", value: "missing" }] }),
+      ],
+      relations: [relation("r1", RelationEnums.Type.Synonym, "hound", "dog", "monica")],
+      existing: { hound: existingEntity("hound") },
+      leftOutIds: ["monica"],
+    };
+    const replaced = replaceEntityId(draft, "dog", "stored-dog");
+    const withLeftOut = await validateImport(
+      JSON.stringify(draftToImportJson({ ...replaced, leftOutIds: [] })),
+      context
+    );
+    expect(withLeftOut.plan).toBeNull();
+
+    const { errors, plan } = await validateImport(
+      JSON.stringify(draftToImportJson(replaced)),
+      context
+    );
+    expect(errors).toEqual([]);
+
+    const next = draftAfterAppend(replaced, plan!);
+    expect(next.entities.map((entity) => entity.id).sort()).toEqual(["monica", "stored-dog"]);
+    expect(next.entities.find((entity) => entity.id === "monica")).toEqual(draft.entities[1]);
+    expect(next.leftOutIds).toEqual(["monica"]);
+    expect(next.relations.map((item) => [...item.entityIds].sort())).toEqual([
+      ["hound", "monica", "stored-dog"],
+    ]);
+  });
+});
+
 describe("setAllConflictChoices", () => {
   it("settles every conflict of every appended draft at once", () => {
     const conflict = (stored: string, imported: string) => ({
@@ -448,6 +505,8 @@ describe("setAllConflictChoices", () => {
       label: "detail",
       stored,
       imported,
+      storedValue: stored,
+      importedValue: imported,
       useImported: false,
     });
     const draft: ImportDraft = {
