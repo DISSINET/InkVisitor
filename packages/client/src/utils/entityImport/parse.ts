@@ -36,7 +36,9 @@ const removeTrailingCommas = (text: string): string => {
  */
 export const parseImportInput = (
   text: string,
-  maxEntities: number
+  maxEntities: number,
+  // ids of items that don't count toward maxEntities
+  uncountedIds: ReadonlySet<string> = new Set()
 ): { items: unknown[]; errors: ImportIssue[] } => {
   if (!text.trim()) {
     return { items: [], errors: [{ message: "Paste JSON or load a .json file" }] };
@@ -63,12 +65,15 @@ export const parseImportInput = (
   if (items.length === 0) {
     return { items: [], errors: [{ message: "The input holds no entity" }] };
   }
-  if (items.length > maxEntities) {
+  const counted = items.filter(
+    (item) => !uncountedIds.has(String((item as { id?: unknown } | null)?.id))
+  ).length;
+  if (counted > maxEntities) {
     return {
       items: [],
       errors: [
         {
-          message: `The input holds ${items.length} entities; at most ${maxEntities} can be imported at once`,
+          message: `The input holds ${counted} entities; at most ${maxEntities} can be imported at once`,
         },
       ],
     };

@@ -36,6 +36,15 @@ describe("parseImportInput", () => {
     expect(parseImportInput("[]", 10).errors).toHaveLength(1);
   });
 
+  it("leaves the uncounted items out of the limit", () => {
+    const items = [
+      ...Array.from({ length: 10 }, () => ({ class: "C" })),
+      { id: "copy", class: "V" },
+    ];
+    const { errors } = parseImportInput(JSON.stringify(items), 10, new Set(["copy"]));
+    expect(errors).toEqual([]);
+  });
+
   it("rejects more than 10 entities", () => {
     const text = JSON.stringify(Array.from({ length: 11 }, () => ({ class: "C" })));
     const { errors } = parseImportInput(text, 10);

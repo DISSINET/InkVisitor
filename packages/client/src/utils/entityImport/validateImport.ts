@@ -40,6 +40,9 @@ export interface ImportValidationContext {
   // The input was written from the drafts, where every field holds a value,
   // given or a default, so no field counts as set by the user in a merge.
   fromDrafts?: boolean;
+  // Values the drafts made for slots naming a stored Value; they stand in for
+  // the stored Value and don't count toward the entity limit
+  valueCopyIds?: string[];
 }
 
 /** Ids of every entity the stored version of an entity points at. */
@@ -120,7 +123,11 @@ export const validateImport = async (
   text: string,
   context: ImportValidationContext
 ): Promise<ImportValidation> => {
-  const parsed = parseImportInput(text, maxImportEntities(context.role));
+  const parsed = parseImportInput(
+    text,
+    maxImportEntities(context.role),
+    new Set(context.valueCopyIds)
+  );
   if (parsed.errors.length) {
     return { errors: parsed.errors, notes: [], plan: null };
   }
@@ -238,6 +245,13 @@ export const validateImport = async (
       errors.push({ entityIndex: item.index, label: item.entity.labels[0], path, message });
     const known = appendTargets[stored.id];
     if (known) {
+      // an append never writes the class, so a class changed in Detail is refused
+      if (item.entity.class !== known.class) {
+        report(
+          "class",
+          `${quote(stored.labels[0])} is a ${className(known.class)} in the database; an appended entity keeps its class`
+        );
+      }
       if (isStale(known, stored)) {
         report(
           "id",

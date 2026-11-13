@@ -293,6 +293,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         ...validationContext(),
         appendTargets: appendTargetsOf(draft),
         fromDrafts: true,
+        valueCopyIds: draft.valueCopyIds,
       });
       if (!plan) {
         setDraftErrors(issuesWithEntityIds(everyDraft, errors));
@@ -362,6 +363,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         ...validationContext(),
         appendTargets: appendTargetsOf(draft),
         allowAppend: false,
+        valueCopyIds: draft.valueCopyIds,
       });
       setDraftErrors(issuesWithEntityIds(draft, result.errors));
       plan = result.plan;

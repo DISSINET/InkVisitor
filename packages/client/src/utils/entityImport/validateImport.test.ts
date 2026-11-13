@@ -329,4 +329,16 @@ describe("validateImport appending to a stored entity", () => {
     });
     expect(changed.errors.map((error) => error.path)).toEqual(["id"]);
   });
+
+  it("refuses an appended draft whose class was changed in Detail", async () => {
+    const { errors } = await validateImport(
+      JSON.stringify({ id: "augustine", class: "C", labels: ["Augustine"] }),
+      {
+        ...contextWith([stored]),
+        appendTargets: { augustine: stored },
+        allowAppend: false,
+      }
+    );
+    expect(errors.map((error) => error.path)).toEqual(["class"]);
+  });
 });
