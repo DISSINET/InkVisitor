@@ -1,5 +1,6 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
+import { CMetaProp } from "constructors";
 import { validateImport } from "./validateImport";
 
 const existingEntity = (id: string, entityClass: EntityEnums.Class) =>
@@ -59,7 +60,7 @@ describe("validateImport", () => {
   it("collects errors of every kind without a plan", async () => {
     const context = contextWith([existingEntity("taken", EntityEnums.Class.Concept)], UserEnums.Role.Editor);
     const text = JSON.stringify([
-      { id: "taken", class: "C", labels: ["taken"] },
+      { id: "taken", class: "P", labels: ["taken"] },
       { class: "T", labels: ["T"], data: { parent: { territoryId: "nowhere" } } },
       { class: "C", labels: ["dog"], props: [{ type: "ghost" }] },
     ]);
@@ -68,7 +69,7 @@ describe("validateImport", () => {
 
     expect(plan).toBeNull();
     expect(errors.map((error) => [error.entityIndex, error.path])).toEqual([
-      [1, "id"],
+      [1, "class"],
       [2, "data.parent.territoryId"],
       [2, "class"],
       [3, "props[0].type.entityId"],
@@ -182,5 +183,162 @@ describe("validateImport", () => {
 
     expect(errors).toHaveLength(1);
     expect(context.source.getEntities).not.toHaveBeenCalled();
+  });
+});
+
+describe("validateImport appending to a stored entity", () => {
+  const stored = {
+    ...existingEntity("augustine", EntityEnums.Class.Person),
+    labels: ["Augustine"],
+    detail: "",
+    language: EntityEnums.Language.Latin,
+    notes: [],
+    data: {},
+    references: [],
+    updatedAt: "t1",
+    props: [
+      {
+        ...CMetaProp({ typeEntityId: "born", valueEntityId: "v-354" }),
+      },
+    ],
+  } as unknown as IEntity;
+  const storedValue = { ...existingEntity("v-354", EntityEnums.Class.Value), labels: ["354"] };
+
+  it("merges the input into the stored entity and leaves out a Value only a skipped metaprop used", async () => {
+    const context = contextWith([
+      stored,
+      storedValue,
+      existingEntity("born", EntityEnums.Class.Concept),
+      existingEntity("died", EntityEnums.Class.Concept),
+    ]);
+    const text = JSON.stringify([
+      {
+        id: "augustine",
+        class: "P",
+        labels: ["Augustine", "Augustinus"],
+        props: [
+          { type: "born", value: "new-354" },
+          { type: "died", value: "new-430" },
+        ],
+      },
+      { id: "new-354", class: "V", labels: ["354"] },
+      { id: "new-430", class: "V", labels: ["430"] },
+    ]);
+
+    const { errors, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    expect(plan!.entities.map((entity) => entity.id).sort()).toEqual(["augustine", "new-430"]);
+    const augustine = plan!.entities.find((entity) => entity.id === "augustine")!;
+    expect(augustine.labels).toEqual(["Augustine", "Augustinus"]);
+    expect(augustine.props.map((prop) => prop.value.entityId)).toEqual(["v-354", "new-430"]);
+    expect(plan!.appends.augustine.stored).toBe(stored);
+    expect(plan!.appends.augustine.skipped).toMatchObject({ labels: 1, props: 1, values: 1 });
+  });
+
+  it("creates an input Value with a taken id under a new id, never appending it", async () => {
+    const context = contextWith([storedValue, existingEntity("born", EntityEnums.Class.Concept)]);
+    const text = JSON.stringify([
+      { id: "monica", class: "P", labels: ["Monica"], props: [{ type: "born", value: "v-354" }] },
+      { id: "v-354", class: "V", labels: ["332"] },
+    ]);
+
+    const { errors, notes, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    expect(plan!.appends).toEqual({});
+    const value = plan!.entities.find((entity) => entity.class === EntityEnums.Class.Value)!;
+    expect(value.id).not.toBe("v-354");
+    expect(value.labels).toEqual(["332"]);
+    const monica = plan!.entities.find((entity) => entity.id === "monica")!;
+    expect(monica.props[0].value.entityId).toBe(value.id);
+    expect(notes.map((note) => note.path)).toContain("id");
+  });
+
+  it("checks a new slot naming an entity the stored entity uses elsewhere", async () => {
+    const entities = [
+      stored,
+      storedValue,
+      existingEntity("born", EntityEnums.Class.Concept),
+      existingEntity("died", EntityEnums.Class.Concept),
+      existingEntity("confessions", EntityEnums.Class.Resource),
+    ];
+    const copied = await validateImport(
+      JSON.stringify({
+        id: "augustine",
+        class: "P",
+        labels: ["Augustine"],
+        props: [{ type: "died", value: "v-354" }],
+      }),
+      contextWith(entities)
+    );
+    expect(copied.errors).toEqual([]);
+    expect(copied.plan!.valueCopyIds).toHaveLength(1);
+    const augustine = copied.plan!.entities.find((entity) => entity.id === "augustine")!;
+    expect(augustine.props[1].value.entityId).toBe(copied.plan!.valueCopyIds[0]);
+
+    const wrongClass = await validateImport(
+      JSON.stringify({
+        id: "augustine",
+        class: "P",
+        labels: ["Augustine"],
+        references: [{ resource: "confessions", value: "born" }],
+      }),
+      contextWith(entities)
+    );
+    expect(wrongClass.errors.map((error) => error.path)).toEqual(["references[0].value"]);
+  });
+
+  it("refuses to append to an entity of another class", async () => {
+    const context = contextWith([stored]);
+    const { errors } = await validateImport(
+      JSON.stringify({ id: "augustine", class: "C", labels: ["Augustine"] }),
+      context
+    );
+    expect(errors.map((error) => error.path)).toEqual(["class"]);
+  });
+
+  it("takes an already appended draft as final, and stops when the stored entity changed", async () => {
+    const draftJson = JSON.stringify({
+      id: "augustine",
+      class: "P",
+      labels: ["Augustine"],
+      // v-354 is a stored Value the stored entity already points at: no copy
+      props: [{ type: "born", value: "v-354" }],
+    });
+
+    const final = await validateImport(draftJson, {
+      ...contextWith([stored, storedValue, existingEntity("born", EntityEnums.Class.Concept)]),
+      appendTargets: { augustine: stored },
+      allowAppend: false,
+    });
+    expect(final.errors).toEqual([]);
+    expect(final.plan!.valueCopyIds).toEqual([]);
+    const augustine = final.plan!.entities[0];
+    expect(augustine.props[0].id).toBe(stored.props[0].id);
+    expect(final.plan!.appends.augustine.conflicts).toEqual([]);
+
+    const changed = await validateImport(draftJson, {
+      ...contextWith([
+        { ...stored, updatedAt: "t2" } as unknown as IEntity,
+        storedValue,
+        existingEntity("born", EntityEnums.Class.Concept),
+      ]),
+      appendTargets: { augustine: stored },
+      allowAppend: false,
+    });
+    expect(changed.errors.map((error) => error.path)).toEqual(["id"]);
+  });
+
+  it("refuses an appended draft whose class was changed in Detail", async () => {
+    const { errors } = await validateImport(
+      JSON.stringify({ id: "augustine", class: "C", labels: ["Augustine"] }),
+      {
+        ...contextWith([stored]),
+        appendTargets: { augustine: stored },
+        allowAppend: false,
+      }
+    );
+    expect(errors.map((error) => error.path)).toEqual(["class"]);
   });
 });

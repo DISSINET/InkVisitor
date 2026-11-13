@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { StyledTabGroup } from "../EntityDetailBox/EntityDetailBoxStyles";
 
 // fills the full-height modal, so the JSON field gets all the room left
 export const StyledStep = styled.div`
@@ -95,31 +94,198 @@ export const StyledDraftIssues = styled.div`
   overflow: auto;
 `;
 
-// the bottom edges of the other tabs draw the top line of the box, and the
-// selected tab, which has none, opens into it
-export const StyledDraftTabGroup = styled(StyledTabGroup)`
-  margin-bottom: 0;
-  /* the selected tab takes the background of the Detail it opens into */
-  & > [data-selected="true"] {
-    background-color: ${({ theme }) => theme.color["white"]};
-  }
-  /* the last tab ends on the right edge of the box below */
-  & > *:last-child {
-    margin-right: 0;
-  }
-`;
-
 export const StyledDraftDetail = styled.div`
   position: relative;
   flex: 1;
+  min-width: 0;
   min-height: ${({ theme }) => theme.space[64]};
   overflow: hidden;
   background-color: ${({ theme }) => theme.color["white"]};
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
-  border-top: none;
-  /* matches the rounding of the tabs on top */
-  border-bottom-left-radius: ${({ theme }) => theme.borderRadius.sm};
-  border-bottom-right-radius: ${({ theme }) => theme.borderRadius.sm};
+  /* the list on the left draws this edge, open where the selected row is */
+  border-left: none;
+  border-radius: ${({ theme }) => `0 ${theme.borderRadius.sm} ${theme.borderRadius.sm} 0`};
+`;
+
+// Left of the Detail: the tools to find a draft over every draft, grouped by
+// class, as tabs turned on their side. Each piece draws its part of the edge
+// shared with the Detail, so the selected row can leave its part out and open
+// into the Detail.
+export const StyledDraftListBox = styled.div<{ $width: number }>`
+  /* holds the resize handle on its right edge */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: ${({ $width }) => $width}px;
+  min-height: 0;
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
+  border-right: none;
+  border-radius: ${({ theme }) => `${theme.borderRadius.sm} 0 0 ${theme.borderRadius.sm}`};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+`;
+
+// dragged sideways, sets the width of the list; it straddles the edge the
+// list shares with the Detail
+export const StyledDraftListResize = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  z-index: 2;
+  width: 6px;
+  cursor: col-resize;
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    background-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledDraftListToolbar = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2]};
+  border-right: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][500]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][400]};
+`;
+
+export const StyledDraftListNav = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDraftListCount = styled.span`
+  flex-shrink: 0;
+  min-width: 3.6rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  text-align: center;
+`;
+
+// on the right of its row, or on the left as the row's label
+export const StyledDraftListSummary = styled.p<{ $left?: boolean }>`
+  margin-left: ${({ $left }) => ($left ? 0 : "auto")};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  text-align: ${({ $left }) => ($left ? "left" : "right")};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+export const StyledDraftList = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+
+  & > * {
+    border-right: ${({ theme }) => theme.borderWidth[1]} solid
+      ${({ theme }) => theme.color["gray"][500]};
+  }
+`;
+
+export const StyledDraftListEmpty = styled.p`
+  padding: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+// below the last row, carries the shared edge down to the bottom
+export const StyledDraftListEnd = styled.div`
+  flex: 1;
+`;
+
+export const StyledDraftListGroup = styled.button`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  flex-shrink: 0;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+  text-align: left;
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  border: none;
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+  cursor: pointer;
+`;
+
+export const StyledDraftListRow = styled.div<{ $selected: boolean }>`
+  /* holds the class bar, which sits on its left edge */
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  min-height: 2.6rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  /* the colors of a Detail tab */
+  color: ${({ theme, $selected }) => ($selected ? theme.color["black"] : theme.color["gray"][700])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["white"] : theme.color["gray"][100]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+  cursor: pointer;
+
+  && {
+    border-right-color: ${({ $selected }) => ($selected ? "transparent" : "")};
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ theme, $selected }) =>
+      $selected ? theme.color["white"] : theme.color["gray"][200]};
+  }
+`;
+
+export const StyledDraftListLabel = styled.span<{ $leftOut: boolean }>`
+  flex: 1;
+  text-decoration: ${({ $leftOut }) => ($leftOut ? "line-through" : "none")};
+  opacity: ${({ $leftOut }) => ($leftOut ? 0.6 : 1)};
+  align-self: center;
+  min-width: 0;
+  padding: ${({ theme }) => `0 ${theme.space[2]}`};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const StyledDraftListMarkers = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDraftListBadge = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+export const StyledDraftListLeaveOut = styled.button`
+  display: flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["greyer"]};
+  background: none;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ theme }) => theme.color["gray"][300]};
+  }
 `;
 
 // between the footer's left and right buttons
@@ -133,6 +299,123 @@ export const StyledDraftModeHint = styled.p`
 
 export const StyledHiddenFileInput = styled.input`
   display: none;
+`;
+
+// left of the buttons in the footer of the JSON step
+export const StyledInputHint = styled(StyledDraftModeHint)`
+  margin-left: 0;
+  text-align: left;
+`;
+
+// striped like the upload area of the documents page
+export const StyledLoadArea = styled.button`
+  flex-shrink: 0;
+  width: 100%;
+  height: 3.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"]["400"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  cursor: pointer;
+  background: ${({ theme }) => `
+    repeating-linear-gradient(
+      -45deg,
+      ${theme.color.white},
+      ${theme.color.white},
+      2px,
+      ${theme.color.uploadDocumentBg} 1px,
+      ${theme.color.uploadDocumentBg} 12px
+    )
+  `};
+
+  &:hover,
+  &:focus-visible {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+// the list, the Detail and the side column of the selected draft
+export const StyledDraftBody = styled.div`
+  display: flex;
+  flex: 1;
+  min-height: 0;
+`;
+
+// beside the Detail: how the selected draft relates to the database
+export const StyledAppendPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[4]};
+  width: 23rem;
+  min-height: 0;
+  margin-left: ${({ theme }) => theme.space[4]};
+  overflow-y: auto;
+`;
+
+export const StyledAppendSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledAppendHeading = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+// one side of a conflict: the value itself is what gets clicked
+export const StyledConflictOption = styled.button<{ $selected: boolean }>`
+  display: flex;
+  align-items: baseline;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: left;
+  overflow-wrap: anywhere;
+  color: ${({ theme, $selected }) => ($selected ? theme.color["white"] : theme.color["black"])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["primary"] : theme.color["white"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme, $selected }) => ($selected ? theme.color["primary"] : theme.color["gray"]["400"])};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledConflictSide = styled.span`
+  flex-shrink: 0;
+  width: 4.5rem;
+  opacity: 0.7;
+`;
+
+export const StyledAppendText = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  overflow-wrap: anywhere;
+`;
+
+export const StyledAppendRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledAppendRowLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["greyer"]};
 `;
 
 export const StyledProgress = styled.p`
@@ -188,6 +471,22 @@ export const StyledIssueList = styled.ul`
   gap: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[4]};
   list-style: disc;
+`;
+
+// an issue about one draft opens it
+export const StyledIssueLink = styled.button`
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
 `;
 
 // loop errors span several lines, one per edge

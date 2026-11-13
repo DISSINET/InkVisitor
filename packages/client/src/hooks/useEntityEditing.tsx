@@ -55,6 +55,8 @@ export interface EntityEditing {
   // Detail shown outside the Detail box: the element whose width decides its
   // narrow layout, and its tabs sit outside its own height
   hostElementId?: string;
+  // given, a double click on the tag of an unstored entity opens it there
+  openUnstored?: (entityId: string) => void;
 }
 
 export const STORED_ENTITY_EDITING: EntityEditing = {
