@@ -66,6 +66,7 @@ async function main(): Promise<void> {
   const buildDir = path.join(DATASETS_DIR, buildOut);
   const names = workNames(pgName, new Date());
   const started = Date.now();
+  let exporting = false;
   let building = false;
   let promoted = false;
 
@@ -97,6 +98,7 @@ async function main(): Promise<void> {
     // the directory belongs to this run; a file left by an earlier run would be imported too
     fs.rmSync(buildDir, { recursive: true, force: true });
     fs.mkdirSync(buildDir, { recursive: true });
+    exporting = true;
     const exported = new Map<string, number>();
     for (const table of Object.keys(TABLES)) {
       if (!present.includes(table)) {
@@ -223,7 +225,9 @@ async function main(): Promise<void> {
     }
     console.log(colors.green(`migrated ${dbName} -> ${pgName} (postgres) through datasets/${out} in ${seconds(started)} s`));
   } finally {
-    if (!promoted && fs.existsSync(buildDir)) {
+    // a run refused before the export has nothing of its own to report; a
+    // datasets/<out>-migrating already there belongs to an earlier run
+    if (!promoted && exporting) {
       const kept = [`datasets/${buildOut}`, ...(building ? [`database ${names.build}`] : [])];
       console.log(
         colors.red(
