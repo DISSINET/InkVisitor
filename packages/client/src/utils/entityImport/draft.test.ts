@@ -15,6 +15,7 @@ import {
   missingSynonymGroupIds,
   reorderDraftRelations,
   replaceEntityId,
+  replaceUndoEntityId,
   setAllConflictChoices,
   tabEntities,
   toggleLeftOut,
@@ -396,6 +397,47 @@ describe("undoAppend", () => {
         ["puppy", "dog"],
       ].sort()
     );
+  });
+
+  it("undoes an earlier append and keeps a later one", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { props: [{ type: "size", value: "puppy" }] }),
+        newEntity("puppy"),
+        newEntity("kennel", { props: [{ type: "size", value: "dog" }] }),
+      ],
+      relations: [],
+    };
+    const stored = (id: string) => ({
+      stored: existingEntity(id),
+      conflicts: [],
+      skipped: {} as never,
+    });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = { ...draft, appends: { "stored-dog": stored("stored-dog") } };
+
+    // the later appends: the puppy the dog points at, the kennel pointing at the dog
+    for (const [fromId, toId] of [
+      ["puppy", "stored-puppy"],
+      ["kennel", "stored-kennel"],
+    ]) {
+      draft = replaceEntityId(draft, fromId, toId);
+      draft = { ...draft, appends: { ...draft.appends, [toId]: stored(toId) } };
+      undoDog = replaceUndoEntityId(undoDog, fromId, toId);
+    }
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual([
+      "dog",
+      "stored-puppy",
+      "stored-kennel",
+    ]);
+    expect(undone.entities[0].props[0].value.entityId).toBe("stored-puppy");
+    expect(undone.entities[2].props[0].value.entityId).toBe("dog");
+    expect(Object.keys(undone.appends!).sort()).toEqual(["stored-kennel", "stored-puppy"]);
   });
 });
 

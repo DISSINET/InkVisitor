@@ -24,6 +24,7 @@ export {
   missingSynonymGroupIds,
   reorderDraftRelations,
   replaceEntityId,
+  replaceUndoEntityId,
   setAllConflictChoices,
   setConflictChoice,
   toggleLeftOut,

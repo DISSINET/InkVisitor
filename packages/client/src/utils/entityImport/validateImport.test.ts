@@ -255,6 +255,40 @@ describe("validateImport appending to a stored entity", () => {
     expect(notes.map((note) => note.path)).toContain("id");
   });
 
+  it("checks a new slot naming an entity the stored entity uses elsewhere", async () => {
+    const entities = [
+      stored,
+      storedValue,
+      existingEntity("born", EntityEnums.Class.Concept),
+      existingEntity("died", EntityEnums.Class.Concept),
+      existingEntity("confessions", EntityEnums.Class.Resource),
+    ];
+    const copied = await validateImport(
+      JSON.stringify({
+        id: "augustine",
+        class: "P",
+        labels: ["Augustine"],
+        props: [{ type: "died", value: "v-354" }],
+      }),
+      contextWith(entities)
+    );
+    expect(copied.errors).toEqual([]);
+    expect(copied.plan!.valueCopyIds).toHaveLength(1);
+    const augustine = copied.plan!.entities.find((entity) => entity.id === "augustine")!;
+    expect(augustine.props[1].value.entityId).toBe(copied.plan!.valueCopyIds[0]);
+
+    const wrongClass = await validateImport(
+      JSON.stringify({
+        id: "augustine",
+        class: "P",
+        labels: ["Augustine"],
+        references: [{ resource: "confessions", value: "born" }],
+      }),
+      contextWith(entities)
+    );
+    expect(wrongClass.errors.map((error) => error.path)).toEqual(["references[0].value"]);
+  });
+
   it("refuses to append to an entity of another class", async () => {
     const context = contextWith([stored]);
     const { errors } = await validateImport(

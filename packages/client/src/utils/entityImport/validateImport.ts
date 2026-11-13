@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IProp, ITerritory } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import {
   AppendInfo,
@@ -45,6 +45,71 @@ export interface ImportValidationContext {
 /** Ids of every entity the stored version of an entity points at. */
 const storedRefIds = (stored: IEntity): Set<string> =>
   new Set(collectEntityRefs([{ index: 0, entity: stored, rawRelations: [] }]).map((ref) => ref.id));
+
+const collectStoredPropPaths = (
+  stored: IProp[],
+  imported: IProp[],
+  path: string,
+  paths: Set<string>
+) => {
+  imported.forEach((prop, propIndex) => {
+    const match = stored.find(
+      (candidate) =>
+        candidate.type.entityId === prop.type.entityId &&
+        candidate.value.entityId === prop.value.entityId
+    );
+    if (!match) {
+      return;
+    }
+    const propPath = `${path}[${propIndex}]`;
+    paths.add(`${propPath}.type.entityId`);
+    paths.add(`${propPath}.value.entityId`);
+    collectStoredPropPaths(match.children, prop.children, `${propPath}.children`, paths);
+  });
+};
+
+/**
+ * Paths of the imported entity's refs that sit in a metaprop, reference or
+ * territory field the stored entity already holds. A ref to an id the stored
+ * entity uses elsewhere is new and checked like any other.
+ */
+const storedRefPaths = (stored: IEntity, imported: IEntity): Set<string> => {
+  const paths = new Set<string>();
+  collectStoredPropPaths(stored.props, imported.props, "props", paths);
+  imported.references.forEach((reference, referenceIndex) => {
+    if (
+      stored.references.some(
+        (candidate) =>
+          candidate.resource === reference.resource && candidate.value === reference.value
+      )
+    ) {
+      paths.add(`references[${referenceIndex}].resource`);
+      paths.add(`references[${referenceIndex}].value`);
+    }
+  });
+  // a territory's parent always stays as stored
+  paths.add("data.parent.territoryId");
+  const storedProtocol = (stored as ITerritory).data?.protocol as unknown as
+    | Record<string, string | string[]>
+    | undefined;
+  const importedProtocol = (imported as ITerritory).data?.protocol as unknown as
+    | Record<string, string | string[]>
+    | undefined;
+  for (const [key, value] of Object.entries(importedProtocol ?? {})) {
+    const storedValue = storedProtocol?.[key];
+    const storedIds = Array.isArray(storedValue) ? storedValue : [storedValue];
+    if (Array.isArray(value)) {
+      value.forEach((id, idIndex) => {
+        if (storedIds.includes(id)) {
+          paths.add(`data.protocol.${key}[${idIndex}]`);
+        }
+      });
+    } else if (storedIds.includes(value)) {
+      paths.add(`data.protocol.${key}`);
+    }
+  }
+  return paths;
+};
 
 /**
  * Runs every check on the pasted text and, when nothing blocks the import,
@@ -201,9 +266,12 @@ export const validateImport = async (
     Object.entries(appends).map(([entityId, { stored }]) => [entityId, storedRefIds(stored)])
   );
   const ownerIdByIndex = new Map(entities.map((item) => [item.index, item.entity.id]));
-  const newRefs = refs.filter(
-    (ref) => !storedRefsByOwner.get(ownerIdByIndex.get(ref.entityIndex)!)?.has(ref.id)
+  const storedPathsByIndex = new Map(
+    entities
+      .filter((item) => appends[item.entity.id])
+      .map((item) => [item.index, storedRefPaths(appends[item.entity.id].stored, item.entity)])
   );
+  const newRefs = refs.filter((ref) => !storedPathsByIndex.get(ref.entityIndex)?.has(ref.path));
 
   // the entities the stored entities point at, so Detail shows them and the
   // merge can compare Values by their text

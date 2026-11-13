@@ -190,6 +190,31 @@ describe("appendChanges and storedFields", () => {
     expect(changes).toEqual({ notes: ["bishop", "saint"], data: { logicalType: "1" } });
     expect(storedFields(stored, changes)).toEqual({ notes: ["bishop"], data: { logicalType: null } });
   });
+
+  it("send a status picked in a conflict", () => {
+    const stored = concept();
+    const appended = { ...stored, status: EntityEnums.Status.Pending };
+    expect(appendChanges(stored, appended)).toEqual({ status: EntityEnums.Status.Pending });
+    expect(storedFields(stored, { status: EntityEnums.Status.Pending })).toEqual({
+      status: EntityEnums.Status.Approved,
+    });
+  });
+
+  it("never send a territory's parent, which would reorder it", () => {
+    const stored = concept({
+      class: EntityEnums.Class.Territory,
+      data: { parent: { territoryId: "T0", order: 3 } },
+    });
+    const appended = {
+      ...stored,
+      notes: ["council"],
+      data: { parent: { territoryId: "T0", order: EntityEnums.Order.Last } },
+    };
+    expect(appendChanges(stored, appended)).toEqual({ notes: ["council"] });
+
+    const withData = { ...appended, data: { ...appended.data, validations: [], extra: "x" } };
+    expect(appendChanges(stored, withData).data).toEqual({ extra: "x" });
+  });
 });
 
 describe("keepStoredIds", () => {

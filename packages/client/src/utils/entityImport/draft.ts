@@ -168,6 +168,32 @@ export const appendUndoOf = (
 };
 
 /**
+ * The undo of an earlier append after a later "append to it" gave another
+ * draft a stored id, so undoing the earlier one keeps the later one.
+ */
+export const replaceUndoEntityId = (
+  undo: AppendUndo,
+  fromId: string,
+  toId: string
+): AppendUndo => {
+  const swap = (id: string) => (id === fromId ? toId : id);
+  const replaced = replaceEntityId(
+    { entities: [undo.entity, ...undo.entities], relations: undo.relations, existing: {} },
+    fromId,
+    toId
+  );
+  const [entity, ...entities] = replaced.entities;
+  return {
+    ...undo,
+    entity,
+    entities,
+    relations: replaced.relations,
+    links: undo.links.map((link) => ({ ...link, ownerId: swap(link.ownerId) })),
+    copyIds: undo.copyIds.map(swap),
+  };
+};
+
+/**
  * Undoes one "append to it". The draft comes back as it was before the
  * append, the links the append moved to the stored entity point at it again,
  * and so do its relations; the other drafts keep every change made since. A

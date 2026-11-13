@@ -361,6 +361,7 @@ const APPEND_FIELDS = [
   "labels",
   "detail",
   "language",
+  "status",
   "notes",
   "legacyId",
   "data",
@@ -368,12 +369,24 @@ const APPEND_FIELDS = [
   "references",
 ] as const;
 
+// The server merges an update's data into the stored data, so leaving a key
+// out keeps the stored value. A territory update carrying `parent` reorders it
+// among its siblings even when the order is unchanged.
+const withoutSkippedData = (data: object | undefined) =>
+  Object.fromEntries(
+    Object.entries(data ?? {}).filter(([key]) => !SKIPPED_DATA_KEYS.includes(key))
+  );
+
 /** The fields of the appended entity that differ from the stored entity. */
 export const appendChanges = (stored: IEntity, entity: IEntity): Partial<IEntity> => {
   const changes: Partial<IEntity> = {};
   for (const field of APPEND_FIELDS) {
-    if (JSON.stringify(stored[field]) !== JSON.stringify(entity[field])) {
-      (changes as Record<string, unknown>)[field] = entity[field];
+    const [storedValue, value] =
+      field === "data"
+        ? [withoutSkippedData(stored.data), withoutSkippedData(entity.data)]
+        : [stored[field], entity[field]];
+    if (JSON.stringify(storedValue) !== JSON.stringify(value)) {
+      (changes as Record<string, unknown>)[field] = value;
     }
   }
   return changes;

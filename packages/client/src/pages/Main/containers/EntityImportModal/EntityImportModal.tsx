@@ -34,6 +34,7 @@ import {
   missingEntityIds,
   missingSynonymGroupIds,
   replaceEntityId,
+  replaceUndoEntityId,
   setAllConflictChoices,
   setConflictChoice,
   toggleLeftOut,
@@ -300,8 +301,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       const next = draftAfterAppend(replaced, plan);
       const storedLabel = plan.appends[storedId]?.stored.labels[0];
       setDraft(next);
+      // the earlier appends' undos follow the draft to its stored id
       setAppendRecords((records) => ({
-        ...records,
+        ...Object.fromEntries(
+          Object.entries(records).map(([id, record]) => [
+            id,
+            { ...record, undo: replaceUndoEntityId(record.undo, entityId, storedId) },
+          ])
+        ),
         [storedId]: { undo: appendUndoOf(draft, entityId, storedId), storedLabel },
       }));
       setDraftErrors([]);

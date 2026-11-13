@@ -491,21 +491,38 @@ export const validateRelations = async (
   const kept = entries.filter((entry) => !dropped.has(entry));
 
   // 6. types that allow a single relation per entity; synonyms are exempt, the
-  // server merges their groups instead. Of these, only the asymmetrical Action
-  // event equivalent can meet a relation of a stored entity in the database.
+  // server merges their groups instead. A stored member of a symmetrical
+  // relation, appended or not, counts the relations it has in the database.
+  const isSingle = (type: RelationEnums.Type) => {
+    const rule = ruleOf(type);
+    return !rule.multiple && !rule.cloudType;
+  };
+  const storedCounts = new Map<string, number>();
+  await Promise.all(
+    kept
+      .filter(({ relation }) => isSingle(relation.type) && !ruleOf(relation.type).asymmetrical)
+      .flatMap(({ relation }) =>
+        relation.entityIds.filter(isStored).map(async (entityId) => {
+          const stored = await fetchForward(entityId, relation.type);
+          storedCounts.set(`${relation.type}:${entityId}`, stored.length);
+        })
+      )
+  );
   const relationCounts = new Map<string, number>();
   for (const entry of kept) {
     const { type, entityIds } = entry.relation;
     const rule = ruleOf(type);
-    if (rule.multiple || rule.cloudType) {
+    if (!isSingle(type)) {
       continue;
     }
-    const countedIds = rule.asymmetrical ? [entityIds[0]] : unique(entityIds.filter(isNew));
+    const countedIds = rule.asymmetrical ? [entityIds[0]] : unique(entityIds);
     for (const entityId of countedIds) {
       const key = `${type}:${entityId}`;
       const previous =
         relationCounts.get(key) ??
-        databaseFirstHopGraphs.get(type)?.successors(entityId).length ??
+        (rule.asymmetrical
+          ? databaseFirstHopGraphs.get(type)?.successors(entityId).length
+          : storedCounts.get(key)) ??
         0;
       relationCounts.set(key, previous + 1);
       if (previous + 1 === 2) {
