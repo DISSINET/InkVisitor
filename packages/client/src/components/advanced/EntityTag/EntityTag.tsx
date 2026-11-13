@@ -427,6 +427,10 @@ const EntityTagInner: React.FC<EntityTag> = ({
             onDoubleClickOverride(e);
             return;
           }
+          if (isUnstored && editing.openUnstored) {
+            editing.openUnstored(entity.id);
+            return;
+          }
           if (!disableDoubleClick) {
             // opening at the front of the tab strip keeps the entity on screen
             // whatever else is already open

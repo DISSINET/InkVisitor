@@ -15,6 +15,7 @@ import {
   missingSynonymGroupIds,
   reorderDraftRelations,
   replaceEntityId,
+  setAllConflictChoices,
   tabEntities,
   toggleLeftOut,
   undoAppend,
@@ -395,5 +396,43 @@ describe("undoAppend", () => {
         ["puppy", "dog"],
       ].sort()
     );
+  });
+});
+
+describe("setAllConflictChoices", () => {
+  it("settles every conflict of every appended draft at once", () => {
+    const conflict = (stored: string, imported: string) => ({
+      path: "detail",
+      label: "detail",
+      stored,
+      imported,
+      useImported: false,
+    });
+    const draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { detail: "stored dog" }),
+        newEntity("puppy", { detail: "stored puppy" }),
+      ],
+      appends: {
+        dog: {
+          stored: existingEntity("dog"),
+          conflicts: [conflict("stored dog", "new dog")],
+          skipped: {} as never,
+        },
+        puppy: {
+          stored: existingEntity("puppy"),
+          conflicts: [conflict("stored puppy", "new puppy")],
+          skipped: {} as never,
+        },
+      },
+    };
+
+    const imported = setAllConflictChoices(draft, true);
+    expect(imported.entities.map((entity) => entity.detail)).toEqual(["new dog", "new puppy"]);
+
+    const back = setAllConflictChoices(imported, false);
+    expect(back.entities.map((entity) => entity.detail)).toEqual(["stored dog", "stored puppy"]);
+    expect(back.appends!.dog.conflicts[0].useImported).toBe(false);
   });
 });

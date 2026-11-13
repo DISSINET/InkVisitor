@@ -253,6 +253,23 @@ export const setConflictChoice = (
   };
 };
 
+/**
+ * Settles every conflict of every appended draft to the stored or the
+ * imported value; a conflict already settled that way is left as it is.
+ */
+export const setAllConflictChoices = (draft: ImportDraft, useImported: boolean): ImportDraft =>
+  Object.entries(draft.appends ?? {}).reduce(
+    (current, [entityId, append]) =>
+      append.conflicts.reduce(
+        (next, conflict, conflictIndex) =>
+          conflict.useImported === useImported
+            ? next
+            : setConflictChoice(next, entityId, conflictIndex, useImported),
+        current
+      ),
+    draft
+  );
+
 const isValueCopy = (draft: ImportDraft, entityId: string) =>
   !!draft.valueCopyIds?.includes(entityId);
 

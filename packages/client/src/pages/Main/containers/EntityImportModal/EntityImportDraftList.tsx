@@ -9,6 +9,7 @@ import {
   IcoArrowUp,
   IcoCaretDown,
   IcoCaretRight,
+  IcoCheck,
   IcoCloseCg,
   IcoExclamation,
   IcoWarning,
@@ -47,6 +48,9 @@ interface EntityImportDraftList {
   selectedId: string | undefined;
   onSelect: (entityId: string) => void;
   onToggleLeftOut: (entityId: string) => void;
+  // drafts opened in the Detail so far
+  reviewedIds: Set<string>;
+  onAllConflictChoices: (useImported: boolean) => void;
 }
 
 /**
@@ -109,6 +113,8 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
   selectedId,
   onSelect,
   onToggleLeftOut,
+  reviewedIds,
+  onAllConflictChoices,
 }) => {
   const [width, setWidth] = useState(readListWidth);
   const resizeTo = (next: number) => {
@@ -201,7 +207,12 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
     (entity) => draft.appends?.[entity.id] && !leftOut.has(entity.id)
   ).length;
   const leftOutCount = entities.filter((entity) => leftOut.has(entity.id)).length;
+  const reviewedCount = entities.filter((entity) => reviewedIds.has(entity.id)).length;
+  const conflictCount = entities
+    .filter((entity) => !leftOut.has(entity.id))
+    .reduce((total, entity) => total + conflictsOf(entity), 0);
   const summary = [
+    `${reviewedCount}/${entities.length} reviewed`,
     appendCount ? `${appendCount} append` : "",
     leftOutCount ? `${leftOutCount} left out` : "",
   ]
@@ -313,8 +324,27 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
               },
             ]}
           />
-          {summary && <StyledDraftListSummary>{summary}</StyledDraftListSummary>}
+          <StyledDraftListSummary>{summary}</StyledDraftListSummary>
         </StyledDraftListNav>
+        {conflictCount > 0 && (
+          <StyledDraftListNav>
+            <StyledDraftListSummary $left>
+              {`All ${conflictCount} ${conflictCount === 1 ? "conflict" : "conflicts"}:`}
+            </StyledDraftListSummary>
+            <Button
+              label="keep stored"
+              inverted
+              size={ButtonSize.Small}
+              onClick={() => onAllConflictChoices(false)}
+            />
+            <Button
+              label="take import"
+              inverted
+              size={ButtonSize.Small}
+              onClick={() => onAllConflictChoices(true)}
+            />
+          </StyledDraftListNav>
+        )}
       </StyledDraftListToolbar>
       <StyledDraftList>
         {groups.length === 0 && <StyledDraftListEmpty>{"Nothing matches."}</StyledDraftListEmpty>}
@@ -330,7 +360,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
               {!isFolded &&
                 members.map((entity) => {
                   const append = draft.appends?.[entity.id];
-                  const conflictCount = append?.conflicts.length ?? 0;
+                  const rowConflicts = append?.conflicts.length ?? 0;
                   const isSelected = entity.id === selectedId;
                   const reason = leftOut.get(entity.id);
                   return (
@@ -372,13 +402,20 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                             tooltipLabel="the import can't create it as it is; see the errors above"
                           />
                         )}
-                        {!reason && conflictCount > 0 && (
+                        {!reason && rowConflicts > 0 && (
                           <IconWithTooltip
                             icon={<IcoWarning />}
                             color="warning"
-                            tooltipLabel={`${conflictCount} ${
-                              conflictCount === 1 ? "conflict" : "conflicts"
+                            tooltipLabel={`${rowConflicts} ${
+                              rowConflicts === 1 ? "conflict" : "conflicts"
                             } with the database`}
+                          />
+                        )}
+                        {reviewedIds.has(entity.id) && (
+                          <IconWithTooltip
+                            icon={<IcoCheck />}
+                            color="greyer"
+                            tooltipLabel="reviewed: opened in the Detail"
                           />
                         )}
                         <StyledDraftListBadge>

@@ -169,10 +169,11 @@ export const StyledDraftListCount = styled.span`
   text-align: center;
 `;
 
-export const StyledDraftListSummary = styled.p`
-  margin-left: auto;
+// on the right of its row, or on the left as the row's label
+export const StyledDraftListSummary = styled.p<{ $left?: boolean }>`
+  margin-left: ${({ $left }) => ($left ? 0 : "auto")};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
-  text-align: right;
+  text-align: ${({ $left }) => ($left ? "left" : "right")};
   color: ${({ theme }) => theme.color["mutedText"]};
 `;
 

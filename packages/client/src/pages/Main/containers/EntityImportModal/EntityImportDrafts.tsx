@@ -34,6 +34,8 @@ interface EntityImportDrafts {
   // leaves the entity out of the import, or brings it back
   onToggleLeftOut: (entityId: string) => void;
   onConflictChoice: (entityId: string, conflictIndex: number, useImported: boolean) => void;
+  // settles every conflict of the import to the stored or the imported value
+  onAllConflictChoices: (useImported: boolean) => void;
   // resolves to whether the draft became an append to the stored entity
   onAppendTo: (entityId: string, storedId: string) => Promise<boolean>;
   // the stored ids of the appends made in the tabs, which can be undone
@@ -52,6 +54,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   onDraftChange,
   onToggleLeftOut,
   onConflictChoice,
+  onAllConflictChoices,
   onAppendTo,
   undoableAppendIds,
   onUndoAppend,
@@ -76,6 +79,14 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   }, [tabs, selectedId]);
 
   const leftOut = useMemo(() => leftOutDrafts(draft), [draft]);
+
+  // every draft opened in the Detail counts as reviewed
+  const [reviewedIds, setReviewedIds] = useState(() => new Set<string>());
+  useEffect(() => {
+    if (selectedId && !reviewedIds.has(selectedId)) {
+      setReviewedIds((current) => new Set(current).add(selectedId));
+    }
+  }, [selectedId]);
   const labelOf = (entityId: string) => {
     const entity = draft.entities.find((candidate) => candidate.id === entityId);
     return entity ? getEntityLabel(entity) : entityId;
@@ -109,6 +120,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       createsEntities: false,
       offersStoredEntityFeatures: false,
       hostElementId: DRAFT_DETAIL_ELEMENT_ID,
+      // a double click on the tag of another draft opens that draft
+      openUnstored: setSelectedId,
     }),
     [writes, draftEntityIds]
   );
@@ -188,6 +201,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             leftOut={leftOut}
             labelOf={labelOf}
             onToggleLeftOut={onToggleLeftOut}
+            reviewedIds={reviewedIds}
+            onAllConflictChoices={onAllConflictChoices}
           />
 
           <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>

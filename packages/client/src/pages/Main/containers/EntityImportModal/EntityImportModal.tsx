@@ -34,6 +34,7 @@ import {
   missingEntityIds,
   missingSynonymGroupIds,
   replaceEntityId,
+  setAllConflictChoices,
   setConflictChoice,
   toggleLeftOut,
   undoAppend,
@@ -270,6 +271,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
   const handleConflictChoice = (entityId: string, conflictIndex: number, useImported: boolean) =>
     setDraft((current) => current && setConflictChoice(current, entityId, conflictIndex, useImported));
+  const handleAllConflictChoices = (useImported: boolean) =>
+    setDraft((current) => current && setAllConflictChoices(current, useImported));
 
   // The draft takes the id of the stored entity everywhere in the drafts, and
   // the drafts are validated again: the draft is merged into the stored
@@ -467,6 +470,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onDraftChange={handleDraftChange}
               onToggleLeftOut={handleToggleLeftOut}
               onConflictChoice={handleConflictChoice}
+              onAllConflictChoices={handleAllConflictChoices}
               onAppendTo={handleAppendTo}
               undoableAppendIds={Object.keys(appendRecords)}
               onUndoAppend={handleUndoAppend}

@@ -97,6 +97,7 @@ const Harness = () => {
       onDraftChange={(change) => setDraft((current) => change(current))}
       onToggleLeftOut={(entityId) => closed.push(entityId)}
       onConflictChoice={() => {}}
+      onAllConflictChoices={() => {}}
       onAppendTo={async () => false}
       undoableAppendIds={[]}
       onUndoAppend={() => {}}
