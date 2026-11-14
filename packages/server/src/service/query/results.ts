@@ -30,9 +30,9 @@ export interface IColumnsContext {
   /** every entity a column of the page points at, by id */
   entities: Map<string, IEntity>;
   /** ER column id -> row entity id -> ids linked in the column's direction, in relation order */
-  related: Record<string, Record<string, string[]>>;
+  related: Map<string, Map<string, string[]>>;
   /** row entity id -> the user behind its first audit */
-  creators: Record<string, IUser>;
+  creators: Map<string, IUser>;
 }
 
 /** the territory a territory hangs under or a statement is placed in */
@@ -84,7 +84,7 @@ function linkedIds(
       return Entity.extractIdsFromProps(entity.props, [PropSpecKind.TYPE]);
     // Entity Relations
     case Explore.EExploreColumnType.ER:
-      return related[column.id]?.[entity.id] ?? [];
+      return related.get(column.id)?.get(entity.id) ?? [];
     // Entity Parent Territory
     case Explore.EExploreColumnType.EPRT: {
       const parentId = parentTerritoryId(entity);
@@ -103,36 +103,34 @@ function relatedIds(
   rowIds: string[],
   relations: RelationTypes.IRelation[],
   inverse: boolean
-): Record<string, string[]> {
+): Map<string, string[]> {
   const rows = new Set(rowIds);
-  const linked: Record<string, Set<string>> = {};
+  const linked = new Map<string, Set<string>>();
   for (const relation of relations) {
     for (const rowId of new Set(relation.entityIds)) {
       if (!rows.has(rowId) || !Relation.isInDirection(relation, rowId, inverse)) {
         continue;
       }
-      const ids = linked[rowId] ?? (linked[rowId] = new Set<string>());
+      const ids = linked.get(rowId) ?? new Set<string>();
+      linked.set(rowId, ids);
       for (const id of relation.entityIds) {
         ids.add(id);
       }
     }
   }
-  const out: Record<string, string[]> = {};
-  for (const rowId of rowIds) {
-    const ids = linked[rowId];
-    if (ids) {
-      ids.delete(rowId);
-      out[rowId] = [...ids];
-    }
+  const out = new Map<string, string[]>();
+  for (const [rowId, ids] of linked) {
+    ids.delete(rowId);
+    out.set(rowId, [...ids]);
   }
   return out;
 }
 
 /** row id -> the user behind its first audit, for the rows whose audit and user both exist */
-async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Record<string, IUser>> {
+async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Map<string, IUser>> {
   const audits = await Audit.getFirstForEntities(db, rowIds);
   const users = new Map<string, IUser | null>();
-  const out: Record<string, IUser> = {};
+  const out = new Map<string, IUser>();
   for (const audit of audits) {
     if (!audit.user) {
       continue;
@@ -142,7 +140,7 @@ async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Record<strin
     }
     const user = users.get(audit.user);
     if (user) {
-      out[audit.modelId] = user;
+      out.set(audit.modelId, user);
     }
   }
   return out;
@@ -318,8 +316,8 @@ export default class Results<T extends { id: string }> {
     const context: IColumnsContext = {
       usedInTerritories: {},
       entities: new Map(),
-      related: {},
-      creators: {},
+      related: new Map(),
+      creators: new Map(),
     };
     if (!entities.length) {
       return context;
@@ -331,7 +329,7 @@ export default class Results<T extends { id: string }> {
       if (column.type === Explore.EExploreColumnType.ER) {
         const params = column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
         const relations = await Relation.findForEntities(db, rowIds, params.relationType);
-        context.related[column.id] = relatedIds(rowIds, relations, params.inverse === true);
+        context.related.set(column.id, relatedIds(rowIds, relations, params.inverse === true));
       }
     }
 
@@ -428,7 +426,7 @@ export default class Results<T extends { id: string }> {
         }
         // Created by
         case Explore.EExploreColumnType.EUC: {
-          const user = context.creators[entity.id];
+          const user = context.creators.get(entity.id);
           if (user) {
             out[column.id] = user;
           }

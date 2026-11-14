@@ -137,4 +137,59 @@ describe("Results column data", () => {
     expect(results.columns(rows[0], [], context)).toEqual({});
     expect(getMany).not.toHaveBeenCalled();
   });
+
+  it("keeps the order cells had: relation order for ER, document order for props", async () => {
+    const page: Record<string, IEntity> = {
+      a: entity("a", { props: [prop("pt", "z2"), prop("pt", "b2")] }),
+      b: entity("b"),
+    };
+    const linked: Record<string, IEntity> = { ...page };
+    for (const id of ["z", "c", "z2", "b2"]) {
+      linked[id] = entity(id);
+    }
+    jest
+      .spyOn(storage.entities, "getMany")
+      .mockImplementation(async (_conn, ids: string[]) => ids.filter((id) => linked[id]).map((id) => linked[id]));
+    // in the order storage returns them, which is not id order
+    const relations = [
+      { id: "r9", type: "REL", entityIds: ["a", "z"] },
+      { id: "r1", type: "SCL", entityIds: ["a", "b"] },
+      { id: "r5", type: "REL", entityIds: ["c", "a"] },
+    ];
+    jest
+      .spyOn(storage.relations, "forEntities")
+      .mockImplementation(async (_conn, _ids, type) => relations.filter((r) => r.type === type) as any);
+    const cols = [
+      column("rel", C.ER, { relationType: "REL" }),
+      column("scl", C.ER, { relationType: "SCL" }),
+      column("scl-inverse", C.ER, { relationType: "SCL", inverse: true }),
+      column("value", C.EPV, { propertyType: "pt" }),
+    ];
+
+    const results = new Results<IEntity>();
+    const context = await results.prepareColumnsContext(conn, [page.a, page.b], cols);
+    const a = results.columns(page.a, cols, context);
+    const b = results.columns(page.b, cols, context);
+
+    // REL is symmetrical: a is listed second in r5 and still links to c
+    expect(a["rel"]).toEqual([linked.z, linked.c]);
+    expect(a["scl"]).toEqual([page.b]);
+    expect(b["scl-inverse"]).toEqual([page.a]);
+    expect(b["scl"]).toEqual([]);
+    expect(a["value"]).toEqual([linked.z2, linked.b2]);
+  });
+
+  it("serves a row whose id is an Object.prototype key like any other", async () => {
+    jest.spyOn(storage.entities, "getMany").mockResolvedValue([]);
+    jest.spyOn(storage.relations, "forEntities").mockResolvedValue([]);
+    jest.spyOn(storage.audits, "firstForMany").mockResolvedValue([]);
+    const odd = [entity("constructor"), entity("toString"), entity("__proto__")];
+    const cols = [column("scl", C.ER, { relationType: "SCL" }), column("creator", C.EUC)];
+
+    const results = new Results<IEntity>();
+    const context = await results.prepareColumnsContext(conn, odd, cols);
+    for (const row of odd) {
+      expect(results.columns(row, cols, context)).toEqual({ scl: [] });
+    }
+  });
 });
