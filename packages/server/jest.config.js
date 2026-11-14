@@ -90,6 +90,7 @@ const UNIT_TEST_PATHS = [
   "src/service/storage/config.test.ts",
   "src/service/storage/postgres/sql.test.ts",
   "src/service/storage/postgres/search.test.ts",
+  "src/service/storage/postgres/query/edges.test.ts",
   "src/service/storage/postgres/query/filters.test.ts",
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",

@@ -241,6 +241,25 @@ function idsMatch(p: Params, idsSql: string, targets: string[] | null, classes: 
   return `cardinality(${idsSql}) > 0`;
 }
 
+/** candidate rows through `index` for the targets; every row without a target (candidateStatements) */
+const candidates = (p: Params, index: string, targets: string[] | null): string =>
+  targets ? p.index(TABLE.entities, index, targets) : "TRUE";
+
+/**
+ * the longest target list ownCandidates probes a gin index with. When the planner runs the
+ * overlap as a filter it compares every key of a row with every target, so the list an unpinned
+ * target resolves to (thousands of ids) costs more there than reading the documents does
+ */
+const INDEXED_TARGETS_LIMIT = 100;
+
+/**
+ * candidates() ahead of a predicate over e's own document. The index keys are a superset of the
+ * ids the predicate reads at the same paths, so a row the index leaves out cannot match and its
+ * document is never read; a long target list is left to the predicate alone
+ */
+const ownCandidates = (p: Params, index: string, targets: string[] | null): string =>
+  targets && targets.length <= INDEXED_TARGETS_LIMIT ? candidates(p, index, targets) : "TRUE";
+
 /** text[] of the ids `paths` collect from document `doc`; null and empty ids are dropped, as every ReQL collector does */
 const collected = (paths: string[], doc: string): string => `(${collect(paths, "v IS NOT NULL AND v <> ''", doc)})`;
 
@@ -399,7 +418,7 @@ function hasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass
     return hasIdOfClasses(p, `ARRAY(SELECT ${propId(kind)} FROM ${PROPS("e")})`, classes);
   }
   const match = targets ? `${propId(kind)} = ${anyOf(p, targets)}` : `${propId(kind)} <> ''`;
-  return `EXISTS (SELECT 1 FROM ${PROPS("e")} WHERE ${match})`;
+  return `${ownCandidates(p, DbEnums.Indexes.PropsRecursive, targets)} AND EXISTS (SELECT 1 FROM ${PROPS("e")} WHERE ${match})`;
 }
 
 /** the rows `s` an edge targets: by id when pinned, by the node's classes when unpinned, every row otherwise (entitiesOfClasses) */
@@ -423,7 +442,7 @@ const REFS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'refe
 function hasReference(e: SearchEdge, p: Params, kind: "resource" | "value"): string {
   const targets = e.targetIds();
   const match = targets ? `ref->>'${kind}' = ${anyOf(p, targets)}` : nonEmpty(`ref->>'${kind}'`);
-  return `EXISTS (SELECT 1 FROM ${REFS("e")} WHERE ${match})`;
+  return `${ownCandidates(p, DbEnums.Indexes.EntityReferences, targets)} AND EXISTS (SELECT 1 FROM ${REFS("e")} WHERE ${match})`;
 }
 
 /** e is a resource the target entities' references point at (runIsReferenceResourceEdge) */
@@ -446,11 +465,8 @@ const statementPropPaths = (kind: "type" | "value"): string[] => [
 
 /** statements whose in-statement props reference a target by `kind`, an entity of the classes (SP:V), or anything (runStatementPropEdge) */
 const statementHasProp = (e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string =>
-  `${isClass("e", S)} AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), narrowByClass ? e.targetClasses() : [])}`;
-
-/** candidate statements through `index` for the targets; every statement without a target (candidateStatements) */
-const candidates = (p: Params, index: string, targets: string[] | null): string =>
-  targets ? p.index(TABLE.entities, index, targets) : "TRUE";
+  `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds())}` +
+  ` AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), narrowByClass ? e.targetClasses() : [])}`;
 
 /** the actants of the statement row `x`, one element `a` each */
 const ACTANTS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'data'->'actants'`)}) a`;
@@ -471,7 +487,8 @@ type ActantField = "classifications" | "identifications";
 
 /** statements with an actant classification or identification pointing at a target, or any (runStatementActantFieldEdge) */
 const statementHasActantField = (e: SearchEdge, p: Params, field: ActantField): string =>
-  `${isClass("e", S)} AND ${idsMatch(p, collected([`$.data.actants[*].${field}[*].entityId`], "e.doc"), e.targetIds(), [])}`;
+  `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementActantsCI, e.targetIds())}` +
+  ` AND ${idsMatch(p, collected([`$.data.actants[*].${field}[*].entityId`], "e.doc"), e.targetIds(), [])}`;
 
 /** the actant whose classifications or identifications point at a target (runInverseStatementActantFieldEdge) */
 const isActantField = (e: SearchEdge, p: Params, field: ActantField): string =>
@@ -490,7 +507,10 @@ function statementHasActant(e: SearchEdge, p: Params, positions: EntityEnums.Pos
   } else if (classes.length) {
     check = entityMatches(p, "a->>'entityId'", classes);
   }
-  return `${isClass("e", S)} AND EXISTS (SELECT 1 FROM ${ACTANTS("e")} WHERE a->>'position' = ${anyOf(p, positions)} AND ${check})`;
+  return (
+    `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementEntities, targets)}` +
+    ` AND EXISTS (SELECT 1 FROM ${ACTANTS("e")} WHERE a->>'position' = ${anyOf(p, positions)} AND ${check})`
+  );
 }
 
 /**
@@ -503,7 +523,10 @@ function statementHasAction(e: SearchEdge, p: Params): string {
   if (!targets && !classes.length) {
     return `${isClass("e", S)} AND jsonb_path_exists(e.doc, '$.data.actions[*].actionId')`;
   }
-  return `${isClass("e", S)} AND ${idsMatch(p, collected(["$.data.actions[*].actionId"], "e.doc"), targets, classes)}`;
+  return (
+    `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementEntities, targets)}` +
+    ` AND ${idsMatch(p, collected(["$.data.actions[*].actionId"], "e.doc"), targets, classes)}`
+  );
 }
 
 /** every id the two statement indexes cover: actions, actants, tags, the direct territory, in-statement prop types and values */
