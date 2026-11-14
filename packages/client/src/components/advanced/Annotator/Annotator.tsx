@@ -94,6 +94,7 @@ import {
   TerritoryCreateModalType,
   W_SCROLL,
 } from "./types";
+import { isAnchorLanguageMismatch } from "./utils/anchorElvl";
 import { annotatorHighlight } from "./utils/highlight";
 
 const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
@@ -738,6 +739,17 @@ export const TextAnnotator = ({
     await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
+  };
+
+  const handleAddEntityAnchor = (entity: IEntity, elvl: EntityEnums.Elvl): Promise<void> => {
+    const sourceLanguage = userData?.options.defaultStatementLanguage;
+    if (isAnchorLanguageMismatch(elvl, entity, sourceLanguage)) {
+      toast.info(
+        `Anchored entity language (${entity.language}) does not correspond with the user statement language (${sourceLanguage}). Anchor epistemic level changed to "inferential".`,
+      );
+      return handleAddAnchor(entity.id, EntityEnums.Elvl.Inferential);
+    }
+    return handleAddAnchor(entity.id, elvl);
   };
 
   const handleRefreshEntityAndStatement = (entityId: string) => {
@@ -1760,7 +1772,7 @@ export const TextAnnotator = ({
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
-                      onAnchorAdd={handleAddAnchor}
+                      onAnchorAdd={handleAddEntityAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
                       annotatorPositionHierarchy={annotatorPositionHierarchy}

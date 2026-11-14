@@ -75,7 +75,7 @@ interface TextAnnotatorMenuProps {
   text: string;
   anchors: Tag[];
   entities: Record<string, IEntity | false>;
-  onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
+  onAnchorAdd: (entity: IEntity, elvl: EntityEnums.Elvl) => void;
   onCreateStatement?: (
     elvl: EntityEnums.Elvl,
     entityCreateModalProps?: {
@@ -659,8 +659,8 @@ export const TextAnnotatorMenu = ({
                     categoryTypes={classesAnnotator}
                     statementLabelHint
                     initTyped={text.length > 30 ? text.substring(0, 30) : text}
-                    onSelected={(newAnchorId) => {
-                      onAnchorAdd(newAnchorId, suggesterElvl);
+                    onPicked={(entity) => {
+                      onAnchorAdd(entity, suggesterElvl);
                     }}
                     inputWidth="full"
                     openDetailOnCreate
