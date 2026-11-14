@@ -547,12 +547,14 @@ const isInStatementAsAction = (e: SearchEdge, p: Params): string =>
  * props, references, actions with their props, actants with classifications,
  * identifications and props, tags. The reference paths are strict because
  * ReQL reads references only when they are an array; a strict path over
- * anything else yields nothing.
+ * anything else yields nothing. Their filter skips a legacy reference row
+ * that lacks the side, where a strict member access would fail and, errors
+ * being silenced, empty the result for every reference of the statement.
  */
 const STATEMENT_ENTITY_PATHS = [
   ...propPaths("$.props[*]", 3),
-  "strict $.references[*].resource",
-  "strict $.references[*].value",
+  "strict $.references[*] ? (exists(@.resource)).resource",
+  "strict $.references[*] ? (exists(@.value)).value",
   "$.data.actions[*].actionId",
   ...propPaths("$.data.actions[*].props[*]", 3),
   "$.data.actants[*].entityId",

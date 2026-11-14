@@ -207,6 +207,12 @@ describe("entity search", () => {
     expect(await search({ labelOrId: "p-" })).toEqual(["p-1", "p-2"]);
   });
 
+  // a stored document never holds U+0000 on PostgreSQL, so a search drops it too
+  itPg("ignores a NUL character in the search input", async () => {
+    expect(await search({ label: "st\u0000ar" })).toEqual(["c-2", "c-3"]);
+    expect(await search({ labelOrId: "c-1\u0000" })).toEqual(["c-1"]);
+  });
+
   it("idsMatchingLabel keeps the given ids whose label matches; labelsOf returns labels only when present", async () => {
     expect(sorted(await storage.entities.idsMatchingLabel(conn, ["c-2", "c-3", "p-1"], "star", "^", "$"))).toEqual(["c-2", "c-3"]);
     expect(await storage.entities.idsMatchingLabel(conn, ["c-2"], "star", "^", "$")).toEqual(["c-2"]);
@@ -667,6 +673,28 @@ describe("explore: statement edges", () => {
     // a target that is not a statement selects nothing
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:", { entityId: "c-1" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:")])).toEqual(["p-1", "p-2"]);
+  });
+
+  it("IS: reads every reference side present when a legacy reference row lacks one", async () => {
+    await storage.entities.insert(
+      conn,
+      entity("s-legacy", C.Statement, [""], {
+        props: [],
+        references: [
+          { id: "ref-l1", value: "c-4" },
+          { id: "ref-l2", resource: "r-2", value: "" },
+        ],
+        data: { text: "", territory: { territoryId: "t-child", order: 2 }, tags: [], actions: [], actants: [] },
+      })
+    );
+    try {
+      expect(await explore({ entityClasses: [C.Concept, C.Resource] }, [edge("IS:", { entityId: "s-legacy" })])).toEqual([
+        "c-4",
+        "r-2",
+      ]);
+    } finally {
+      await storage.entities.delete(conn, "s-legacy");
+    }
   });
 });
 
