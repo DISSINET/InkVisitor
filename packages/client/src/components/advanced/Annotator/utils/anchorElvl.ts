@@ -5,15 +5,13 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 const CLASSES_WITHOUT_LANGUAGE_CHECK = [EntityEnums.Class.Statement, EntityEnums.Class.Territory];
 
 /**
- * A textual anchor of an entity whose language differs from the user's source language
- * (`defaultStatementLanguage`) is inferential, same as an actant or action in a statement.
+ * An entity whose language differs from the user's source language (`defaultStatementLanguage`)
+ * gets an inferential anchor instead of a textual one, same as an actant or action in a statement.
  */
-export const isAnchorLanguageMismatch = (
-  elvl: EntityEnums.Elvl | undefined,
+export const isForeignLanguageEntity = (
   entity: { class: EntityEnums.Class; language: EntityEnums.Language },
   sourceLanguage: EntityEnums.Language | undefined,
 ): boolean =>
-  elvl === EntityEnums.Elvl.Textual &&
   !!sourceLanguage &&
   !CLASSES_WITHOUT_LANGUAGE_CHECK.includes(entity.class) &&
   entity.language !== sourceLanguage;

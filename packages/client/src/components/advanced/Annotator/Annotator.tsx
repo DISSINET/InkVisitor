@@ -94,7 +94,7 @@ import {
   TerritoryCreateModalType,
   W_SCROLL,
 } from "./types";
-import { isAnchorLanguageMismatch } from "./utils/anchorElvl";
+import { isForeignLanguageEntity } from "./utils/anchorElvl";
 import { annotatorHighlight } from "./utils/highlight";
 
 const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
@@ -743,7 +743,7 @@ export const TextAnnotator = ({
 
   const handleAddEntityAnchor = (entity: IEntity, elvl: EntityEnums.Elvl): Promise<void> => {
     const sourceLanguage = userData?.options.defaultStatementLanguage;
-    if (isAnchorLanguageMismatch(elvl, entity, sourceLanguage)) {
+    if (elvl === EntityEnums.Elvl.Textual && isForeignLanguageEntity(entity, sourceLanguage)) {
       toast.info(
         `Anchored entity language (${entity.language}) does not correspond with the user statement language (${sourceLanguage}). Anchor epistemic level changed to "inferential".`,
       );
@@ -1655,6 +1655,7 @@ export const TextAnnotator = ({
           }
           selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
+          sourceLanguage={userData?.options.defaultStatementLanguage}
         />
       )}
 

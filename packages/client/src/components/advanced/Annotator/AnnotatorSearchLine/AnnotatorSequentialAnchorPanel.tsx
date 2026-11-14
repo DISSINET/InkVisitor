@@ -1,11 +1,14 @@
 import { Annotator, Occurrence } from "@inkvisitor/annotator/src/lib";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button } from "components";
-import React from "react";
+import { Button, Submit } from "components";
+import React, { useState } from "react";
 import { useTheme } from "styled-components";
 import { IcoAnchor, IcoAnchorCheck, IcoChevronLeft } from "Theme/icons";
+import { getEntityLabel } from "utils/utils";
 import { AnnotatorFloatingPanel } from "../AnnotatorFloatingPanel/AnnotatorFloatingPanel";
 import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
+import { isForeignLanguageEntity } from "../utils/anchorElvl";
 import { AnnotatorEntityMultiPicker } from "./AnnotatorEntityMultiPicker";
 import { AnnotatorFindControls } from "./AnnotatorFindControls";
 import { entityIdsToAnchor } from "./anchorUtils";
@@ -45,6 +48,8 @@ interface AnnotatorSequentialAnchorPanel {
   /** Tag names of the anchors already wrapping the active match. */
   selectedAnchorTagNames: string[];
   selectedText: string;
+  /** The user's default source language; picked entities in another language get inferential anchors. */
+  sourceLanguage?: EntityEnums.Language;
 }
 
 export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorPanel> = ({
@@ -71,6 +76,7 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
   onRemoveEntityToAnchor,
   selectedAnchorTagNames,
   selectedText,
+  sourceLanguage,
 }) => {
   const theme = useTheme();
 
@@ -87,6 +93,34 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
     selectedAnchorTagNames
   );
   const allAlreadyAnchored = entitiesToAnchor.length > 0 && idsToAnchor.length === 0;
+
+  // the user confirms each foreign-language entity once while the panel is open
+  const [confirmedForeignIds, setConfirmedForeignIds] = useState<string[]>([]);
+  const [showForeignSubmit, setShowForeignSubmit] = useState(false);
+
+  const foreignEntities = entitiesToAnchor.filter((entity) =>
+    isForeignLanguageEntity(entity, sourceLanguage)
+  );
+  const foreignIds = new Set(foreignEntities.map((entity) => entity.id));
+  const unconfirmedForeignEntities = foreignEntities.filter(
+    (entity) => !confirmedForeignIds.includes(entity.id)
+  );
+  const unconfirmedForeignList = unconfirmedForeignEntities
+    .map((entity) => `${getEntityLabel(entity)} (${entity.language})`)
+    .join(", ");
+
+  const anchorAndNext = () => {
+    // each addAnchor re-selects the span it wrapped, so the calls nest
+    // and the first id becomes the outermost tag
+    idsToAnchor.forEach((entityId) =>
+      annotator?.addAnchor(
+        entityId,
+        foreignIds.has(entityId) ? { elvl: EntityEnums.Elvl.Inferential } : undefined
+      )
+    );
+    saveDocumentContent("Anchor saved");
+    goToNextOccurence();
+  };
 
   return (
     <AnnotatorFloatingPanel
@@ -137,15 +171,32 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
             tooltipLabel="wrap the selection in an anchor for each given entity and go to the next match"
             disabled={!hasResults || idsToAnchor.length === 0 || selectedText.length === 0}
             onClick={() => {
-              // each addAnchor re-selects the span it wrapped, so the calls nest
-              // and the first id becomes the outermost tag
-              idsToAnchor.forEach((entityId) => annotator?.addAnchor(entityId));
-              saveDocumentContent("Anchor saved");
-              goToNextOccurence();
+              if (unconfirmedForeignEntities.length > 0) {
+                setShowForeignSubmit(true);
+              } else {
+                anchorAndNext();
+              }
             }}
           />
         )}
       </StyledFindReplaceFooter>
+
+      <Submit
+        title="Language mismatch"
+        text={`The language of ${unconfirmedForeignList} does not correspond with the user statement language (${sourceLanguage}). ${unconfirmedForeignEntities.length === 1 ? "Its anchors" : "Their anchors"} will get the epistemic level "inferential".`}
+        show={showForeignSubmit}
+        onSubmit={() => {
+          setConfirmedForeignIds((prevIds) => [
+            ...prevIds,
+            ...unconfirmedForeignEntities.map((entity) => entity.id),
+          ]);
+          setShowForeignSubmit(false);
+          anchorAndNext();
+        }}
+        onCancel={() => setShowForeignSubmit(false)}
+        submitLabel="Anchor & next"
+        submitColor="success"
+      />
     </AnnotatorFloatingPanel>
   );
 };
