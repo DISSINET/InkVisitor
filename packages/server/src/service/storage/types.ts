@@ -149,6 +149,8 @@ export interface AuditCountParams {
 export interface AuditStore extends TableStore<IAudit> {
   firstFor(conn: Conn, scope: AuditScope, modelId: string): Promise<IAudit | null>;
   lastFor(conn: Conn, scope: AuditScope, modelId: string): Promise<IAudit | null>;
+  /** the first audit (as firstFor orders them) of each listed model that has one, in no promised order */
+  firstForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
   lastNFor(conn: Conn, scope: AuditScope, modelId: string, n: number): Promise<IAudit[]>;
   relationAuditsForEntity(conn: Conn, entityId: string, n: number): Promise<IAudit[]>;
   earliestDate(conn: Conn): Promise<Date | null>;

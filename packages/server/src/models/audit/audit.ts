@@ -224,6 +224,17 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Gets the first audit of each listed entity that has one, in one read
+   * @param db rethinkdb Conn
+   * @param entityIds string[]
+   * @returns Promise<Audit[]> in no particular order
+   */
+  static async getFirstForEntities(db: Conn, entityIds: string[]): Promise<Audit[]> {
+    const result = await storage.audits.firstForMany(db, AuditScope.Entity, entityIds);
+    return result.map((data) => new Audit(data));
+  }
+
+  /**
    * Gets the earliest audit entry date in the database
    * @param db rethinkdb Conn
    * @returns Promise<Date | null>
