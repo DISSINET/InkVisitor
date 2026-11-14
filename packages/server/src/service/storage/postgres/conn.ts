@@ -4,7 +4,7 @@ import { REQUIRED } from "../requiredIndexes";
 import { Conn } from "../types";
 import { MERGE_FUNCTION_DDL, SESSIONS_DDL, pgIndexName, provision } from "./provision";
 import { syncSchema } from "./schema";
-import { ident } from "./sql";
+import { ident, withoutNul } from "./sql";
 
 export const pgConfig: PgConfig = pgConfigFromEnv();
 
@@ -35,7 +35,7 @@ export function query<R extends QueryResultRow = any>(
   params: unknown[] = []
 ): Promise<QueryResult<R>> {
   const c = unwrap(conn);
-  const run = () => c.client.query<R>(sql, params);
+  const run = () => c.client.query<R>(sql, params.map(withoutNul));
   const next = c.queue.then(run, run);
   c.queue = next.catch(() => undefined);
   return next;
@@ -58,6 +58,15 @@ export async function openConnection(
     password: pgConfig.password,
     database: opts.db === null ? "postgres" : opts.db ?? pgConfig.database,
     connectionTimeoutMillis: (opts.timeoutSeconds ?? 30) * 1000,
+    // a write blocked by a lock held outside the API (an open psql
+    // transaction, another instance's schema sync) fails within the 20 s
+    // request timeout, so its connection goes back to the pool free and the
+    // write never lands after the request has failed
+    lock_timeout: 10000,
+    // a peer that vanished without closing the socket is noticed within
+    // minutes; the OS default waits two hours before the first probe
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
   });
   const conn: PgConn = { client: c, open: false, queue: Promise.resolve() };
   // an unhandled 'error' event would crash the process; the pool's ping
