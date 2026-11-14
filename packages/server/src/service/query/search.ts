@@ -212,12 +212,7 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(
-            db,
-            entity,
-            columns,
-            columnsContext
-          ),
+          columnData: this.results!.columns(entity, columns, columnsContext),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)
