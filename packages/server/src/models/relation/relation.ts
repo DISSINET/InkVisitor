@@ -669,12 +669,7 @@ export default class Relation implements IRelationModel {
   ): Promise<T[]> {
     const relations = await Relation.findForEntities<T>(db, [entityId], relType);
 
-    return relations.filter((relation) => {
-      if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
-        return true;
-      }
-      return relation.entityIds.indexOf(entityId) === 0;
-    });
+    return relations.filter((relation) => Relation.isInDirection(relation, entityId, false));
   }
 
   /**
@@ -695,12 +690,19 @@ export default class Relation implements IRelationModel {
   ): Promise<T[]> {
     const relations = await Relation.findForEntities<T>(db, [entityId], relType);
 
-    return relations.filter((relation) => {
-      if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
-        return true;
-      }
-      return relation.entityIds.indexOf(entityId) === 1;
-    });
+    return relations.filter((relation) => Relation.isInDirection(relation, entityId, true));
+  }
+
+  /**
+   * true when `relation`, which holds `entityId`, runs in the asked direction from it: forward
+   * when an asymmetrical relation has the entity at entityIds[0], inverse at entityIds[1]; a
+   * symmetrical relation runs both ways
+   */
+  static isInDirection(relation: RelationTypes.IRelation, entityId: string, inverse: boolean): boolean {
+    if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
+      return true;
+    }
+    return relation.entityIds.indexOf(entityId) === (inverse ? 1 : 0);
   }
 
   /**

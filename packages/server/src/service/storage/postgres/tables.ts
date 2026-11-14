@@ -586,6 +586,21 @@ export const audits: AuditStore = {
     );
   },
 
+  async firstForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    // the ordering of firstFor: date, then id
+    return docs<IAudit>(
+      TABLE.audits,
+      await q(
+        conn,
+        `SELECT DISTINCT ON (model_id) doc FROM audits WHERE audit_scope = $1 AND model_id = ANY($2::text[]) ORDER BY model_id, date, id`,
+        [scope, modelIds]
+      )
+    );
+  },
+
   async lastNFor(conn, scope, modelId, n) {
     const where = byScopeAndModel(scope, modelId);
     return docs<IAudit>(
