@@ -82,6 +82,8 @@ To switch between local -> remote hosts, just provide `SSH*` variables. If provi
 
 You can run specialized jobs by typing `J`. These jobs are single purposes actions, ie. fixing bad import dates.
 
+The menu lists the jobs every selected target can run, and runs the chosen one on each. With `--target=postgres` that is `fixEditorEntityAclJob`, which brings the acl_permissions rows of a running database to the routes the release needs (`pnpm start <env> --target=postgres`, then `J`); the other jobs migrate data of older releases and run on RethinkDB only.
+
 ### Direct import scripts (DEPRECATED)
 
 - `pnpm import:remote`
