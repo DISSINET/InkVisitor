@@ -31,13 +31,6 @@ export const getEdgeSourceNode = (root: Query.INode, edgeId: string): Query.INod
   getAllNodes(root).find((node) => node.edges.some((edge) => edge.id === edgeId));
 
 /**
- * A query request is "empty" when nothing constrains the search: no edges, no
- * explore filters, and the root node neither targets a specific entity / label
- * nor narrows the entity classes (an empty or full class set means "any class").
- * Such a request would scan the whole database, so the explorer skips it instead
- * of firing it automatically (e.g. on page load with the default root node).
- */
-/**
  * A stats view with every event type switched off aggregates nothing, so the
  * request can only come back empty - there is no point sending it.
  */
@@ -45,34 +38,38 @@ export const isStatsRequestEmpty = (explore: Explore.IExplore): boolean =>
   explore.view.mode === Explore.EViewMode.Stats &&
   explore.view.stats.eventType.length === 0;
 
-export const isQueryRequestEmpty = (
-  query: Query.INode,
-  explore: Explore.IExplore,
-): boolean => {
-  if (getAllEdges(query).length > 0) {
-    return false;
+/**
+ * Whether anything narrows the entities a node stands for: a pinned entity, a
+ * subset of the classes (an empty or full class set means "any class"), a node
+ * filter, or its edges - any of them under And, each of them under any other
+ * operator, which the server evaluates as Or. An SE edge says the entity is
+ * its target node, so a positive one narrows only when that node is narrowed.
+ */
+const isNodeNarrowed = (node: Query.INode): boolean => {
+  const entityClasses = node.params.entityClasses ?? [];
+  if (node.params.entityId || countNodeFilters(node.params) > 0) {
+    return true;
   }
-  if (explore.filters.length > 0) {
-    return false;
+  if (entityClasses.length > 0 && entityClasses.length < classesAll.length) {
+    return true;
   }
-
-  const { entityId, label, entityClasses } = query.params;
-  if (entityId) {
-    return false;
-  }
-  if (label && label.trim().length > 0) {
-    return false;
-  }
-
-  const classes = entityClasses ?? [];
-  const narrowsClasses =
-    classes.length > 0 && classes.length < classesAll.length;
-  if (narrowsClasses) {
-    return false;
-  }
-
-  return true;
+  const narrows = (edge: Query.IEdge) =>
+    edge.type !== Query.EdgeType.SE ||
+    edge.logic === Query.EdgeLogic.Negative ||
+    isNodeNarrowed(edge.node);
+  return node.operator === Query.NodeOperator.And
+    ? node.edges.some(narrows)
+    : node.edges.length > 0 && node.edges.every(narrows);
 };
+
+/**
+ * A query request is "empty" when nothing constrains the search: no explore
+ * filters and a root node nothing narrows. Such a request would scan the whole
+ * database, so the explorer skips it instead of firing it automatically (e.g.
+ * on page load with the default root node).
+ */
+export const isQueryRequestEmpty = (query: Query.INode, explore: Explore.IExplore): boolean =>
+  explore.filters.length === 0 && !isNodeNarrowed(query);
 
 /** the params the node filters panel sets, cleared together and dropped when an entity is pinned */
 export const NODE_FILTER_KEYS = [

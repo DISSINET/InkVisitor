@@ -80,9 +80,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   }));
 
   const edgeType = edge?.type;
-  const edgeLabel = edgeType ? Query.EdgeTypeLabels[edgeType] : "related";
+  // a saved query can hold an edge type from a newer build, with no label or target params here
+  const edgeLabel = edgeType ? (Query.EdgeTypeLabels[edgeType] ?? edgeType) : "related";
 
-  const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
+  const nodeParams = (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]) || {};
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
@@ -229,7 +230,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
   }, [theme, isValid, isRoot]);
 
-  const hasParallelEdges = isRoot && node.edges.length > 1;
+  // start nodes are joined by Or alone, so their root has no operator to choose
+  const hasParallelEdges = isRoot && node.edges.length > 1 && !Query.hasStartNodes(node);
 
   return (
     <StyledNodeContainer>

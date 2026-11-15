@@ -2083,6 +2083,38 @@ export class EdgeHasReferenceValue extends SearchEdge {
   }
 }
 
+/**
+ * SE ("is"): the entity is the target node itself. It matches the entities of
+ * q among the target ids - a pinned entity with its expansion, or the entities
+ * passing the node's filters and nested conditions - else those of the node's
+ * classes, else every entity of q.
+ */
+export class EdgeIsEntity extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType.SE;
+  }
+
+  run(q: RStream): RStream {
+    const targetIds = this.targetIds();
+    if (targetIds !== null) {
+      return intersectIdsWithStream(
+        q,
+        targetIds.length ? (r.expr(targetIds) as unknown as RStream) : null
+      );
+    }
+    const classes = this.node.params.entityClasses ?? [];
+    const matched = classes.length
+      ? q.filter(function (e: RDatum<IEntity>) {
+          return r.expr(classes).contains(e("class"));
+        })
+      : q;
+    return matched.map(function (e) {
+      return e("id");
+    });
+  }
+}
+
 export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreResolvers): SearchEdge {
   const edge = createEdge(data);
   if (resolvers) {
@@ -2175,6 +2207,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsInStatementAsPseudoActant(data);
     case Query.EdgeType["IS:A"]:
       return new EdgeIsInStatementAsAction(data);
+    case Query.EdgeType.SE:
+      return new EdgeIsEntity(data);
     default: {
       const orderedRelation = data.type ? ORDERED_RELATION_EDGES[data.type] : undefined;
       if (orderedRelation) {
