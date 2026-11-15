@@ -1,0 +1,187 @@
+// PROTOTYPE: throwaway styles for the sentence query builder demo.
+import styled, { css, DefaultTheme } from "styled-components";
+
+// the noun a clause attaches to picks its colour, so the reader sees which
+// part of the sentence each clause talks about
+const nounColors = (theme: DefaultTheme) => [
+  theme.color["query2"],
+  theme.color["warning"],
+  theme.color["danger"],
+  theme.color["info"],
+];
+export const nounColor = (theme: DefaultTheme, nounOrder: number) =>
+  nounColors(theme)[nounOrder % nounColors(theme).length];
+
+export const StyledPrototype = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[3]};
+  margin: ${({ theme }) => theme.space[2]};
+  border: ${({ theme }) => theme.borderWidth[1]} dashed ${({ theme }) => theme.color["query2"]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  background-color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["text"]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;
+
+export const StyledPrototypeHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;
+
+export const StyledPrototypeBadge = styled.span`
+  padding: 0 ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  background-color: ${({ theme }) => theme.color["query2"]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-weight: bold;
+  letter-spacing: 0.05em;
+`;
+
+export const StyledSentence = styled.div`
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  min-height: 3.2rem;
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  font-size: ${({ theme }) => theme.fontSize.base};
+  cursor: text;
+`;
+
+export const StyledWord = styled.span<{ $color: string; $isNoun?: boolean }>`
+  padding: 0 ${({ theme }) => theme.space[1]};
+  border-bottom: 0.2rem solid ${({ $color }) => $color};
+  ${({ $isNoun }) =>
+    $isNoun &&
+    css`
+      font-weight: bold;
+    `}
+`;
+
+export const StyledEntityWord = styled.span<{ $color: string; $clickable?: boolean }>`
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
+  display: inline-flex;
+  align-items: center;
+  padding: 0 ${({ theme }) => theme.space[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ $color }) => $color};
+  font-style: italic;
+`;
+
+export const StyledSentenceInput = styled.input`
+  flex: 1;
+  min-width: 14rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["text"]};
+  font-size: ${({ theme }) => theme.fontSize.base};
+`;
+
+export const StyledSuggestionList = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 32rem;
+  max-height: 26rem;
+  overflow-y: auto;
+  margin: ${({ theme }) => theme.space[1]} 0 0 0;
+  padding: ${({ theme }) => theme.space[1]} 0;
+  list-style: none;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  box-shadow: 0 0.4rem 1.2rem ${({ theme }) => theme.color["primaryTransparent"]};
+`;
+
+export const StyledSuggestion = styled.li<{ $active: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
+  cursor: pointer;
+  background-color: ${({ theme, $active }) =>
+    $active ? theme.color["tableSelectionHover"] : "transparent"};
+`;
+
+export const StyledSuggestionHint = styled.span`
+  color: ${({ theme }) => theme.color["mutedText"]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+`;
+
+export const StyledHelpLine = styled.div`
+  color: ${({ theme }) => theme.color["mutedText"]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+`;
+
+export const StyledTemplateList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledTemplate = styled.button<{ $active: boolean }>`
+  text-align: left;
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme, $active }) => ($active ? theme.color["query2"] : theme.color["gray"][300])};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  background-color: ${({ theme, $active }) =>
+    $active ? theme.color["tableSelectionHover"] : theme.color["white"]};
+  color: ${({ theme }) => theme.color["text"]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  cursor: pointer;
+`;
+
+export const StyledBlank = styled.span`
+  color: ${({ theme }) => theme.color["mutedText"]};
+  font-style: italic;
+`;
+
+export const StyledFillRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize.base};
+`;
+
+export const StyledActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledSwitcher = styled.div`
+  position: fixed;
+  bottom: ${({ theme }) => theme.space[6]};
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
+  border-radius: 999px;
+  background-color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  box-shadow: 0 0.4rem 1.6rem ${({ theme }) => theme.color["modalBg"]};
+`;
+
+export const StyledSwitcherArrow = styled.button`
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  cursor: pointer;
+`;

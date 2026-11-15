@@ -69,6 +69,8 @@ import { FilterPopover } from "./FilterPopover/FilterPopover";
 import { SearchFiltersPopover } from "./FloatingSearchContainer/SearchFiltersPopover";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
+// PROTOTYPE: sentence query builder demo
+import { SentenceQueryPrototype } from "./SentenceQueryPrototype/SentenceQueryPrototype";
 import { QueryAction, QueryActionType, queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem, queryWarnings } from "./types";
@@ -922,6 +924,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 </>,
               ]}
             >
+              <SentenceQueryPrototype
+                dispatch={queryStateDispatch}
+                onRunSearch={handleRunSearch}
+              />
               <StyledQueryScroller>
                 <MemoizedQueryBox
                   key={queryLoadCount}
