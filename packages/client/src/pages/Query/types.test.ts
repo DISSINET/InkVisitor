@@ -403,3 +403,17 @@ describe("inverse Holonym edge and hidden edge types", () => {
     expect(edgeTypesHidden.filter((t) => edgeTypesImplemented.includes(t))).toEqual([]);
   });
 });
+
+describe("the SE edge of a start node", () => {
+  it("is left out of the edge type dropdown", () => {
+    expect(findValidEdgeTypesForSourceNode(sourceNode([]))).toContain(Query.EdgeType.SE);
+    expect(edgeTypesHidden).toContain(Query.EdgeType.SE);
+  });
+});
+
+describe("an edge type this build has no rule for", () => {
+  it("is left for the server to judge", () => {
+    const unknown = edge("NOPE" as Query.EdgeType, sourceNode([]));
+    expect(isEdgeValid(sourceNode([]), unknown)).toEqual({ valid: true, problems: [] });
+  });
+});

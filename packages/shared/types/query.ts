@@ -116,6 +116,7 @@ export namespace Query {
     "I_R:A2S" = "I_R:A2S",
     "R:REL" = "R:REL",
     "I_R:REL" = "I_R:REL",
+    "SE" = "SE",
   }
 
   export enum NodeOperator {
@@ -438,6 +439,10 @@ export namespace Query {
       entityId: { allowedClasses: [] },
     },
     "I_R:REL": {},
+    SE: {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
@@ -1019,6 +1024,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
+    SE: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
     "HP:V": "has property: value",
@@ -1089,6 +1098,7 @@ export namespace Query {
     "I_R:A2S": "has relation: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
+    SE: "is",
   };
 
   /**
@@ -1167,6 +1177,37 @@ export namespace Query {
     "I_R:A2S": "Finds entities used as the actant2 semantics of the target action",
     "R:REL": "Finds entities related to the target",
     "I_R:REL": "Finds entities related to the target",
+    SE: "Finds the entities the target describes: the target is the entity itself",
+  };
+
+  /** the edges of a node of a request body, which can hold anything in their place */
+  const edgesOf = (node: INode | undefined): IEdge[] =>
+    Array.isArray(node?.edges) ? node.edges : [];
+
+  /**
+   * Whether the query has start nodes. An SE edge of the root describes the
+   * root's entity itself, so its target node starts the query from the
+   * entities it finds, with conditions of its own.
+   */
+  export const hasStartNodes = (root: INode): boolean =>
+    edgesOf(root).some((edge) => edge.type === EdgeType.SE);
+
+  /**
+   * Start nodes are alternatives - a result is an entity any of them finds -
+   * so they are the root's only edges and its operator is Or. Any node can be
+   * sent as the root of a query of its own, so no node below the root has an
+   * SE edge.
+   */
+  export const areStartNodesValid = (root: INode): boolean => {
+    const noneBelow = (node: INode): boolean =>
+      edgesOf(node).every((edge) => !hasStartNodes(edge.node) && noneBelow(edge.node));
+    if (!noneBelow(root)) {
+      return false;
+    }
+    return (
+      !hasStartNodes(root) ||
+      (root.operator === NodeOperator.Or && edgesOf(root).every((edge) => edge.type === EdgeType.SE))
+    );
   };
 
   export enum EdgeProblemSource {

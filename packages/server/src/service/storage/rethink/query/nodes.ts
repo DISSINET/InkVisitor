@@ -159,7 +159,8 @@ export default class SearchNode implements Query.INode, ExplorePlan {
           }
         }
       }
-      return Array.from(acc);
+      // the union comes edge by edge; sorted, it has the order of every other id list here
+      return Array.from(acc).sort();
     }
 
     // AND: narrowing pipeline. `acc === null` means "universe" (no edge applied

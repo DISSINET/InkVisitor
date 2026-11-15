@@ -394,6 +394,10 @@ export const findValidEdgeTypesForTargetNode = (node: Query.INode): Query.EdgeTy
 export const isEdgeValid = (sourceNode: Query.INode, edge: Query.IEdge): Query.EdgeValidity => {
   const targetNode = edge.node;
   const edgeRule = Query.EdgeTypeNodeRules[edge.type];
+  // a saved query can hold an edge type from a newer build, which the server judges
+  if (!edgeRule) {
+    return { valid: true, problems: [] };
+  }
   const [ruleFrom, ruleTo] = edgeRule;
 
   const sourceValid = isNodeValid(sourceNode, ruleFrom);
