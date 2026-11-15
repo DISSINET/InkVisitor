@@ -10,6 +10,8 @@ export interface IRequest<TParams = any, TBody = any, TQuery = any> {
     user: Pick<IUser, "id">;
   };
   getUserOrFail(): User;
+  /** set by express-session */
+  sessionID?: string;
   baseUrl: string;
   route: { path: string };
   method: string;

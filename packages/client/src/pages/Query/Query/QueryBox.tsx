@@ -8,6 +8,7 @@ import { QueryGridNode } from "./components/QueryGridNode";
 import { StyledGridCell, StyledQueryBox } from "./QueryBoxStyles";
 import { QueryAction } from "./state";
 import { edgeTargets, getAllEdges, valueNodeEdge } from "./utils";
+import { getEdgeSourceClasses } from "../utils";
 
 interface QueryBoxProps {
   state: Query.INode;
@@ -212,7 +213,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               {thisCellNode && (
                 <QueryGridNode
                   node={thisCellNode}
-                  rootNode={state}
+                  sourceClasses={associated && getEdgeSourceClasses(state, associated.edge.id)}
                   isRoot={wi === 0}
                   dispatch={dispatch}
                   edge={associated?.edge}

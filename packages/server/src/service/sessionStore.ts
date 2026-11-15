@@ -5,11 +5,13 @@ export async function ensureSessionsTable(conn: Conn): Promise<void> {
   await storage.sessions.ensure(conn);
 }
 
+/** @param exceptSid session that survives, e.g. the caller's own */
 export async function invalidateUserSessions(
   conn: Conn,
-  userId: string
+  userId: string,
+  exceptSid?: string
 ): Promise<void> {
-  await storage.sessions.deleteByUser(conn, userId);
+  await storage.sessions.deleteByUser(conn, userId, exceptSid);
 }
 
 /**
@@ -78,7 +80,8 @@ export class StorageSessionStore extends session.Store {
       .catch((err) => callback(err));
   }
 
-  set(
+  private write(
+    op: "set" | "touch",
     sid: string,
     sess: session.SessionData,
     callback?: (err?: unknown) => void
@@ -93,9 +96,17 @@ export class StorageSessionStore extends session.Store {
     };
 
     this.ensureReady()
-      .then(() => this.withConn((conn) => storage.sessions.set(conn, row)))
+      .then(() => this.withConn((conn) => storage.sessions[op](conn, row)))
       .then(() => callback?.())
       .catch((err) => callback?.(err));
+  }
+
+  set(
+    sid: string,
+    sess: session.SessionData,
+    callback?: (err?: unknown) => void
+  ): void {
+    this.write("set", sid, sess, callback);
   }
 
   destroy(sid: string, callback?: (err?: unknown) => void): void {
@@ -105,11 +116,14 @@ export class StorageSessionStore extends session.Store {
       .catch((err) => callback?.(err));
   }
 
+  // express-session touches every unmodified session when a response ends,
+  // including socket.io polls, so a request that was already running when the
+  // user's sessions were ended must not write its row back
   touch(
     sid: string,
     sess: session.SessionData,
     callback?: (err?: unknown) => void
   ): void {
-    this.set(sid, sess, callback);
+    this.write("touch", sid, sess, callback);
   }
 }

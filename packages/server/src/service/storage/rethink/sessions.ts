@@ -1,4 +1,4 @@
-import { r } from "rethinkdb-ts";
+import { r, RDatum } from "rethinkdb-ts";
 import { SessionRow, SessionStore } from "../types";
 import { unwrap } from "./conn";
 import { TABLE } from "./tables";
@@ -24,14 +24,20 @@ export const sessions: SessionStore = {
     await r.table(TABLE.sessions).insert(row, { conflict: "replace" }).run(unwrap(conn));
   },
 
+  async touch(conn, row) {
+    // update skips a missing document, it never inserts one
+    await r.table(TABLE.sessions).get(row.id).update(row).run(unwrap(conn));
+  },
+
   async delete(conn, sid) {
     await r.table(TABLE.sessions).get(sid).delete().run(unwrap(conn));
   },
 
-  async deleteByUser(conn, userId) {
+  async deleteByUser(conn, userId, exceptSid) {
     await r
       .table(TABLE.sessions)
       .getAll(userId, { index: "userId" })
+      .filter((session: RDatum) => session("id").ne(exceptSid ?? ""))
       .delete()
       .run(unwrap(conn));
   },
