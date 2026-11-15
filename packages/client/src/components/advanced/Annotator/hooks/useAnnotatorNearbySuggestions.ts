@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseStatement, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { useMemo } from "react";
 import {
@@ -23,6 +23,8 @@ const quiet = { ignoreErrorToast: true };
  * outside "territory" so the frequent territory invalidations do not refetch
  * the whole walk; it may lag by a minute. The T tree comes from the cache the
  * Main page keeps loaded; without it only the anchored statements are listed.
+ * While a new walk runs, e.g. for another class, the entities come from the
+ * statements the previous walk fetched, so the list does not empty meanwhile.
  */
 export const useAnnotatorNearbySuggestions = (
   anchors: IAnchorsNode[] | undefined,
@@ -54,6 +56,7 @@ export const useAnnotatorNearbySuggestions = (
               .fetchQuery({
                 queryKey: ["statement", id],
                 queryFn: async () => (await api.statementGet(id, quiet)).data,
+                staleTime: 60_000,
               })
               .catch(() => undefined)
           )
@@ -84,6 +87,7 @@ export const useAnnotatorNearbySuggestions = (
     },
     enabled: enabled && api.isLoggedIn() && (containingIds.length > 0 || !!leafTerritoryId),
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
     retry: false,
   });
 

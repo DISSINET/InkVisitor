@@ -139,4 +139,12 @@ describe("collectNearbyEntities", () => {
       "r",
     ]);
   });
+
+  it("leaves the place of a discouraged entity to the next one", () => {
+    const discouraged = { ...entity("d"), status: EntityEnums.Status.Discouraged } as IEntity;
+    const s = statement("s", { actants: ["d", "p"] }, [discouraged, entity("p")]);
+    expect(collectNearbyEntities([s], EntityEnums.Extension.Any, 1).map((e) => e.id)).toEqual([
+      "p",
+    ]);
+  });
 });

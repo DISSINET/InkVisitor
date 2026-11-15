@@ -21,7 +21,6 @@ import { useDebounce, useDetailPanelReveal, useEntityEditing, useSearchParams } 
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
-import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
 import { IcoHome } from "Theme/icons";
 import {
@@ -350,7 +349,7 @@ const EntitySuggesterFull: React.FC<
           const icons: React.ReactNode[] = [];
 
           if (territoryActantIds?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} size={12} />);
+            icons.push(<IcoHome key={entity.id} size={12} />);
           }
 
           return {
@@ -556,7 +555,7 @@ const EntitySuggesterFull: React.FC<
     return filteredSuggestions;
   };
 
-  const listedPrioritySuggestions = filterSuggestionsInOrder(
+  const priorityRows = filterSuggestionsInOrder(
     getClassFilteredPreSuggestions(prioritySuggestions),
   ).map((suggestion) => ({
     ...suggestion,
@@ -568,18 +567,13 @@ const EntitySuggesterFull: React.FC<
       />,
     ],
   }));
-  const prioritySuggestionIds = new Set(listedPrioritySuggestions.map((s) => s.entity.id));
-  const listedSuggestions = [
-    ...listedPrioritySuggestions,
-    ...(suggestions ?? []).filter((s) => !prioritySuggestionIds.has(s.entity.id)),
-  ];
 
   return selectedCategory && allCategories && user ? (
     <>
       <Suggester
         isFetching={isFetchingStatement}
-        suggestions={listedSuggestions}
-        prioritySuggestionCount={listedPrioritySuggestions.length}
+        suggestions={suggestions || []}
+        prioritySuggestions={priorityRows}
         preSuggestions={
           preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }

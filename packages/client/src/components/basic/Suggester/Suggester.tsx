@@ -46,6 +46,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
+import { useListedSuggestions } from "./useListedSuggestions";
 import { IcoClipboard, IcoMinus, IcoPlusBold } from "Theme/icons";
 
 // suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
@@ -59,9 +60,9 @@ const TYPE_BAR_WIDTH = 5;
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
-  // how many of the suggestions lead the list ahead of the search hits; the list
-  // grows by that many rows, so the search hits keep their usual height
-  prioritySuggestionCount?: number;
+  // listed above the search hits, which leave out the entities listed here; the
+  // list grows by their rows, so the search hits keep their usual height
+  prioritySuggestions?: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
@@ -160,7 +161,7 @@ const previewClipboard = async (): Promise<string | undefined> => {
 export const Suggester: React.FC<Suggester> = ({
   marginTop = false,
   suggestions = [],
-  prioritySuggestionCount = 0,
+  prioritySuggestions = [],
   placeholder = "",
   typed,
   category,
@@ -218,6 +219,11 @@ export const Suggester: React.FC<Suggester> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
+    prioritySuggestions,
+    suggestions,
+    isFocused || isHovered,
+  );
 
   // the input blurs on the mousedown that picks a row, so the right-click list
   // waits for the whole list to close, focus and hover gone
@@ -358,7 +364,8 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      const entity = (contextListed ? (contextSuggestions ?? []) : suggestions)[selected]?.entity;
+      const listed = contextListed ? (contextSuggestions ?? []) : listedSuggestions;
+      const entity = listed[selected]?.entity;
       if (!disableEnter && entity) {
         if (entity.status !== EntityEnums.Status.Discouraged) {
           if (!entity.isTemplate) {
@@ -699,17 +706,17 @@ export const Suggester: React.FC<Suggester> = ({
                 ...floatingStyles,
               }}
             >
-              {!contextListed && (suggestions.length || (isFetching && isFocused)) ? (
+              {!contextListed && (listedSuggestions.length || (isFetching && isFocused)) ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
-                    {renderEntitySuggestions(suggestions, prioritySuggestionCount)}
+                    {renderEntitySuggestions(listedSuggestions, listedPriorityCount)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
                   {/* the arrow keys belong to the class menu while it is open */}
                   {!isCategoryMenuOpen && (
                     <SuggesterKeyPress
                       onArrowDown={() => {
-                        if (selected < suggestions.length - 1) setSelected(selected + 1);
+                        if (selected < listedSuggestions.length - 1) setSelected(selected + 1);
                       }}
                       onArrowUp={() => {
                         if (selected > -1) setSelected(selected - 1);

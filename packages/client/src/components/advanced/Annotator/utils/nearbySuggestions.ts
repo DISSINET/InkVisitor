@@ -88,7 +88,8 @@ export const sortStatementsByDistance = <T extends { id: string }>(
   );
 
 // The entities of the class (any class for the wildcard) used in the
-// statements, in statement order, up to `limit`. Territories are never suggested.
+// statements, in statement order, up to `limit`. Territories are never
+// suggested, nor are discouraged entities, which the suggester cannot pick.
 export const collectNearbyEntities = (
   statements: IResponseStatement[],
   entityClass: EntityEnums.Class | EntityEnums.Extension.Any = EntityEnums.Extension.Any,
@@ -104,6 +105,7 @@ export const collectNearbyEntities = (
       if (
         entity &&
         entity.class !== EntityEnums.Class.Territory &&
+        entity.status !== EntityEnums.Status.Discouraged &&
         (entityClass === EntityEnums.Extension.Any || entity.class === entityClass)
       ) {
         picked.set(id, entity);
