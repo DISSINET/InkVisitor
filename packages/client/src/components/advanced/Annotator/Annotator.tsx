@@ -741,8 +741,9 @@ export const TextAnnotator = ({
     toast.info(`Anchor created ${entityId}.`);
   };
 
+  const sourceLanguage = userData?.options.defaultStatementLanguage;
+
   const handleAddEntityAnchor = (entity: IEntity, elvl: EntityEnums.Elvl): Promise<void> => {
-    const sourceLanguage = userData?.options.defaultStatementLanguage;
     if (elvl === EntityEnums.Elvl.Textual && isForeignLanguageEntity(entity, sourceLanguage)) {
       toast.info(
         `Anchored entity language (${entity.language}) does not correspond with the user statement language (${sourceLanguage}). Anchor epistemic level changed to "inferential".`,
@@ -1655,7 +1656,7 @@ export const TextAnnotator = ({
           }
           selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
-          sourceLanguage={userData?.options.defaultStatementLanguage}
+          sourceLanguage={sourceLanguage}
         />
       )}
 
