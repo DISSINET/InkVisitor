@@ -52,7 +52,9 @@ import { ButtonSize } from "types";
 interface QueryGridNodeProps {
   node: INodeItem;
   edge: Query.IEdge | undefined;
-  rootNode: Query.INode;
+  // classes the node this node's edge hangs off can hold, empty for any; the
+  // root has no such node
+  sourceClasses?: EntityEnums.Class[];
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
@@ -62,7 +64,7 @@ interface QueryGridNodeProps {
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   node,
   edge,
-  rootNode,
+  sourceClasses,
   dispatch,
   problems,
   isRoot = false,
@@ -84,9 +86,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
+  // the suggester below re-seeds the class it shows whenever it is handed a new
+  // list of allowed classes, so the list is rebuilt only when the source's
+  // classes differ in content
+  const sourceClassesKey = sourceClasses?.join();
   const relationConstrainedCategoryTypes = useMemo(
-    () => getRelationConstrainedCategoryTypes(edgeType, rootNode.params.entityClasses),
-    [edgeType, rootNode.params.entityClasses],
+    () => getRelationConstrainedCategoryTypes(edgeType, sourceClasses),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [edgeType, sourceClassesKey],
   );
 
   const entityIdCategoryTypes = useMemo(() => {
@@ -113,14 +120,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
 
-  // the constraint comes from the root class and the edge together, so neither
-  // named alone tells the user what to change
-  const rootClassLabels =
-    rootNode.params.entityClasses && rootNode.params.entityClasses.length > 0
-      ? rootNode.params.entityClasses
-          .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
-          .join(", ")
-      : "";
+  // the constraint comes from the source node's class and the edge together,
+  // so neither named alone tells the user what to change
+  const sourceClassLabels = (sourceClasses ?? [])
+    .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
+    .join(", ");
 
   const entityId = node.params.entityId;
   const orderedLanguageDict = useOrderedLanguageDict();
@@ -491,8 +495,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 ) : (
                   <EntitySuggester
                     // remount on edge type switch so the typed input and other
-                    // internal state don't carry over to a different edge
-                    key={edgeType}
+                    // internal state don't carry over to a different edge, and
+                    // per node, since a grid cell passes to another node when
+                    // one above it is removed
+                    key={`${node.id}:${edgeType}`}
                     inputWidth={212}
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
@@ -557,8 +563,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           isRelationEntityPickerDisabled ? (
                             <p>
                               The "{edgeLabel}" relation allows no target class for{" "}
-                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}
-                              . Change the root class or the edge type.
+                              {sourceClassLabels ? (
+                                <b>{sourceClassLabels}</b>
+                              ) : (
+                                "the node it starts from"
+                              )}
+                              . Change that node's class or the edge type.
                             </p>
                           ) : (
                             <StyledTooltipList>

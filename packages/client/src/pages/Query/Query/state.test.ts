@@ -11,6 +11,20 @@ const makeNode = (id: string, edges: Query.IEdge[] = []): Query.INode => ({
   edges,
 });
 
+const classNode = (
+  id: string,
+  classes: EntityEnums.Class[],
+  edges: Query.IEdge[] = [],
+): Query.INode => ({ ...makeNode(id, edges), params: { entityClasses: classes } });
+
+const makeEdge = (id: string, type: Query.EdgeType, node: Query.INode): Query.IEdge => ({
+  id,
+  type,
+  params: {},
+  logic: Query.EdgeLogic.Positive,
+  node,
+});
+
 describe("queryReducer node filters", () => {
   const withTarget = (params: Query.INodeParams): Query.INode =>
     makeNode("root", [
@@ -154,6 +168,167 @@ describe("queryReducer updateEdgeType", () => {
       EntityEnums.Class.Action,
     ]);
   });
+
+  it("seeds a nested relation edge's target class from its source node, not the root", () => {
+    // a Superclass pairs a Concept with a Concept; a Person root pairs with none
+    const state = classNode("root", [EntityEnums.Class.Person], [
+      makeEdge(
+        "e0",
+        Query.EdgeType["R:"],
+        classNode("n0", [EntityEnums.Class.Concept], [
+          makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1")),
+        ]),
+      ),
+    ]);
+    const next = queryReducer(state, {
+      type: QueryActionType.updateEdgeType,
+      payload: { edgeId: "e1", newType: Query.EdgeType["R:SCL"] },
+    });
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("moves the relation targets under the switched edge's target to its new class", () => {
+    // n1 becomes a Concept, and a Synonym pairs a Concept with a Concept only
+    const state = classNode("root", [EntityEnums.Class.Concept], [
+      makeEdge(
+        "e1",
+        Query.EdgeType["EP:T"],
+        classNode("n1", [EntityEnums.Class.Action], [
+          makeEdge("e2", Query.EdgeType["R:SYN"], classNode("n2", [EntityEnums.Class.Action])),
+        ]),
+      ),
+    ]);
+    const next = queryReducer(state, {
+      type: QueryActionType.updateEdgeType,
+      payload: { edgeId: "e1", newType: Query.EdgeType["R:SCL"] },
+    });
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  const pinned = (id: string, edges: Query.IEdge[] = []): Query.INode => ({
+    ...makeNode(id, edges),
+    params: { entityId: "picked", entityClasses: [] },
+  });
+  const switchType = (state: Query.INode, edgeId: string, newType: Query.EdgeType) =>
+    queryReducer(state, { type: QueryActionType.updateEdgeType, payload: { edgeId, newType } });
+
+  it("seeds under a picked entity from the classes its own edge lets it hold", () => {
+    // the picked entity is a Superclass of a Concept, so it is a Concept itself
+    const state = classNode("root", [EntityEnums.Class.Concept], [
+      makeEdge(
+        "e0",
+        Query.EdgeType["R:SCL"],
+        pinned("n0", [makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1"))]),
+      ),
+    ]);
+    const next = switchType(state, "e1", Query.EdgeType["R:SCL"]);
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("seeds under a node without classes from the classes its own edge lets it hold", () => {
+    // a prop type is always a Concept
+    const state = classNode("root", [EntityEnums.Class.Person], [
+      makeEdge("e0", Query.EdgeType["EP:T"], {
+        ...makeNode("n0", [makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1"))]),
+        params: {},
+      }),
+    ]);
+    const next = switchType(state, "e1", Query.EdgeType["R:SCL"]);
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("the class seeded beside a picked entity does not move the targets under it", () => {
+    // the switch seeds n1 with the Antonym's first class, Action, yet the picked
+    // entity can as well be a Concept, which the Synonym under it still reaches
+    const state = classNode("root", [], [
+      makeEdge(
+        "e1",
+        Query.EdgeType["R:SCL"],
+        pinned("n1", [
+          makeEdge("e2", Query.EdgeType["R:SYN"], classNode("n2", [EntityEnums.Class.Concept])),
+        ]),
+      ),
+    ]);
+    const next = switchType(state, "e1", Query.EdgeType["R:ANT"]);
+    expect(next.edges[0].node.params.entityId).toBe("picked");
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("removing the picked entity moves the targets its seeded class does not reach", () => {
+    // the edge control clears the picked entity right after the type switch,
+    // which leaves n1 on the class the switch seeded
+    const state = classNode("root", [EntityEnums.Class.Concept, EntityEnums.Class.Action], [
+      makeEdge(
+        "e1",
+        Query.EdgeType["R:SCL"],
+        pinned("n1", [
+          makeEdge("e2", Query.EdgeType["R:SYN"], classNode("n2", [EntityEnums.Class.Concept])),
+        ]),
+      ),
+    ]);
+    const switched = switchType(state, "e1", Query.EdgeType["R:ANT"]);
+    const next = queryReducer(switched, {
+      type: QueryActionType.updateNodeEntityId,
+      payload: { nodeId: "n1", newEntityId: undefined },
+    });
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Action]);
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Action,
+    ]);
+  });
+
+  it("resolves the classes of a picked entity through every node above it", () => {
+    // n1 is a Superclass of a Classification target, so a Concept
+    const state = classNode("root", [EntityEnums.Class.Person], [
+      makeEdge("e0", Query.EdgeType["R:CLA"], {
+        ...makeNode("n0", [
+          makeEdge(
+            "e1",
+            Query.EdgeType["R:SCL"],
+            pinned("n1", [makeEdge("e2", Query.EdgeType["EP:T"], makeNode("n2"))]),
+          ),
+        ]),
+        params: {},
+      }),
+    ]);
+    const next = switchType(state, "e2", Query.EdgeType["R:SCL"]);
+    expect(next.edges[0].node.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+});
+
+describe("queryReducer updateNodeExpansionToggles", () => {
+  it("turning EQ off moves a target only the equivalents reached", () => {
+    // with EQ the prop type stands for its equivalents of any class; alone it
+    // is a Concept, which a Synonym pairs with a Concept
+    const state = classNode("root", [], [
+      makeEdge("e0", Query.EdgeType["EP:T"], {
+        ...makeNode("n0", [
+          makeEdge("e1", Query.EdgeType["R:SYN"], classNode("n1", [EntityEnums.Class.Action])),
+        ]),
+        params: { entityId: "picked", entityClasses: [], includeEquivalents: true },
+      }),
+    ]);
+    const next = queryReducer(state, {
+      type: QueryActionType.updateNodeExpansionToggles,
+      payload: { nodeId: "n0", field: "includeEquivalents", value: undefined },
+    });
+    expect(next.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
 });
 
 describe("queryReducer updateNodeClass", () => {
@@ -214,7 +389,7 @@ describe("queryReducer updateNodeClass", () => {
     expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
   });
 
-  it("does not touch relation targets when a non-root node changes class", () => {
+  it("leaves the relation targets of other nodes alone", () => {
     const state = rootWithEdge([EntityEnums.Class.Action], Query.EdgeType["R:SYN"], {
       entityClasses: [EntityEnums.Class.Concept],
     });
@@ -228,9 +403,78 @@ describe("queryReducer updateNodeClass", () => {
     const next = changeClass(state, "n2", [EntityEnums.Class.Concept]);
     expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
   });
+
+  // root -e0-> n0 -R:SYN-> n1, a Synonym pairing each class with itself only
+  const nested = (
+    rootClasses: EntityEnums.Class[],
+    rootEdgeType: Query.EdgeType,
+  ): Query.INode =>
+    classNode("root", rootClasses, [
+      makeEdge(
+        "e0",
+        rootEdgeType,
+        classNode("n0", [EntityEnums.Class.Concept], [
+          makeEdge("e1", Query.EdgeType["R:SYN"], classNode("n1", [EntityEnums.Class.Concept])),
+        ]),
+      ),
+    ]);
+  const n0Classes = (state: Query.INode) => state.edges[0].node.params.entityClasses;
+  const n1Classes = (state: Query.INode) => state.edges[0].node.edges[0].node.params.entityClasses;
+
+  it("moves a nested relation target to the first class its source node allows", () => {
+    const state = nested([EntityEnums.Class.Person], Query.EdgeType["R:"]);
+    const next = changeClass(state, "n0", [EntityEnums.Class.Action]);
+    expect(n1Classes(next)).toEqual([EntityEnums.Class.Action]);
+  });
+
+  it("keeps a nested relation target its source node still allows when the root changes", () => {
+    const state = nested([EntityEnums.Class.Concept], Query.EdgeType["R:"]);
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(n0Classes(next)).toEqual([EntityEnums.Class.Concept]);
+    expect(n1Classes(next)).toEqual([EntityEnums.Class.Concept]);
+  });
+
+  it("moves the relation targets under a moved target as well", () => {
+    const state = nested([EntityEnums.Class.Concept], Query.EdgeType["R:SYN"]);
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(n0Classes(next)).toEqual([EntityEnums.Class.Action]);
+    expect(n1Classes(next)).toEqual([EntityEnums.Class.Action]);
+  });
+
+  it("leaves a target out of reach alone while its own source keeps its classes", () => {
+    // n1 holds a class its source never reached; its picker is re-seeded only
+    // when the source's classes change, so the stored class stays as well
+    const state = nested([EntityEnums.Class.Action], Query.EdgeType["R:"]);
+    state.edges[0].node.edges[0].node.params.entityClasses = [EntityEnums.Class.Action];
+    const next = changeClass(state, "root", [EntityEnums.Class.Action, EntityEnums.Class.Person]);
+    expect(n0Classes(next)).toEqual([EntityEnums.Class.Concept]);
+    expect(n1Classes(next)).toEqual([EntityEnums.Class.Action]);
+  });
+
+  it("moves a relation target under an any-class target the new class reaches through", () => {
+    const state = nested([EntityEnums.Class.Concept], Query.EdgeType["R:SYN"]);
+    state.edges[0].node.params.entityClasses = [];
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(n0Classes(next)).toEqual([]);
+    expect(n1Classes(next)).toEqual([EntityEnums.Class.Action]);
+  });
 });
 
 describe("queryReducer removeEdge", () => {
+  it("removes a nested edge from its own source node", () => {
+    const state = makeNode("root", [
+      makeEdge("e0", Query.EdgeType["EP:T"], makeNode("n0", [
+        makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1")),
+      ])),
+    ]);
+    const next = queryReducer(state, {
+      type: QueryActionType.removeEdge,
+      payload: { edgeId: "e1" },
+    });
+    expect(next.edges.map((edge) => edge.id)).toEqual(["e0"]);
+    expect(next.edges[0].node.edges).toEqual([]);
+  });
+
   const edge = (id: string, node: Query.INode): Query.IEdge => ({
     id,
     type: Query.EdgeType["EP:T"],
