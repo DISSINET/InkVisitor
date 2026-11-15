@@ -821,7 +821,7 @@ describe("sessions", () => {
     await storage.sessions.ensure(conn);
   });
   afterAll(async () => {
-    for (const sid of ["sid-1", "sid-2", "sid-3"]) {
+    for (const sid of ["sid-1", "sid-2", "sid-3", "sid-4", "sid-5"]) {
       await storage.sessions.delete(conn, sid);
     }
   });
@@ -843,5 +843,23 @@ describe("sessions", () => {
     expect((await storage.sessions.get(conn, "sid-3"))?.expiresAt).toBe(500);
     await storage.sessions.delete(conn, "sid-3");
     expect(await storage.sessions.get(conn, "sid-3")).toBeNull();
+  });
+
+  it("touch overwrites an existing row and never inserts a missing one", async () => {
+    await storage.sessions.set(conn, { id: "sid-4", userId: "u4", data: "{}", expiresAt: 10 });
+    await storage.sessions.touch(conn, { id: "sid-4", userId: "u4", data: "{}", expiresAt: 30 });
+    expect((await storage.sessions.get(conn, "sid-4"))?.expiresAt).toBe(30);
+
+    await storage.sessions.delete(conn, "sid-4");
+    await storage.sessions.touch(conn, { id: "sid-4", userId: "u4", data: "{}", expiresAt: 40 });
+    expect(await storage.sessions.get(conn, "sid-4")).toBeNull();
+  });
+
+  it("deleteByUser keeps exceptSid", async () => {
+    await storage.sessions.set(conn, { id: "sid-4", userId: "u5", data: "{}", expiresAt: 500 });
+    await storage.sessions.set(conn, { id: "sid-5", userId: "u5", data: "{}", expiresAt: 500 });
+    await storage.sessions.deleteByUser(conn, "u5", "sid-5");
+    expect(await storage.sessions.get(conn, "sid-4")).toBeNull();
+    expect(await storage.sessions.get(conn, "sid-5")).not.toBeNull();
   });
 });

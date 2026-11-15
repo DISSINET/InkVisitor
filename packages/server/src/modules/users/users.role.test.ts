@@ -219,6 +219,49 @@ describe("Users role change", function () {
     expect(await storedRole(target.id)).toEqual(UserEnums.Role.Admin);
   });
 
+  // repeating the current role is a no-op any signed-in user may send, and a
+  // request without a session is a 401
+  const probeSession = (agent: AuthAgent, role: UserEnums.Role, status: number) =>
+    agent.put(`${apiPath}/users/me`).send({ role }).expect(status);
+
+  it("logs out a user whose role changes", async () => {
+    const target = await createTarget(UserEnums.Role.Editor);
+    const targetAgent = await createAgentWithUserId(target.id);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ role: UserEnums.Role.Viewer })
+      .expect(200);
+
+    await probeSession(targetAgent, UserEnums.Role.Viewer, 401);
+  });
+
+  it("keeps the session that changed its own password and logs out the others", async () => {
+    const target = await createTarget(UserEnums.Role.Viewer);
+    const currentAgent = await createAgentWithUserId(target.id);
+    const otherAgent = await createAgentWithUserId(target.id);
+
+    await currentAgent
+      .put(`${apiPath}/users/me`)
+      .send({ password: `pw-${Math.random()}` })
+      .expect(200);
+
+    await probeSession(currentAgent, UserEnums.Role.Viewer, 200);
+    await probeSession(otherAgent, UserEnums.Role.Viewer, 401);
+  });
+
+  it("does not log a user out when the edit is rejected", async () => {
+    const target = await createTarget(UserEnums.Role.Editor);
+    const targetAgent = await createAgentWithUserId(target.id);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ password: `pw-${Math.random()}`, email: admin.email })
+      .expect(409);
+
+    await probeSession(targetAgent, UserEnums.Role.Editor, 200);
+  });
+
   it("does not let an admin create an owner", async () => {
     const email = `role-created-${Math.random()}@test.com`;
 
