@@ -57,6 +57,10 @@ const SUGGESTION_LIST_MIN_WIDTH = 320;
 // px; the type bar is all that separates the class box from the input
 const TYPE_BAR_WIDTH = 5;
 
+// set by the size middleware on the floating list to the room left in the
+// boundary; the rows inside cap their height with it
+const AVAILABLE_HEIGHT_VAR = "--suggester-available-height";
+
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
@@ -222,7 +226,7 @@ export const Suggester: React.FC<Suggester> = ({
   const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
     prioritySuggestions,
     suggestions,
-    isFocused || isHovered,
+    isFocused || isHovered
   );
 
   // the input blurs on the mousedown that picks a row, so the right-click list
@@ -421,7 +425,10 @@ export const Suggester: React.FC<Suggester> = ({
         rowProps={{ items: suggestions }}
         rowCount={suggestions.length}
         rowHeight={rowHeight}
-        style={{ maxHeight: `calc(20rem + ${extraRows * rowHeight}px)` }}
+        // until the size middleware first measures, the rows take their full height
+        style={{
+          maxHeight: `min(calc(20rem + ${extraRows * rowHeight}px), var(${AVAILABLE_HEIGHT_VAR}, 100vh))`,
+        }}
         overscanCount={scrollOverscanCount}
         rowComponent={(props) => {
           return (
@@ -454,15 +461,22 @@ export const Suggester: React.FC<Suggester> = ({
     whileElementsMounted: autoUpdate,
     // near the right edge flip first tries bottom-end, aligning the list to the
     // input's right edge; shift slides it into view when neither alignment
-    // fits, and size caps it to the boundary width
+    // fits, and size caps it to the room left in the boundary: #page-content,
+    // which clips the list portaled into it, or the window on a page without one
     middleware: [
       offset(1),
       flip({ padding: 10 }),
       shift({ padding: 10 }),
       size({
         padding: 10,
-        apply({ availableWidth, elements }) {
+        apply({ availableWidth, availableHeight, elements }) {
           elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
+          // only the rows scroll, so the cap goes to them; on the floating list
+          // it would cut them off
+          elements.floating.style.setProperty(
+            AVAILABLE_HEIGHT_VAR,
+            `${Math.max(0, availableHeight)}px`
+          );
         },
       }),
       // how far the list starts left of the input, after flip and shift
