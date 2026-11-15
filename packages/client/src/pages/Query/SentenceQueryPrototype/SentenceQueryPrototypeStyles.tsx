@@ -1,5 +1,5 @@
 // PROTOTYPE: throwaway styles for the sentence query builder demo.
-import styled, { css, DefaultTheme } from "styled-components";
+import styled, { css, DefaultTheme, keyframes } from "styled-components";
 
 // the noun a clause attaches to picks its colour, so the reader sees which
 // part of the sentence each clause talks about
@@ -216,4 +216,52 @@ export const StyledSwappableWord = styled(StyledWord)<{ $isOpen: boolean }>`
   &:hover {
     background-color: ${({ theme }) => theme.color["tableSelectionHover"]};
   }
+`;
+
+const blink = keyframes`
+  50% {
+    opacity: 0;
+  }
+`;
+
+// a click target right after a picked entity, wide enough to hit, drawn as a
+// blinking text cursor while its menu is open
+export const StyledCaretSlot = styled.span<{ $isOpen: boolean }>`
+  position: relative;
+  align-self: stretch;
+  width: 0.8rem;
+  min-height: 1.6em;
+  cursor: text;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 15%;
+    bottom: 15%;
+    left: 0.2rem;
+    border-left: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["text"]};
+    opacity: 0;
+    ${({ $isOpen }) =>
+      $isOpen &&
+      css`
+        animation: ${blink} 1s step-end infinite;
+        opacity: 1;
+      `}
+  }
+`;
+
+// AND / OR between the clauses on one noun
+export const StyledOperatorWord = styled.span<{ $color: string; $isClickable: boolean }>`
+  padding: 0 ${({ theme }) => theme.space[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  color: ${({ $color }) => $color};
+  font-weight: bold;
+  text-transform: uppercase;
+  ${({ $isClickable, theme }) =>
+    $isClickable &&
+    css`
+      cursor: pointer;
+      &:hover {
+        background-color: ${theme.color["tableSelectionHover"]};
+      }
+    `}
 `;

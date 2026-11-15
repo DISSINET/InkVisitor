@@ -8,7 +8,9 @@ import { IcoClose } from "Theme/icons";
 import {
   attachments,
   clauseById,
+  connectives,
   introducedNouns,
+  operatorOf,
   Token,
   tokenText,
   Widening,
@@ -18,10 +20,19 @@ import {
 import {
   nounColor,
   StyledPart,
+  StyledCaretSlot,
+  StyledOperatorWord,
   StyledRemoveButton,
   StyledSwappableWord,
   StyledWord,
 } from "./SentenceQueryPrototypeStyles";
+
+export interface PartMenu {
+  tokenIndex: number;
+  kind: "swap" | "widen";
+}
+const isOpen = (openMenu: PartMenu | undefined, tokenIndex: number, kind: PartMenu["kind"]) =>
+  openMenu?.tokenIndex === tokenIndex && openMenu.kind === kind;
 
 interface SentenceWords {
   tokens: Token[];
@@ -31,10 +42,13 @@ interface SentenceWords {
   onClearEntity?: (tokenIndex: number) => void;
   // EQ / SUB of a picked entity; the ones on show right after it, with a ×
   onWiden?: (tokenIndex: number, widening: Widening, value: boolean) => void;
-  // a click on the root noun or a clause's phrase opens its alternatives
-  onOpenSwap?: (tokenIndex: number) => void;
-  swapIndex?: number;
-  renderSwapMenu?: (tokenIndex: number) => React.ReactNode;
+  // a click on the root noun or a clause's phrase opens its alternatives, a
+  // click right after a picked entity its EQ / SUB
+  openMenu?: PartMenu;
+  onOpenMenu?: (menu: PartMenu) => void;
+  renderMenu?: (menu: PartMenu) => React.ReactNode;
+  // flips AND / OR of the noun introduced at `nounTokenIndex`
+  onToggleOperator?: (nounTokenIndex: number) => void;
   // the × of a clause or an "and those X"
   onRemove?: (tokenIndex: number) => void;
 }
@@ -43,9 +57,10 @@ export const SentenceWords: React.FC<SentenceWords> = ({
   renderPendingSlot,
   onClearEntity,
   onWiden,
-  onOpenSwap,
-  swapIndex,
-  renderSwapMenu,
+  openMenu,
+  onOpenMenu,
+  renderMenu,
+  onToggleOperator,
   onRemove,
 }) => {
   const theme = useTheme();
@@ -58,16 +73,16 @@ export const SentenceWords: React.FC<SentenceWords> = ({
     );
 
   const swappable = (tokenIndex: number, color: string, text: string, isNoun?: boolean) =>
-    onOpenSwap ? (
+    onOpenMenu ? (
       <StyledSwappableWord
         $color={color}
         $isNoun={isNoun}
-        $isOpen={swapIndex === tokenIndex}
+        $isOpen={isOpen(openMenu, tokenIndex, "swap")}
         // a mousedown here is not an outside click for the open menu
         data-swap-target
         onMouseDown={(e) => {
           e.preventDefault();
-          onOpenSwap(tokenIndex);
+          onOpenMenu({ tokenIndex, kind: "swap" });
         }}
       >
         {text}
@@ -77,6 +92,22 @@ export const SentenceWords: React.FC<SentenceWords> = ({
         {text}
       </StyledWord>
     );
+
+  const joinedBy = connectives(tokens);
+  // AND / OR of a noun, coloured like the noun it joins clauses on
+  const operatorWord = (nounTokenIndex: number) => (
+    <StyledOperatorWord
+      $color={colorOfNoun(nounTokenIndex)}
+      $isClickable={!!onToggleOperator}
+      onMouseDown={(e) => {
+        if (!onToggleOperator) return;
+        e.preventDefault();
+        onToggleOperator(nounTokenIndex);
+      }}
+    >
+      {operatorOf(tokens, nounTokenIndex)}
+    </StyledOperatorWord>
+  );
 
   const removeButton = (tokenIndex: number) =>
     onRemove && (
@@ -97,14 +128,17 @@ export const SentenceWords: React.FC<SentenceWords> = ({
           return (
             <StyledPart key={tokenIndex}>
               {swappable(tokenIndex, color, tokenText(tokens, tokenIndex), true)}
-              {swapIndex === tokenIndex && renderSwapMenu?.(tokenIndex)}
+              {isOpen(openMenu, tokenIndex, "swap") && renderMenu?.({ tokenIndex, kind: "swap" })}
             </StyledPart>
           );
         }
         if (token.kind === "focus") {
           return (
             <StyledPart key={tokenIndex}>
-              <StyledWord $color={color}>{tokenText(tokens, tokenIndex)}</StyledWord>
+              {operatorWord(token.tokenIndex)}
+              <StyledWord $color={color}>
+                {tokenText(tokens, tokenIndex).replace(/^\w+ /, "")}
+              </StyledWord>
               {removeButton(tokenIndex)}
             </StyledPart>
           );
@@ -112,12 +146,14 @@ export const SentenceWords: React.FC<SentenceWords> = ({
         const clause = clauseById(token.clauseId);
         return (
           <StyledPart key={tokenIndex}>
+            {joinedBy[tokenIndex] !== undefined && operatorWord(joinedBy[tokenIndex]!)}
             {swappable(tokenIndex, color, clause.phrase)}
             {clause.target.kind === "noun" && (
               <StyledWord $color={colorOfNoun(tokenIndex)} $isNoun>
                 {tokenText(tokens, tokenIndex).slice(clause.phrase.length + 1)}
               </StyledWord>
             )}
+            {removeButton(tokenIndex)}
             {clause.target.kind === "entity" &&
               (token.entity ? (
                 <EntityTag
@@ -146,8 +182,21 @@ export const SentenceWords: React.FC<SentenceWords> = ({
                   )}
                 </React.Fragment>
               ))}
-            {removeButton(tokenIndex)}
-            {swapIndex === tokenIndex && renderSwapMenu?.(tokenIndex)}
+            {token.entity && onOpenMenu && widenings(clause, token.entity, false).length > 0 && (
+              // the spot a text cursor would take right after the entity
+              <StyledCaretSlot
+                $isOpen={isOpen(openMenu, tokenIndex, "widen")}
+                data-swap-target
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onOpenMenu({ tokenIndex, kind: "widen" });
+                }}
+              >
+                {isOpen(openMenu, tokenIndex, "widen") &&
+                  renderMenu?.({ tokenIndex, kind: "widen" })}
+              </StyledCaretSlot>
+            )}
+            {isOpen(openMenu, tokenIndex, "swap") && renderMenu?.({ tokenIndex, kind: "swap" })}
           </StyledPart>
         );
       })}

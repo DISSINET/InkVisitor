@@ -1,7 +1,7 @@
 // PROTOTYPE: the sentence the user types word by word, picking each next
 // phrase from the suggestions that fit at that point. Variant A starts it
 // empty, variant B from a ready-made sentence whose blanks it fills in.
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, Query } from "@inkvisitor/shared/types";
 import { EntitySuggester } from "components/advanced";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getEntityLabel } from "utils/utils";
@@ -9,7 +9,9 @@ import { getEntityLabel } from "utils/utils";
 import {
   blankLabel,
   clauseById,
+  focusTokenIndex,
   nextSuggestions,
+  operatorOf,
   pendingEntityClause,
   removeToken,
   Suggestion,
@@ -17,8 +19,10 @@ import {
   swapToken,
   Token,
   Widening,
+  wideningSuggestions,
+  withOperator,
 } from "./sentenceGrammar";
-import { SentenceWords } from "./SentenceWords";
+import { PartMenu, SentenceWords } from "./SentenceWords";
 import {
   StyledHelpLine,
   StyledInputPart,
@@ -31,6 +35,23 @@ import {
 
 // every typed word has to start a word of the suggestion, in any order, so
 // "subj pers" finds "persons ... that are the subject of"
+// a leading "and" / "or" sets how the picked clause joins the others on its noun
+const splitConnective = (typed: string): { connective?: Query.NodeOperator; rest: string } => {
+  const match = typed.match(/^\s*(and|or)(?:\s+|$)(.*)$/i);
+  if (!match) return { rest: typed };
+  const connective =
+    match[1].toLowerCase() === "or" ? Query.NodeOperator.Or : Query.NodeOperator.And;
+  return { connective, rest: match[2] };
+};
+
+// the suggestion as it reads with the typed connective in front
+const withConnective = (suggestion: Suggestion, connective?: Query.NodeOperator) => {
+  const { action } = suggestion;
+  if (!connective || action.kind !== "add") return suggestion.text;
+  if (action.token.kind === "focus") return suggestion.text.replace(/^\w+/, connective);
+  return `${connective} ${suggestion.text}`;
+};
+
 const matches = (suggestion: Suggestion, typed: string) => {
   const words = suggestion.text.toLowerCase().split(/\s+/);
   return typed
@@ -51,27 +72,35 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
   const [activeIndex, setActiveIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  // the part of the sentence whose alternatives are open
-  const [swapIndex, setSwapIndex] = useState<number>();
+  // the menu open on a part of the sentence
+  const [openMenu, setOpenMenu] = useState<PartMenu>();
 
   useEffect(() => {
-    if (swapIndex === undefined) return;
+    if (!openMenu) return;
     const close = (e: MouseEvent) => {
-      if (!(e.target as Element).closest?.("[data-swap-target]")) setSwapIndex(undefined);
+      if (!(e.target as Element).closest?.("[data-swap-target]")) setOpenMenu(undefined);
     };
-    const escape = (e: KeyboardEvent) => e.key === "Escape" && setSwapIndex(undefined);
+    const escape = (e: KeyboardEvent) => e.key === "Escape" && setOpenMenu(undefined);
     document.addEventListener("mousedown", close);
     document.addEventListener("keydown", escape);
     return () => {
       document.removeEventListener("mousedown", close);
       document.removeEventListener("keydown", escape);
     };
-  }, [swapIndex]);
+  }, [openMenu]);
 
   const pending = pendingEntityClause(tokens);
+  const { connective, rest } = splitConnective(typed);
   const suggestions = useMemo(
-    () => nextSuggestions(tokens).filter((suggestion) => matches(suggestion, typed)),
-    [tokens, typed]
+    () =>
+      nextSuggestions(tokens).filter(
+        (suggestion) =>
+          matches(suggestion, rest) &&
+          // a connective joins a clause, it says nothing before EQ / SUB or the first noun
+          (!connective ||
+            (suggestion.action.kind === "add" && suggestion.action.token.kind !== "root"))
+      ),
+    [tokens, rest, connective]
   );
 
   const replaceToken = (tokenIndex: number, token: Token) => {
@@ -107,7 +136,12 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
 
   const pick = (suggestion: Suggestion) => {
     const { action } = suggestion;
-    if (action.kind === "add") onChange([...tokens, action.token]);
+    if (action.kind === "add") {
+      const { token } = action;
+      const noun = token.kind === "focus" ? token.tokenIndex : focusTokenIndex(tokens);
+      const joined = connective ? withOperator(tokens, noun, connective) : tokens;
+      onChange([...joined, token]);
+    }
     if (action.kind === "widen") widen(tokens.length - 1, action.widening, true);
     setTyped("");
     setActiveIndex(0);
@@ -151,24 +185,42 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
           tokens={tokens}
           onClearEntity={clearSlot}
           onWiden={widen}
-          swapIndex={swapIndex}
-          onOpenSwap={(tokenIndex) => {
+          openMenu={openMenu}
+          onToggleOperator={(nounTokenIndex) =>
+            onChange(
+              withOperator(
+                tokens,
+                nounTokenIndex,
+                operatorOf(tokens, nounTokenIndex) === Query.NodeOperator.And
+                  ? Query.NodeOperator.Or
+                  : Query.NodeOperator.And
+              )
+            )
+          }
+          onOpenMenu={(menu) => {
             setIsOpen(false);
-            setSwapIndex((open) => (open === tokenIndex ? undefined : tokenIndex));
+            setOpenMenu((open) =>
+              open?.tokenIndex === menu.tokenIndex && open.kind === menu.kind ? undefined : menu
+            );
           }}
           onRemove={(tokenIndex) => {
-            setSwapIndex(undefined);
+            setOpenMenu(undefined);
             onChange(removeToken(tokens, tokenIndex));
           }}
-          renderSwapMenu={(tokenIndex) => (
+          renderMenu={({ tokenIndex, kind }) => (
             <StyledSuggestionList data-swap-target>
-              {swapSuggestions(tokens, tokenIndex).map((suggestion) => (
+              {(kind === "widen"
+                ? wideningSuggestions(tokens[tokenIndex])
+                : swapSuggestions(tokens, tokenIndex)
+              ).map((suggestion) => (
                 <StyledSuggestion
                   key={suggestion.text}
                   $active={suggestion.hint === "current"}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    setSwapIndex(undefined);
+                    // the widen menu sits inside the slot that opens it
+                    e.stopPropagation();
+                    setOpenMenu(undefined);
                     const { action } = suggestion;
                     if (action.kind === "widen") widen(tokenIndex, action.widening, true);
                     if (action.kind === "add")
@@ -237,7 +289,7 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
                       pick(suggestion);
                     }}
                   >
-                    <span>{suggestion.text}</span>
+                    <span>{withConnective(suggestion, connective)}</span>
                     {suggestion.hint && (
                       <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>
                     )}
@@ -250,7 +302,7 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
       </StyledSentence>
       <StyledHelpLine>
         Type to filter, ↑ ↓ to move, Enter or Tab to add, Backspace to remove the last part. Click a
-        part to swap it, × to remove it.
+        part to swap it, × to remove it, AND / OR to switch it; or type "or" before a condition.
       </StyledHelpLine>
     </>
   );

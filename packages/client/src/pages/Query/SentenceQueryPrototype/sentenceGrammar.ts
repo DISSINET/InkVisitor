@@ -206,11 +206,48 @@ export const widenings = (clause: Clause, entity: PickedEntity, on: boolean): Wi
       !!entity[wideningField(widening)] === on
   );
 
+// how the clauses on a noun combine, AND unless set; the graph builder keeps
+// one operator per node, so it is one per noun here too
+type Operator = { operator?: Query.NodeOperator };
+
 export type Token =
-  | { kind: "root"; noun: NounKey }
-  | { kind: "clause"; clauseId: string; entity?: PickedEntity }
+  | ({ kind: "root"; noun: NounKey } & Operator)
+  // the operator only counts on a clause that introduces a noun
+  | ({ kind: "clause"; clauseId: string; entity?: PickedEntity } & Operator)
   // moves the focus back to the noun introduced by the token at `tokenIndex`
   | { kind: "focus"; tokenIndex: number };
+
+export const operatorOf = (tokens: Token[], nounTokenIndex: number): Query.NodeOperator => {
+  const token = tokens[nounTokenIndex];
+  return (token.kind !== "focus" && token.operator) || Query.NodeOperator.And;
+};
+
+export const withOperator = (
+  tokens: Token[],
+  nounTokenIndex: number,
+  operator: Query.NodeOperator
+): Token[] =>
+  tokens.map((token, tokenIndex) =>
+    tokenIndex === nounTokenIndex && token.kind !== "focus" ? { ...token, operator } : token
+  );
+
+/**
+ * For each token, the noun whose AND / OR is shown right before it: every
+ * clause on a noun after its first one gets it. A clause right after
+ * "and those X" reads the operator from that phrase instead.
+ */
+export const connectives = (tokens: Token[]): (number | undefined)[] => {
+  const attachedTo = attachments(tokens);
+  const clausesSoFar = new Map<number, number>();
+  return tokens.map((token, tokenIndex) => {
+    if (token.kind !== "clause") return undefined;
+    const noun = attachedTo[tokenIndex];
+    const count = clausesSoFar.get(noun) ?? 0;
+    clausesSoFar.set(noun, count + 1);
+    if (count === 0 || tokens[tokenIndex - 1]?.kind === "focus") return undefined;
+    return noun;
+  });
+};
 
 /** The nouns a sentence has introduced, by the index of the token that did. */
 export const introducedNouns = (tokens: Token[]): { tokenIndex: number; noun: NounKey }[] => {
@@ -290,7 +327,7 @@ export interface Suggestion {
   action: SuggestionAction;
 }
 
-const wideningSuggestions = (token: Token | undefined): Suggestion[] => {
+export const wideningSuggestions = (token: Token | undefined): Suggestion[] => {
   if (token?.kind !== "clause" || !token.entity) return [];
   const clause = clauseById(token.clauseId);
   const entity = token.entity;
@@ -324,7 +361,7 @@ export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
   const backReferences: Suggestion[] = introducedNouns(tokens)
     .filter((introduced) => introduced.tokenIndex !== focus)
     .map((introduced) => ({
-      text: `and those ${NOUNS[introduced.noun].label}`,
+      text: `${operatorOf(tokens, introduced.tokenIndex)} those ${NOUNS[introduced.noun].label}`,
       hint: "go back to",
       action: { kind: "add", token: { kind: "focus", tokenIndex: introduced.tokenIndex } },
     }));
@@ -445,6 +482,11 @@ export const swapToken = (tokens: Token[], tokenIndex: number, token: Token): To
     }
   }
 
+  // the noun's AND / OR stays with whatever introduces a noun in its place
+  if (old.kind !== "focus" && old.operator && next.kind !== "focus") {
+    next = { ...next, operator: old.operator };
+  }
+
   let swapped = [...tokens];
   swapped[tokenIndex] = next;
   const introducedBefore = nounOfToken(tokens, tokenIndex);
@@ -473,11 +515,15 @@ export const pendingEntityClause = (tokens: Token[]): Clause | undefined => {
 let idCounter = 0;
 const nextId = (prefix: string) => `${prefix}-${++idCounter}`;
 
-const newNode = (params: Query.INodeParams, id?: string): Query.INode => ({
+const newNode = (
+  params: Query.INodeParams,
+  operator = Query.NodeOperator.And,
+  id?: string
+): Query.INode => ({
   id: id ?? nextId("sentence-node"),
   type: Query.NodeType.E,
   params,
-  operator: Query.NodeOperator.And,
+  operator,
   edges: [],
 });
 
@@ -490,7 +536,10 @@ export const compileSentence = (tokens: Token[]): Query.INode | undefined => {
   if (root?.kind !== "root") return undefined;
 
   const nodesByToken = new Map<number, Query.INode>();
-  nodesByToken.set(0, newNode({ entityClasses: NOUNS[root.noun].classes }, "root"));
+  nodesByToken.set(
+    0,
+    newNode({ entityClasses: NOUNS[root.noun].classes }, operatorOf(tokens, 0), "root")
+  );
   const attachedTo = attachments(tokens);
 
   tokens.forEach((token, tokenIndex) => {
@@ -501,7 +550,10 @@ export const compileSentence = (tokens: Token[]): Query.INode | undefined => {
 
     let target: Query.INode;
     if (clause.target.kind === "noun") {
-      target = newNode({ entityClasses: NOUNS[clause.target.noun].classes });
+      target = newNode(
+        { entityClasses: NOUNS[clause.target.noun].classes },
+        operatorOf(tokens, tokenIndex)
+      );
       nodesByToken.set(tokenIndex, target);
     } else if (token.entity) {
       // a pinned entity is the whole match of its node, as the graph builder
@@ -535,7 +587,7 @@ export const tokenText = (tokens: Token[], tokenIndex: number): string => {
   if (token.kind === "root") return NOUNS[token.noun].label;
   if (token.kind === "focus") {
     const noun = nounOfToken(tokens, token.tokenIndex);
-    return `and those ${noun ? NOUNS[noun].label : ""}`;
+    return `${operatorOf(tokens, token.tokenIndex)} those ${noun ? NOUNS[noun].label : ""}`;
   }
   const clause = clauseById(token.clauseId);
   if (clause.target.kind === "noun") {
