@@ -285,3 +285,44 @@ describe("queryReducer propPair", () => {
     expect(switchTo(Query.EdgeType["R:CLA"])).toBeUndefined();
   });
 });
+
+describe("queryReducer HP: value node", () => {
+  it("a new edge is HP: with a type node and a value node", () => {
+    const next = queryReducer(makeNode("root"), {
+      type: QueryActionType.addNode,
+      payload: { parentId: "root" },
+    });
+    expect(next.edges[0].type).toBe(Query.EdgeType["HP:"]);
+    expect(next.edges[0].valueNode?.id).toBeTruthy();
+    expect(next.edges[0].valueNode?.id).not.toBe(next.edges[0].node.id);
+  });
+
+  it("an edge added under the value node lands there", () => {
+    const withProp = queryReducer(makeNode("root"), {
+      type: QueryActionType.addNode,
+      payload: { parentId: "root" },
+    });
+    const valueId = withProp.edges[0].valueNode!.id;
+    const next = queryReducer(withProp, {
+      type: QueryActionType.addNode,
+      payload: { parentId: valueId },
+    });
+    expect(next.edges[0].valueNode?.edges).toHaveLength(1);
+    expect(next.edges[0].node.edges).toHaveLength(0);
+  });
+
+  it("an edge type switch adds the value node for HP: only", () => {
+    const withProp = queryReducer(makeNode("root"), {
+      type: QueryActionType.addNode,
+      payload: { parentId: "root" },
+    });
+    const switchTo = (state: Query.INode, newType: Query.EdgeType) =>
+      queryReducer(state, {
+        type: QueryActionType.updateEdgeType,
+        payload: { edgeId: state.edges[0].id, newType },
+      });
+    const relation = switchTo(withProp, Query.EdgeType["R:CLA"]);
+    expect(relation.edges[0].valueNode).toBeUndefined();
+    expect(switchTo(relation, Query.EdgeType["HP:"]).edges[0].valueNode).toBeDefined();
+  });
+});

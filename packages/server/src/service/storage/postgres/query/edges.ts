@@ -32,6 +32,8 @@ export default class SearchEdge implements Query.IEdge {
   logic: Query.EdgeLogic;
   id: string;
   node: SearchNode;
+  /** HP: only: the value half of the prop, resolved as the target of an HP:V edge */
+  valueSide: SearchEdge | null;
   /** id expansion and the territory lineage; injected by the plan, see setResolvers */
   protected resolvers?: ExploreResolvers;
 
@@ -41,11 +43,16 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+    this.valueSide =
+      this.type === Query.EdgeType["HP:"] && data.valueNode
+        ? new SearchEdge({ type: Query.TupleValueEdgeType, node: data.valueNode })
+        : null;
   }
 
   setResolvers(resolvers: ExploreResolvers): void {
     this.resolvers = resolvers;
     this.node.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
   }
 
   protected resolve(): ExploreResolvers {
@@ -94,6 +101,7 @@ export default class SearchEdge implements Query.IEdge {
     // the node filters narrow an empty target only: a pinned entity is the target itself, whatever its status
     this.descendantIds = null;
     this.propPairIds = await this.resolvePropPair(conn);
+    await this.valueSide?.prepare(conn);
 
     if (!entityId) {
       // every other predicate applies the filters through the targetIds() set; the relation edges
@@ -146,10 +154,22 @@ export default class SearchEdge implements Query.IEdge {
     });
   }
 
-  /** the half of the same prop the propPair pins, with the entities it allows; null without a propPair */
+  /**
+   * the half of the same prop the propPair pins, or the value node of HP: holds, with the
+   * entities it allows; null without a propPair and for a value node constrained by class only
+   */
   propPair(): { kind: "type" | "value"; ids: string[] } | null {
+    if (this.valueSide) {
+      const ids = this.valueSide.targetIds();
+      return ids ? { kind: "value", ids } : null;
+    }
     const kind = Query.PropPairEdges[this.type];
     return kind && this.propPairIds ? { kind, ids: this.propPairIds } : null;
+  }
+
+  /** the classes the value node of HP: narrows the value to when it holds no id set */
+  valueClasses(): EntityEnums.Class[] {
+    return this.valueSide && !this.valueSide.targetIds() ? this.valueSide.targetClasses() : [];
   }
 
   /**
@@ -421,10 +441,17 @@ function fromMap(map: Record<string, RelationEnums.Type>, build: (type: Relation
 const PROPS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'props'`)}) pr`;
 const propId = (kind: "type" | "value"): string => `coalesce(pr->'${kind}'->>'entityId', '')`;
 
-/** the prop `pr` holds a propPair entity on the half the propPair pins; TRUE without a propPair */
+/**
+ * the prop `pr` holds a propPair entity on the half the propPair pins, or a value of the
+ * classes the value node of HP: picks; TRUE without either
+ */
 function pairMatch(e: SearchEdge, p: Params): string {
   const pair = e.propPair();
-  return pair ? `${propId(pair.kind)} = ${anyOf(p, pair.ids)}` : "TRUE";
+  if (pair) {
+    return `${propId(pair.kind)} = ${anyOf(p, pair.ids)}`;
+  }
+  const classes = e.valueClasses();
+  return classes.length ? entityMatches(p, propId("value"), classes) : "TRUE";
 }
 
 /** the prop `pr` references a target by `kind`, an entity of the classes, or anything */
@@ -707,6 +734,7 @@ export const PREDICATES: Record<string, Predicate> = {
   ...fromMap(ORDERED, (type) => (e, p) => relationTarget(e, p, type)),
   ...fromMap(INVERSE_ORDERED, (type) => (e, p) => relationTarget(e, p, type, true)),
   ...fromMap(UNORDERED, (type) => (e, p) => unorderedRelation(e, p, type)),
+  "HP:": (e, p) => hasProp(e, p, "type", false),
   "EP:T": (e, p) => hasProp(e, p, "type", false),
   "HP:V": (e, p) => hasProp(e, p, "value", true),
   "I_EP:T": (e, p) => isProp(e, p, "type"),

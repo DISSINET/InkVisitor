@@ -17,6 +17,9 @@ export namespace Query {
     params: IEdgeParams;
     logic: EdgeLogic;
     node: INode;
+    // HP: only: the value half of the prop, matched like an HP:V target; `node`
+    // is the type half, and both halves hold on the same prop
+    valueNode?: INode;
   }
 
   export interface INodeParams {
@@ -73,6 +76,7 @@ export namespace Query {
     E = "Entity",
   }
   export enum EdgeType {
+    "HP:" = "HP:",
     "HP:V" = "HP:V",
     "I_HP:V" = "I_HP:V",
     "EP:T" = "EP:T",
@@ -143,6 +147,12 @@ export namespace Query {
     "I_R:REL" = "I_R:REL",
   }
 
+  /**
+   * The value node of an HP: edge is picked and matched as the target of this
+   * edge type.
+   */
+  export const TupleValueEdgeType = EdgeType["HP:V"];
+
   export enum NodeOperator {
     And = "and",
     Or = "or",
@@ -191,6 +201,10 @@ export namespace Query {
   ];
 
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
+    // the type node; the value node takes the HP:V target params
+    "HP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "HP:V": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
@@ -466,6 +480,13 @@ export namespace Query {
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
+    "HP:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
     "HP:V": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
@@ -1046,6 +1067,7 @@ export namespace Query {
     ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
+    "HP:": "has property",
     "HP:V": "has property: value",
     "I_HP:V": "is property: value",
     "EP:T": "has property: type",
@@ -1123,6 +1145,7 @@ export namespace Query {
    * direction is known.
    */
   export const EdgeTypeDescriptions: Record<EdgeType, string> = {
+    "HP:": "Finds entities with an own prop whose type is the type node and whose value is the value node",
     "HP:V": "Finds entities whose own props have the target as a value",
     "I_HP:V": "Finds the prop values in the target entity's own props",
     "EP:T": "Finds entities whose own props have the target as a type",

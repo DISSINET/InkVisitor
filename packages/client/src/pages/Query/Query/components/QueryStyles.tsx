@@ -201,6 +201,15 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   margin-top: 1.4rem;
 `;
 
+// the "with value" label leading from the edge's spine to the value node of an HP: edge
+export const StyledEdgeValueLabel = styled.span`
+  padding-right: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
+`;
+
 export const StyledTooltipList = styled.ul`
   margin: 0;
   padding-left: ${({ theme }) => theme.space[4]};

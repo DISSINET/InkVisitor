@@ -58,6 +58,8 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // the value node of an HP: edge goes away with the edge, removed from the type node
+  isValueNode?: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -68,6 +70,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
   onOpenEntityInDetail,
+  isValueNode = false,
 }) => {
   const theme = useTheme();
   const isValid = problems.every((problem) => problem.warning);
@@ -652,7 +655,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </div>
-        {node.gridX !== 0 && node.gridY !== 0 && edge && (
+        {node.gridX !== 0 && node.gridY !== 0 && edge && !isValueNode && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}

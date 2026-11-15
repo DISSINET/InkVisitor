@@ -2,12 +2,27 @@ import { Query } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 
+/** the nodes an edge leads to: its target, and the value node of an HP: edge */
+export const edgeTargets = (edge: Query.IEdge): Query.INode[] =>
+  edge.valueNode ? [edge.node, edge.valueNode] : [edge.node];
+
+/**
+ * The value node of an HP: edge seen as the target of an HP:V edge, which is how it is
+ * picked and filtered; the id stays the HP: edge's own.
+ */
+export const valueNodeEdge = (edge: Query.IEdge & { valueNode: Query.INode }): Query.IEdge => ({
+  ...edge,
+  type: Query.TupleValueEdgeType,
+  node: edge.valueNode,
+  valueNode: undefined,
+});
+
 export const getAllEdges = (node: Query.INode): Query.IEdge[] => {
   const edges: Query.IEdge[] = [];
   const traverse = (node: Query.INode) => {
     node.edges.forEach((edge) => {
       edges.push(edge);
-      traverse(edge.node);
+      edgeTargets(edge).forEach(traverse);
     });
   };
   traverse(node);
@@ -19,7 +34,7 @@ export const getAllNodes = (node: Query.INode): Query.INode[] => {
   const traverse = (node: Query.INode) => {
     nodes.push(node);
     node.edges.forEach((edge) => {
-      traverse(edge.node);
+      edgeTargets(edge).forEach(traverse);
     });
   };
   traverse(node);
@@ -128,9 +143,15 @@ export const suggestQueryName = (
     node.edges
       .map((edge) => {
         const negation = edge.logic === Query.EdgeLogic.Negative ? "NOT " : "";
-        const parts = [Query.EdgeTypeLabels[edge.type] ?? edge.type, target(edge.node, false)];
-        const nested = edge.node.edges.length ? ` (${conditions(edge.node)})` : "";
-        return `${negation}${parts.filter(Boolean).join(" ")}${nested}`;
+        const half = (node: Query.INode) => {
+          const nested = node.edges.length ? `(${conditions(node)})` : "";
+          return [target(node, false), nested].filter(Boolean).join(" ");
+        };
+        const parts = [Query.EdgeTypeLabels[edge.type] ?? edge.type, half(edge.node)];
+        if (edge.valueNode) {
+          parts.push("with value", half(edge.valueNode));
+        }
+        return `${negation}${parts.filter(Boolean).join(" ")}`;
       })
       .join(node.operator === Query.NodeOperator.Or ? " or " : ", ");
 

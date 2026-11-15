@@ -7,7 +7,7 @@ import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { StyledGridCell, StyledQueryBox } from "./QueryBoxStyles";
 import { QueryAction } from "./state";
-import { getAllEdges, getAllNodes } from "./utils";
+import { edgeTargets, getAllEdges, valueNodeEdge } from "./utils";
 
 interface QueryBoxProps {
   state: Query.INode;
@@ -34,7 +34,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       maxNodeDepth = Math.max(maxNodeDepth, depth);
 
       node.edges.forEach((edge) => {
-        traverse(edge.node, depth + 1);
+        edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
@@ -44,7 +44,25 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   }, [state]);
 
   const allEdges = getAllEdges(state);
-  const allNodes = getAllNodes(state);
+
+  // the edge leading to a node; the value node of an HP: edge gets that edge as an HP:V
+  // edge, with its connector in place of the edge's own controls
+  const incomingEdge = (
+    nodeId: string | undefined,
+  ): { edge: Query.IEdge; isValue: boolean } | undefined => {
+    if (!nodeId) {
+      return undefined;
+    }
+    for (const edge of allEdges) {
+      if (edge.node.id === nodeId) {
+        return { edge, isValue: false };
+      }
+      if (edge.valueNode?.id === nodeId) {
+        return { edge: valueNodeEdge({ ...edge, valueNode: edge.valueNode }), isValue: true };
+      }
+    }
+    return undefined;
+  };
 
   const nodeItems = useMemo<INodeItem[]>(() => {
     const nodeItems: INodeItem[] = [];
@@ -52,8 +70,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     const traverse = (node: Query.INode, depth: number) => {
       nodeItems.push({ ...node, gridX: depth, gridY: nodeItems.length });
 
-      node.edges.forEach((edge, index) => {
-        traverse(edge.node, depth + 1);
+      node.edges.forEach((edge) => {
+        edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
@@ -67,6 +85,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   // on the rows in between. To keep the spine connected we (a) extend each
   // non-last sibling's vertical line full height and (b) draw a pass-through
   // vertical line in those empty "gap" rows.
+  // a spine branch is keyed by the node it leads to, as an HP: edge leads to two
   const { extendEdgeIds, extendNegativeEdgeIds, railCells, nodeChildStubs } = useMemo(() => {
     const idToItem = new Map(nodeItems.map((n) => [n.id, n]));
     const extend = new Set<string>();
@@ -84,11 +103,14 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       if (node.edges.length > 0) {
         childStubs.set(node.id, isNeg(node.edges[0]));
       }
-      if (node.edges.length > 1) {
+      const children = node.edges
+        .flatMap((e) => edgeTargets(e).map((target) => ({ edge: e, target })))
+        .map(({ edge, target }) => ({ edge, key: target.id, row: idToItem.get(target.id)?.gridY }))
+        .filter(
+          (ci): ci is { edge: Query.IEdge; key: string; row: number } => ci.row !== undefined,
+        );
+      if (children.length > 1) {
         const colEdge = idToItem.get(node.id)?.gridX ?? 0;
-        const children = node.edges
-          .map((e) => ({ edge: e, row: idToItem.get(e.node.id)?.gridY }))
-          .filter((ci): ci is { edge: Query.IEdge; row: number } => ci.row !== undefined);
 
         // each spine segment between two consecutive siblings feeds the lower
         // (next) sibling, so it takes that sibling's colour
@@ -97,16 +119,16 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const next = children[i + 1];
           const nextNeg = isNeg(next.edge);
 
-          extend.add(cur.edge.id);
+          extend.add(cur.key);
           if (nextNeg) {
-            extendNeg.add(cur.edge.id);
+            extendNeg.add(cur.key);
           }
           for (let r = cur.row + 1; r < next.row; r++) {
             rails.set(`${colEdge}-${r}`, nextNeg);
           }
         }
       }
-      node.edges.forEach((e) => traverse(e.node));
+      node.edges.forEach((e) => edgeTargets(e).forEach(traverse));
     };
     traverse(state);
 
@@ -124,11 +146,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
         return [...Array(nodeItems.length).keys()].map((hi) => {
           const nextCellNode = nodeItems.find((node) => node.gridX === wi + 1 && node.gridY === hi);
           const thisCellNode = nodeItems.find((node) => node.gridX === wi && node.gridY === hi);
-          const associatedEdge =
-            thisCellNode && allEdges.find((edge) => edge.node.id === thisCellNode.id);
-
-          const nextCellAssociatedEdge =
-            nextCellNode && allEdges.find((edge) => edge.node.id === nextCellNode.id);
+          const associated = incomingEdge(thisCellNode?.id);
+          const nextCellAssociated = incomingEdge(nextCellNode?.id);
 
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
@@ -196,25 +215,31 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   rootNode={state}
                   isRoot={wi === 0}
                   dispatch={dispatch}
-                  edge={associatedEdge}
+                  edge={associated?.edge}
+                  isValueNode={associated?.isValue}
                   problems={queryStateValidity.problems.filter(
                     (problem) => problem.source === thisCellNode.id,
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
-              {nextCellAssociatedEdge && (
+              {nextCellNode && nextCellAssociated && (
                 <QueryGridEdge
                   node={nextCellNode}
                   rootNode={state}
                   isRootEdge={wi === 0}
                   dispatch={dispatch}
-                  edge={nextCellAssociatedEdge}
-                  extendVertical={extendEdgeIds.has(nextCellAssociatedEdge.id)}
-                  extendNegative={extendNegativeEdgeIds.has(nextCellAssociatedEdge.id)}
-                  problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === nextCellAssociatedEdge.id,
-                  )}
+                  edge={nextCellAssociated.edge}
+                  isValueConnector={nextCellAssociated.isValue}
+                  extendVertical={extendEdgeIds.has(nextCellNode.id)}
+                  extendNegative={extendNegativeEdgeIds.has(nextCellNode.id)}
+                  problems={
+                    nextCellAssociated.isValue
+                      ? []
+                      : queryStateValidity.problems.filter(
+                          (problem) => problem.source === nextCellAssociated.edge.id,
+                        )
+                  }
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}

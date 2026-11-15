@@ -369,6 +369,15 @@ const edge = (type: string, target: Query.INodeParams | Query.INode = {}, logic 
 /** a prop edge whose propPair pins the other half of the matched prop */
 const pairedEdge = (type: string, target: Query.INodeParams, propPair: Query.IPropPair, logic = Query.EdgeLogic.Positive): Partial<Query.IEdge> =>
   ({ ...edge(type, target, logic), params: { propPair } });
+/** an HP: edge to a type node and a value node, each given as node params or a full node */
+const propEdge = (
+  type: Query.INodeParams | Query.INode,
+  value: Query.INodeParams | Query.INode,
+  logic = Query.EdgeLogic.Positive
+): Partial<Query.IEdge> => ({
+  ...edge("HP:", type, logic),
+  valueNode: "type" in value ? (value as Query.INode) : node(value),
+});
 const explore = async (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], operator = Query.NodeOperator.And) =>
   sorted(await storage.explore.plan(node(params, edges, operator), resolvers).run(conn));
 
@@ -426,6 +435,28 @@ describe("explore: relation, prop and reference edges", () => {
     expect(await explore(concepts, [pairedEdge("I_EP:T", { entityId: "c-1" }, { entityId: "x-1" })])).toEqual([]);
     expect(
       await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["c-2", "c-3", "c-4"]);
+  });
+
+  it("HP: needs its type node and its value node on the same top-level prop", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({}, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, {})])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityClasses: [C.Concept] })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityClasses: [C.Person] })])).toEqual([]);
+    // the subprop x-1 / c-4 is not a top-level prop
+    expect(await explore(concepts, [propEdge({ entityId: "c-4" }, { entityId: "x-1" })])).toEqual([]);
+    // conditions nested under the value node narrow the values: c-3 is the superclass of c-2 only
+    const valueUnder = (superclassOf: string) =>
+      node({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityId: superclassOf })]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, valueUnder("c-2"))])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, valueUnder("c-4"))])).toEqual([]);
+    expect(
+      await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
     ).toEqual(["c-2", "c-3", "c-4"]);
   });
 

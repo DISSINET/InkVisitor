@@ -206,6 +206,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!newTargetParams.entityId) {
         edgeToUpdate.node.params.entityId = undefined;
       }
+      if (newType === Query.EdgeType["HP:"]) {
+        edgeToUpdate.valueNode ??= newValueNode();
+      } else {
+        delete edgeToUpdate.valueNode;
+      }
       return updatedStateUpdate;
 
     case QueryActionType.updateEdgeLogic:
@@ -439,22 +444,28 @@ const updateNodeType = (
   return updatedState;
 };
 
+const newNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
+  type: Query.NodeType.E,
+  id: uuidv4(),
+  params: { entityClasses, label: "" },
+  operator: Query.NodeOperator.And,
+  edges: [],
+});
+
+/**
+ * The value node of an HP: edge, seeded with the first class its suggester offers, as an
+ * HP:V target is on an edge type switch
+ */
+const newValueNode = (): Query.INode => newNode([classesAll[0]]);
+
 const addNode = (state: Query.INode, parentId: string): Query.INode => {
   const newEdge: Query.IEdge = {
-    type: Query.EdgeType["EP:T"],
+    type: Query.EdgeType["HP:"],
     id: uuidv4(),
     params: {},
     logic: Query.EdgeLogic.Positive,
-    node: {
-      type: Query.NodeType.E,
-      id: uuidv4(),
-      params: {
-        entityClasses: [],
-        label: "",
-      },
-      operator: Query.NodeOperator.And,
-      edges: [],
-    },
+    node: newNode([]),
+    valueNode: newValueNode(),
   };
 
   // Recursively clone the node tree, adding the new edge to the parent node
@@ -472,6 +483,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
       edges: node.edges.map((edge) => ({
         ...edge,
         node: cloneNode(edge.node),
+        ...(edge.valueNode && { valueNode: cloneNode(edge.valueNode) }),
       })),
     };
   };

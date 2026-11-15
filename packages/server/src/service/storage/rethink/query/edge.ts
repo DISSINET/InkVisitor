@@ -201,7 +201,7 @@ export default class SearchEdge implements Query.IEdge {
    * treats as "matches nothing". Falls back to the raw params.entityId when
    * prepare() has not run, so a bare run() keeps the single-id semantics.
    */
-  protected targetIds(): string[] | null {
+  targetIds(): string[] | null {
     if (this.targetEntityIds) {
       return this.targetEntityIds;
     }
@@ -1057,6 +1057,45 @@ export class EdgeHasPropValue extends SearchEdge {
       .map(function (e) {
         return e("id");
       });
+  }
+}
+
+/**
+ * HP: matches a prop by both halves: its type is a target of `node`, as on
+ * EP:T, and its value is a target of `valueNode`, resolved as the target of an
+ * HP:V edge.
+ */
+export class EdgeHasProp extends EdgeHasPropType {
+  private valueSide: EdgeHasPropValue | null;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["HP:"];
+    this.valueSide = data.valueNode ? new EdgeHasPropValue({ node: data.valueNode }) : null;
+  }
+
+  setResolvers(resolvers: ExploreResolvers): void {
+    super.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    await this.valueSide?.prepare(db);
+  }
+
+  /** keeps the props whose value the value node allows: its id set, else its classes */
+  protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
+    const ids = this.valueSide?.targetIds() ?? null;
+    const classes = this.valueSide?.node.params.entityClasses ?? [];
+    const valueId = (prop: RDatum) => prop("value")("entityId").default("");
+    if (ids) {
+      return (prop: RDatum) => r.expr(ids).contains(valueId(prop));
+    }
+    if (classes.length) {
+      return (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes);
+    }
+    return () => r.expr(true);
   }
 }
 
@@ -2148,6 +2187,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreR
 
 function createEdge(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
+    case Query.EdgeType["HP:"]:
+      return new EdgeHasProp(data);
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:

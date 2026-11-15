@@ -43,6 +43,9 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
         warnings.push({ source: edge.id, text: PINNED_CONDITION_WARNING, warning: true });
       }
       visit(edge.node, edge.type);
+      if (edge.valueNode) {
+        visit(edge.valueNode, Query.TupleValueEdgeType);
+      }
     }
   };
   visit(root);
@@ -50,6 +53,8 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [
+  // HP: matches the type and the value of the same prop (server: EdgeHasProp in edge.ts)
+  Query.EdgeType["HP:"],
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
   // inverse entity-prop edges: match the prop types / values found in the
@@ -185,6 +190,15 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["SUT:D"],
   Query.EdgeType["I_SUT:D"],
   Query.EdgeType["I_CT:D"],
+];
+
+/**
+ * Implemented edge types offered only on an edge that already has them, as in a saved
+ * query: "EP:T" / "HP:V" are HP: with its value or its type left empty.
+ */
+export const edgeTypesRetired: Query.EdgeType[] = [
+  Query.EdgeType["EP:T"],
+  Query.EdgeType["HP:V"],
 ];
 
 /**
