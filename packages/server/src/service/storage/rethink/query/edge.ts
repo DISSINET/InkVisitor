@@ -1084,19 +1084,26 @@ export class EdgeHasProp extends EdgeHasPropType {
     await this.valueSide?.prepare(db);
   }
 
-  /** keeps the props whose value the value node allows: its id set, else its classes */
   protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
-    const ids = this.valueSide?.targetIds() ?? null;
-    const classes = this.valueSide?.node.params.entityClasses ?? [];
-    const valueId = (prop: RDatum) => prop("value")("entityId").default("");
-    if (ids) {
-      return (prop: RDatum) => r.expr(ids).contains(valueId(prop));
-    }
-    if (classes.length) {
-      return (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes);
-    }
-    return () => r.expr(true);
+    return valueNodeFilter(this.valueSide);
   }
+}
+
+/**
+ * keeps the props whose value the value node of HP: / SP: allows: its id set, else its
+ * classes; every prop without a value node
+ */
+function valueNodeFilter(valueSide: SearchEdge | null): (prop: RDatum) => RValue<boolean> {
+  const ids = valueSide?.targetIds() ?? null;
+  const classes = valueSide?.node.params.entityClasses ?? [];
+  const valueId = (prop: RDatum) => prop("value")("entityId").default("");
+  if (ids) {
+    return (prop: RDatum) => r.expr(ids).contains(valueId(prop));
+  }
+  if (classes.length) {
+    return (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes);
+  }
+  return () => r.expr(true);
 }
 
 /**
@@ -1280,6 +1287,36 @@ export class EdgeStatementHasPropValue extends SearchEdge {
       "value",
       this.propPairFilter()
     );
+  }
+}
+
+/**
+ * SP: matches an in-statement prop by both halves: its type is a target of `node`, as on
+ * SP:T, and its value is a target of `valueNode`, resolved as the target of an SP:V edge.
+ */
+export class EdgeStatementHasProp extends EdgeStatementHasPropType {
+  private valueSide: EdgeStatementHasPropValue | null;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SP:"];
+    this.valueSide = data.valueNode
+      ? new EdgeStatementHasPropValue({ node: data.valueNode })
+      : null;
+  }
+
+  setResolvers(resolvers: ExploreResolvers): void {
+    super.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    await this.valueSide?.prepare(db);
+  }
+
+  protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
+    return valueNodeFilter(this.valueSide);
   }
 }
 
@@ -2203,6 +2240,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsReferenceResource(data);
     case Query.EdgeType["HR:V"]:
       return new EdgeHasReferenceValue(data);
+    case Query.EdgeType["SP:"]:
+      return new EdgeStatementHasProp(data);
     case Query.EdgeType["SP:T"]:
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:

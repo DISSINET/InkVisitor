@@ -17,8 +17,9 @@ export namespace Query {
     params: IEdgeParams;
     logic: EdgeLogic;
     node: INode;
-    // HP: only: the value half of the prop, matched like an HP:V target; `node`
-    // is the type half, and both halves hold on the same prop
+    // HP: and SP: only: the value half of the prop, matched like a target of the
+    // edge type TupleValueEdgeTypes names; `node` is the type half, and both halves
+    // hold on the same prop
     valueNode?: INode;
   }
 
@@ -107,6 +108,7 @@ export namespace Query {
     "I_CT:D" = "I_CT:D",
     "CT:G" = "CT:G",
     "I_CT:G" = "I_CT:G",
+    "SP:" = "SP:",
     "SP:T" = "SP:T",
     "I_SP:T" = "I_SP:T",
     "SP:V" = "SP:V",
@@ -148,10 +150,13 @@ export namespace Query {
   }
 
   /**
-   * The value node of an HP: edge is picked and matched as the target of this
-   * edge type.
+   * The edges with a type node and a value node, by the edge type whose target the
+   * value node is picked and matched as.
    */
-  export const TupleValueEdgeType = EdgeType["HP:V"];
+  export const TupleValueEdgeTypes: Partial<Record<EdgeType, EdgeType>> = {
+    "HP:": EdgeType["HP:V"],
+    "SP:": EdgeType["SP:V"],
+  };
 
   export enum NodeOperator {
     And = "and",
@@ -296,6 +301,10 @@ export namespace Query {
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
+    // the type node; the value node takes the SP:V target params
+    "SP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "SP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -731,6 +740,16 @@ export namespace Query {
         params: { entityClass: [EntityEnums.Class.Territory] },
       },
     ],
+    "SP:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
     "SP:T": [
       {
         nodeType: NodeType.E,
@@ -1098,6 +1117,7 @@ export namespace Query {
     "I_CT:D": "T has parent T: direct parent",
     "CT:G": "T has child T: any",
     "I_CT:G": "T has parent T: any",
+    "SP:": "has S prop",
     "SP:T": "has S prop: type",
     "I_SP:T": "is S prop: type",
     "SP:V": "has S prop: value",
@@ -1177,6 +1197,8 @@ export namespace Query {
     "I_CT:D": "Finds territories directly below the target territory",
     "CT:G": "Finds territories that have the target territory anywhere below them",
     "I_CT:G": "Finds territories anywhere below the target territory",
+    "SP:":
+      "Finds statements with an action or actant prop whose type is the type node and whose value is the value node",
     "SP:T": "Finds statements with an action or actant prop whose type is the target",
     "I_SP:T": "Finds actants that carry a prop in a statement whose type is the target",
     "SP:V": "Finds statements with an action or actant prop whose value is the target",

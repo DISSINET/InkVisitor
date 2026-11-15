@@ -384,6 +384,12 @@ const propEdge = (
   ...edge("HP:", type, logic),
   valueNode: "type" in value ? (value as Query.INode) : node(value),
 });
+/** an SP: edge to a type node and a value node, as propEdge */
+const statementPropEdge = (
+  type: Query.INodeParams | Query.INode,
+  value: Query.INodeParams | Query.INode,
+  logic = Query.EdgeLogic.Positive
+): Partial<Query.IEdge> => ({ ...propEdge(type, value, logic), type: Query.EdgeType["SP:"] });
 const explore = async (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], operator = Query.NodeOperator.And) =>
   sorted(await storage.explore.plan(node(params, edges, operator), resolvers).run(conn));
 
@@ -689,6 +695,31 @@ describe("explore: statement edges", () => {
     // an identification is not a classification
     expect(await explore({ entityClasses: [C.Person] }, [edge("I_SC", { entityId: "c-3" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Person] }, [edge("I_SC")])).toEqual(["p-1"]);
+  });
+
+  it("SP: needs its type node and its value node on the same prop, at any of the three levels", async () => {
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["s-1"]);
+    // s-1 has a c-2 typed prop and a c-4 valued prop, but not one prop with both
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(
+      await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])
+    ).toEqual(["s-1"]);
+    // a third-level actant prop and an action prop
+    expect(await explore(S, [statementPropEdge({ entityId: "x-4" }, { entityId: "x-5" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-4" }, { entityId: "x-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({}, { entityId: "c-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, {})])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityClasses: [C.Concept] })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityClasses: [C.Person] })])).toEqual([]);
+    // conditions nested under the value node narrow the values: c-3 is the superclass of c-2 only
+    const valueUnder = (superclassOf: string) =>
+      node({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityId: superclassOf })]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, valueUnder("c-2"))])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, valueUnder("c-4"))])).toEqual([]);
+    expect(
+      await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["s-2", "s-3"]);
   });
 
   it("a propPair on SP:T, SP:V, I_SP:T and I_SP:V needs both halves on the same prop, at any of the three levels", async () => {

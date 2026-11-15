@@ -10,7 +10,7 @@ import {
   INodeItem,
   QueryValidityProblem,
 } from "../../types";
-import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
 import { EdgePropPairPicker } from "./EdgePropPairPicker";
@@ -39,7 +39,7 @@ interface QueryGridEdgeProps {
   // coloured by that sibling's logic - red when the sibling below is negative
   extendNegative?: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // the connector to the value node of an HP: edge, which the edge's own controls
+  // the connector to the value node of an HP: / SP: edge, which the edge's own controls
   // in the type node's row already set
   isValueConnector?: boolean;
 }
@@ -83,10 +83,12 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   const x = 20;
   const midY = QUERY_GRID_HEIGHT / 2;
   const curveRadius = 8;
+  // the "with value" branch leaves the HP: / SP: edge's own value line, not the parent's spine
+  const branchX = isValueConnector ? QUERY_PROP_VALUE_X : x;
   const branchPath = [
-    `M ${x} 0`,
-    `L ${x} ${midY - curveRadius}`,
-    `Q ${x} ${midY} ${x + curveRadius} ${midY}`,
+    `M ${branchX} 0`,
+    `L ${branchX} ${midY - curveRadius}`,
+    `Q ${branchX} ${midY} ${branchX + curveRadius} ${midY}`,
     `L ${QUERY_GRID_WIDTH} ${midY}`,
   ].join(" ");
 
@@ -97,6 +99,17 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
             <path d={branchPath} fill="none" strokeLinecap="round" />
           </g>
+          {edge.valueNode && !isValueConnector && (
+            <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
+              <line
+                x1={QUERY_PROP_VALUE_X}
+                x2={QUERY_PROP_VALUE_X}
+                y1={midY}
+                y2={QUERY_GRID_HEIGHT}
+                strokeLinecap="round"
+              />
+            </g>
+          )}
           {extendVertical && (
             <g
               style={{

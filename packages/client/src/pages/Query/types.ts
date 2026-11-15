@@ -44,7 +44,7 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
       }
       visit(edge.node, edge.type);
       if (edge.valueNode) {
-        visit(edge.valueNode, Query.TupleValueEdgeType);
+        visit(edge.valueNode, Query.TupleValueEdgeTypes[edge.type]);
       }
     }
   };
@@ -61,6 +61,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // target entity's own props (server: runInversePropEdge in edge.ts)
   Query.EdgeType["I_EP:T"],
   Query.EdgeType["I_HP:V"],
+  // SP: matches the type and the value of the same in-statement prop (server:
+  // EdgeStatementHasProp in edge.ts)
+  Query.EdgeType["SP:"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
   // statement actant-field edges: match a Statement that has some actant
@@ -194,11 +197,14 @@ export const edgeTypesHidden: Query.EdgeType[] = [
 
 /**
  * Implemented edge types offered only on an edge that already has them, as in a saved
- * query: "EP:T" / "HP:V" are HP: with its value or its type left empty.
+ * query: "EP:T" / "HP:V" are HP: with its value or its type left empty, "SP:T" / "SP:V" the
+ * same for SP:.
  */
 export const edgeTypesRetired: Query.EdgeType[] = [
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
+  Query.EdgeType["SP:T"],
+  Query.EdgeType["SP:V"],
 ];
 
 /**

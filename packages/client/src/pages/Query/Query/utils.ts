@@ -2,17 +2,17 @@ import { Query } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 
-/** the nodes an edge leads to: its target, and the value node of an HP: edge */
+/** the nodes an edge leads to: its target, and the value node of an HP: / SP: edge */
 export const edgeTargets = (edge: Query.IEdge): Query.INode[] =>
   edge.valueNode ? [edge.node, edge.valueNode] : [edge.node];
 
 /**
- * The value node of an HP: edge seen as the target of an HP:V edge, which is how it is
- * picked and filtered; the id stays the HP: edge's own.
+ * The value node of an HP: / SP: edge seen as the target of an HP:V / SP:V edge, which is
+ * how it is picked and filtered; the id stays the edge's own.
  */
 export const valueNodeEdge = (edge: Query.IEdge & { valueNode: Query.INode }): Query.IEdge => ({
   ...edge,
-  type: Query.TupleValueEdgeType,
+  type: Query.TupleValueEdgeTypes[edge.type] ?? edge.type,
   node: edge.valueNode,
   valueNode: undefined,
 });

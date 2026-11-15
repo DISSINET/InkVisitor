@@ -201,7 +201,7 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   margin-top: 1.4rem;
 `;
 
-// the "with value" label leading from the edge's spine to the value node of an HP: edge
+// the "with value" label leading from the edge's spine to the value node of an HP: / SP: edge
 export const StyledEdgeValueLabel = styled.span`
   padding-right: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["white"]};

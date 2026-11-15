@@ -60,7 +60,7 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // the value node of an HP: edge goes away with the edge, removed from the type node
+  // the value node of an HP: / SP: edge goes away with the edge, removed from the type node
   isValueNode?: boolean;
 }
 

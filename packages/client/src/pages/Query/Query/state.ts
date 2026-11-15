@@ -205,7 +205,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!newTargetParams.entityId) {
         edgeToUpdate.node.params.entityId = undefined;
       }
-      if (newType === Query.EdgeType["HP:"]) {
+      if (Query.TupleValueEdgeTypes[newType]) {
         edgeToUpdate.valueNode ??= newValueNode();
       } else {
         delete edgeToUpdate.valueNode;
@@ -468,7 +468,7 @@ const newNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
 });
 
 /**
- * The value node of an HP: edge, seeded with the first class its suggester offers, as an
+ * The value node of an HP: / SP: edge, seeded with the first class its suggester offers, as an
  * HP:V target is on an edge type switch
  */
 const newValueNode = (): Query.INode => newNode([classesAll[0]]);

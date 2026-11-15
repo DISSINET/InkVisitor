@@ -2,7 +2,7 @@ import { Query } from "@inkvisitor/shared/types/query";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { INodeItem, QueryValidity } from "../types";
-import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../constants";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { StyledGridCell, StyledQueryBox } from "./QueryBoxStyles";
@@ -46,7 +46,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
 
   const allEdges = getAllEdges(state);
 
-  // the edge leading to a node; the value node of an HP: edge gets that edge as an HP:V
+  // the edge leading to a node; the value node of an HP: / SP: edge gets that edge as an HP:V
   // edge, with its connector in place of the edge's own controls
   const incomingEdge = (
     nodeId: string | undefined,
@@ -86,13 +86,17 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   // on the rows in between. To keep the spine connected we (a) extend each
   // non-last sibling's vertical line full height and (b) draw a pass-through
   // vertical line in those empty "gap" rows.
-  // a spine branch is keyed by the node it leads to, as an HP: edge leads to two
-  const { extendEdgeIds, extendNegativeEdgeIds, railCells, nodeChildStubs } = useMemo(() => {
+  // The spine leads to each edge's node. The value node of an HP: / SP: edge hangs off a line
+  // of its own at QUERY_PROP_VALUE_X, run from that edge's row down to the value node's row,
+  // so the two halves of the prop read as one edge and the spine passes them by.
+  const spine = useMemo(() => {
     const idToItem = new Map(nodeItems.map((n) => [n.id, n]));
     const extend = new Set<string>();
     const extendNeg = new Set<string>();
     // cellKey -> whether the segment feeds a negative sibling (paint it red)
     const rails = new Map<string, boolean>();
+    // cellKey -> whether the HP: / SP: edge is negative, for the cells its value line passes
+    const valueRails = new Map<string, boolean>();
     // nodeId -> whether the first child's edge is negative; a node's own row
     // never has anything drawn in its own column, so without this the spine
     // reads as broken between the node and the branch curve into its first child
@@ -104,14 +108,23 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       if (node.edges.length > 0) {
         childStubs.set(node.id, isNeg(node.edges[0]));
       }
+      const colEdge = idToItem.get(node.id)?.gridX ?? 0;
+      node.edges.forEach((e) => {
+        const typeRow = idToItem.get(e.node.id)?.gridY;
+        const valueRow = e.valueNode && idToItem.get(e.valueNode.id)?.gridY;
+        if (typeRow === undefined || valueRow === undefined) {
+          return;
+        }
+        for (let r = typeRow + 1; r < valueRow; r++) {
+          valueRails.set(`${colEdge}-${r}`, isNeg(e));
+        }
+      });
       const children = node.edges
-        .flatMap((e) => edgeTargets(e).map((target) => ({ edge: e, target })))
-        .map(({ edge, target }) => ({ edge, key: target.id, row: idToItem.get(target.id)?.gridY }))
+        .map((edge) => ({ edge, key: edge.node.id, row: idToItem.get(edge.node.id)?.gridY }))
         .filter(
           (ci): ci is { edge: Query.IEdge; key: string; row: number } => ci.row !== undefined,
         );
       if (children.length > 1) {
-        const colEdge = idToItem.get(node.id)?.gridX ?? 0;
 
         // each spine segment between two consecutive siblings feeds the lower
         // (next) sibling, so it takes that sibling's colour
@@ -137,9 +150,11 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       extendEdgeIds: extend,
       extendNegativeEdgeIds: extendNeg,
       railCells: rails,
+      valueRailCells: valueRails,
       nodeChildStubs: childStubs,
     };
   }, [state, nodeItems]);
+  const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
     <StyledQueryBox $gridWeight={gridWeight} $nodeItems={nodeItems}>
@@ -153,6 +168,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
+          const showValueRail = valueRailCells.has(railKey);
+          const valueRailNegative = valueRailCells.get(railKey) === true;
 
           const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
@@ -183,6 +200,29 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     stroke={railNegative ? theme.color.entityA : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={railNegative ? "6 4" : undefined}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+              {showValueRail && (
+                <svg
+                  width={QUERY_GRID_WIDTH}
+                  height={QUERY_GRID_HEIGHT}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <line
+                    x1={QUERY_PROP_VALUE_X}
+                    x2={QUERY_PROP_VALUE_X}
+                    y1={0}
+                    y2={QUERY_GRID_HEIGHT}
+                    stroke={valueRailNegative ? theme.color.entityA : theme.color.query2}
+                    strokeWidth={3}
+                    strokeDasharray={valueRailNegative ? "6 4" : undefined}
                     strokeLinecap="round"
                   />
                 </svg>

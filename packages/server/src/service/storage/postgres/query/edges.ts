@@ -32,7 +32,7 @@ export default class SearchEdge implements Query.IEdge {
   logic: Query.EdgeLogic;
   id: string;
   node: SearchNode;
-  /** HP: only: the value half of the prop, resolved as the target of an HP:V edge */
+  /** HP: and SP: only: the value half of the prop, resolved as the target of an HP:V / SP:V edge */
   valueSide: SearchEdge | null;
   /** id expansion and the territory lineage; injected by the plan, see setResolvers */
   protected resolvers?: ExploreResolvers;
@@ -43,9 +43,10 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+    const valueType = Query.TupleValueEdgeTypes[this.type];
     this.valueSide =
-      this.type === Query.EdgeType["HP:"] && data.valueNode
-        ? new SearchEdge({ type: Query.TupleValueEdgeType, node: data.valueNode })
+      valueType && data.valueNode
+        ? new SearchEdge({ type: valueType, node: data.valueNode })
         : null;
   }
 
@@ -155,7 +156,7 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * the half of the same prop the propPair pins, or the value node of HP: holds, with the
+   * the half of the same prop the propPair pins, or the value node of HP: / SP: holds, with the
    * entities it allows; null without a propPair and for a value node constrained by class only
    */
   propPair(): { kind: "type" | "value"; ids: string[] } | null {
@@ -167,7 +168,7 @@ export default class SearchEdge implements Query.IEdge {
     return kind && this.propPairIds ? { kind, ids: this.propPairIds } : null;
   }
 
-  /** the classes the value node of HP: narrows the value to when it holds no id set */
+  /** the classes the value node of HP: / SP: narrows the value to when it holds no id set */
   valueClasses(): EntityEnums.Class[] {
     return this.valueSide && !this.valueSide.targetIds() ? this.valueSide.targetClasses() : [];
   }
@@ -462,7 +463,7 @@ const propId = (kind: "type" | "value"): string => `coalesce(pr->'${kind}'->>'en
 
 /**
  * the prop `pr` holds a propPair entity on the half the propPair pins, or a value of the
- * classes the value node of HP: picks; TRUE without either
+ * classes the value node of HP: / SP: picks; TRUE without either
  */
 function pairMatch(e: SearchEdge, p: Params): string {
   const pair = e.propPair();
@@ -559,11 +560,12 @@ const propRows = (paths: string[], doc: string): string =>
 
 /**
  * statements whose in-statement props reference a target by `kind`, an entity of the classes
- * (SP:V), or anything (runStatementPropEdge); with a propPair, one prop holds both halves
+ * (SP:V), or anything (runStatementPropEdge); with a propPair or the value node of SP:, one
+ * prop holds both halves
  */
 function statementHasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string {
   const classes = narrowByClass ? e.targetClasses() : [];
-  if (!e.propPair()) {
+  if (!e.propPair() && !e.valueClasses().length) {
     return (
       `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds())}` +
       ` AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), classes)}`
@@ -773,6 +775,7 @@ export const PREDICATES: Record<string, Predicate> = {
   "HR:R": (e, p) => hasReference(e, p, "resource"),
   "HR:V": (e, p) => hasReference(e, p, "value"),
   "I_HR:R": isReferenceResource,
+  "SP:": (e, p) => statementHasProp(e, p, "type", false),
   "SP:T": (e, p) => statementHasProp(e, p, "type", false),
   "SP:V": (e, p) => statementHasProp(e, p, "value", true),
   "I_SP:T": (e, p) => isStatementProp(e, p, "type", false),
