@@ -469,13 +469,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
                     // seeds the class shown on mount / edge switch: the node's
-                    // committed class, else the first class the edge allows.
-                    // The suggester owns the selection afterwards, so a wildcard
-                    // pick (which clears entityClasses) is not re-derived here.
+                    // committed class, the wildcard when its class filter is
+                    // cleared (no initCategory), else the first class the edge
+                    // allows. The suggester owns the selection afterwards.
                     initCategory={
-                      node.params.entityClasses?.[0] ??
-                      entityIdCategoryTypes[0] ??
-                      EntityEnums.Class.Concept
+                      paramEntityClass && node.params.entityClasses?.length === 0
+                        ? undefined
+                        : (node.params.entityClasses?.[0] ??
+                          entityIdCategoryTypes[0] ??
+                          EntityEnums.Class.Concept)
                     }
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {

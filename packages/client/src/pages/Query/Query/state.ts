@@ -467,11 +467,8 @@ const newNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
   edges: [],
 });
 
-/**
- * The value node of an HP: / SP: edge, seeded with the first class its suggester offers, as an
- * HP:V target is on an edge type switch
- */
-const newValueNode = (): Query.INode => newNode([classesAll[0]]);
+/** The value node of an HP: / SP: edge, with no class, so left untouched it matches any value */
+const newValueNode = (): Query.INode => newNode([]);
 
 const addNode = (state: Query.INode, parentId: string): Query.INode => {
   const newEdge: Query.IEdge = {

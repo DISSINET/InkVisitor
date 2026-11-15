@@ -539,6 +539,8 @@ describe("queryReducer HP: value node", () => {
     expect(next.edges[0].type).toBe(Query.EdgeType["HP:"]);
     expect(next.edges[0].valueNode?.id).toBeTruthy();
     expect(next.edges[0].valueNode?.id).not.toBe(next.edges[0].node.id);
+    // no class: an untouched value node matches any value
+    expect(next.edges[0].valueNode?.params.entityClasses).toEqual([]);
   });
 
   it("an edge added under the value node lands there", () => {

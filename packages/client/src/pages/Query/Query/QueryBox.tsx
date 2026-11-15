@@ -95,8 +95,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     const extendNeg = new Set<string>();
     // cellKey -> whether the segment feeds a negative sibling (paint it red)
     const rails = new Map<string, boolean>();
-    // cellKey -> whether the HP: / SP: edge is negative, for the cells its value line passes
-    const valueRails = new Map<string, boolean>();
+    // cellKey -> the HP: / SP: edge whose value line passes the cell
+    const valueRails = new Map<string, Query.IEdge>();
     // nodeId -> whether the first child's edge is negative; a node's own row
     // never has anything drawn in its own column, so without this the spine
     // reads as broken between the node and the branch curve into its first child
@@ -116,7 +116,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           return;
         }
         for (let r = typeRow + 1; r < valueRow; r++) {
-          valueRails.set(`${colEdge}-${r}`, isNeg(e));
+          valueRails.set(`${colEdge}-${r}`, e);
         }
       });
       const children = node.edges
@@ -168,8 +168,15 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
-          const showValueRail = valueRailCells.has(railKey);
-          const valueRailNegative = valueRailCells.get(railKey) === true;
+          const valueRailEdge = valueRailCells.get(railKey);
+          const valueRailNegative = valueRailEdge?.logic === Query.EdgeLogic.Negative;
+          // the value line belongs to one edge, so it takes that edge's colour as its box does:
+          // the invalid colour over the red of NOT
+          const valueRailInvalid =
+            !!valueRailEdge &&
+            queryStateValidity.problems.some(
+              (problem) => problem.source === valueRailEdge.id && !problem.warning,
+            );
 
           const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
@@ -204,7 +211,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   />
                 </svg>
               )}
-              {showValueRail && (
+              {valueRailEdge && (
                 <svg
                   width={QUERY_GRID_WIDTH}
                   height={QUERY_GRID_HEIGHT}
@@ -220,7 +227,13 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={QUERY_PROP_VALUE_X}
                     y1={0}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={valueRailNegative ? theme.color.entityA : theme.color.query2}
+                    stroke={
+                      valueRailInvalid
+                        ? theme.color.queryInvalid
+                        : valueRailNegative
+                          ? theme.color.entityA
+                          : theme.color.query2
+                    }
                     strokeWidth={3}
                     strokeDasharray={valueRailNegative ? "6 4" : undefined}
                     strokeLinecap="round"
@@ -274,13 +287,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   isValueConnector={nextCellAssociated.isValue}
                   extendVertical={extendEdgeIds.has(nextCellNode.id)}
                   extendNegative={extendNegativeEdgeIds.has(nextCellNode.id)}
-                  problems={
-                    nextCellAssociated.isValue
-                      ? []
-                      : queryStateValidity.problems.filter(
-                          (problem) => problem.source === nextCellAssociated.edge.id,
-                        )
-                  }
+                  // a value connector carries its edge's id, so an invalid edge colours it too
+                  problems={queryStateValidity.problems.filter(
+                    (problem) => problem.source === nextCellAssociated.edge.id,
+                  )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
