@@ -109,12 +109,22 @@ export const StyledSuggestion = styled.li<{ $active: boolean }>`
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[4]};
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
+  align-items: baseline;
   cursor: pointer;
   background-color: ${({ theme, $active }) =>
     $active ? theme.color["tableSelectionHover"] : "transparent"};
+  /* the option stays on one line, a long hint gives way */
+  & > span:first-child {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 `;
 
 export const StyledSuggestionHint = styled.span`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: ${({ theme }) => theme.color["mutedText"]};
   font-size: ${({ theme }) => theme.fontSize.xs};
 `;
