@@ -1,6 +1,7 @@
 // PROTOTYPE: the sentence the user types word by word, picking each next
 // phrase from the suggestions that fit at that point. Variant A starts it
 // empty, variant B from a ready-made sentence whose blanks it fills in.
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Query } from "@inkvisitor/shared/types";
 import { EntitySuggester } from "components/advanced";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -12,7 +13,6 @@ import {
   focusTokenIndex,
   nextSuggestions,
   operatorOf,
-  pendingEntityClause,
   removeToken,
   Suggestion,
   swapSuggestions,
@@ -89,7 +89,6 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
     };
   }, [openMenu]);
 
-  const pending = pendingEntityClause(tokens);
   const { connective, rest } = splitConnective(typed);
   const suggestions = useMemo(
     () =>
@@ -247,8 +246,16 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
                 inputWidth={160}
                 suggestionListWidth={320}
                 categoryTypes={clause.target.classes}
-                initCategory={clause.target.initClass}
-                placeholder={blankLabel(clause)}
+                initCategory={
+                  token.entityClass === EntityEnums.Extension.Any
+                    ? undefined
+                    : (token.entityClass ?? clause.target.initClass)
+                }
+                // left empty, the blank matches any entity of the class shown
+                placeholder={`any ${blankLabel(clause)}`}
+                onChangeCategory={(entityClass) =>
+                  replaceToken(tokenIndex, { ...token, entityClass })
+                }
                 disableCreate
                 disableTemplatesAccept
                 autoFocus={isLast}
@@ -258,51 +265,51 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
             );
           }}
         />
-        {!pending && (
-          // the list opens under the input, where the sentence continues
-          <StyledInputPart>
-            <StyledSentenceInput
-              ref={inputRef}
-              value={typed}
-              placeholder={
-                tokens.length ? "add a condition" : "start with statements, persons, concepts"
-              }
-              onChange={(e) => {
-                setTyped(e.target.value);
-                setActiveIndex(0);
-                setIsOpen(true);
-              }}
-              onFocus={() => setIsOpen(true)}
-              onBlur={() => setTimeout(() => setIsOpen(false), 150)}
-              onKeyDown={onKeyDown}
-            />
-            {isOpen && suggestions.length > 0 && (
-              <StyledSuggestionList>
-                {suggestions.map((suggestion, index) => (
-                  <StyledSuggestion
-                    key={suggestion.text}
-                    $active={index === activeIndex}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    // mousedown keeps the input focused, so the list stays open
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      pick(suggestion);
-                    }}
-                  >
-                    <span>{withConnective(suggestion, connective)}</span>
-                    {suggestion.hint && (
-                      <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>
-                    )}
-                  </StyledSuggestion>
-                ))}
-              </StyledSuggestionList>
-            )}
-          </StyledInputPart>
-        )}
+        {/* the list opens under the input, where the sentence continues; a blank
+            left empty does not stop it */}
+        <StyledInputPart>
+          <StyledSentenceInput
+            ref={inputRef}
+            value={typed}
+            placeholder={
+              tokens.length ? "add a condition" : "start with statements, persons, concepts"
+            }
+            onChange={(e) => {
+              setTyped(e.target.value);
+              setActiveIndex(0);
+              setIsOpen(true);
+            }}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+            onKeyDown={onKeyDown}
+          />
+          {isOpen && suggestions.length > 0 && (
+            <StyledSuggestionList>
+              {suggestions.map((suggestion, index) => (
+                <StyledSuggestion
+                  key={suggestion.text}
+                  $active={index === activeIndex}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  // mousedown keeps the input focused, so the list stays open
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    pick(suggestion);
+                  }}
+                >
+                  <span>{withConnective(suggestion, connective)}</span>
+                  {suggestion.hint && (
+                    <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>
+                  )}
+                </StyledSuggestion>
+              ))}
+            </StyledSuggestionList>
+          )}
+        </StyledInputPart>
       </StyledSentence>
       <StyledHelpLine>
         Type to filter, ↑ ↓ to move, Enter or Tab to add, Backspace to remove the last part. Click a
-        part to swap it, × to remove it, AND / OR to switch it; or type "or" before a condition.
+        part to swap it, × to remove it, AND / OR to switch it; or type "or" before a condition. An
+        empty blank matches any entity of its class.
       </StyledHelpLine>
     </>
   );

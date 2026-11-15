@@ -68,7 +68,8 @@ export const SentenceTemplates: React.FC<SentenceTemplates> = ({
     {templateIndex !== undefined && (
       <>
         <StyledHelpLine>
-          Fill in the blanks. More conditions can be added at the end.
+          Fill in the blanks, or leave one empty to match any entity of its class. More conditions
+          can be added at the end.
         </StyledHelpLine>
         <SentenceTyped tokens={tokens} onChange={onChange} sentenceKey={templateIndex} />
       </>

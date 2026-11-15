@@ -213,7 +213,14 @@ type Operator = { operator?: Query.NodeOperator };
 export type Token =
   | ({ kind: "root"; noun: NounKey } & Operator)
   // the operator only counts on a clause that introduces a noun
-  | ({ kind: "clause"; clauseId: string; entity?: PickedEntity } & Operator)
+  | ({
+      kind: "clause";
+      clauseId: string;
+      entity?: PickedEntity;
+      // the class the blank's picker shows while no entity is picked: the
+      // blank then stands for any entity of it
+      entityClass?: EntityEnums.Class | EntityEnums.Extension.Any;
+    } & Operator)
   // moves the focus back to the noun introduced by the token at `tokenIndex`
   | { kind: "focus"; tokenIndex: number };
 
@@ -504,12 +511,15 @@ export const swapToken = (tokens: Token[], tokenIndex: number, token: Token): To
   return swapped;
 };
 
-/** The clause at the end of the sentence that still waits for its entity. */
-export const pendingEntityClause = (tokens: Token[]): Clause | undefined => {
-  const last = tokens[tokens.length - 1];
-  if (last?.kind !== "clause" || last.entity) return undefined;
-  const clause = clauseById(last.clauseId);
-  return clause.target.kind === "entity" ? clause : undefined;
+/** The class a blank stands for while no entity is picked. */
+export const blankClass = (
+  token: Extract<Token, { kind: "clause" }>
+): EntityEnums.Class | EntityEnums.Extension.Any => {
+  const target = clauseById(token.clauseId).target;
+  if (token.entityClass) return token.entityClass;
+  return target.kind === "entity"
+    ? (target.initClass ?? target.classes[0])
+    : EntityEnums.Extension.Any;
 };
 
 let idCounter = 0;
@@ -528,8 +538,8 @@ const newNode = (
 });
 
 /**
- * Compiles the sentence to a query tree. A clause still waiting for its entity
- * is left out, so a half-typed sentence still compiles to what it says so far.
+ * Compiles the sentence to a query tree. A blank with no entity picked matches
+ * any entity of the class its picker shows, as an empty graph node does.
  */
 export const compileSentence = (tokens: Token[]): Query.INode | undefined => {
   const root = tokens[0];
@@ -566,7 +576,10 @@ export const compileSentence = (tokens: Token[]): Query.INode | undefined => {
           (subordinatesApply(clause) && token.entity.includeSubordinates) || undefined,
       });
     } else {
-      return;
+      const entityClass = blankClass(token);
+      target = newNode({
+        entityClasses: entityClass === EntityEnums.Extension.Any ? [] : [entityClass],
+      });
     }
 
     source.edges.push({
