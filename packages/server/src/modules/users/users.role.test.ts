@@ -38,10 +38,15 @@ describe("Users role change", function () {
     return user;
   };
 
-  const storedRole = async (userId: string): Promise<string> => {
+  const storedUser = async (userId: string): Promise<IUser> => {
     const row = await r.table(User.table).get(userId).run(db.connection);
-    return row.role;
+    if (!row) {
+      throw new Error(`user ${userId} is not stored`);
+    }
+    return row;
   };
+
+  const storedRole = async (userId: string): Promise<string> => (await storedUser(userId)).role;
 
   beforeAll(async () => {
     await db.initDb();
@@ -108,6 +113,30 @@ describe("Users role change", function () {
       .expect(403);
 
     expect(await storedRole(viewer.id)).toEqual(UserEnums.Role.Viewer);
+  });
+
+  it("does not let an editor grant themselves territory rights", async () => {
+    const editor = await createTarget(UserEnums.Role.Editor);
+    const editorAgent = await createAgentWithUserId(editor.id);
+
+    await editorAgent
+      .put(`${apiPath}/users/me`)
+      .send({ rights: [{ territory: "T0", mode: UserEnums.RoleMode.Write }] })
+      .expect(403);
+
+    expect((await storedUser(editor.id)).rights).toEqual([]);
+  });
+
+  it("lets an admin set a user's territory rights", async () => {
+    const target = await createTarget(UserEnums.Role.Editor);
+    const rights = [{ territory: "T0", mode: UserEnums.RoleMode.Write }];
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ rights })
+      .expect(200);
+
+    expect((await storedUser(target.id)).rights).toEqual(rights);
   });
 
   it("lets an admin switch a user between the non-owner roles", async () => {

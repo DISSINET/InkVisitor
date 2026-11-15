@@ -720,6 +720,15 @@ export default Router()
           throw new PermissionDeniedError("user role cannot be changed");
         }
 
+        // territory rights decide what a user may edit, so only a manager sets
+        // them, also on their own account
+        if (
+          data.rights !== undefined &&
+          !editor.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
+        ) {
+          throw new PermissionDeniedError("user rights cannot be changed");
+        }
+
         const changesAccess =
           !!data.password ||
           (data.active !== undefined && data.active !== existingUser.active);
