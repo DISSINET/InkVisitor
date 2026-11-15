@@ -75,6 +75,7 @@ import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
+import { useAnnotatorContextSuggestions } from "./hooks/useAnnotatorContextSuggestions";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
 import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
@@ -1276,6 +1277,13 @@ export const TextAnnotator = ({
     [annotatorMode, selectedText, isSelectingText, hideSelectionMenu, dataDocument, findPanel],
   );
 
+  const contextSuggestions = useAnnotatorContextSuggestions(
+    dataDocument?.anchors,
+    selectionStartIndex,
+    annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1]?.id,
+    isMenuDisplayed && selectionStartIndex !== -1,
+  );
+
   // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a
   // live preview but are NOT saved; the user commits a whole series with Done
   // (save) or reverts it with Discard. The raw text is snapshotted when move
@@ -1778,6 +1786,7 @@ export const TextAnnotator = ({
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
+                      contextSuggestions={contextSuggestions}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       onMoveAnchorBoundary={isMenuReadOnly ? undefined : handleMoveAnchorBoundary}

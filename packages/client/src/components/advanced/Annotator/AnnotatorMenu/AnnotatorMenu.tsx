@@ -93,6 +93,8 @@ interface TextAnnotatorMenuProps {
    * this document's text down to the deepest leaf at the cursor.
    */
   annotatorPositionHierarchy: AnnotatorPositionTNode[];
+  /** Entities already used in statements around the selection, closest first. */
+  contextSuggestions?: IEntity[];
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl,
@@ -143,6 +145,7 @@ export const TextAnnotatorMenu = ({
   onAnchorAdd,
   onCreateStatement = undefined,
   annotatorPositionHierarchy,
+  contextSuggestions,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
@@ -659,6 +662,7 @@ export const TextAnnotatorMenu = ({
                     categoryTypes={classesAnnotator}
                     statementLabelHint
                     initTyped={text.length > 30 ? text.substring(0, 30) : text}
+                    prioritySuggestions={contextSuggestions}
                     onPicked={(entity) => {
                       onAnchorAdd(entity, suggesterElvl);
                     }}
