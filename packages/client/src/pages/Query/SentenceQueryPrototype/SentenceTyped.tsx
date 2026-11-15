@@ -3,7 +3,7 @@
 // empty, variant B from a ready-made sentence whose blanks it fills in.
 import { IEntity } from "@inkvisitor/shared/types";
 import { EntitySuggester } from "components/advanced";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getEntityLabel } from "utils/utils";
 
 import {
@@ -11,13 +11,17 @@ import {
   clauseById,
   nextSuggestions,
   pendingEntityClause,
+  removeToken,
   Suggestion,
+  swapSuggestions,
+  swapToken,
   Token,
   Widening,
 } from "./sentenceGrammar";
 import { SentenceWords } from "./SentenceWords";
 import {
   StyledHelpLine,
+  StyledInputPart,
   StyledSentence,
   StyledSentenceInput,
   StyledSuggestion,
@@ -47,6 +51,22 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
   const [activeIndex, setActiveIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // the part of the sentence whose alternatives are open
+  const [swapIndex, setSwapIndex] = useState<number>();
+
+  useEffect(() => {
+    if (swapIndex === undefined) return;
+    const close = (e: MouseEvent) => {
+      if (!(e.target as Element).closest?.("[data-swap-target]")) setSwapIndex(undefined);
+    };
+    const escape = (e: KeyboardEvent) => e.key === "Escape" && setSwapIndex(undefined);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [swapIndex]);
 
   const pending = pendingEntityClause(tokens);
   const suggestions = useMemo(
@@ -131,6 +151,38 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
           tokens={tokens}
           onClearEntity={clearSlot}
           onWiden={widen}
+          swapIndex={swapIndex}
+          onOpenSwap={(tokenIndex) => {
+            setIsOpen(false);
+            setSwapIndex((open) => (open === tokenIndex ? undefined : tokenIndex));
+          }}
+          onRemove={(tokenIndex) => {
+            setSwapIndex(undefined);
+            onChange(removeToken(tokens, tokenIndex));
+          }}
+          renderSwapMenu={(tokenIndex) => (
+            <StyledSuggestionList data-swap-target>
+              {swapSuggestions(tokens, tokenIndex).map((suggestion) => (
+                <StyledSuggestion
+                  key={suggestion.text}
+                  $active={suggestion.hint === "current"}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setSwapIndex(undefined);
+                    const { action } = suggestion;
+                    if (action.kind === "widen") widen(tokenIndex, action.widening, true);
+                    if (action.kind === "add")
+                      onChange(swapToken(tokens, tokenIndex, action.token));
+                  }}
+                >
+                  <span>{suggestion.text}</span>
+                  {suggestion.hint && (
+                    <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>
+                  )}
+                </StyledSuggestion>
+              ))}
+            </StyledSuggestionList>
+          )}
           renderPendingSlot={(tokenIndex) => {
             const token = tokens[tokenIndex];
             if (token.kind !== "clause") return null;
@@ -155,44 +207,50 @@ export const SentenceTyped: React.FC<SentenceTyped> = ({ tokens, onChange, sente
           }}
         />
         {!pending && (
-          <StyledSentenceInput
-            ref={inputRef}
-            value={typed}
-            placeholder={
-              tokens.length ? "add a condition" : "start with statements, persons, concepts"
-            }
-            onChange={(e) => {
-              setTyped(e.target.value);
-              setActiveIndex(0);
-              setIsOpen(true);
-            }}
-            onFocus={() => setIsOpen(true)}
-            onBlur={() => setTimeout(() => setIsOpen(false), 150)}
-            onKeyDown={onKeyDown}
-          />
-        )}
-        {!pending && isOpen && suggestions.length > 0 && (
-          <StyledSuggestionList>
-            {suggestions.map((suggestion, index) => (
-              <StyledSuggestion
-                key={suggestion.text}
-                $active={index === activeIndex}
-                onMouseEnter={() => setActiveIndex(index)}
-                // mousedown keeps the input focused, so the list stays open
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  pick(suggestion);
-                }}
-              >
-                <span>{suggestion.text}</span>
-                {suggestion.hint && <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>}
-              </StyledSuggestion>
-            ))}
-          </StyledSuggestionList>
+          // the list opens under the input, where the sentence continues
+          <StyledInputPart>
+            <StyledSentenceInput
+              ref={inputRef}
+              value={typed}
+              placeholder={
+                tokens.length ? "add a condition" : "start with statements, persons, concepts"
+              }
+              onChange={(e) => {
+                setTyped(e.target.value);
+                setActiveIndex(0);
+                setIsOpen(true);
+              }}
+              onFocus={() => setIsOpen(true)}
+              onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+              onKeyDown={onKeyDown}
+            />
+            {isOpen && suggestions.length > 0 && (
+              <StyledSuggestionList>
+                {suggestions.map((suggestion, index) => (
+                  <StyledSuggestion
+                    key={suggestion.text}
+                    $active={index === activeIndex}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    // mousedown keeps the input focused, so the list stays open
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      pick(suggestion);
+                    }}
+                  >
+                    <span>{suggestion.text}</span>
+                    {suggestion.hint && (
+                      <StyledSuggestionHint>{suggestion.hint}</StyledSuggestionHint>
+                    )}
+                  </StyledSuggestion>
+                ))}
+              </StyledSuggestionList>
+            )}
+          </StyledInputPart>
         )}
       </StyledSentence>
       <StyledHelpLine>
-        Type to filter, ↑ ↓ to move, Enter or Tab to add, Backspace to remove the last part.
+        Type to filter, ↑ ↓ to move, Enter or Tab to add, Backspace to remove the last part. Click a
+        part to swap it, × to remove it.
       </StyledHelpLine>
     </>
   );

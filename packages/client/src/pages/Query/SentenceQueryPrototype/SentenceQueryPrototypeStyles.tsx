@@ -53,7 +53,7 @@ export const StyledSentence = styled.div`
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  font-size: ${({ theme }) => theme.fontSize.base};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   cursor: text;
 `;
 
@@ -67,14 +67,20 @@ export const StyledWord = styled.span<{ $color: string; $isNoun?: boolean }>`
     `}
 `;
 
+export const StyledInputPart = styled.span`
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 14rem;
+`;
+
 export const StyledSentenceInput = styled.input`
   flex: 1;
-  min-width: 14rem;
   border: none;
   outline: none;
   background: transparent;
   color: ${({ theme }) => theme.color["text"]};
-  font-size: ${({ theme }) => theme.fontSize.base};
+  font-size: ${({ theme }) => theme.fontSize.sm};
   &::placeholder {
     color: ${({ theme }) => theme.color["gray"][500]};
   }
@@ -91,6 +97,7 @@ export const StyledSuggestionList = styled.ul`
   margin: ${({ theme }) => theme.space[1]} 0 0 0;
   padding: ${({ theme }) => theme.space[1]} 0;
   list-style: none;
+  font-size: ${({ theme }) => theme.fontSize.sm};
   background-color: ${({ theme }) => theme.color["white"]};
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
@@ -170,4 +177,43 @@ export const StyledSwitcherArrow = styled.button`
   color: ${({ theme }) => theme.color["white"]};
   font-size: ${({ theme }) => theme.fontSize.lg};
   cursor: pointer;
+`;
+
+export const StyledRemoveButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["mutedText"]};
+  cursor: pointer;
+  opacity: 0;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+  &:focus-visible {
+    opacity: 1;
+  }
+`;
+
+// one part of the sentence, with its menu of alternatives anchored under it
+export const StyledPart = styled.span`
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  &:hover ${StyledRemoveButton} {
+    opacity: 1;
+  }
+`;
+
+export const StyledSwappableWord = styled(StyledWord)<{ $isOpen: boolean }>`
+  cursor: pointer;
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  background-color: ${({ theme, $isOpen }) =>
+    $isOpen ? theme.color["tableSelectionHover"] : "transparent"};
+  &:hover {
+    background-color: ${({ theme }) => theme.color["tableSelectionHover"]};
+  }
 `;

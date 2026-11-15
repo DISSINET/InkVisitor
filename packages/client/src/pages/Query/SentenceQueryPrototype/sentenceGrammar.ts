@@ -195,6 +195,17 @@ export const wideningPhrase = (clause: Clause, widening: Widening): string => {
     : "+ subordinates";
 };
 
+const wideningField = (widening: Widening) =>
+  widening === "equivalents" ? "includeEquivalents" : "includeSubordinates";
+
+/** The widenings a picked entity has on, or could have, under its clause. */
+export const widenings = (clause: Clause, entity: PickedEntity, on: boolean): Widening[] =>
+  (["equivalents", "subordinates"] as Widening[]).filter(
+    (widening) =>
+      (widening === "equivalents" || subordinatesApply(clause)) &&
+      !!entity[wideningField(widening)] === on
+  );
+
 export type Token =
   | { kind: "root"; noun: NounKey }
   | { kind: "clause"; clauseId: string; entity?: PickedEntity }
@@ -270,7 +281,7 @@ export const clausesFor = (nounKey: NounKey): Clause[] => {
 
 export type SuggestionAction =
   | { kind: "add"; token: Token }
-  // widens the entity picked by the last clause
+  // widens the entity picked by the clause the suggestion is offered for
   | { kind: "widen"; widening: Widening };
 
 export interface Suggestion {
@@ -278,6 +289,17 @@ export interface Suggestion {
   hint?: string;
   action: SuggestionAction;
 }
+
+const wideningSuggestions = (token: Token | undefined): Suggestion[] => {
+  if (token?.kind !== "clause" || !token.entity) return [];
+  const clause = clauseById(token.clauseId);
+  const entity = token.entity;
+  return widenings(clause, entity, false).map((widening) => ({
+    text: wideningPhrase(clause, widening),
+    hint: `of ${entity.label}`,
+    action: { kind: "widen", widening },
+  }));
+};
 
 /** What the sentence can continue with, unless a clause waits for its entity. */
 export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
@@ -308,27 +330,136 @@ export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
     }));
 
   // right after a picked entity, its EQ / SUB come first
-  const widenings: Suggestion[] = [];
-  const last = tokens[tokens.length - 1];
-  if (last.kind === "clause" && last.entity) {
-    const clause = clauseById(last.clauseId);
-    if (!last.entity.includeEquivalents) {
-      widenings.push({
-        text: wideningPhrase(clause, "equivalents"),
-        hint: `of ${last.entity.label}`,
-        action: { kind: "widen", widening: "equivalents" },
-      });
+  return [...wideningSuggestions(tokens[tokens.length - 1]), ...clauses, ...backReferences];
+};
+
+/**
+ * The tokens at `drop`, together with every later token that hangs off a noun
+ * one of them introduced, directly or through a noun introduced in turn. A
+ * dropped "and those X" takes the clauses that went back to X through it.
+ */
+const withDependents = (tokens: Token[], drop: Set<number>): Set<number> => {
+  const attachedTo = attachments(tokens);
+  const dropped = new Set(drop);
+  // the noun the sentence went back to through a dropped focus token
+  let droppedFocus: number | undefined;
+  // a token only ever attaches to an earlier one, so one pass in order is enough
+  tokens.forEach((token, tokenIndex) => {
+    if (token.kind === "root") return;
+    const anchor = attachedTo[tokenIndex];
+    if (token.kind === "focus") {
+      if (dropped.has(anchor)) dropped.add(tokenIndex);
+      droppedFocus = dropped.has(tokenIndex) ? anchor : undefined;
+      return;
     }
-    if (subordinatesApply(clause) && !last.entity.includeSubordinates) {
-      widenings.push({
-        text: wideningPhrase(clause, "subordinates"),
-        hint: `of ${last.entity.label}`,
-        action: { kind: "widen", widening: "subordinates" },
-      });
+    if (dropped.has(anchor) || anchor === droppedFocus) dropped.add(tokenIndex);
+  });
+  return dropped;
+};
+
+// focus tokens point at token indices, which shift as earlier tokens go
+const withoutTokens = (tokens: Token[], dropped: Set<number>): Token[] => {
+  const newIndex = new Map<number, number>();
+  const kept: Token[] = [];
+  tokens.forEach((token, tokenIndex) => {
+    if (dropped.has(tokenIndex)) return;
+    newIndex.set(tokenIndex, kept.length);
+    kept.push(token);
+  });
+  const renumbered = kept.map((token) =>
+    token.kind === "focus" ? { ...token, tokenIndex: newIndex.get(token.tokenIndex)! } : token
+  );
+  // an "and those X" while X is already in focus says nothing; dropping it
+  // leaves every attachment as it was
+  const redundant = new Set<number>();
+  let focus = 0;
+  renumbered.forEach((token, tokenIndex) => {
+    if (token.kind === "focus") {
+      if (token.tokenIndex === focus) redundant.add(tokenIndex);
+      focus = token.tokenIndex;
+    } else if (token.kind === "clause" && clauseById(token.clauseId).target.kind === "noun") {
+      focus = tokenIndex;
+    }
+  });
+  return redundant.size ? withoutTokens(renumbered, redundant) : renumbered;
+};
+
+/** Removes a token and everything that talks about the noun it introduced. */
+export const removeToken = (tokens: Token[], tokenIndex: number): Token[] =>
+  withoutTokens(tokens, withDependents(tokens, new Set([tokenIndex])));
+
+/** Clauses that no longer fit the noun they attach to, and focus tokens left without a noun. */
+const misfits = (tokens: Token[]): Set<number> => {
+  const attachedTo = attachments(tokens);
+  const misfit = new Set<number>();
+  tokens.forEach((token, tokenIndex) => {
+    if (token.kind === "focus" && !nounOfToken(tokens, token.tokenIndex)) misfit.add(tokenIndex);
+    if (token.kind !== "clause") return;
+    const noun = nounOfToken(tokens, attachedTo[tokenIndex]);
+    if (!noun || !clausesFor(noun).some((clause) => clause.id === token.clauseId)) {
+      misfit.add(tokenIndex);
+    }
+  });
+  return misfit;
+};
+
+/** What the token at `tokenIndex` can be swapped for, the current one included. */
+export const swapSuggestions = (tokens: Token[], tokenIndex: number): Suggestion[] => {
+  const token = tokens[tokenIndex];
+  if (token.kind === "root") {
+    return ROOT_NOUNS.map((noun) => ({
+      text: NOUNS[noun].label,
+      hint: noun === token.noun ? "current" : undefined,
+      action: { kind: "add", token: { kind: "root", noun } },
+    }));
+  }
+  if (token.kind !== "clause") return [];
+  const noun = nounOfToken(tokens, attachments(tokens)[tokenIndex]);
+  if (!noun) return [];
+  // a picked entity's EQ / SUB come first, as they do right after picking it
+  return [
+    ...wideningSuggestions(token),
+    ...clausesFor(noun).map(
+      (clause): Suggestion => ({
+        text: tokenText([{ kind: "clause", clauseId: clause.id }], 0),
+        hint: clause.id === token.clauseId ? "current" : undefined,
+        action: { kind: "add", token: { kind: "clause", clauseId: clause.id } },
+      })
+    ),
+  ];
+};
+
+/**
+ * Puts `token` in place of the one at `tokenIndex`. A picked entity stays when
+ * the new clause takes its class. When the noun the old token introduced goes
+ * away, so does everything said about it, and clauses that stop fitting their
+ * noun drop out with their own dependents.
+ */
+export const swapToken = (tokens: Token[], tokenIndex: number, token: Token): Token[] => {
+  const old = tokens[tokenIndex];
+  let next = token;
+  if (old.kind === "clause" && old.entity && next.kind === "clause") {
+    const target = clauseById(next.clauseId).target;
+    if (target.kind === "entity" && target.classes.includes(old.entity.class)) {
+      next = { ...next, entity: old.entity };
     }
   }
 
-  return [...widenings, ...clauses, ...backReferences];
+  let swapped = [...tokens];
+  swapped[tokenIndex] = next;
+  const introducedBefore = nounOfToken(tokens, tokenIndex);
+  // a root keeps its dependents, the misfit pass below sorts them out
+  if (old.kind === "clause" && introducedBefore !== nounOfToken(swapped, tokenIndex)) {
+    const dependents = withDependents(tokens, new Set([tokenIndex]));
+    dependents.delete(tokenIndex);
+    swapped = withoutTokens(swapped, dependents);
+  }
+
+  // dropping a misfit can move the focus of the tokens after it, so repeat
+  for (let misfit = misfits(swapped); misfit.size; misfit = misfits(swapped)) {
+    swapped = withoutTokens(swapped, withDependents(swapped, misfit));
+  }
+  return swapped;
 };
 
 /** The clause at the end of the sentence that still waits for its entity. */
