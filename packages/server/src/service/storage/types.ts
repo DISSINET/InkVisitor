@@ -224,8 +224,14 @@ export interface SessionStore {
   get(conn: Conn, sid: string): Promise<SessionRow | null>;
   /** inserts or overwrites */
   set(conn: Conn, row: SessionRow): Promise<void>;
+  /**
+   * overwrites a row that still exists; a missing row stays missing, so a
+   * request in flight cannot bring back a session that was ended meanwhile
+   */
+  touch(conn: Conn, row: SessionRow): Promise<void>;
   delete(conn: Conn, sid: string): Promise<void>;
-  deleteByUser(conn: Conn, userId: string): Promise<void>;
+  /** deletes every session of the user, except exceptSid when given */
+  deleteByUser(conn: Conn, userId: string, exceptSid?: string): Promise<void>;
   /** @returns number of removed rows */
   deleteExpired(conn: Conn, now: number): Promise<number>;
 }
