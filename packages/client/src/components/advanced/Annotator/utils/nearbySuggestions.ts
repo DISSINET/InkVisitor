@@ -9,8 +9,8 @@ import {
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { collectStatementAnchors, searchTree } from "utils/utils";
 
-// how many context entities the Annotator suggester lists above the search hits
-export const CONTEXT_SUGGESTIONS_LIMIT = 10;
+// how many nearby entities the Annotator suggester lists above the search hits
+export const NEARBY_SUGGESTIONS_LIMIT = 10;
 
 const collectPropEntityIds = (props: IProp[] | undefined, ids: string[]) => {
   props?.forEach((prop) => {
@@ -87,11 +87,12 @@ export const sortStatementsByDistance = <T extends { id: string }>(
     (a, b) => (distances.get(a.id) ?? Infinity) - (distances.get(b.id) ?? Infinity)
   );
 
-// The entities used in the statements, in statement order, up to `limit`.
-// Territories are never suggested.
-export const collectContextEntities = (
+// The entities of the class (any class for the wildcard) used in the
+// statements, in statement order, up to `limit`. Territories are never suggested.
+export const collectNearbyEntities = (
   statements: IResponseStatement[],
-  limit: number = CONTEXT_SUGGESTIONS_LIMIT
+  entityClass: EntityEnums.Class | EntityEnums.Extension.Any = EntityEnums.Extension.Any,
+  limit: number = NEARBY_SUGGESTIONS_LIMIT
 ): IEntity[] => {
   const picked = new Map<string, IEntity>();
   for (const statement of statements) {
@@ -100,7 +101,11 @@ export const collectContextEntities = (
         return [...picked.values()];
       }
       const entity = statement.entities[id];
-      if (entity && entity.class !== EntityEnums.Class.Territory) {
+      if (
+        entity &&
+        entity.class !== EntityEnums.Class.Territory &&
+        (entityClass === EntityEnums.Extension.Any || entity.class === entityClass)
+      ) {
         picked.set(id, entity);
       }
     }

@@ -3,12 +3,12 @@ import { IEntity, IProp, IResponseStatement, IResponseTree } from "@inkvisitor/s
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { describe, expect, it } from "vitest";
 import {
-  collectContextEntities,
+  collectNearbyEntities,
   getStatementAnchorContext,
   getStatementEntityIds,
   getTerritoryChain,
   sortStatementsByDistance,
-} from "./contextSuggestions";
+} from "./nearbySuggestions";
 
 const entity = (id: string, entityClass = EntityEnums.Class.Person) =>
   ({ id, class: entityClass, labels: [id] }) as unknown as IEntity;
@@ -111,19 +111,32 @@ describe("sortStatementsByDistance", () => {
   });
 });
 
-describe("collectContextEntities", () => {
-  it("keeps the statement order, skips territories and duplicates, and stops at the limit", () => {
-    const s1 = statement("s1", { actions: ["a"], actants: ["p", "t"] }, [
-      entity("a", EntityEnums.Class.Action),
-      entity("p"),
-      entity("t", EntityEnums.Class.Territory),
-    ]);
-    const s2 = statement("s2", { actants: ["p", "q", "r"] }, [
-      entity("p"),
-      entity("q"),
-      entity("r"),
-    ]);
+describe("collectNearbyEntities", () => {
+  const s1 = statement("s1", { actions: ["a"], actants: ["p", "t"] }, [
+    entity("a", EntityEnums.Class.Action),
+    entity("p"),
+    entity("t", EntityEnums.Class.Territory),
+  ]);
+  const s2 = statement("s2", { actions: ["b"], actants: ["p", "q", "r"] }, [
+    entity("b", EntityEnums.Class.Action),
+    entity("p"),
+    entity("q"),
+    entity("r"),
+  ]);
 
-    expect(collectContextEntities([s1, s2], 3).map((e) => e.id)).toEqual(["a", "p", "q"]);
+  it("keeps the statement order, skips territories and duplicates, and stops at the limit", () => {
+    expect(collectNearbyEntities([s1, s2], EntityEnums.Extension.Any, 3).map((e) => e.id)).toEqual([
+      "a",
+      "p",
+      "b",
+    ]);
+  });
+
+  it("counts only the entities of the class toward the limit", () => {
+    expect(collectNearbyEntities([s1, s2], EntityEnums.Class.Person, 3).map((e) => e.id)).toEqual([
+      "p",
+      "q",
+      "r",
+    ]);
   });
 });
