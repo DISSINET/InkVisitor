@@ -59,6 +59,9 @@ const TYPE_BAR_WIDTH = 5;
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
+  // how many of the suggestions lead the list ahead of the search hits; the list
+  // grows by that many rows, so the search hits keep their usual height
+  prioritySuggestionCount?: number;
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
@@ -157,6 +160,7 @@ const previewClipboard = async (): Promise<string | undefined> => {
 export const Suggester: React.FC<Suggester> = ({
   marginTop = false,
   suggestions = [],
+  prioritySuggestionCount = 0,
   placeholder = "",
   typed,
   category,
@@ -402,7 +406,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[], extraRows = 0) => {
     const rowHeight = 25;
 
     return (
@@ -410,7 +414,7 @@ export const Suggester: React.FC<Suggester> = ({
         rowProps={{ items: suggestions }}
         rowCount={suggestions.length}
         rowHeight={rowHeight}
-        style={{ maxHeight: "20rem" }}
+        style={{ maxHeight: `calc(20rem + ${extraRows * rowHeight}px)` }}
         overscanCount={scrollOverscanCount}
         rowComponent={(props) => {
           return (
@@ -698,7 +702,7 @@ export const Suggester: React.FC<Suggester> = ({
               {!contextListed && (suggestions.length || (isFetching && isFocused)) ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
-                    {renderEntitySuggestions(suggestions)}
+                    {renderEntitySuggestions(suggestions, prioritySuggestionCount)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
                   {/* the arrow keys belong to the class menu while it is open */}

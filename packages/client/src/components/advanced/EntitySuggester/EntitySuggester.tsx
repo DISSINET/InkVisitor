@@ -579,6 +579,7 @@ const EntitySuggesterFull: React.FC<
       <Suggester
         isFetching={isFetchingStatement}
         suggestions={listedSuggestions}
+        prioritySuggestionCount={listedPrioritySuggestions.length}
         preSuggestions={
           preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }

@@ -1277,11 +1277,13 @@ export const TextAnnotator = ({
     [annotatorMode, selectedText, isSelectingText, hideSelectionMenu, dataDocument, findPanel],
   );
 
+  // listed only in the menu's Create Anchors section, which the menu leaves out
+  // when creating is disabled or the menu is read-only
   const contextSuggestions = useAnnotatorContextSuggestions(
     dataDocument?.anchors,
     selectionStartIndex,
     annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1]?.id,
-    isMenuDisplayed && selectionStartIndex !== -1,
+    isMenuDisplayed && selectionStartIndex !== -1 && !disableCreate && !isMenuReadOnly,
   );
 
   // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a

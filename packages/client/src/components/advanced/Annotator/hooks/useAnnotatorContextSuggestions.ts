@@ -1,8 +1,7 @@
-import { IEntity, IResponseStatement } from "@inkvisitor/shared/types";
+import { IEntity, IResponseStatement, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import { useMemo } from "react";
 import {
   collectContextEntities,
@@ -21,6 +20,8 @@ const quiet = { ignoreErrorToast: true };
  * A territory is fetched only while the list is not full, and an unreadable
  * territory ends the walk. The keys stay outside "territory" so the frequent
  * territory invalidations do not refetch the whole walk; it may lag by a minute.
+ * The T tree comes from the cache the Main page keeps loaded; without it only
+ * the anchored statements are listed.
  */
 export const useAnnotatorContextSuggestions = (
   anchors: IAnchorsNode[] | undefined,
@@ -29,7 +30,6 @@ export const useAnnotatorContextSuggestions = (
   enabled: boolean
 ): IEntity[] | undefined => {
   const queryClient = useQueryClient();
-  const { data: tree } = useTreeQuery();
 
   const { containingIds, distances } = useMemo(
     () =>
@@ -58,6 +58,7 @@ export const useAnnotatorContextSuggestions = (
       ).filter((statement): statement is IResponseStatement => !!statement);
 
       const startId = leafTerritoryId ?? anchored[0]?.data.territory?.territoryId;
+      const tree = queryClient.getQueryData<IResponseTree>(["tree"]);
       const levels: IResponseStatement[][] = [];
       for (const territoryId of startId && tree ? getTerritoryChain(tree, startId) : []) {
         const listed = collectContextEntities([anchored, ...levels].flat()).length;
@@ -78,8 +79,7 @@ export const useAnnotatorContextSuggestions = (
       }
       return { anchored, levels };
     },
-    enabled:
-      enabled && api.isLoggedIn() && !!tree && (containingIds.length > 0 || !!leafTerritoryId),
+    enabled: enabled && api.isLoggedIn() && (containingIds.length > 0 || !!leafTerritoryId),
     staleTime: 60_000,
     retry: false,
   });
