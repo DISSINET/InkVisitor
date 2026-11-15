@@ -1,22 +1,36 @@
 // PROTOTYPE: renders a sentence with each clause coloured by the noun it
 // attaches to.
+import { Checkbox } from "components";
+import { EntityTag } from "components/advanced";
 import React from "react";
 import { useTheme } from "styled-components";
 
-import { attachments, clauseById, introducedNouns, Token, tokenText } from "./sentenceGrammar";
-import { nounColor, StyledEntityWord, StyledWord } from "./SentenceQueryPrototypeStyles";
+import {
+  attachments,
+  clauseById,
+  introducedNouns,
+  subordinatesApply,
+  Token,
+  tokenText,
+  Widening,
+  wideningPhrase,
+} from "./sentenceGrammar";
+import { nounColor, StyledWord } from "./SentenceQueryPrototypeStyles";
 
 interface SentenceWords {
   tokens: Token[];
   // renders the slot of a clause still waiting for its entity
   renderPendingSlot?: (tokenIndex: number) => React.ReactNode;
-  // a click on a picked entity empties its slot again
+  // the unlink button of a picked entity empties its slot again
   onClearEntity?: (tokenIndex: number) => void;
+  // EQ / SUB of a picked entity, shown as toggles right after it
+  onWiden?: (tokenIndex: number, widening: Widening, value: boolean) => void;
 }
 export const SentenceWords: React.FC<SentenceWords> = ({
   tokens,
   renderPendingSlot,
   onClearEntity,
+  onWiden,
 }) => {
   const theme = useTheme();
   const nouns = introducedNouns(tokens);
@@ -56,17 +70,37 @@ export const SentenceWords: React.FC<SentenceWords> = ({
             )}
             {clause.target.kind === "entity" &&
               (token.entity ? (
-                <StyledEntityWord
-                  $color={color}
-                  $clickable={!!onClearEntity}
-                  onClick={() => onClearEntity?.(tokenIndex)}
-                >
-                  {token.entity.label}
-                  {onClearEntity && " ×"}
-                </StyledEntityWord>
+                <EntityTag
+                  entity={token.entity.entity}
+                  tagMaxWidth={200}
+                  disableDrag
+                  unlinkButton={
+                    onClearEntity ? { onClick: () => onClearEntity(tokenIndex) } : false
+                  }
+                />
               ) : (
                 renderPendingSlot?.(tokenIndex)
               ))}
+            {clause.target.kind === "entity" && token.entity && onWiden && (
+              <>
+                <Checkbox
+                  label={wideningPhrase(clause, "equivalents")}
+                  size={14}
+                  value={!!token.entity.includeEquivalents}
+                  onChangeFn={(value) => onWiden(tokenIndex, "equivalents", value)}
+                  disableEnterKey
+                />
+                {subordinatesApply(clause) && (
+                  <Checkbox
+                    label={wideningPhrase(clause, "subordinates")}
+                    size={14}
+                    value={!!token.entity.includeSubordinates}
+                    onChangeFn={(value) => onWiden(tokenIndex, "subordinates", value)}
+                    disableEnterKey
+                  />
+                )}
+              </>
+            )}
           </React.Fragment>
         );
       })}

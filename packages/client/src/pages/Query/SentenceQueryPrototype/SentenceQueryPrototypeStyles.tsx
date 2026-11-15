@@ -13,6 +13,7 @@ export const nounColor = (theme: DefaultTheme, nounOrder: number) =>
   nounColors(theme)[nounOrder % nounColors(theme).length];
 
 export const StyledPrototype = styled.div`
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
@@ -66,16 +67,6 @@ export const StyledWord = styled.span<{ $color: string; $isNoun?: boolean }>`
     `}
 `;
 
-export const StyledEntityWord = styled.span<{ $color: string; $clickable?: boolean }>`
-  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
-  display: inline-flex;
-  align-items: center;
-  padding: 0 ${({ theme }) => theme.space[1]};
-  border-radius: ${({ theme }) => theme.borderRadius.xs};
-  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ $color }) => $color};
-  font-style: italic;
-`;
-
 export const StyledSentenceInput = styled.input`
   flex: 1;
   min-width: 14rem;
@@ -84,6 +75,9 @@ export const StyledSentenceInput = styled.input`
   background: transparent;
   color: ${({ theme }) => theme.color["text"]};
   font-size: ${({ theme }) => theme.fontSize.base};
+  &::placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+  }
 `;
 
 export const StyledSuggestionList = styled.ul`
@@ -145,14 +139,6 @@ export const StyledTemplate = styled.button<{ $active: boolean }>`
 export const StyledBlank = styled.span`
   color: ${({ theme }) => theme.color["mutedText"]};
   font-style: italic;
-`;
-
-export const StyledFillRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize.base};
 `;
 
 export const StyledActions = styled.div`

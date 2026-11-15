@@ -11,7 +11,9 @@
 
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import { Query } from "@inkvisitor/shared/types";
+import { IEntity, Query } from "@inkvisitor/shared/types";
+
+import { edgeTypesWithoutSubordinates, edgeTypesWithSubtreeDepth } from "../types";
 
 export type NounKey =
   | "statements"
@@ -171,7 +173,27 @@ export interface PickedEntity {
   id: string;
   label: string;
   class: EntityEnums.Class;
+  // the whole entity, for its tag
+  entity: IEntity;
+  // EQ / SUB of the graph builder's node: widen the picked entity to its
+  // equivalents and to what is under it
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
+
+export type Widening = "equivalents" | "subordinates";
+
+export const subordinatesApply = (clause: Clause) =>
+  !edgeTypesWithoutSubordinates.includes(clause.edgeType);
+
+// worded after the EQ / SUB toggles of the graph node, so the two read alike
+export const wideningPhrase = (clause: Clause, widening: Widening): string => {
+  if (widening === "equivalents") return "+ equivalents";
+  // I_CT: reads SUB as how deep below the territory to match
+  return edgeTypesWithSubtreeDepth.includes(clause.edgeType)
+    ? "+ all levels below"
+    : "+ subordinates";
+};
 
 export type Token =
   | { kind: "root"; noun: NounKey }
@@ -246,10 +268,15 @@ export const clausesFor = (nounKey: NounKey): Clause[] => {
   });
 };
 
+export type SuggestionAction =
+  | { kind: "add"; token: Token }
+  // widens the entity picked by the last clause
+  | { kind: "widen"; widening: Widening };
+
 export interface Suggestion {
   text: string;
   hint?: string;
-  token: Token;
+  action: SuggestionAction;
 }
 
 /** What the sentence can continue with, unless a clause waits for its entity. */
@@ -258,7 +285,7 @@ export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
     return ROOT_NOUNS.map((noun) => ({
       text: NOUNS[noun].label,
       hint: "start with",
-      token: { kind: "root", noun },
+      action: { kind: "add", token: { kind: "root", noun } },
     }));
   }
   const noun = focusedNoun(tokens);
@@ -269,7 +296,7 @@ export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
         ? `${clause.phrase} ${NOUNS[clause.target.noun].label}`
         : clause.phrase,
     hint: `about the ${NOUNS[noun].label}`,
-    token: { kind: "clause", clauseId: clause.id },
+    action: { kind: "add", token: { kind: "clause", clauseId: clause.id } },
   }));
   const focus = focusTokenIndex(tokens);
   const backReferences: Suggestion[] = introducedNouns(tokens)
@@ -277,9 +304,31 @@ export const nextSuggestions = (tokens: Token[]): Suggestion[] => {
     .map((introduced) => ({
       text: `and those ${NOUNS[introduced.noun].label}`,
       hint: "go back to",
-      token: { kind: "focus", tokenIndex: introduced.tokenIndex },
+      action: { kind: "add", token: { kind: "focus", tokenIndex: introduced.tokenIndex } },
     }));
-  return [...clauses, ...backReferences];
+
+  // right after a picked entity, its EQ / SUB come first
+  const widenings: Suggestion[] = [];
+  const last = tokens[tokens.length - 1];
+  if (last.kind === "clause" && last.entity) {
+    const clause = clauseById(last.clauseId);
+    if (!last.entity.includeEquivalents) {
+      widenings.push({
+        text: wideningPhrase(clause, "equivalents"),
+        hint: `of ${last.entity.label}`,
+        action: { kind: "widen", widening: "equivalents" },
+      });
+    }
+    if (subordinatesApply(clause) && !last.entity.includeSubordinates) {
+      widenings.push({
+        text: wideningPhrase(clause, "subordinates"),
+        hint: `of ${last.entity.label}`,
+        action: { kind: "widen", widening: "subordinates" },
+      });
+    }
+  }
+
+  return [...widenings, ...clauses, ...backReferences];
 };
 
 /** The clause at the end of the sentence that still waits for its entity. */
@@ -326,7 +375,13 @@ export const compileSentence = (tokens: Token[]): Query.INode | undefined => {
     } else if (token.entity) {
       // a pinned entity is the whole match of its node, as the graph builder
       // stores it
-      target = newNode({ entityId: token.entity.id, entityClasses: [] });
+      target = newNode({
+        entityId: token.entity.id,
+        entityClasses: [],
+        includeEquivalents: token.entity.includeEquivalents || undefined,
+        includeSubordinates:
+          (subordinatesApply(clause) && token.entity.includeSubordinates) || undefined,
+      });
     } else {
       return;
     }

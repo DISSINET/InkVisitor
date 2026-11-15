@@ -924,11 +924,11 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 </>,
               ]}
             >
-              <SentenceQueryPrototype
-                dispatch={queryStateDispatch}
-                onRunSearch={handleRunSearch}
-              />
               <StyledQueryScroller>
+                <SentenceQueryPrototype
+                  dispatch={queryStateDispatch}
+                  onRunSearch={handleRunSearch}
+                />
                 <MemoizedQueryBox
                   key={queryLoadCount}
                   state={queryState}
