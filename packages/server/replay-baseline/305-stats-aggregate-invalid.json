@@ -12,8 +12,8 @@
     "status": 500,
     "contentType": "application/json",
     "body": {
-      "error": "Error",
-      "message": "fromDate must be before toDate",
+      "error": "InternalServerError",
+      "message": "Please try again. If the problem persists, send the details to the project owner.",
       "result": false
     }
   }

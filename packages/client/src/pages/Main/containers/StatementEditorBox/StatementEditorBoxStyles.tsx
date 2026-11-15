@@ -250,6 +250,16 @@ export const StyledMissingTerritory = styled.p`
 `;
 
 // Anchor Section
+// the anchor rows are padded already, so the pager drops its own bottom margin
+export const StyledEditorAnchorPagination = styled.div`
+  display: flex;
+  margin-top: ${({ theme }) => theme.space[1]};
+
+  > * {
+    margin-bottom: 0;
+  }
+`;
+
 export const StyledEditorAnchorSectionContent = styled.div`
   display: flex;
   flex-direction: column;

@@ -12,7 +12,7 @@ export class ResponseTooltip
 {
   entities: Record<string, IEntity> = {};
   relations: UsedRelations;
-  usedInDocuments: IResponseUsedInDocument[] = [];
+  usedInDocuments: EntityTooltip.IUsedInDocument[] = [];
 
   constructor(entity: Entity) {
     super(entity);
@@ -20,6 +20,31 @@ export class ResponseTooltip
     // the tooltip renders only the entity's own (forward) connections
     this.relations.withInverse = false;
     this.usedInDocuments = [];
+  }
+
+  /**
+   * Collapses anchors with the same (trimmed) text in the same document into
+   * one entry with their count, in the order of first occurrence
+   * @param uses one entry per anchor
+   * @returns one entry per distinct document and anchor text
+   */
+  static groupUsedInDocuments(
+    uses: IResponseUsedInDocument[]
+  ): EntityTooltip.IUsedInDocument[] {
+    const groups = new Map<string, EntityTooltip.IUsedInDocument>();
+    for (const use of uses) {
+      // every client surface trims anchor texts, so surrounding whitespace
+      // does not make a text distinct
+      const anchorText = use.anchorText.trim();
+      const key = `${use.document.id}\u0000${anchorText}`;
+      const group = groups.get(key);
+      if (group) {
+        group.count++;
+      } else {
+        groups.set(key, { document: use.document, anchorText, count: 1 });
+      }
+    }
+    return [...groups.values()];
   }
 
   /**
@@ -52,7 +77,7 @@ export class ResponseTooltip
       ]),
     ]);
 
-    this.usedInDocuments = usedInDocuments;
+    this.usedInDocuments = ResponseTooltip.groupUsedInDocuments(usedInDocuments);
 
     this.addLinkedEntities(
       this.relations.getEntityIdsFromType(RelationEnums.Type.Superclass)

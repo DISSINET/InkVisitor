@@ -10,9 +10,10 @@ import { feedTable } from "./import/feed";
 import { SeedTarget } from "./import/target";
 import { createTargets } from "./import/targets";
 import { RethinkTarget } from "./import/targets/rethinkdb";
+import { PostgresTarget } from "./import/targets/postgres";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
-import jobs from "./jobs/index";
+import jobs, { pgJobs } from "./jobs/index";
 
 enum MODES {
   NOTHING = 0,
@@ -53,7 +54,7 @@ class Importer {
     return !!(this.mode & mode);
   }
 
-  /** the RethinkDB target; jobs and the ssh tunnel only exist for it */
+  /** the RethinkDB target; the ssh tunnel only exists for it */
   private get rethink(): RethinkTarget | undefined {
     return this.targets.find((t): t is RethinkTarget => t.kind === "rethinkdb");
   }
@@ -178,7 +179,7 @@ class Importer {
       delete menu["T"];
     }
 
-    if (!this.dbName || !this.rethink) {
+    if (!this.dbName) {
       delete menu["J"];
     }
 
@@ -296,15 +297,14 @@ class Importer {
   }
 
   async selectJob(): Promise<void> {
-    const rethink = this.rethink;
-    if (!rethink) {
-      console.log(colors.red("Jobs run against RethinkDB only"));
-      return;
-    }
+    // a job is offered when every selected target can run it
+    const names = Object.keys(jobs).filter((name) =>
+      this.targets.every((target) => target.kind === "rethinkdb" || pgJobs[name])
+    );
     console.log(
       `Jobs: ${[
         "",
-        ...Object.keys(jobs).map((key, i) => {
+        ...names.map((key, i) => {
           let jobName = key.replace(/([A-Z])/g, " $1");
           jobName = jobName.charAt(0).toUpperCase() + jobName.slice(1);
           return `${jobName} (${i + 1})`;
@@ -316,15 +316,21 @@ class Importer {
       "Choose the job (name/number)",
       (input: string): string | undefined => {
         if (parseInt(input) > 0) {
-          input = Object.keys(jobs)[parseInt(input) - 1];
+          input = names[parseInt(input) - 1];
         }
 
-        return Object.keys(jobs).find((key) => key === input);
+        return names.find((key) => key === input);
       },
       ""
     );
 
-    await jobs[job](rethink.getConnection());
+    for (const target of this.targets) {
+      if (target instanceof RethinkTarget) {
+        await jobs[job](target.getConnection());
+      } else if (target instanceof PostgresTarget) {
+        await pgJobs[job](await target.client());
+      }
+    }
   }
 
   /** drops and recreates the selected database with every table and index, on every target */

@@ -283,6 +283,7 @@ export const StyledMenu = styled.div<{ $minWidth?: number }>`
   &::-webkit-scrollbar-thumb {
     border-width: 1px;
   }
+  padding: ${({ theme }) => theme.space[1]} 0;
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   background-color: ${({ theme }) => theme.color["white"]};
@@ -297,8 +298,10 @@ interface StyledOption {
 }
 export const StyledOption = styled.div<StyledOption>`
   cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  margin: 0 ${({ theme }) => theme.space["px"]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   background-color: ${({ theme, $highlighted }) =>
-    $highlighted ? theme.color["invertedBg"]["primary"] : theme.color["white"]};
+    $highlighted ? theme.color["invertedBg"]["primary"] : "transparent"};
   font-weight: ${({ $selected }) => ($selected ? "bold" : "normal")};
   color: ${({ theme, $disabled }) =>
     $disabled ? theme.color["gray"][500] : theme.color["black"]};
@@ -320,7 +323,13 @@ export const StyledDefaultOptionRow = styled.div`
    group still shows which group the visible options belong to */
 export const StyledGroupHeading = styled.div`
   position: sticky;
-  top: 0;
+  /* sticky offsets count from inside the menu's top padding; the negative
+     offset, and the negative margin on a heading that opens the menu, cancel
+     that padding so the heading sits against the menu's edge */
+  top: -${({ theme }) => theme.space[1]};
+  &:first-child {
+    margin-top: -${({ theme }) => theme.space[1]};
+  }
   z-index: 1;
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

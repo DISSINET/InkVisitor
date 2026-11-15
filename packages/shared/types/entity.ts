@@ -19,8 +19,8 @@ export interface IEntity {
   templateData?: object;
   createdAt?: Date;
   updatedAt?: Date;
-  // response-only, never persisted: content of each document anchor pointing
-  // at this entity (only filled for Statement-class entities in response
+  // response-only, never persisted: distinct contents of the document anchors
+  // pointing at this entity (only filled for Statement-class entities in response
   // entities maps / lists; see Entity.applyAnchorTexts on the server)
   anchorTexts?: string[];
 }

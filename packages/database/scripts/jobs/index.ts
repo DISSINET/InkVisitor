@@ -1,4 +1,5 @@
 import { Connection } from "rethinkdb-ts";
+import { Client } from "pg";
 import restoreDatesJob from "./restore-dates";
 import printDeletedEntitiesJob from "./print-deleted-entities";
 import fixDuplicatedElementsJob from "./fix-duplicated-array-elements";
@@ -13,12 +14,23 @@ import fixMissingAuditTypeJob from "./fix-missing-audit-type";
 import replaceAuditsPolymorphicJob from "./replace-audits-polymorphic";
 import ensureIndexesJob from "./ensure-indexes";
 import createSavedQueriesTableJob from "./create-saved-queries-table";
-import fixEditorEntityAclJob from "./fix-editor-entity-acl";
+import fixEditorEntityAclJob, { fixEditorEntityAclPgJob } from "./fix-editor-entity-acl";
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 import fixDuplicateRowsJob from "./fix-duplicate-rows";
 
 export type IJob = (db: Connection) => Promise<void>;
+
+/** a job on a PostgreSQL database, the client connected to it */
+export type IPgJob = (db: Client) => Promise<void>;
+
+/**
+ * The jobs that run on PostgreSQL too, under their name in the RethinkDB list.
+ * The others migrate data of older releases and exist for RethinkDB only.
+ */
+export const pgJobs: Record<string, IPgJob> = {
+  fixEditorEntityAclJob: fixEditorEntityAclPgJob,
+};
 
 const alljobs: Record<string, IJob> = {
   restoreDatesJob,

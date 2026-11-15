@@ -671,6 +671,14 @@ describe("audits", () => {
     expect((await storage.audits.firstFor(conn, "document" as any, "doc1"))?.id).toBe("au-5");
   });
 
+  it("firstForMany gives the first audit of each listed model that has one", async () => {
+    const first = await storage.audits.firstForMany(conn, "entity" as any, ["m2", "m1", "none"]);
+    expect(first.map((a) => `${a.modelId}:${a.id}`).sort()).toEqual(["m1:au-1", "m2:au-4"]);
+    expect(await storage.audits.firstForMany(conn, "entity" as any, [])).toEqual([]);
+    const documents = await storage.audits.firstForMany(conn, "document" as any, ["doc1", "m1"]);
+    expect(documents.map((a) => a.id)).toEqual(["au-5"]);
+  });
+
   it("relationAuditsForEntity, newest first, capped", async () => {
     expect((await storage.audits.relationAuditsForEntity(conn, "m2", 5)).map((a) => a.id)).toEqual(["au-7", "au-6"]);
     expect((await storage.audits.relationAuditsForEntity(conn, "m2", 1)).map((a) => a.id)).toEqual(["au-7"]);

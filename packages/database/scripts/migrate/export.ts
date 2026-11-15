@@ -6,7 +6,7 @@ import { r, Connection } from "rethinkdb-ts";
  * Writes `rows` to `file` as a JSON array with one document per line, holding
  * one document at a time. Returns how many were written.
  */
-export async function writeJsonArray(rows: AsyncIterable<unknown>, file: string): Promise<number> {
+export async function writeJsonArray(rows: AsyncIterable<unknown> | Iterable<unknown>, file: string): Promise<number> {
   const out = createWriteStream(file, { encoding: "utf8" });
   const write = async (chunk: string): Promise<void> => {
     if (!out.write(chunk)) {
