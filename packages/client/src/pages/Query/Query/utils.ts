@@ -26,6 +26,10 @@ export const getAllNodes = (node: Query.INode): Query.INode[] => {
   return nodes;
 };
 
+/** The node the edge hangs off, which is the source side of the edge. */
+export const getEdgeSourceNode = (root: Query.INode, edgeId: string): Query.INode | undefined =>
+  getAllNodes(root).find((node) => node.edges.some((edge) => edge.id === edgeId));
+
 /**
  * A query request is "empty" when nothing constrains the search: no edges, no
  * explore filters, and the root node neither targets a specific entity / label

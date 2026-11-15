@@ -69,7 +69,7 @@ import { FilterPopover } from "./FilterPopover/FilterPopover";
 import { SearchFiltersPopover } from "./FloatingSearchContainer/SearchFiltersPopover";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
-import { queryReducer, queryStateInitial } from "./Query/state";
+import { QueryAction, QueryActionType, queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem, queryWarnings } from "./types";
 import {
@@ -99,7 +99,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     setStatementId,
   } = useSearchParams();
 
-  const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
+  const [queryState, dispatchQueryState] = useReducer(queryReducer, queryStateInitial);
+  // the builder's suggesters keep the class they show in their own state, so
+  // every loaded query gets a builder mounted for it
+  const [queryLoadCount, countQueryLoad] = useReducer((count: number) => count + 1, 0);
+  const queryStateDispatch = useCallback((action: QueryAction) => {
+    if (action.type === QueryActionType.setQueryState) {
+      countQueryLoad();
+    }
+    dispatchQueryState(action);
+  }, []);
 
   // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
   // and/or subordinates (inverse SCL/SOE/HOL + child territories) of the final
@@ -915,6 +924,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             >
               <StyledQueryScroller>
                 <MemoizedQueryBox
+                  key={queryLoadCount}
                   state={queryState}
                   dispatch={queryStateDispatch}
                   isQueryFetching={queryIsFetching}
