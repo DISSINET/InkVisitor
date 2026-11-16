@@ -2,13 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import {
-  actantLogicalTypeDict,
-  actionPartOfSpeechDict,
-  conceptPartOfSpeechDict,
-  entitiesDict,
-  entityStatusDict,
-} from "@inkvisitor/shared/dictionaries";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
@@ -25,7 +19,12 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
-import { countNodeFilters } from "../utils";
+import {
+  classesReach,
+  countNodeFilters,
+  LOGICAL_TYPE_CLASSES,
+  PART_OF_SPEECH_CLASSES,
+} from "../utils";
 import { FilterPopover } from "../../FilterPopover/FilterPopover";
 import {
   StyledForm,
@@ -34,6 +33,11 @@ import {
   StyledRowHeader,
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { CoOccurrencePicker } from "../../FloatingSearchContainer/CoOccurrencePicker";
+import {
+  logicalTypeFilterOptions,
+  partOfSpeechFilterOptions,
+  statusFilterOptions,
+} from "../../FloatingSearchContainer/attributeFilterOptions";
 import {
   DateRangeFilter,
   parseDate,
@@ -54,20 +58,6 @@ import {
   StyledTooltipListItem,
 } from "./QueryStyles";
 import { ButtonSize } from "types";
-
-// the dictionary types its values as plain strings
-const logicalTypeOptions = actantLogicalTypeDict as {
-  value: EntityEnums.LogicalType;
-  label: string;
-}[];
-
-// a concept without a part of speech stores the empty value, which has no label to pick it by
-const partOfSpeechOptions = [
-  ...conceptPartOfSpeechDict.filter(
-    (option) => option.value !== EntityEnums.ConceptPartOfSpeech.Empty,
-  ),
-  ...actionPartOfSpeechDict,
-];
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -149,6 +139,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const entityId = node.params.entityId;
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  // the classes this node's entities can be of, empty for any; a filter on a field none of
+  // them carries is offered only while it still holds a value, so it can be cleared
+  const nodeClasses = node.params.entityClasses?.length
+    ? node.params.entityClasses
+    : (relationConstrainedCategoryTypes ?? paramEntityId?.allowedClasses ?? []);
+  const showLogicalType =
+    classesReach(nodeClasses, LOGICAL_TYPE_CLASSES) || !!node.params.entityLogicalTypes?.length;
+  const showPartOfSpeech =
+    classesReach(nodeClasses, PART_OF_SPEECH_CLASSES) ||
+    !!node.params.entityPartsOfSpeech?.length;
 
   const updateFilters = (changes: Partial<Query.INodeParams>) =>
     dispatch({ type: QueryActionType.updateNodeFilters, payload: { nodeId: node.id, changes } });
@@ -406,10 +407,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                       value={node.params.entityStatuses ?? []}
                       placeholder="any status"
                       width="full"
-                      options={entityStatusDict.map((status) => ({
-                        value: status.value,
-                        label: status.label,
-                      }))}
+                      options={statusFilterOptions}
                       onChange={(entityStatuses) => updateFilters({ entityStatuses })}
                     />
                   </StyledRowControl>
@@ -426,30 +424,36 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     />
                   </StyledRowControl>
                 </StyledRow>
-                <StyledRow>
-                  <StyledRowHeader>logical type</StyledRowHeader>
-                  <StyledRowControl>
-                    <Dropdown.Multi.Basic
-                      value={node.params.entityLogicalTypes ?? []}
-                      placeholder="any logical type"
-                      width="full"
-                      options={logicalTypeOptions}
-                      onChange={(entityLogicalTypes) => updateFilters({ entityLogicalTypes })}
-                    />
-                  </StyledRowControl>
-                </StyledRow>
-                <StyledRow>
-                  <StyledRowHeader>part of speech</StyledRowHeader>
-                  <StyledRowControl>
-                    <Dropdown.Multi.Basic
-                      value={node.params.entityPartsOfSpeech ?? []}
-                      placeholder="any part of speech"
-                      width="full"
-                      options={partOfSpeechOptions}
-                      onChange={(entityPartsOfSpeech) => updateFilters({ entityPartsOfSpeech })}
-                    />
-                  </StyledRowControl>
-                </StyledRow>
+                {showLogicalType && (
+                  <StyledRow>
+                    <StyledRowHeader>logical type</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityLogicalTypes ?? []}
+                        placeholder="any logical type"
+                        width="full"
+                        options={logicalTypeFilterOptions}
+                        onChange={(entityLogicalTypes) => updateFilters({ entityLogicalTypes })}
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
+                {showPartOfSpeech && (
+                  <StyledRow>
+                    <StyledRowHeader>part of speech</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityPartsOfSpeech ?? []}
+                        placeholder="any part of speech"
+                        width="full"
+                        options={partOfSpeechFilterOptions}
+                        onChange={(entityPartsOfSpeech) =>
+                          updateFilters({ entityPartsOfSpeech })
+                        }
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
                 <StyledRow>
                   <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
                   <StyledRowControl>

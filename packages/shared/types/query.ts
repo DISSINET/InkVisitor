@@ -1273,6 +1273,8 @@ export namespace Explore {
     UUIDs = "uuids",
     Status = "status",
     Language = "language",
+    LogicalType = "logical type",
+    PartOfSpeech = "part of speech",
     CreatedAt = "created at",
     UpdatedAt = "updated at",
     CreatedBy = "created by",
@@ -1287,6 +1289,8 @@ export namespace Explore {
     | IExploreUuidsFilter
     | IExploreStatusFilter
     | IExploreLanguageFilter
+    | IExploreLogicalTypeFilter
+    | IExplorePartOfSpeechFilter
     | IExploreCreatedAtFilter
     | IExploreUpdatedAtFilter
     | IExploreCreatedByFilter
@@ -1311,14 +1315,62 @@ export namespace Explore {
     // listed entities; the listed entities themselves are never matched
     entityIds: string[];
   }
+  // OR semantics for the status, language, logical type and part of speech
+  // filters - matches an entity with any of the listed values
   interface IExploreStatusFilter {
     type: SearchOption.Status;
-    status: EntityEnums.Status;
+    statuses?: EntityEnums.Status[];
+    // the single value of a filter saved before it took a list
+    status?: EntityEnums.Status;
   }
   interface IExploreLanguageFilter {
     type: SearchOption.Language;
-    language: EntityEnums.Language;
+    languages?: EntityEnums.Language[];
+    // the single value of a filter saved before it took a list
+    language?: EntityEnums.Language;
   }
+  interface IExploreLogicalTypeFilter {
+    type: SearchOption.LogicalType;
+    logicalTypes: EntityEnums.LogicalType[];
+  }
+  interface IExplorePartOfSpeechFilter {
+    type: SearchOption.PartOfSpeech;
+    partsOfSpeech: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
+  }
+
+  export type IExploreAttributeParams = Pick<
+    Query.INodeParams,
+    "entityStatuses" | "entityLanguages" | "entityLogicalTypes" | "entityPartsOfSpeech"
+  >;
+
+  /**
+   * The status, language, logical type and part of speech filters as the node params
+   * that test the same entity fields; a filter that is missing or empty leaves its param out
+   */
+  export const attributeFilterParams = (
+    filters: IExploreSearchFilter[]
+  ): IExploreAttributeParams => {
+    const params: IExploreAttributeParams = {};
+    for (const filter of filters) {
+      if (filter.type === SearchOption.Status) {
+        params.entityStatuses =
+          filter.statuses ?? (filter.status ? [filter.status] : undefined);
+      } else if (filter.type === SearchOption.Language) {
+        params.entityLanguages =
+          filter.languages ?? (filter.language !== undefined ? [filter.language] : undefined);
+      } else if (filter.type === SearchOption.LogicalType) {
+        params.entityLogicalTypes = filter.logicalTypes;
+      } else if (filter.type === SearchOption.PartOfSpeech) {
+        params.entityPartsOfSpeech = filter.partsOfSpeech;
+      }
+    }
+    (Object.keys(params) as (keyof IExploreAttributeParams)[]).forEach((key) => {
+      if (!params[key]?.length) {
+        delete params[key];
+      }
+    });
+    return params;
+  };
   interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
     createdAfter?: string;

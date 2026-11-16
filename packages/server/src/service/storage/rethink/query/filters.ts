@@ -4,8 +4,11 @@ import { AuditScope } from "@inkvisitor/shared/types/audit";
 import { Query } from "@inkvisitor/shared/types/query";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
+import { nodeLabel } from "../../../../common/searchLabel";
 import { nodeFilters } from "../../postgres/query/filters";
-import { wrap } from "../conn";
+import { Conn } from "../../types";
+import { unwrap, wrap } from "../conn";
+import { searchWordByWord } from "../search";
 import { audits, TABLE } from "../tables";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
@@ -140,4 +143,31 @@ export function withinDataFields(stream: RStream, params: Query.INodeParams): RS
     );
   }
   return q;
+}
+
+/** the ids among `ids` whose entities pass the node filters in `params` */
+export async function idsPassingFilters(
+  conn: Conn,
+  ids: string[],
+  params: Query.INodeParams
+): Promise<string[]> {
+  if (!ids.length) {
+    return [];
+  }
+  const db = unwrap(conn);
+  const statuses = params.entityStatuses ?? [];
+  const languages = params.entityLanguages ?? [];
+  const label = nodeLabel(params.label);
+  let q: RStream = r.table(TABLE.entities).getAll(r.args(ids));
+  if (statuses.length) {
+    q = q.filter((row: RDatum) => r.expr(statuses).contains(row("status")));
+  }
+  if (languages.length) {
+    q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
+  }
+  if (label) {
+    q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
+  }
+  q = withinIds(withinDataFields(q, params), await auditAndCoOccurrenceIds(db, params));
+  return (q as unknown as RDatum)("id").run(db, QUERY_RUN_OPTIONS);
 }

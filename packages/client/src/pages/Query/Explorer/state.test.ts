@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { describe, expect, it } from "vitest";
 import { ExploreActionType, exploreReducer, exploreStateInitial } from "./state";
@@ -41,5 +42,50 @@ describe("exploreReducer setColumns", () => {
     });
 
     expect(next).toBe(state);
+  });
+});
+
+describe("exploreReducer setAttributeFilter", () => {
+  const status = Explore.SearchOption.Status;
+
+  it("replaces the filter of its type and drops it once its list is empty", () => {
+    const withOld: Explore.IExplore = {
+      ...exploreStateInitial,
+      filters: [{ type: status, status: "1" as EntityEnums.Status }],
+    };
+    const statuses = ["0", "2"] as EntityEnums.Status[];
+
+    const next = exploreReducer(withOld, {
+      type: ExploreActionType.setAttributeFilter,
+      payload: { type: status, statuses },
+    });
+    expect(next.filters).toEqual([{ type: status, statuses }]);
+
+    const cleared = exploreReducer(next, {
+      type: ExploreActionType.setAttributeFilter,
+      payload: { type: status, statuses: [] },
+    });
+    expect(cleared.filters).toEqual([]);
+  });
+});
+
+describe("Explore.attributeFilterParams", () => {
+  it("reads the lists, and the single value of a filter saved before them", () => {
+    expect(
+      Explore.attributeFilterParams([
+        { type: Explore.SearchOption.Status, status: "1" as EntityEnums.Status },
+        { type: Explore.SearchOption.Language, language: "" as EntityEnums.Language },
+        { type: Explore.SearchOption.LogicalType, logicalTypes: [] },
+        {
+          type: Explore.SearchOption.PartOfSpeech,
+          partsOfSpeech: ["noun" as EntityEnums.ConceptPartOfSpeech],
+        },
+        { type: Explore.SearchOption.Label, label: "x" },
+      ]),
+    ).toEqual({
+      entityStatuses: ["1"],
+      entityLanguages: [""],
+      entityPartsOfSpeech: ["noun"],
+    });
   });
 });

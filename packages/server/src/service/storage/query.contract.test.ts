@@ -517,6 +517,19 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:CLA", { entityLogicalTypes: [definite] })])).toEqual(["c-2"]);
   });
 
+  it("filterIds keeps the listed ids whose entities pass the node filters", async () => {
+    const filterIds = async (ids: string[], params: Query.INodeParams) =>
+      sorted(await storage.explore.filterIds(conn, ids, params));
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    expect(await filterIds(ALL, { entityStatuses: ["1" as EntityEnums.Status] })).toEqual(["c-3"]);
+    expect(await filterIds(ALL, { entityLanguages: ["eng" as EntityEnums.Language] })).toEqual(["c-1"]);
+    expect(await filterIds(["c-1", "p-2"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual([]);
+    expect(await filterIds(["c-1", "p-1"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual(["p-1"]);
+    expect(await filterIds([], { entityPartsOfSpeech: [noun] })).toEqual([]);
+  });
+
   // ReQL takes a language or label into the target id set, which R: matches the source entity against
   itPg("the relation edges test a language or label on the partner, never the entity itself", async () => {
     const eng = "eng" as EntityEnums.Language;

@@ -3,7 +3,10 @@ import { Query, Explore } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
+  classesReach,
   countNodeFilters,
+  LOGICAL_TYPE_CLASSES,
+  PART_OF_SPEECH_CLASSES,
   isQueryRequestEmpty,
   QUERY_NAME_MAX_LENGTH,
   suggestQueryName,
@@ -160,6 +163,17 @@ describe("isQueryRequestEmpty", () => {
         makeExplore([{ type: Explore.SearchOption.Label, label: "x" }]),
       ),
     ).toBe(false);
+  });
+});
+
+describe("classesReach", () => {
+  it("is true for any class, or when one class carries the field", () => {
+    const C = EntityEnums.Class;
+    expect(classesReach([], LOGICAL_TYPE_CLASSES)).toBe(true);
+    expect(classesReach([C.Concept, C.Person], LOGICAL_TYPE_CLASSES)).toBe(true);
+    expect(classesReach([C.Concept], LOGICAL_TYPE_CLASSES)).toBe(false);
+    expect(classesReach([C.Action], PART_OF_SPEECH_CLASSES)).toBe(true);
+    expect(classesReach([C.Person, C.Territory], PART_OF_SPEECH_CLASSES)).toBe(false);
   });
 });
 

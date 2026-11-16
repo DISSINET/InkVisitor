@@ -10,6 +10,7 @@ import {
   tableList,
 } from "./conn";
 import { assertRequiredIndexes, createDatabase, dropDatabase } from "./provision";
+import { idsPassingFilters } from "./query/filters";
 import SearchNode from "./query/nodes";
 import { sessions } from "./sessions";
 import {
@@ -52,6 +53,7 @@ export function createRethinkStorage(): Storage {
       plan(query: Query.INode, resolvers: ExploreResolvers) {
         return new SearchNode(query, resolvers);
       },
+      filterIds: idsPassingFilters,
     },
   };
 }

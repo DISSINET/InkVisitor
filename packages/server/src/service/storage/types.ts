@@ -298,5 +298,7 @@ export interface Storage {
 
   explore: {
     plan(query: Query.INode, resolvers: ExploreResolvers): ExplorePlan;
+    /** the ids among `ids` whose entities pass the node filters in `params`, in no set order */
+    filterIds(conn: Conn, ids: string[], params: Query.INodeParams): Promise<string[]>;
   };
 }

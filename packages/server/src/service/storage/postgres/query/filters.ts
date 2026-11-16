@@ -177,6 +177,21 @@ function coOccurs(p: Params, alias: string, filters: NodeFilters): string {
     : `${alias}.id = ANY(ARRAY(${coOccurrentSelect(p, filters.coOccurrence)}))`;
 }
 
+/** the ids among `ids` whose entities pass the node filters in `params` */
+export async function idsPassingFilters(
+  conn: Conn,
+  ids: string[],
+  params: Query.INodeParams
+): Promise<string[]> {
+  if (!ids.length) {
+    return [];
+  }
+  const p = new Params();
+  const where = [`e.id = ${anyOf(p, ids)}`, ...filterParts(p, "e", [], nodeFilters(params))];
+  const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
+  return res.rows.map((row: { id: string }) => row.id);
+}
+
 /**
  * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
  * constraint; empty lists do not constrain. Every node filter is checked here: for a node's
