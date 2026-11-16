@@ -1,4 +1,3 @@
-import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IRequestSearch,
@@ -7,8 +6,13 @@ import {
 import { TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
+import {
+  logicalTypeFilterOptions,
+  partOfSpeechFilterOptions,
+  statusFilterOptions,
+} from "./attributeFilterOptions";
 import { CoOccurrencePicker } from "./CoOccurrencePicker";
 import { DateRangeFilter, parseDate } from "./DateRangeFilter";
 import { useUserFilterOptions } from "./useUserFilterOptions";
@@ -18,21 +22,9 @@ import {
   StyledRowControl,
   StyledRowHeader,
 } from "./FloatingSearchFormStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { ExploreAction, ExploreActionType } from "../Explorer/state";
+import { AttributeFilter, ExploreAction, ExploreActionType } from "../Explorer/state";
 
-const defaultStatusOption = {
-  label: "any",
-  value: "" as EntityEnums.Status,
-};
-const statusOptions = [defaultStatusOption].concat(entityStatusDict);
-
-const languageFilterAny = "*";
-const defaultLanguageOption = {
-  label: "any",
-  value: languageFilterAny as EntityEnums.Language,
-};
 const defaultClassForTypeBar = "" as EntityEnums.Class;
 
 const initSearchValues: IRequestSearch = {
@@ -48,12 +40,6 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
 
   filters.forEach((filter) => {
     switch (filter.type) {
-      case Explore.SearchOption.Status:
-        searchData.status = filter.status;
-        break;
-      case Explore.SearchOption.Language:
-        searchData.language = filter.language;
-        break;
       case Explore.SearchOption.CreatedAt:
         searchData.createdAfter = parseDate(filter.createdAfter);
         searchData.createdBefore = parseDate(filter.createdBefore);
@@ -75,7 +61,8 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
         searchData.isRootInvalid = filter.rootValidity;
         break;
       default:
-        // label and UUID filters have their own controls outside this panel
+        // label and UUID filters have their own controls outside this panel, and
+        // the list filters are read straight from the applied filters
         break;
     }
   });
@@ -102,25 +89,11 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
   // local state would lose them on reopen
   const coOccurrenceIds = filtersToCoOccurrenceIds(filters);
 
+  const attributeParams = Explore.attributeFilterParams(filters);
+  const setAttributeFilter = (filter: AttributeFilter) =>
+    dispatch({ type: ExploreActionType.setAttributeFilter, payload: filter });
+
   const orderedLanguageDict = useOrderedLanguageDict();
-  const languageOptions: DropdownItem[] = useMemo(
-    () => [defaultLanguageOption].concat(orderedLanguageDict),
-    [orderedLanguageDict],
-  );
-
-  const statusOptionSelected: EntityEnums.Status = useMemo(() => {
-    if (!!searchData.status) {
-      return searchData.status || defaultStatusOption.value;
-    }
-    return defaultStatusOption.value;
-  }, [searchData.status]);
-
-  const languageOptionSelected = useMemo(() => {
-    if (searchData.language !== undefined) {
-      return searchData.language;
-    }
-    return defaultLanguageOption.value;
-  }, [searchData.language]);
 
   const handleChange = useCallback(
     (changes: {
@@ -144,25 +117,14 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.Status}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
-            placeholder=""
+          <Dropdown.Multi.Basic
+            placeholder="any"
             width="full"
-            options={statusOptions}
-            value={statusOptionSelected}
-            isClearable={!!searchData.status}
-            onChange={(selectedOption) => {
-              const status =
-                selectedOption === defaultStatusOption.value ? undefined : selectedOption;
-              handleChange({
-                status,
-              });
-              dispatch({
-                type: ExploreActionType.setStatusFilter,
-                payload: {
-                  status,
-                },
-              });
-            }}
+            options={statusFilterOptions}
+            value={attributeParams.entityStatuses ?? []}
+            onChange={(statuses) =>
+              setAttributeFilter({ type: Explore.SearchOption.Status, statuses })
+            }
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
         </StyledRowControl>
@@ -170,30 +132,44 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.Language}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
-            placeholder=""
+          <Dropdown.Multi.Basic
+            placeholder="any"
             width="full"
-            options={languageOptions}
-            value={languageOptionSelected}
-            isClearable={searchData.language !== undefined}
-            onChange={(selectedOption) => {
-              // clearing reports an empty string
-              const language =
-                !selectedOption || selectedOption === defaultLanguageOption.value
-                  ? undefined
-                  : selectedOption;
-              handleChange({
-                language,
-              });
-              dispatch({
-                type: ExploreActionType.setLanguageFilter,
-                payload: {
-                  language,
-                },
-              });
-            }}
+            options={orderedLanguageDict}
+            value={attributeParams.entityLanguages ?? []}
+            onChange={(languages) =>
+              setAttributeFilter({ type: Explore.SearchOption.Language, languages })
+            }
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
+        </StyledRowControl>
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>{Explore.SearchOption.LogicalType}</StyledRowHeader>
+        <StyledRowControl>
+          <Dropdown.Multi.Basic
+            placeholder="any"
+            width="full"
+            options={logicalTypeFilterOptions}
+            value={attributeParams.entityLogicalTypes ?? []}
+            onChange={(logicalTypes) =>
+              setAttributeFilter({ type: Explore.SearchOption.LogicalType, logicalTypes })
+            }
+          />
+        </StyledRowControl>
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>{Explore.SearchOption.PartOfSpeech}</StyledRowHeader>
+        <StyledRowControl>
+          <Dropdown.Multi.Basic
+            placeholder="any"
+            width="full"
+            options={partOfSpeechFilterOptions}
+            value={attributeParams.entityPartsOfSpeech ?? []}
+            onChange={(partsOfSpeech) =>
+              setAttributeFilter({ type: Explore.SearchOption.PartOfSpeech, partsOfSpeech })
+            }
+          />
         </StyledRowControl>
       </StyledRow>
 
@@ -210,7 +186,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>date created</StyledRowHeader>
         <StyledRowControl>
           <DateRangeFilter
             after={searchData.createdAfter}
@@ -227,7 +203,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>date updated</StyledRowHeader>
         <StyledRowControl>
           <DateRangeFilter
             after={searchData.updatedAfter}

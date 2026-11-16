@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
@@ -75,6 +76,8 @@ export const isQueryRequestEmpty = (query: Query.INode, explore: Explore.IExplor
 export const NODE_FILTER_KEYS = [
   "entityStatuses",
   "entityLanguages",
+  "entityLogicalTypes",
+  "entityPartsOfSpeech",
   "label",
   "createdAfter",
   "createdBefore",
@@ -86,11 +89,35 @@ export const NODE_FILTER_KEYS = [
   "coOccurrence",
 ] as const satisfies readonly (keyof Query.INodeParams)[];
 
+const C = EntityEnums.Class;
+
+/** the classes whose entities carry data.logicalType */
+export const LOGICAL_TYPE_CLASSES = [
+  C.Person,
+  C.Group,
+  C.Being,
+  C.Object,
+  C.Location,
+  C.Event,
+  C.Value,
+];
+
+/** the classes whose entities carry data.pos */
+export const PART_OF_SPEECH_CLASSES = [C.Concept, C.Action];
+
+/** an entity of one of `classes` (empty for any class) can be of one of `carriers` */
+export const classesReach = (
+  classes: EntityEnums.Class[],
+  carriers: EntityEnums.Class[],
+): boolean => classes.length === 0 || classes.some((c) => carriers.includes(c));
+
 /** how many node filters a node applies; a date range counts once, whichever ends are set */
 export const countNodeFilters = (params: Query.INodeParams): number =>
   [
     params.entityStatuses?.length,
     params.entityLanguages?.length,
+    params.entityLogicalTypes?.length,
+    params.entityPartsOfSpeech?.length,
     params.label?.trim(),
     params.createdAfter || params.createdBefore,
     params.updatedAfter || params.updatedBefore,

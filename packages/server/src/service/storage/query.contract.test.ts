@@ -62,17 +62,18 @@ beforeAll(async () => {
     entity("t-child", C.Territory, ["Child territory"], { data: { parent: { territoryId: "t-root", order: 0 } } }),
     entity("c-1", C.Concept, ["Étoile bleue"], {
       language: "eng",
+      data: { pos: "noun" },
       props: [prop("c-3", "c-2", [prop("x-1", "c-4")])],
       references: [
         { id: "ref-1", resource: "r-1", value: "c-3" },
         { id: "ref-2", resource: "", value: "" },
       ],
     }),
-    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1" }),
-    entity("c-3", C.Concept, ["star-shaped object"], { status: "1" }),
+    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1", data: { pos: "" } }),
+    entity("c-3", C.Concept, ["star-shaped object"], { status: "1", data: { pos: "adj" } }),
     entity("c-4", C.Concept, ["Object"], { isTemplate: true }),
-    entity("a-1", C.Action, ["shine"]),
-    entity("p-1", C.Person, ["Anna Nováková"]),
+    entity("a-1", C.Action, ["shine"], { data: { pos: "verb" } }),
+    entity("p-1", C.Person, ["Anna Nováková"], { data: { logicalType: "1" } }),
     entity("p-2", C.Person, undefined),
     entity("l-1", C.Location, ["Prague (city)"]),
     entity("r-1", C.Resource, ["Book one"], { data: { documentId: "d-1" } }),
@@ -502,6 +503,34 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityLanguages: [eng] })])).toEqual(["c-2"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { entityLanguages: [eng] })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("I_HP:V", { entityLanguages: [eng] })])).toEqual(["c-3"]);
+  });
+
+  it("entityLogicalTypes and entityPartsOfSpeech narrow a node's base and an unpinned target", async () => {
+    const definite = "1" as EntityEnums.LogicalType;
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const adj = "adj" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await explore({ entityLogicalTypes: [definite] })).toEqual(["p-1"]);
+    expect(await explore({ entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], entityPartsOfSpeech: [adj] })).toEqual(["c-3"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityPartsOfSpeech: [noun] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:CLA", { entityLogicalTypes: [definite] })])).toEqual(["c-2"]);
+  });
+
+  it("filterIds keeps the listed ids whose entities pass the node filters", async () => {
+    const filterIds = async (ids: string[], params: Query.INodeParams) =>
+      sorted(await storage.explore.filterIds(conn, ids, params));
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    // the empty part of speech of a concept; classes without the field never match it
+    const none = "" as EntityEnums.ConceptPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [none] })).toEqual(["c-2"]);
+    expect(await filterIds(ALL, { entityStatuses: ["1" as EntityEnums.Status] })).toEqual(["c-3"]);
+    expect(await filterIds(ALL, { entityLanguages: ["eng" as EntityEnums.Language] })).toEqual(["c-1"]);
+    expect(await filterIds(["c-1", "p-2"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual([]);
+    expect(await filterIds(["c-1", "p-1"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual(["p-1"]);
+    expect(await filterIds([], { entityPartsOfSpeech: [noun] })).toEqual([]);
   });
 
   // ReQL takes a language or label into the target id set, which R: matches the source entity against

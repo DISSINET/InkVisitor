@@ -14,6 +14,8 @@ import { q } from "../tables";
 export type NodeFilters = {
   statuses: EntityEnums.Status[];
   languages: EntityEnums.Language[];
+  logicalTypes: EntityEnums.LogicalType[];
+  partsOfSpeech: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
   label: [string, string, string] | undefined;
   createdAfter?: string;
   createdBefore?: string;
@@ -30,6 +32,8 @@ export type NodeFilters = {
 export const NO_FILTERS: NodeFilters = {
   statuses: [],
   languages: [],
+  logicalTypes: [],
+  partsOfSpeech: [],
   label: undefined,
   editedBy: [],
   coOccurrence: [],
@@ -69,6 +73,8 @@ const userId = (name: string, value: unknown): string | undefined => {
 export const nodeFilters = (params: Query.INodeParams): NodeFilters => ({
   statuses: params.entityStatuses ?? [],
   languages: params.entityLanguages ?? [],
+  logicalTypes: params.entityLogicalTypes ?? [],
+  partsOfSpeech: params.entityPartsOfSpeech ?? [],
   label: nodeLabel(params.label),
   createdAfter: isoDate(params.createdAfter),
   createdBefore: isoDate(params.createdBefore),
@@ -84,6 +90,8 @@ export const nodeFilters = (params: Query.INodeParams): NodeFilters => ({
 export const hasFilters = (f: NodeFilters): boolean =>
   f.statuses.length > 0 ||
   f.languages.length > 0 ||
+  f.logicalTypes.length > 0 ||
+  f.partsOfSpeech.length > 0 ||
   !!f.label ||
   !!(f.createdAfter || f.createdBefore || f.updatedAfter || f.updatedBefore) ||
   !!(f.createdBy || f.updatedBy) ||
@@ -169,6 +177,21 @@ function coOccurs(p: Params, alias: string, filters: NodeFilters): string {
     : `${alias}.id = ANY(ARRAY(${coOccurrentSelect(p, filters.coOccurrence)}))`;
 }
 
+/** the ids among `ids` whose entities pass the node filters in `params` */
+export async function idsPassingFilters(
+  conn: Conn,
+  ids: string[],
+  params: Query.INodeParams
+): Promise<string[]> {
+  if (!ids.length) {
+    return [];
+  }
+  const p = new Params();
+  const where = [`e.id = ${anyOf(p, ids)}`, ...filterParts(p, "e", [], nodeFilters(params))];
+  const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
+  return res.rows.map((row: { id: string }) => row.id);
+}
+
 /**
  * the conditions an entity row `alias` meets to be of the classes and pass the filters, one per
  * constraint; empty lists do not constrain. Every node filter is checked here: for a node's
@@ -189,6 +212,13 @@ export function filterParts(
   }
   if (filters.languages.length) {
     parts.push(`${alias}.language = ${anyOf(p, filters.languages)}`);
+  }
+  // no column holds these, so they are read off the document
+  if (filters.logicalTypes.length) {
+    parts.push(`${alias}.doc->'data'->>'logicalType' = ${anyOf(p, filters.logicalTypes)}`);
+  }
+  if (filters.partsOfSpeech.length) {
+    parts.push(`${alias}.doc->'data'->>'pos' = ${anyOf(p, filters.partsOfSpeech)}`);
   }
   if (filters.label) {
     parts.push(labelMatch(p, labelPattern(...filters.label), `${alias}.labels`));
