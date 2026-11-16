@@ -1,5 +1,5 @@
-import { Checkbox, IconWithTooltip } from "components";
-import { IcoWarning } from "Theme/icons";
+import { Button, Checkbox, IconWithTooltip } from "components";
+import { IcoClose, IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -22,7 +22,10 @@ import {
   StyledEdgePropPairSlot,
   StyledEdgeSvg,
   StyledEdgeTypeCell,
+  StyledEdgeValueBox,
+  StyledEdgeValueControlsLayer,
   StyledEdgeValueLabel,
+  StyledPropPairTabLabel,
 } from "./QueryStyles";
 
 interface QueryGridEdgeProps {
@@ -85,6 +88,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   const curveRadius = 8;
   // the "with value" branch leaves the HP: / SP: edge's own value line, not the parent's spine
   const branchX = isValueConnector ? QUERY_PROP_VALUE_X : x;
+  const ControlsLayer = isValueConnector ? StyledEdgeValueControlsLayer : StyledEdgeControlsLayer;
   const branchPath = [
     `M ${branchX} 0`,
     `L ${branchX} ${midY - curveRadius}`,
@@ -122,11 +126,24 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           )}
         </g>
       </StyledEdgeSvg>
-      <StyledEdgeControlsLayer>
+      <ControlsLayer>
         {isValueConnector ? (
-          <StyledEdgeBox $color={lineColor}>
+          <StyledEdgeValueBox $color={lineColor}>
             <StyledEdgeValueLabel>with value</StyledEdgeValueLabel>
-          </StyledEdgeBox>
+            <Button
+              icon={<IcoClose size={12} />}
+              noBackground
+              noBorder
+              textColor="white"
+              tooltipLabel="remove the value node"
+              onClick={() =>
+                dispatch({
+                  type: QueryActionType.updateEdgeValueNode,
+                  payload: { edgeId: edge.id, hasValueNode: false },
+                })
+              }
+            />
+          </StyledEdgeValueBox>
         ) : (
           <StyledEdgeBox $color={lineColor}>
             <Checkbox
@@ -186,6 +203,21 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
                   />
                 </StyledEdgePropPairSlot>
               )}
+              {Query.TupleValueEdgeTypes[edge.type] && !edge.valueNode && (
+                <StyledEdgePropPairSlot $color={lineColor}>
+                  <StyledPropPairTabLabel
+                    type="button"
+                    onClick={() =>
+                      dispatch({
+                        type: QueryActionType.updateEdgeValueNode,
+                        payload: { edgeId: edge.id, hasValueNode: true },
+                      })
+                    }
+                  >
+                    + with value
+                  </StyledPropPairTabLabel>
+                </StyledEdgePropPairSlot>
+              )}
             </StyledEdgeTypeCell>
             {warning && (
               <IconWithTooltip
@@ -197,7 +229,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             )}
           </StyledEdgeBox>
         )}
-      </StyledEdgeControlsLayer>
+      </ControlsLayer>
     </StyledEdgeContainer>
   );
 };

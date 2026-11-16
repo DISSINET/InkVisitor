@@ -69,6 +69,7 @@ enum QueryActionType {
   updateEdgeType,
   updateEdgeLogic,
   updateEdgePropPair,
+  updateEdgeValueNode,
   updateNodeType,
   updateNodeClass,
   clearNodeFilters,
@@ -99,6 +100,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateEdgePropPair;
       payload: { edgeId: string; propPair: Query.IPropPair | undefined };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueNode;
+      payload: { edgeId: string; hasValueNode: boolean };
     }
   | {
       type: QueryActionType.updateNodeType;
@@ -205,9 +210,8 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!newTargetParams.entityId) {
         edgeToUpdate.node.params.entityId = undefined;
       }
-      if (Query.TupleValueEdgeTypes[newType]) {
-        edgeToUpdate.valueNode ??= newValueNode();
-      } else {
+      // the value node is optional on HP: / SP: and kept across a switch between them
+      if (!Query.TupleValueEdgeTypes[newType]) {
         delete edgeToUpdate.valueNode;
       }
       reseedRelationTargetClasses(updatedStateUpdate, sourceClassesBeforeSwitch);
@@ -230,6 +234,22 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 
     case QueryActionType.updateEdgePropPair:
       return updateEdgePropPair(state, action.payload.edgeId, action.payload.propPair);
+
+    case QueryActionType.updateEdgeValueNode: {
+      const updatedStateValue = { ...state };
+      const edgeWithValue = getAllEdges(updatedStateValue).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValue || !Query.TupleValueEdgeTypes[edgeWithValue.type]) {
+        return updatedStateValue;
+      }
+      if (action.payload.hasValueNode) {
+        edgeWithValue.valueNode ??= newValueNode();
+      } else {
+        delete edgeWithValue.valueNode;
+      }
+      return updatedStateValue;
+    }
 
     case QueryActionType.updateNodeType:
       return updateNodeType(state, action.payload.nodeId, action.payload.newType);
@@ -477,7 +497,6 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
     params: {},
     logic: Query.EdgeLogic.Positive,
     node: newNode([]),
-    valueNode: newValueNode(),
   };
 
   // Recursively clone the node tree, adding the new edge to the parent node
