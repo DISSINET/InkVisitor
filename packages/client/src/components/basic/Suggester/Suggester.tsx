@@ -46,6 +46,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
+import { useListedSuggestions } from "./useListedSuggestions";
 import { IcoClipboard, IcoMinus, IcoPlusBold } from "Theme/icons";
 
 // suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
@@ -56,9 +57,16 @@ const SUGGESTION_LIST_MIN_WIDTH = 320;
 // px; the type bar is all that separates the class box from the input
 const TYPE_BAR_WIDTH = 5;
 
+// set by the size middleware on the floating list to the room left in the
+// boundary; the rows inside cap their height with it
+const AVAILABLE_HEIGHT_VAR = "--suggester-available-height";
+
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
+  // listed above the search hits, which leave out the entities listed here; the
+  // list grows by their rows, so the search hits keep their usual height
+  prioritySuggestions?: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
@@ -157,6 +165,7 @@ const previewClipboard = async (): Promise<string | undefined> => {
 export const Suggester: React.FC<Suggester> = ({
   marginTop = false,
   suggestions = [],
+  prioritySuggestions = [],
   placeholder = "",
   typed,
   category,
@@ -214,6 +223,11 @@ export const Suggester: React.FC<Suggester> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
+    prioritySuggestions,
+    suggestions,
+    isFocused || isHovered
+  );
 
   // the input blurs on the mousedown that picks a row, so the right-click list
   // waits for the whole list to close, focus and hover gone
@@ -354,7 +368,8 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      const entity = (contextListed ? (contextSuggestions ?? []) : suggestions)[selected]?.entity;
+      const listed = contextListed ? (contextSuggestions ?? []) : listedSuggestions;
+      const entity = listed[selected]?.entity;
       if (!disableEnter && entity) {
         if (entity.status !== EntityEnums.Status.Discouraged) {
           if (!entity.isTemplate) {
@@ -402,7 +417,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[], extraRows = 0) => {
     const rowHeight = 25;
 
     return (
@@ -410,7 +425,10 @@ export const Suggester: React.FC<Suggester> = ({
         rowProps={{ items: suggestions }}
         rowCount={suggestions.length}
         rowHeight={rowHeight}
-        style={{ maxHeight: "20rem" }}
+        // until the size middleware first measures, the rows take their full height
+        style={{
+          maxHeight: `min(calc(20rem + ${extraRows * rowHeight}px), var(${AVAILABLE_HEIGHT_VAR}, 100vh))`,
+        }}
         overscanCount={scrollOverscanCount}
         rowComponent={(props) => {
           return (
@@ -443,15 +461,22 @@ export const Suggester: React.FC<Suggester> = ({
     whileElementsMounted: autoUpdate,
     // near the right edge flip first tries bottom-end, aligning the list to the
     // input's right edge; shift slides it into view when neither alignment
-    // fits, and size caps it to the boundary width
+    // fits, and size caps it to the room left in the boundary: #page-content,
+    // which clips the list portaled into it, or the window on a page without one
     middleware: [
       offset(1),
       flip({ padding: 10 }),
       shift({ padding: 10 }),
       size({
         padding: 10,
-        apply({ availableWidth, elements }) {
+        apply({ availableWidth, availableHeight, elements }) {
           elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
+          // only the rows scroll, so the cap goes to them; on the floating list
+          // it would cut them off
+          elements.floating.style.setProperty(
+            AVAILABLE_HEIGHT_VAR,
+            `${Math.max(0, availableHeight)}px`
+          );
         },
       }),
       // how far the list starts left of the input, after flip and shift
@@ -695,17 +720,17 @@ export const Suggester: React.FC<Suggester> = ({
                 ...floatingStyles,
               }}
             >
-              {!contextListed && (suggestions.length || (isFetching && isFocused)) ? (
+              {!contextListed && (listedSuggestions.length || (isFetching && isFocused)) ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
-                    {renderEntitySuggestions(suggestions)}
+                    {renderEntitySuggestions(listedSuggestions, listedPriorityCount)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
                   {/* the arrow keys belong to the class menu while it is open */}
                   {!isCategoryMenuOpen && (
                     <SuggesterKeyPress
                       onArrowDown={() => {
-                        if (selected < suggestions.length - 1) setSelected(selected + 1);
+                        if (selected < listedSuggestions.length - 1) setSelected(selected + 1);
                       }}
                       onArrowUp={() => {
                         if (selected > -1) setSelected(selected - 1);

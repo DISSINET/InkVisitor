@@ -1097,10 +1097,12 @@ class Api {
   async territoryGet(
     territoryId: string,
     options?: IApiOptions,
+    // the server checks every statement for warnings, the costly part of the call
+    withWarnings: boolean = true,
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
       const response = await this.connection.get(
-        `/territories/${territoryId}?preload=1&warnings=1`,
+        `/territories/${territoryId}?preload=1${withWarnings ? "&warnings=1" : ""}`,
         options,
       );
       return response;

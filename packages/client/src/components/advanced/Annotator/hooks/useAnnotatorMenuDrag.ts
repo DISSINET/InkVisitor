@@ -18,12 +18,23 @@ export interface AnnotatorMenuDrag {
   resetDragOffset: () => void;
 }
 
+interface AnnotatorMenuDragOptions {
+  /**
+   * Takes the focus out of the panel when a drag starts. Pressing the handle
+   * leaves the focus where it was, and a suggester list belongs to its focused
+   * input, not to the panel, so it would stay open over the moving panel.
+   */
+  blurOnDragStart?: boolean;
+}
+
 /**
  * Pointer dragging for a floating annotator panel. The offset is applied by the
  * caller as a translate() on an inner layer, never on the Floating UI root.
  * The panel is kept inside #page while dragging.
  */
-export const useAnnotatorMenuDrag = (): AnnotatorMenuDrag => {
+export const useAnnotatorMenuDrag = ({
+  blurOnDragStart = false,
+}: AnnotatorMenuDragOptions = {}): AnnotatorMenuDrag => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const dragOffsetRef = useRef(dragOffset);
   dragOffsetRef.current = dragOffset;
@@ -62,6 +73,12 @@ export const useAnnotatorMenuDrag = (): AnnotatorMenuDrag => {
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (e.button !== 0) return;
       e.preventDefault();
+      if (blurOnDragStart) {
+        const focused = document.activeElement;
+        if (focused instanceof HTMLElement && draggableRef.current?.contains(focused)) {
+          focused.blur();
+        }
+      }
       dragWindowListenersRef.current?.abort();
       const ac = new AbortController();
       dragWindowListenersRef.current = ac;
@@ -94,7 +111,7 @@ export const useAnnotatorMenuDrag = (): AnnotatorMenuDrag => {
         opts,
       );
     },
-    [endDrag],
+    [blurOnDragStart, endDrag],
   );
 
   const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {

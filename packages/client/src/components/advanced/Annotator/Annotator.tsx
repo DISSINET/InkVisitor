@@ -635,7 +635,7 @@ export const TextAnnotator = ({
     dragHandleProps: menuDragHandleProps,
     draggableRef: menuDraggableRef,
     dragOffset: menuDragOffset,
-  } = useAnnotatorMenuDrag();
+  } = useAnnotatorMenuDrag({ blurOnDragStart: true });
 
   /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and dropdowns so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
@@ -1778,6 +1778,8 @@ export const TextAnnotator = ({
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
+                      documentAnchors={dataDocument.anchors}
+                      selectionIndex={selectionStartIndex}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       onMoveAnchorBoundary={isMenuReadOnly ? undefined : handleMoveAnchorBoundary}
