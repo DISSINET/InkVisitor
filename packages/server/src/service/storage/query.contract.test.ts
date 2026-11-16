@@ -69,7 +69,7 @@ beforeAll(async () => {
         { id: "ref-2", resource: "", value: "" },
       ],
     }),
-    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1" }),
+    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1", data: { pos: "" } }),
     entity("c-3", C.Concept, ["star-shaped object"], { status: "1", data: { pos: "adj" } }),
     entity("c-4", C.Concept, ["Object"], { isTemplate: true }),
     entity("a-1", C.Action, ["shine"], { data: { pos: "verb" } }),
@@ -523,6 +523,9 @@ describe("explore: operators, nesting and target expansion", () => {
     const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
     const verb = "verb" as EntityEnums.ActionPartOfSpeech;
     expect(await filterIds(ALL, { entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    // the empty part of speech of a concept; classes without the field never match it
+    const none = "" as EntityEnums.ConceptPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [none] })).toEqual(["c-2"]);
     expect(await filterIds(ALL, { entityStatuses: ["1" as EntityEnums.Status] })).toEqual(["c-3"]);
     expect(await filterIds(ALL, { entityLanguages: ["eng" as EntityEnums.Language] })).toEqual(["c-1"]);
     expect(await filterIds(["c-1", "p-2"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual([]);

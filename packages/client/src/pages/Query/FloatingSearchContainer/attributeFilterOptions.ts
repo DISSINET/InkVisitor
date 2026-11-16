@@ -17,10 +17,13 @@ export const logicalTypeFilterOptions = actantLogicalTypeDict as {
   label: string;
 }[];
 
-// a concept without a part of speech stores the empty value, which has no label to pick it by
+// a concept without a part of speech stores the empty value, which the dictionary leaves
+// unlabelled; entities of other classes have no part of speech field, so "none" never matches them
 export const partOfSpeechFilterOptions = [
-  ...conceptPartOfSpeechDict.filter(
-    (option) => option.value !== EntityEnums.ConceptPartOfSpeech.Empty,
+  ...conceptPartOfSpeechDict.map((option) =>
+    option.value === EntityEnums.ConceptPartOfSpeech.Empty
+      ? { ...option, label: "none" }
+      : option,
   ),
   ...actionPartOfSpeechDict,
 ];
