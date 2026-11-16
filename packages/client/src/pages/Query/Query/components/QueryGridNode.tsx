@@ -18,7 +18,7 @@ import {
   INodeItem,
   QueryValidityProblem,
 } from "../../types";
-import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { entityPickerInitCategory, getRelationConstrainedCategoryTypes } from "../../utils";
 import {
   classesReach,
   countNodeFilters,
@@ -54,6 +54,7 @@ import {
   StyledNodeContainer,
   StyledNodeExpansionToggles,
   StyledNodeMainRow,
+  StyledStartNodeIcon,
   StyledTooltipList,
   StyledTooltipListItem,
 } from "./QueryStyles";
@@ -92,6 +93,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const edgeType = edge?.type;
   // a saved query can hold an edge type from a newer build, with no label or target params here
   const edgeLabel = edgeType ? (Query.EdgeTypeLabels[edgeType] ?? edgeType) : "related";
+  // a start node is the entity itself, so it is narrowed by its classes, as the root is
+  const isStartNode = edgeType === Query.EdgeType.SE;
+  const hasStartNodes = isRoot && Query.hasStartNodes(node);
 
   const nodeParams = (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]) || {};
 
@@ -138,6 +142,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     .join(", ");
 
   const entityId = node.params.entityId;
+  // a start node shows its entity only while one is pinned (a loaded query), so
+  // it can be unlinked; EQ / SUB widen only a pinned entity, so they go with it
+  const showsEntityPicker = !!paramEntityId && !(isStartNode && !entityId);
   const orderedLanguageDict = useOrderedLanguageDict();
 
   // the classes this node's entities can be of, empty for any; a filter on a field none of
@@ -251,11 +258,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
   }, [theme, isValid, isRoot]);
 
-  // start nodes are joined by Or alone, so their root has no operator to choose
-  const hasParallelEdges = isRoot && node.edges.length > 1 && !Query.hasStartNodes(node);
+  // the root and each start node choose how their parallel edges combine; start
+  // nodes are joined by Or alone, so their root has no operator to choose
+  const hasParallelEdges = (isStartNode || (isRoot && !hasStartNodes)) && node.edges.length > 1;
 
   return (
-    <StyledNodeContainer>
+    <StyledNodeContainer data-testid={isStartNode ? "query-start-node" : undefined}>
       {hasParallelEdges && (
         <SwitchGroup
           $column
@@ -336,7 +344,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </StyledNodeTypeSelect> */}
-          {(paramEntityClass || isRoot) && !(paramEntityId && !isRoot) && (
+          {(isRoot || (paramEntityClass && !showsEntityPicker)) && (
             <Dropdown.Multi.Entity
               shortLabel
               closeMenuOnSelect={false}
@@ -367,7 +375,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               }
               noOptionsMessage="entity class"
               placeholder="all classes"
-              disabled={node.params.entityId !== undefined}
+              // the root of a query with start nodes matches any class; one
+              // loaded with classes keeps its picker, so they can be cleared
+              disabled={
+                node.params.entityId !== undefined ||
+                (hasStartNodes && !node.params.entityClasses?.length)
+              }
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />
           )}
@@ -506,7 +519,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 onOpenEntityInDetail={onOpenEntityInDetail}
               />
             )}
-          {paramEntityId && (
+          {showsEntityPicker && (
             <div>
               {isRoot === false &&
                 (dataEntity !== undefined ? (
@@ -542,14 +555,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
                     // seeds the class shown on mount / edge switch: the node's
-                    // committed class, else the first class the edge allows.
+                    // committed class, else the wildcard its empty (any-class)
+                    // list stands for, or the sole class the edge allows.
                     // The suggester owns the selection afterwards, so a wildcard
                     // pick (which clears entityClasses) is not re-derived here.
-                    initCategory={
-                      node.params.entityClasses?.[0] ??
-                      entityIdCategoryTypes[0] ??
-                      EntityEnums.Class.Concept
-                    }
+                    initCategory={entityPickerInitCategory(
+                      node.params.entityClasses,
+                      entityIdCategoryTypes,
+                    )}
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {
                         const newClasses =
@@ -607,13 +620,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           ) : (
                             <StyledTooltipList>
                               <StyledTooltipListItem>
-                                <b>Empty</b> → matches any entity that has the "{edgeLabel}"
-                                relation{" "}
+                                <b>Empty</b> → matches any entity{" "}
+                                {isStartNode ? "" : `that has the "${edgeLabel}" relation `}
                                 {(selectedClassLabels && `of class ${selectedClassLabels}`) || ""}
                               </StyledTooltipListItem>
                               <StyledTooltipListItem>
-                                <b>Empty + NOT</b> → matches nodes that have no "{edgeLabel}"
-                                relation
+                                <b>Empty + NOT</b> → matches{" "}
+                                {isStartNode
+                                  ? "the entities this start node leaves out"
+                                  : `nodes that have no "${edgeLabel}" relation`}
                               </StyledTooltipListItem>
                             </StyledTooltipList>
                           )
@@ -624,7 +639,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 ))}
             </div>
           )}
-          {!isRoot && !!paramEntityId && (
+          {!isRoot && showsEntityPicker && (
             <StyledNodeExpansionToggles>
               <StyledExpansionToggleGroup>
                 <Checkbox
@@ -726,18 +741,36 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         <div>
           <Button
             icon={<IcoPlusBold style={{ fontSize: "16px", padding: "2px" }} />}
-            tooltipLabel="add new edge"
+            tooltipLabel={hasStartNodes ? "add start node" : "add new edge"}
+            dataTestId={hasStartNodes ? "add-start-node" : undefined}
             color="primary"
             onClick={() => {
-              dispatch({
-                type: QueryActionType.addNode,
-                payload: {
-                  parentId: node.id,
-                },
-              });
+              // the root of a query with start nodes holds no other edge
+              // (Query.areStartNodesValid)
+              dispatch(
+                hasStartNodes
+                  ? { type: QueryActionType.addStartNode }
+                  : {
+                      type: QueryActionType.addNode,
+                      payload: {
+                        parentId: node.id,
+                      },
+                    },
+              );
             }}
           />
         </div>
+        {isRoot && !hasStartNodes && (
+          <div>
+            <Button
+              icon={<StyledStartNodeIcon />}
+              tooltipLabel="add start node"
+              dataTestId="add-start-node"
+              color="primary"
+              onClick={() => dispatch({ type: QueryActionType.addStartNode })}
+            />
+          </div>
+        )}
         {node.gridX !== 0 && node.gridY !== 0 && edge && (
           <div>
             <Button

@@ -65,6 +65,7 @@ const queryStateInitial: Query.INode = {
 
 enum QueryActionType {
   addNode,
+  addStartNode,
   removeEdge,
   updateEdgeType,
   updateEdgeLogic,
@@ -82,6 +83,9 @@ type QueryAction =
   | {
       type: QueryActionType.addNode;
       payload: { parentId: string };
+    }
+  | {
+      type: QueryActionType.addStartNode;
     }
   | {
       type: QueryActionType.removeEdge;
@@ -137,6 +141,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.addNode:
       return addNode(state, action.payload.parentId);
 
+    case QueryActionType.addStartNode:
+      return addStartNode(state);
+
     case QueryActionType.removeEdge:
       const edgeToRemove = action.payload.edgeId;
       const updatedStateRemove = { ...state };
@@ -150,6 +157,10 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         return updatedStateRemove;
       }
       parentNode2.edges = parentNode2.edges.filter((e) => e.id !== edgeToRemove);
+      // start nodes are joined by Or alone; a root that holds none has And, as a new query has
+      if (edge.type === Query.EdgeType.SE && !Query.hasStartNodes(parentNode2)) {
+        parentNode2.operator = Query.NodeOperator.And;
+      }
 
       return updatedStateRemove;
 
@@ -463,6 +474,51 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
   };
 
   return cloneNode(state);
+};
+
+/**
+ * Start nodes are the root's only edges, joined by Or (Query.areStartNodesValid).
+ * A root without them becomes the first start node - its classes, filters,
+ * operator and edges, which keep their ids - so the query still finds what it
+ * found, and an empty start node joins it. The relation targets keep their
+ * classes, as each one's source node holds the classes it held. The result
+ * expansion toggles stay on the root, which carries them when the query is
+ * sent (buildQueryWithResultExpansion).
+ */
+const addStartNode = (state: Query.INode): Query.INode => {
+  const startNodeEdge = (node: Query.INode): Query.IEdge => ({
+    type: Query.EdgeType.SE,
+    id: uuidv4(),
+    params: {},
+    logic: Query.EdgeLogic.Positive,
+    node,
+  });
+  const emptyStartNode = startNodeEdge({
+    type: Query.NodeType.E,
+    id: uuidv4(),
+    params: { entityClasses: [] },
+    operator: Query.NodeOperator.And,
+    edges: [],
+  });
+  if (Query.hasStartNodes(state)) {
+    return {
+      ...state,
+      operator: Query.NodeOperator.Or,
+      edges: [...state.edges, emptyStartNode],
+    };
+  }
+  const { includeEquivalents, includeSubordinates, ...params } = state.params;
+  // a list of every class matches what an empty list matches, and the empty
+  // one reads "all classes", as the start node beside it does
+  if (classesAll.every((entityClass) => params.entityClasses?.includes(entityClass))) {
+    params.entityClasses = [];
+  }
+  return {
+    ...state,
+    params: { entityClasses: [], includeEquivalents, includeSubordinates },
+    operator: Query.NodeOperator.Or,
+    edges: [startNodeEdge({ ...state, id: uuidv4(), params }), emptyStartNode],
+  };
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {

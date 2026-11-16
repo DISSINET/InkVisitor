@@ -8,6 +8,7 @@ import {
   LOGICAL_TYPE_CLASSES,
   PART_OF_SPEECH_CLASSES,
   isQueryRequestEmpty,
+  queryDepth,
   QUERY_NAME_MAX_LENGTH,
   suggestQueryName,
 } from "./utils";
@@ -263,6 +264,70 @@ describe("suggestQueryName", () => {
     );
   });
 
+  it("names each start node as a root, those with conditions in brackets, joined by or", () => {
+    const query = node(
+      {},
+      [
+        edge(
+          Query.EdgeType.SE,
+          node({ entityClasses: [C.Person] }, [
+            edge(Query.EdgeType["R:CLA"], node({ entityId: "heretic" })),
+          ]),
+        ),
+        edge(Query.EdgeType.SE, node({ entityId: "sex" })),
+        edge(Query.EdgeType.SE, node({}), Query.EdgeLogic.Negative),
+      ],
+      Query.NodeOperator.Or,
+    );
+    expect(suggestQueryName(query, labelOf)).toBe(
+      "(Person, has relation: Classification heretic) or sex or NOT Any entity",
+    );
+  });
+
+  it("tells start nodes apart from a root with the same classes and condition", () => {
+    const condition = () => [edge(Query.EdgeType["EP:T"], node({}))];
+    const startNodes = (logic = Query.EdgeLogic.Positive) =>
+      node(
+        {},
+        [
+          edge(Query.EdgeType.SE, node({ entityClasses: [C.Person] })),
+          edge(Query.EdgeType.SE, node({ entityClasses: [C.Group] }, condition()), logic),
+        ],
+        Query.NodeOperator.Or,
+      );
+    expect(suggestQueryName(node({ entityClasses: [C.Person, C.Group] }, condition()), labelOf)).toBe(
+      "Person or Group, has property: type",
+    );
+    expect(suggestQueryName(startNodes(), labelOf)).toBe("Person or (Group, has property: type)");
+    expect(suggestQueryName(startNodes(Query.EdgeLogic.Negative), labelOf)).toBe(
+      "Person or NOT (Group, has property: type)",
+    );
+  });
+
+  it("leaves a single start node and start nodes without conditions unbracketed", () => {
+    const single = node(
+      {},
+      [
+        edge(
+          Query.EdgeType.SE,
+          node({ entityClasses: [C.Group] }, [edge(Query.EdgeType["EP:T"], node({}))]),
+          Query.EdgeLogic.Negative,
+        ),
+      ],
+      Query.NodeOperator.Or,
+    );
+    expect(suggestQueryName(single, labelOf)).toBe("NOT Group, has property: type");
+    const plain = node(
+      {},
+      [
+        edge(Query.EdgeType.SE, node({ entityClasses: [C.Person] })),
+        edge(Query.EdgeType.SE, node({ entityClasses: [C.Group] }), Query.EdgeLogic.Negative),
+      ],
+      Query.NodeOperator.Or,
+    );
+    expect(suggestQueryName(plain, labelOf)).toBe("Person or NOT Group");
+  });
+
   it("falls back for a label not loaded and cuts a long name with an ellipsis", () => {
     expect(suggestQueryName(node({ entityId: "unknown" }), labelOf)).toBe("entity");
     const long = node(
@@ -274,5 +339,27 @@ describe("suggestQueryName", () => {
     const name = suggestQueryName(long, labelOf);
     expect(name.length).toBeLessThanOrEqual(QUERY_NAME_MAX_LENGTH);
     expect(name.endsWith("…")).toBe(true);
+  });
+});
+
+describe("queryDepth", () => {
+  const node = (edges: Query.IEdge[] = []): Query.INode => ({
+    id: "",
+    type: Query.NodeType.E,
+    params: {},
+    operator: Query.NodeOperator.And,
+    edges,
+  });
+  const edge = (target: Query.INode): Query.IEdge => ({
+    id: "",
+    type: Query.EdgeType["EP:T"],
+    params: {},
+    logic: Query.EdgeLogic.Positive,
+    node: target,
+  });
+
+  it("counts the root as the first level and follows the deepest branch", () => {
+    expect(queryDepth(node())).toBe(1);
+    expect(queryDepth(node([edge(node()), edge(node([edge(node([edge(node())]))]))]))).toBe(4);
   });
 });

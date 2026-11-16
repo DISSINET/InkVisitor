@@ -27,6 +27,10 @@ export const getAllNodes = (node: Query.INode): Query.INode[] => {
   return nodes;
 };
 
+/** levels of nodes in the tree, the root being the first, as the server counts them for MAX_SAVED_QUERY_DEPTH */
+export const queryDepth = (node: Query.INode): number =>
+  1 + Math.max(0, ...node.edges.map((edge) => queryDepth(edge.node)));
+
 /** The node the edge hangs off, which is the source side of the edge. */
 export const getEdgeSourceNode = (root: Query.INode, edgeId: string): Query.INode | undefined =>
   getAllNodes(root).find((node) => node.edges.some((edge) => edge.id === edgeId));
@@ -46,7 +50,7 @@ export const isStatsRequestEmpty = (explore: Explore.IExplore): boolean =>
  * operator, which the server evaluates as Or. An SE edge says the entity is
  * its target node, so a positive one narrows only when that node is narrowed.
  */
-const isNodeNarrowed = (node: Query.INode): boolean => {
+export const isNodeNarrowed = (node: Query.INode): boolean => {
   const entityClasses = node.params.entityClasses ?? [];
   if (node.params.entityId || countNodeFilters(node.params) > 0) {
     return true;
@@ -134,9 +138,11 @@ export const QUERY_NAME_MAX_LENGTH = 80;
 /**
  * A saved query name read off the tree: the root's pinned entity or classes,
  * then each edge's label and target, NOT for a negative edge, "or" between
- * the edges of an OR node, and a node's nested conditions in brackets. A name
- * over the limit is cut with an ellipsis. `labelOf` returns a pinned entity's
- * label, undefined while it is not loaded.
+ * the edges of an OR node, and a node's nested conditions in brackets. Each
+ * start node is named as a root would be, the start nodes joined by "or"; one
+ * with conditions next to other start nodes goes in brackets, so its
+ * conditions read as its own. A name over the limit is cut with an ellipsis.
+ * `labelOf` returns a pinned entity's label, undefined while it is not loaded.
  */
 export const suggestQueryName = (
   root: Query.INode,
@@ -152,18 +158,29 @@ export const suggestQueryName = (
     }
     return isRoot ? "Any entity" : "";
   };
+  const negation = (edge: Query.IEdge) => (edge.logic === Query.EdgeLogic.Negative ? "NOT " : "");
   const conditions = (node: Query.INode): string =>
     node.edges
       .map((edge) => {
-        const negation = edge.logic === Query.EdgeLogic.Negative ? "NOT " : "";
         const parts = [Query.EdgeTypeLabels[edge.type] ?? edge.type, target(edge.node, false)];
         const nested = edge.node.edges.length ? ` (${conditions(edge.node)})` : "";
-        return `${negation}${parts.filter(Boolean).join(" ")}${nested}`;
+        return `${negation(edge)}${parts.filter(Boolean).join(" ")}${nested}`;
       })
       .join(node.operator === Query.NodeOperator.Or ? " or " : ", ");
+  const asRoot = (node: Query.INode): string => {
+    const edges = conditions(node);
+    return edges ? `${target(node, true)}, ${edges}` : target(node, true);
+  };
 
-  const edges = conditions(root);
-  const name = edges ? `${target(root, true)}, ${edges}` : target(root, true);
+  const asStartNode = (edge: Query.IEdge): string => {
+    const named = asRoot(edge.node);
+    const bracketed = root.edges.length > 1 && edge.node.edges.length ? `(${named})` : named;
+    return `${negation(edge)}${bracketed}`;
+  };
+
+  const name = Query.hasStartNodes(root)
+    ? root.edges.map(asStartNode).join(" or ")
+    : asRoot(root);
   return name.length > QUERY_NAME_MAX_LENGTH
     ? `${name.slice(0, QUERY_NAME_MAX_LENGTH - 1).trimEnd()}…`
     : name;

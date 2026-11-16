@@ -1,7 +1,7 @@
-import { Checkbox, IconWithTooltip } from "components";
+import { Checkbox, IconWithTooltip, Tooltip } from "components";
 import { IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
-import React from "react";
+import React, { useState } from "react";
 import { QueryAction, QueryActionType } from "../state";
 import {
   edgeTypesHidden,
@@ -12,12 +12,13 @@ import {
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
-import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "pages/Query/utils";
+import { buildEdgeTypeOptionGroups, findValidEdgeTypesForEdge } from "pages/Query/utils";
 import {
   StyledEdgeBox,
   StyledEdgeContainer,
   StyledEdgeControlsLayer,
   StyledEdgeSvg,
+  StyledEdgeTypeLabel,
 } from "./QueryStyles";
 
 interface QueryGridEdgeProps {
@@ -26,7 +27,6 @@ interface QueryGridEdgeProps {
   edge: Query.IEdge;
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
-  isRootEdge?: boolean;
   // when this edge is not the last of its parent's children, the vertical
   // spine must continue down past this branch to reach the siblings below
   extendVertical?: boolean;
@@ -41,13 +41,13 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   edge,
   dispatch,
   problems,
-  isRootEdge = false,
   extendVertical = false,
   extendNegative = false,
 }) => {
   const theme = useTheme();
-  const sourceNode = isRootEdge ? rootNode : node;
-  const validEdgesTypes = findValidEdgeTypesForSourceNode(sourceNode, isRootEdge);
+  const validEdgesTypes = findValidEdgeTypesForEdge(rootNode, edge.id);
+  const [typeLabelElement, setTypeLabelElement] = useState<HTMLSpanElement | null>(null);
+  const [showTypeTooltip, setShowTypeTooltip] = useState(false);
 
   const edgeTypeOptions = buildEdgeTypeOptionGroups(
     validEdgesTypes.filter((type) => !edgeTypesHidden.includes(type)),
@@ -60,6 +60,9 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   const color = isValid ? theme.color.query2 : theme.color.queryInvalid;
 
   const isNegative = edge.logic === Query.EdgeLogic.Negative;
+  // an SE edge leads to a start node and has no other type to offer; NOT shows
+  // on it only while set (a loaded query), so it can be cleared
+  const isStartNodeEdge = edge.type === Query.EdgeType.SE;
 
   // a valid negative ("NOT") edge gets a distinct red connector so it reads as
   // an exclusion at a glance; invalid still wins (its own red) over this
@@ -96,53 +99,72 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
       </StyledEdgeSvg>
       <StyledEdgeControlsLayer>
         <StyledEdgeBox $color={lineColor}>
-          <Checkbox
-            size={15}
-            key={`${edge.id}-not-${edge.logic}`}
-            label="NOT"
-            value={isNegative}
-            // neutral white box + dark check, reads as a control resting on the
-            // red negated edge rather than competing with it
-            color="primary"
-            noFill
-            tooltipLabel="negate this condition (find entities that do NOT match)"
-            onChangeFn={(checked) => {
-              const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
-              if (newLogic === edge.logic) {
-                return;
-              }
-              dispatch({
-                type: QueryActionType.updateEdgeLogic,
-                payload: {
-                  edgeId: edge.id,
-                  newLogic,
-                },
-              });
-            }}
-          />
-          <Dropdown.Single.Basic
-            options={edgeTypeOptions}
-            width={212}
-            noDropDownIndicator
-            value={edge.type}
-            tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
-            onChange={(newValue) => {
-              dispatch({
-                type: QueryActionType.updateEdgeType,
-                payload: {
-                  edgeId: edge.id,
-                  newType: newValue,
-                },
-              });
-              dispatch({
-                type: QueryActionType.updateNodeEntityId,
-                payload: {
-                  nodeId: node.id,
-                  newEntityId: undefined,
-                },
-              });
-            }}
-          />
+          {(!isStartNodeEdge || isNegative) && (
+            <Checkbox
+              size={15}
+              key={`${edge.id}-not-${edge.logic}`}
+              label="NOT"
+              value={isNegative}
+              // neutral white box + dark check, reads as a control resting on the
+              // red negated edge rather than competing with it
+              color="primary"
+              noFill
+              tooltipLabel="negate this condition (find entities that do NOT match)"
+              onChangeFn={(checked) => {
+                const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
+                if (newLogic === edge.logic) {
+                  return;
+                }
+                dispatch({
+                  type: QueryActionType.updateEdgeLogic,
+                  payload: {
+                    edgeId: edge.id,
+                    newLogic,
+                  },
+                });
+              }}
+            />
+          )}
+          {isStartNodeEdge ? (
+            <>
+              <StyledEdgeTypeLabel
+                ref={setTypeLabelElement}
+                onMouseEnter={() => setShowTypeTooltip(true)}
+                onMouseLeave={() => setShowTypeTooltip(false)}
+              >
+                {Query.EdgeTypeLabels[edge.type]}
+              </StyledEdgeTypeLabel>
+              <Tooltip
+                visible={showTypeTooltip}
+                referenceElement={typeLabelElement}
+                content={<p>{Query.EdgeTypeDescriptions[edge.type]}</p>}
+              />
+            </>
+          ) : (
+            <Dropdown.Single.Basic
+              options={edgeTypeOptions}
+              width={212}
+              noDropDownIndicator
+              value={edge.type}
+              tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateEdgeType,
+                  payload: {
+                    edgeId: edge.id,
+                    newType: newValue,
+                  },
+                });
+                dispatch({
+                  type: QueryActionType.updateNodeEntityId,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityId: undefined,
+                  },
+                });
+              }}
+            />
+          )}
           {warning && (
             <IconWithTooltip
               icon={<IcoWarning size={16} />}

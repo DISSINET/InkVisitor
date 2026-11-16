@@ -1,5 +1,6 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
+import { IcoNodeTree } from "Theme/icons";
 import {
   StyledControl,
   StyledSingleValue,
@@ -29,6 +30,12 @@ export const StyledNodeMainRow = styled.div`
     width: ${({ theme }) => theme.space[8]};
     height: 1px;
   }
+`;
+
+// sized as the icons of the node's other buttons
+export const StyledStartNodeIcon = styled(IcoNodeTree)`
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  padding: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledParallelOperator = styled.div`
@@ -121,6 +128,14 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   padding: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[3]};
   margin-top: 1.4rem;
+`;
+
+// the type of an edge that offers no other type to pick
+export const StyledEdgeTypeLabel = styled.span`
+  padding-right: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
 `;
 
 export const StyledTooltipList = styled.ul`

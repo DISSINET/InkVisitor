@@ -7,6 +7,7 @@ import {
   buildEdgeTypeOptionGroups,
   buildStableSignature,
   computeWindowUpdate,
+  entityPickerInitCategory,
   getRelationAllowedClasses,
   getEdgeSourceClasses,
   getRelationConstrainedCategoryTypes,
@@ -500,6 +501,24 @@ describe("getRelationConstrainedCategoryTypes", () => {
     expect(getRelationConstrainedCategoryTypes(Query.EdgeType["R:"], [])).toBeNull();
     expect(getRelationConstrainedCategoryTypes(Query.EdgeType["EP:T"], [])).toBeNull();
     expect(getRelationConstrainedCategoryTypes(undefined, [])).toBeNull();
+  });
+});
+
+describe("entityPickerInitCategory", () => {
+  const { Action, Concept, Group } = EntityEnums.Class;
+
+  it("opens on the stored class", () => {
+    expect(entityPickerInitCategory([Group], [Action, Concept])).toBe(Group);
+  });
+
+  it("leaves an empty stored list to the picker's wildcard when it offers several classes", () => {
+    expect(entityPickerInitCategory([], [Action, Concept])).toBeUndefined();
+    expect(entityPickerInitCategory(undefined, classesAll)).toBeUndefined();
+  });
+
+  it("names a class for a picker that offers one class or none", () => {
+    expect(entityPickerInitCategory([], [Action])).toBe(Action);
+    expect(entityPickerInitCategory([], [])).toBe(Concept);
   });
 });
 

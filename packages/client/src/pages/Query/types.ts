@@ -1,4 +1,5 @@
 import { Query } from "@inkvisitor/shared/types";
+import { isNodeNarrowed } from "./Query/utils";
 
 export type INodeItem = Query.INode & {
   gridX: number;
@@ -16,19 +17,47 @@ export type QueryValidityProblem = {
   warning?: boolean;
 };
 
-export const PINNED_CONDITION_WARNING =
+const pinnedConditionWarning = (outcome: string) =>
   "This condition checks only the entity selected in the node above. If that entity " +
-  "meets it, nothing changes; if not, the query finds nothing. To filter several " +
+  `meets it, nothing changes; if not, ${outcome}. To filter several ` +
   "entities, turn on EQ or SUB in the node above, or remove its entity and choose a " +
   "class instead.";
+
+export const PINNED_CONDITION_WARNING = pinnedConditionWarning("the query finds nothing");
+
+// the other start nodes still add their entities to the result
+export const PINNED_START_NODE_CONDITION_WARNING = pinnedConditionWarning(
+  "this start node finds nothing",
+);
+
+export const START_NODE_WARNING =
+  "Pick a class or add a condition: the query does not run while a start node matches " +
+  "every entity";
 
 /**
  * The warnings of a query: conditions nested under a pinned node that EQ / SUB
  * do not widen test that one entity, so they keep or drop all the matches of
- * the edge above rather than filtering a set.
+ * the edge above rather than filtering a set. While the request is skipped as
+ * empty (isQueryRequestEmpty), each start node that nothing narrows is pointed
+ * at, as one such start node is enough to skip it.
  */
-export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
+export const queryWarnings = (
+  root: Query.INode,
+  isRequestEmpty = false,
+): QueryValidityProblem[] => {
   const warnings: QueryValidityProblem[] = [];
+  if (isRequestEmpty) {
+    root.edges
+      .filter(
+        (edge) =>
+          edge.type === Query.EdgeType.SE &&
+          edge.logic !== Query.EdgeLogic.Negative &&
+          !isNodeNarrowed(edge.node),
+      )
+      .forEach((edge) =>
+        warnings.push({ source: edge.id, text: START_NODE_WARNING, warning: true }),
+      );
+  }
   const visit = (node: Query.INode, incoming?: Query.EdgeType) => {
     const { entityId, includeEquivalents, includeSubordinates } = node.params;
     // on the territory-tree edges SUB is ignored or read as depth, never adding subordinates
@@ -40,7 +69,14 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
         !edgeTypesWithSubtreeDepth.includes(incoming));
     for (const edge of node.edges) {
       if (incoming && entityId && !widened) {
-        warnings.push({ source: edge.id, text: PINNED_CONDITION_WARNING, warning: true });
+        warnings.push({
+          source: edge.id,
+          text:
+            incoming === Query.EdgeType.SE
+              ? PINNED_START_NODE_CONDITION_WARNING
+              : PINNED_CONDITION_WARNING,
+          warning: true,
+        });
       }
       visit(edge.node, edge.type);
     }

@@ -3,6 +3,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
 import { edgeTypesHidden, edgeTypesImplemented } from "./types";
 import {
+  findValidEdgeTypesForEdge,
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
   getRelationAllowedClasses,
@@ -408,6 +409,44 @@ describe("the SE edge of a start node", () => {
   it("is left out of the edge type dropdown", () => {
     expect(findValidEdgeTypesForSourceNode(sourceNode([]))).toContain(Query.EdgeType.SE);
     expect(edgeTypesHidden).toContain(Query.EdgeType.SE);
+  });
+});
+
+describe("the edge types an edge offers", () => {
+  const person = [EntityEnums.Class.Person];
+  const concept = [EntityEnums.Class.Concept];
+  const withId = (id: string, type: Query.EdgeType, target: Query.INode): Query.IEdge => ({
+    ...edge(type, target),
+    id,
+  });
+  const deeper = withId("deeper", Query.EdgeType["HP:V"], sourceNode([]));
+  const fromStartNode = withId("from-start-node", Query.EdgeType["EP:T"], {
+    ...sourceNode(concept),
+    edges: [deeper],
+  });
+  const root: Query.INode = {
+    ...sourceNode([]),
+    operator: Query.NodeOperator.Or,
+    edges: [withId("se", Query.EdgeType.SE, { ...sourceNode(person), edges: [fromStartNode] })],
+  };
+
+  it("under a start node are those of a root with its classes", () => {
+    const types = findValidEdgeTypesForEdge(root, "from-start-node");
+    expect(types).toEqual(findValidEdgeTypesForSourceNode(sourceNode(person), true));
+    expect(types).not.toContain(Query.EdgeType["I_IS:A1"]);
+  });
+
+  it("under the root are narrowed by the root's classes", () => {
+    const personRoot = { ...sourceNode(person), edges: [fromStartNode] };
+    expect(findValidEdgeTypesForEdge(personRoot, "from-start-node")).toEqual(
+      findValidEdgeTypesForSourceNode(sourceNode(person), true),
+    );
+  });
+
+  it("deeper down are not narrowed by class", () => {
+    const types = findValidEdgeTypesForEdge(root, "deeper");
+    expect(types).toEqual(findValidEdgeTypesForSourceNode(sourceNode(concept)));
+    expect(types).not.toEqual(findValidEdgeTypesForSourceNode(sourceNode(concept), true));
   });
 });
 

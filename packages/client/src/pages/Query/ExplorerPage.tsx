@@ -131,6 +131,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     setIncludeEquivalents(value);
   }, []);
 
+  const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
+
+  // No search criteria yet -> the query is not fired (see useQueryData); the
+  // explorer views use this to prompt the user instead of showing empty results.
+  const isRequestEmpty = useMemo(
+    () => isQueryRequestEmpty(queryState, exploreState),
+    [queryState, exploreState],
+  );
+
   /**
    * Collects all problems with the query state
    */
@@ -167,12 +176,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     // });
 
     return {
-      problems: [...problems, ...queryWarnings(queryState)],
+      problems: [...problems, ...queryWarnings(queryState, isRequestEmpty)],
       isValid,
     };
-  }, [queryState]);
-
-  const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
+  }, [queryState, isRequestEmpty]);
 
   // Explorer view mode (Table / Stats) toggle, surfaced as Box header buttons.
   // Preserve the inactive view's config so toggling does not lose columns / stats.
@@ -232,13 +239,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       includeSubordinates,
     });
   }, [queryState, exploreState, includeEquivalents, includeSubordinates]);
-
-  // No search criteria yet -> the query is not fired (see useQueryData); the
-  // explorer views use this to prompt the user instead of showing empty results.
-  const isRequestEmpty = useMemo(
-    () => isQueryRequestEmpty(queryState, exploreState),
-    [queryState, exploreState],
-  );
 
   // Only fire the API query when the user explicitly submits via Run Search or
   // Enter. View-only changes (adding/removing columns, switching view mode) do
