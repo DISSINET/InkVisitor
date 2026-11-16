@@ -189,6 +189,23 @@ export const CLAUSES: Clause[] = [
     on: "any",
     target: anyEntity,
   },
+  // the inverses: the noun is what sits in another entity's props
+  {
+    id: "p-is-value",
+    phrase: "that are a property value of",
+    edgeType: Query.EdgeType["I_HP:V"],
+    logic: Query.EdgeLogic.Positive,
+    on: "any",
+    target: anyEntity,
+  },
+  {
+    id: "p-is-type",
+    phrase: "that are a property type of",
+    edgeType: Query.EdgeType["I_EP:T"],
+    logic: Query.EdgeLogic.Positive,
+    on: "any",
+    target: anyEntity,
+  },
 ];
 
 export const clauseById = (id: string): Clause => CLAUSES.find((clause) => clause.id === id)!;
