@@ -1,14 +1,21 @@
-export { importDataSource, importWriteApi, searchCandidates } from "./apiAdapters";
+export {
+  importDataSource,
+  importWriteApi,
+  searchCandidates,
+  storedRelationsOf,
+} from "./apiAdapters";
 export { buildEntityJson } from "./entityJson";
 export { count, errorMessage, formatIssue } from "./helpers";
 export { maxImportEntities } from "./types";
-export type { ImportIssue, ImportPlan, ImportValidation } from "./types";
+export type { ImportIssue, ImportPlan, ImportValidation, StoredRelationChanges } from "./types";
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
 export { describeSkips } from "./appendMerge";
 export type { AppendConflict, AppendInfo } from "./appendMerge";
 export {
+  addDraftEntity,
+  addStoredRelations,
   appendTargetsOf,
   appendUndoOf,
   draftAfterAppend,
@@ -28,6 +35,7 @@ export {
   replaceUndoEntityId,
   setAllConflictChoices,
   setConflictChoice,
+  storedRelationChanges,
   toggleLeftOut,
   undoAppend,
   tabEntities,

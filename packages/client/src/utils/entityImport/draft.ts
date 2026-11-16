@@ -7,7 +7,7 @@ import { buildEntityJson } from "./entityJson";
 import { count, getAtPath, isPlainObject, setAtPath, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { collectEntityRefs } from "./references";
-import { ImportIssue, ImportPlan } from "./types";
+import { ImportIssue, ImportPlan, StoredRelationChanges } from "./types";
 
 /**
  * The entities of an import while they are edited in the modal, before any of
@@ -34,6 +34,10 @@ export interface ImportDraft {
   // drafts the user left out of the import; they keep their place and their
   // links, and come back when switched on again
   leftOutIds?: string[];
+  // The stored relations of the appended drafts as loaded. `relations` holds
+  // them too, under the same ids, as Detail edits them; the import writes the
+  // difference, see storedRelationChanges, and never sends them as new.
+  storedRelations?: Relation.IRelation[];
 }
 
 export const draftFromPlan = (plan: ImportPlan): ImportDraft => ({
@@ -166,7 +170,67 @@ export const draftAfterAppend = (previous: ImportDraft, plan: ImportPlan): Impor
     appends: { ...plan.appends, ...Object.fromEntries(keptAppends) },
     storedSynonyms: previous.storedSynonyms,
     leftOutIds: previous.leftOutIds?.filter((id) => ids.has(id)),
+    storedRelations: previous.storedRelations,
   };
+};
+
+const isStoredRelation = (draft: ImportDraft, relationId: string) =>
+  !!draft.storedRelations?.some((relation) => relation.id === relationId);
+
+/**
+ * Adds the stored relations of an appended draft, loaded once it is appended,
+ * so Detail shows and edits them; a relation already in the drafts stays as
+ * it is.
+ */
+export const addStoredRelations = (
+  draft: ImportDraft,
+  relations: Relation.IRelation[]
+): ImportDraft => {
+  const known = new Set(draft.relations.map((relation) => relation.id));
+  const added = relations.filter(
+    (relation, index) =>
+      !known.has(relation.id) && relations.findIndex((other) => other.id === relation.id) === index
+  );
+  return added.length
+    ? {
+        ...draft,
+        relations: [...draft.relations, ...added],
+        storedRelations: [...(draft.storedRelations ?? []), ...added],
+      }
+    : draft;
+};
+
+/**
+ * The stored relations the drafts unlinked or edited. A relation with a
+ * left-out member is left as it is stored: a left-out appended draft keeps
+ * its stored state, and a left-out new draft can't be linked to.
+ */
+export const storedRelationChanges = (draft: ImportDraft): StoredRelationChanges => {
+  const leftOut = leftOutDrafts(draft);
+  const touchesLeftOut = (relation: Relation.IRelation) =>
+    relation.entityIds.some((id) => leftOut.has(id));
+  const current = new Map(draft.relations.map((relation) => [relation.id, relation]));
+  const changes: StoredRelationChanges = { deleted: [], updated: [] };
+  for (const before of draft.storedRelations ?? []) {
+    const after = current.get(before.id);
+    if (touchesLeftOut(before) || (after && touchesLeftOut(after))) {
+      continue;
+    }
+    if (!after) {
+      changes.deleted.push(before);
+      continue;
+    }
+    const stored = before as unknown as Record<string, unknown>;
+    const changed = Object.fromEntries(
+      Object.entries(after).filter(
+        ([key, value]) => key !== "id" && JSON.stringify(value) !== JSON.stringify(stored[key])
+      )
+    ) as Partial<Relation.IRelation>;
+    if (Object.keys(changed).length) {
+      changes.updated.push({ before, changes: changed });
+    }
+  }
+  return changes;
 };
 
 /** What undoing one "append to it" needs, taken just before the append. */
@@ -273,10 +337,14 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
     relation.type === original.type &&
     relation.entityIds.length === original.entityIds.length &&
     relation.entityIds.every((id) => original.entityIds.includes(swapBack(id)));
+  // the stored relations of the stored entity, loaded for the append, go
+  const ofStored = (relation: Relation.IRelation) =>
+    isStoredRelation(draft, relation.id) && relation.entityIds.includes(storedId);
   const relations = draft.relations.filter(
     (relation) =>
-      !relation.entityIds.includes(storedId) ||
-      !undo.relations.some((original) => sameMembers(relation, original))
+      !ofStored(relation) &&
+      (!relation.entityIds.includes(storedId) ||
+        !undo.relations.some((original) => sameMembers(relation, original)))
   );
 
   const appends = { ...draft.appends };
@@ -285,6 +353,9 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
     ...draft,
     entities: [...entities, ...restored],
     relations: [...relations, ...undo.relations],
+    storedRelations: draft.storedRelations?.filter(
+      (relation) => !relation.entityIds.includes(storedId)
+    ),
     appends,
     valueCopyIds: [
       ...(draft.valueCopyIds ?? []),
@@ -660,6 +731,15 @@ export const leftOutDrafts = (draft: ImportDraft): Map<string, string> => {
   return leftOut;
 };
 
+/**
+ * Adds a draft made in the drafts, as a suggester's or the create modal's new
+ * entity; it is created with the import like the drafts of the input.
+ */
+export const addDraftEntity = (draft: ImportDraft, entity: IEntity): ImportDraft => ({
+  ...draft,
+  entities: [...draft.entities, entity],
+});
+
 /** Leaves the draft out of the import, or brings it back. */
 export const toggleLeftOut = (draft: ImportDraft, entityId: string): ImportDraft => {
   const leftOutIds = draft.leftOutIds ?? [];
@@ -745,6 +825,10 @@ const sentRelation = (
   leftOut: Map<string, string>,
   relation: Relation.IRelation
 ): Relation.IRelation | undefined => {
+  // a stored relation is written as a change to it, not as a new one
+  if (isStoredRelation(draft, relation.id)) {
+    return undefined;
+  }
   const sent = Relation.RelationRules[relation.type]?.cloudType
     ? {
         ...relation,

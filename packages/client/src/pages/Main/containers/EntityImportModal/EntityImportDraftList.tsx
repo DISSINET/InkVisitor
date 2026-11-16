@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button, IconWithTooltip, Input, Tooltip, TypeBar } from "components";
-import { AttributeButtonGroup } from "components/advanced";
+import { AttributeButtonGroup, EntityCreateModal } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   IcoArrow90DegLeft,
@@ -12,6 +12,7 @@ import {
   IcoCheck,
   IcoCloseCg,
   IcoExclamation,
+  IcoPlus,
   IcoWarning,
 } from "Theme/icons";
 import { ImportDraft } from "utils/entityImport";
@@ -135,6 +136,9 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
   };
+
+  // a new draft not made for any slot; the create modal makes it a draft
+  const [showCreate, setShowCreate] = useState(false);
 
   const [query, setQuery] = useState("");
   const [attentionOnly, setAttentionOnly] = useState(false);
@@ -305,6 +309,14 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
             disabled={!withConflict.length}
             onClick={nextConflict}
           />
+          <Button
+            icon={<IcoPlus />}
+            inverted
+            noBorder
+            size={ButtonSize.Small}
+            tooltipLabel="new entity, a draft like the others"
+            onClick={() => setShowCreate(true)}
+          />
         </StyledDraftListNav>
         <StyledDraftListNav>
           <AttributeButtonGroup
@@ -450,6 +462,12 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
         })}
         <StyledDraftListEnd />
       </StyledDraftList>
+      {showCreate && (
+        <EntityCreateModal
+          categorySelected={EntityEnums.Class.Concept}
+          closeModal={() => setShowCreate(false)}
+        />
+      )}
       <Tooltip
         visible={!!hovered}
         referenceElement={hovered?.element ?? null}

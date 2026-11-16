@@ -1,6 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
+  addStoredRelations,
   appendUndoOf,
   buildDraftDetail,
   draftAfterAppend,
@@ -19,6 +20,7 @@ import {
   replaceEntityId,
   replaceUndoEntityId,
   setAllConflictChoices,
+  storedRelationChanges,
   tabEntities,
   toggleLeftOut,
   undoAppend,
@@ -581,5 +583,38 @@ describe("setAllConflictChoices", () => {
     const back = setAllConflictChoices(imported, false);
     expect(back.entities.map((entity) => entity.detail)).toEqual(["stored dog", "stored puppy"]);
     expect(back.appends!.dog.conflicts[0].useImported).toBe(false);
+  });
+});
+
+describe("stored relations of an appended draft", () => {
+  const scl = relation("s1", RelationEnums.Type.Superclass, "dog", "animal");
+  const syn = relation("s2", RelationEnums.Type.Synonym, "dog", "hound");
+  const withStored = (): ImportDraft =>
+    addStoredRelations(
+      { ...baseDraft(), relations: [], appends: { dog: {} as never } },
+      [scl, syn, scl]
+    );
+
+  it("shows them in the drafts but never sends them as new relations", () => {
+    const draft = withStored();
+    expect(draft.relations.map((item) => item.id)).toEqual(["s1", "s2"]);
+    const json = draftToImportJson(draft) as { relations: object[] }[];
+    expect(json.flatMap((entity) => entity.relations)).toEqual([]);
+    expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
+  });
+
+  it("turns an edit and an unlink into changes to the stored relations", () => {
+    let draft = updateDraftRelation(withStored(), "s1", { entityIds: ["dog", "hound"] });
+    draft = deleteDraftRelation(draft, "s2");
+
+    expect(storedRelationChanges(draft)).toEqual({
+      updated: [{ before: scl, changes: { entityIds: ["dog", "hound"] } }],
+      deleted: [syn],
+    });
+  });
+
+  it("leaves a stored relation with a left-out member as it is stored", () => {
+    const draft = toggleLeftOut(deleteDraftRelation(withStored(), "s1"), "dog");
+    expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
   });
 });

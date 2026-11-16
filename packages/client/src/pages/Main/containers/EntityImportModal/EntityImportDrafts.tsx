@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildDraftDetail,
   createDraftWrites,
+  addDraftEntity,
   ImportDraft,
   ImportIssue,
   leftOutDrafts,
@@ -123,8 +124,13 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       hostElementId: DRAFT_DETAIL_ELEMENT_ID,
       // a double click on the tag of another draft opens that draft
       openUnstored: setSelectedId,
+      // a new entity is one more draft, opened at once
+      createDraft: (entity: IEntity) => {
+        onDraftChange((current) => addDraftEntity(current, entity));
+        setSelectedId(entity.id);
+      },
     }),
-    [writes, draftEntityIds]
+    [writes, draftEntityIds, onDraftChange]
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;

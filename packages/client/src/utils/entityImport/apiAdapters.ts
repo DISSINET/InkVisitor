@@ -1,5 +1,5 @@
 import api from "api";
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { ImportDataSource } from "./types";
 import { ImportWriteApi } from "./writeImport";
 
@@ -12,6 +12,10 @@ export const importDataSource: ImportDataSource = {
   getForwardRelations: async (entityId, type) =>
     (await api.relationsGet(entityId, { relationType: type }, true, quiet)).data,
 };
+
+/** Every stored relation of the entity, the ones pointing at it included. */
+export const storedRelationsOf = async (entityId: string): Promise<Relation.IRelation[]> =>
+  (await api.relationsGet(entityId, {}, false, quiet)).data;
 
 // candidates shown for one draft
 const MAX_CANDIDATES = 5;
@@ -52,6 +56,9 @@ export const importWriteApi: ImportWriteApi = {
   },
   createRelation: async (relation) => {
     await api.relationCreate(relation, quiet);
+  },
+  updateRelation: async (relationId, changes) => {
+    await api.relationUpdate(relationId, changes, quiet);
   },
   deleteRelation: async (relationId) => {
     await api.relationDelete(relationId, quiet);

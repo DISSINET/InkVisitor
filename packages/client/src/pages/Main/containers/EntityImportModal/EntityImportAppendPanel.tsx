@@ -11,10 +11,14 @@ import {
   StyledAppendRow,
   StyledAppendRowLabel,
   StyledAppendSection,
+  StyledAppendTag,
   StyledAppendText,
   StyledConflictOption,
   StyledConflictSide,
 } from "./EntityImportModalStyles";
+
+const STORED_RELATIONS_HINT =
+  "Detail shows its stored relations too; unlinking or changing one is written on Import.";
 
 // a Value is always created, never appended
 export const canAppend = (entity: IEntity) => entity.class !== EntityEnums.Class.Value;
@@ -108,7 +112,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
               <StyledAppendText>{skipped}</StyledAppendText>
             </>
           )}
-          <StyledAppendRowLabel>{"Detail shows only its new relations."}</StyledAppendRowLabel>
+          <StyledAppendRowLabel>{STORED_RELATIONS_HINT}</StyledAppendRowLabel>
         </StyledAppendSection>
       </StyledAppendPanel>
     );
@@ -132,8 +136,10 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
         <StyledAppendSection>
           <StyledAppendRowLabel>{"Possibly already in the database:"}</StyledAppendRowLabel>
           {candidates.map((candidate) => (
-            <StyledAppendRow key={candidate.id}>
-              <EntityTag entity={candidate} />
+            <StyledAppendRow key={candidate.id} $noWrap>
+              <StyledAppendTag>
+                <EntityTag entity={candidate} fullWidth />
+              </StyledAppendTag>
               <Button
                 label="append to it"
                 inverted
@@ -145,7 +151,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
         </StyledAppendSection>
       )}
       <StyledAppendSection>
-        <StyledAppendRowLabel>{"Append to a database entity instead:"}</StyledAppendRowLabel>
+        <StyledAppendRowLabel>{"Append to another database entity instead:"}</StyledAppendRowLabel>
         <EntitySuggester
           categoryTypes={[entity.class]}
           disableCreate

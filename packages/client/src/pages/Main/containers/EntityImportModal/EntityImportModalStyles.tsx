@@ -406,11 +406,18 @@ export const StyledAppendText = styled.p`
   overflow-wrap: anywhere;
 `;
 
-export const StyledAppendRow = styled.div`
+export const StyledAppendRow = styled.div<{ $noWrap?: boolean }>`
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: ${({ $noWrap }) => ($noWrap ? "nowrap" : "wrap")};
+  width: ${({ $noWrap }) => ($noWrap ? "100%" : "")};
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
+`;
+
+// a candidate's tag takes the room its button leaves
+export const StyledAppendTag = styled.div`
+  flex: 1;
+  min-width: 0;
 `;
 
 export const StyledAppendRowLabel = styled.span`

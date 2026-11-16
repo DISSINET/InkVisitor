@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { maxTabCount } from "Theme/constants";
 import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
 import {
+  addStoredRelations,
   appendTargetsOf,
   appendUndoOf,
   AppendUndo,
@@ -39,6 +40,8 @@ import {
   replaceUndoEntityId,
   setAllConflictChoices,
   setConflictChoice,
+  storedRelationChanges,
+  storedRelationsOf,
   toggleLeftOut,
   undoAppend,
   tabEntities,
@@ -72,13 +75,15 @@ const INPUT_PLACEHOLDER = `[
   }
 ]`;
 
-// the drafts in the import format, in id order: moving a tab is no edit
+// the drafts in the import format, in id order: moving a tab is no edit; with
+// the edits to stored relations, which the import format leaves out
 const draftSnapshot = (draft: ImportDraft) =>
-  JSON.stringify(
+  JSON.stringify([
     [...draftToImportJson(draft)].sort((a, b) =>
       String((a as { id: string }).id).localeCompare(String((b as { id: string }).id)),
     ),
-  );
+    storedRelationChanges(draft),
+  ]);
 
 const entityCount = (amount: number) => count(amount, "entity", "entities");
 
@@ -212,6 +217,27 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       .catch(() => ids.forEach((id) => requestedSynonymIds.current.delete(id)));
   }, [draft]);
 
+  // the stored relations of each appended draft, so Detail shows and edits
+  // them; loaded once per stored entity
+  const requestedRelationIds = useRef(new Set<string>());
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+    const ids = Object.keys(draft.appends ?? {}).filter(
+      (id) => !requestedRelationIds.current.has(id),
+    );
+    if (!ids.length) {
+      return;
+    }
+    ids.forEach((id) => requestedRelationIds.current.add(id));
+    Promise.all(ids.map(storedRelationsOf))
+      .then((found) =>
+        setDraft((current) => current && addStoredRelations(current, found.flat())),
+      )
+      .catch(() => ids.forEach((id) => requestedRelationIds.current.delete(id)));
+  }, [draft]);
+
   const handleFileLoad = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // cleared so loading the same file again fires a change
@@ -266,6 +292,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setAppendRecords({});
     setInputErrors([]);
     requestedIds.current.clear();
+    requestedRelationIds.current.clear();
     requestedSynonymIds.current.clear();
     setStep("input");
   };
@@ -343,6 +370,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       return;
     }
     setDraft((current) => current && undoAppend(current, record.undo));
+    // its stored relations load again if it is appended again
+    requestedRelationIds.current.delete(storedId);
     setAppendRecords((records) => {
       const rest = { ...records };
       delete rest[storedId];
@@ -358,7 +387,19 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     ]);
   };
 
-  const handleCreate = async () => {
+  // Import removes the stored relations the drafts unlinked, so it asks first
+  const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const relationChanges = draft ? storedRelationChanges(draft) : { updated: [], deleted: [] };
+  const handleCreate = () => {
+    if (relationChanges.deleted.length) {
+      setShowRemoveSubmit(true);
+    } else {
+      createDrafts();
+    }
+  };
+
+  const createDrafts = async () => {
+    setShowRemoveSubmit(false);
     if (!draft || !user) {
       return;
     }
@@ -375,7 +416,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         valueCopyIds: draft.valueCopyIds,
       });
       setDraftErrors(issuesWithEntityIds(draft, result.errors));
-      plan = result.plan;
+      plan = result.plan && { ...result.plan, storedRelationChanges: storedRelationChanges(draft) };
     } catch (error) {
       setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
     } finally {
@@ -386,7 +427,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
 
     setStep("writing");
-    setProgress({ done: 0, total: plan.entities.length + plan.relations.length });
+    setProgress({
+      done: 0,
+      total:
+        plan.entities.length +
+        plan.relations.length +
+        relationChanges.updated.length +
+        relationChanges.deleted.length,
+    });
 
     let result: ImportWriteOutcome;
     try {
@@ -412,8 +460,16 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       const copies = copyCount
         ? `; ${count(copyCount, "Value", "Values")} created`
         : "";
+      const stored = [
+        result.updatedRelationCount ? `${result.updatedRelationCount} changed` : "",
+        result.deletedRelationCount ? `${result.deletedRelationCount} unlinked` : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
       toast.info(
-        `Imported ${entityCount(result.entityIds.length - copyCount)}${appended}, ${relations}${copies}`,
+        `Imported ${entityCount(result.entityIds.length - copyCount)}${appended}, ${relations}${copies}${
+          stored ? `; stored relations: ${stored}` : ""
+        }`,
       );
       closeModal();
     } else if (result.status === "conflict") {
@@ -511,7 +567,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           <StyledResult>
             <StyledResultFailure>{outcome.failure}</StyledResultFailure>
             <p>
-              {`Rolled back: ${outcome.entityCount} entities, ${outcome.appendCount} appends, ${outcome.relationCount} relations. Nothing was imported.`}
+              {`Rolled back: ${outcome.entityCount} entities, ${outcome.appendCount} appends, ${outcome.relationCount} relations, ${outcome.storedRelationCount} stored relations put back. Nothing was imported.`}
             </p>
           </StyledResult>
         )}
@@ -608,6 +664,26 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         show={showBackSubmit}
         onSubmit={goBackToJson}
         onCancel={() => setShowBackSubmit(false)}
+      />
+      <Submit
+        title="Remove stored relations"
+        text={`The import also removes ${count(
+          relationChanges.deleted.length,
+          "stored relation",
+          "stored relations",
+        )} you unlinked${
+          relationChanges.updated.length
+            ? ` and changes ${count(
+                relationChanges.updated.length,
+                "stored relation",
+                "stored relations",
+              )}`
+            : ""
+        }, in the database.`}
+        submitLabel="Import"
+        show={showRemoveSubmit}
+        onSubmit={createDrafts}
+        onCancel={() => setShowRemoveSubmit(false)}
       />
       <Submit
         title="Close the import"

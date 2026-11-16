@@ -57,6 +57,10 @@ export interface EntityEditing {
   hostElementId?: string;
   // given, a double click on the tag of an unstored entity opens it there
   openUnstored?: (entityId: string) => void;
+  // Given, suggesters and the create modal make a new entity this way instead
+  // of writing it to the database; what needs a stored entity (templates,
+  // copies of a dropped Value) stays off while createsEntities is false.
+  createDraft?: (entity: IEntity) => void;
 }
 
 export const STORED_ENTITY_EDITING: EntityEditing = {

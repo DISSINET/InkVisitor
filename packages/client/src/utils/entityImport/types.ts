@@ -56,6 +56,15 @@ export interface ImportDataSource {
   ) => Promise<Relation.IRelation[]>;
 }
 
+/**
+ * What the drafts did to the stored relations of the appended entities: the
+ * ones unlinked, and the ones edited, each with the fields that changed.
+ */
+export interface StoredRelationChanges {
+  deleted: Relation.IRelation[];
+  updated: { before: Relation.IRelation; changes: Partial<Relation.IRelation> }[];
+}
+
 export interface ImportPlan {
   // creation order: every territory comes after its parent territory
   entities: IEntity[];
@@ -67,6 +76,8 @@ export interface ImportPlan {
   // input entities whose id is taken, appended to the stored entity instead
   // of created; in `entities` with what they will hold after the append
   appends: Record<string, AppendInfo>;
+  // set by the drafts: their edits to the stored relations of appended entities
+  storedRelationChanges?: StoredRelationChanges;
 }
 
 export interface ImportValidation {

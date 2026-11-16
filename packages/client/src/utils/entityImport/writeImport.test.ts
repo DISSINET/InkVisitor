@@ -64,6 +64,10 @@ const fakeServer = (options: {
       }
       relations.set(item.id, item);
     },
+    updateRelation: async (relationId, changes) => {
+      calls.push(`update relation ${relationId} ${Object.keys(changes).join(",")}`);
+      relations.set(relationId, { ...relations.get(relationId)!, ...changes });
+    },
     deleteRelation: async (relationId) => {
       calls.push(`delete relation ${relationId}`);
       relations.delete(relationId);
@@ -107,6 +111,8 @@ describe("writeImport", () => {
       entityIds: ["dog", "cat"],
       appendedIds: [],
       relationCount: 1,
+      updatedRelationCount: 0,
+      deletedRelationCount: 0,
     });
     expect(server.calls).toEqual(["create entity dog", "create entity cat", "create relation r1"]);
     expect(onProgress.mock.calls).toEqual([
@@ -137,6 +143,7 @@ describe("writeImport", () => {
       entityCount: 1,
       appendCount: 0,
       relationCount: 0,
+      storedRelationCount: 0,
     });
     expect(server.calls.slice(-1)).toEqual(["delete entities dog"]);
     expect(server.entities.size).toBe(0);
@@ -261,6 +268,64 @@ describe("writeImport", () => {
 
     expect(outcome).toMatchObject({ status: "rolledBack", appendCount: 1 });
     expect(server.entities.get("wolf")!.notes).toEqual(["old"]);
+  });
+
+  it("writes the edits to stored relations before the new relations", async () => {
+    const stored = { ...entity("wolf"), updatedAt: "t1" } as unknown as IEntity;
+    const scl = relation("s1", RelationEnums.Type.Superclass, "wolf", "animal");
+    const ant = relation("s2", RelationEnums.Type.Antonym, "wolf", "hound");
+    const server = fakeServer({ existing: [stored], relations: [scl, ant] });
+
+    const outcome = await writeImport(
+      {
+        ...plan([stored], [relation("r1", RelationEnums.Type.Holonym, "wolf", "animal")], {
+          wolf: { stored, conflicts: [], skipped: emptySkips() },
+        }),
+        storedRelationChanges: {
+          updated: [{ before: scl, changes: { entityIds: ["wolf", "hound"] } }],
+          deleted: [ant],
+        },
+      },
+      server.api
+    );
+
+    expect(outcome).toMatchObject({
+      status: "created",
+      updatedRelationCount: 1,
+      deletedRelationCount: 1,
+      relationCount: 1,
+    });
+    expect(server.calls).toEqual([
+      "update relation s1 entityIds",
+      "delete relation s2",
+      "create relation r1",
+    ]);
+    expect(server.relations.get("s1")!.entityIds).toEqual(["wolf", "hound"]);
+    expect(server.relations.has("s2")).toBe(false);
+  });
+
+  it("puts the stored relations back when a later write fails", async () => {
+    const stored = { ...entity("wolf"), updatedAt: "t1" } as unknown as IEntity;
+    const scl = relation("s1", RelationEnums.Type.Superclass, "wolf", "animal");
+    const ant = relation("s2", RelationEnums.Type.Antonym, "wolf", "hound");
+    const server = fakeServer({ existing: [stored], relations: [scl, ant], failRelation: "r1" });
+
+    const outcome = await writeImport(
+      {
+        ...plan([stored], [relation("r1", RelationEnums.Type.Holonym, "wolf", "animal")], {
+          wolf: { stored, conflicts: [], skipped: emptySkips() },
+        }),
+        storedRelationChanges: {
+          updated: [{ before: scl, changes: { entityIds: ["wolf", "hound"] } }],
+          deleted: [ant],
+        },
+      },
+      server.api
+    );
+
+    expect(outcome).toMatchObject({ status: "rolledBack", storedRelationCount: 2 });
+    expect(server.relations.get("s1")).toEqual(scl);
+    expect(server.relations.get("s2")).toEqual(ant);
   });
 
   it("lists what the rollback could not remove", async () => {
