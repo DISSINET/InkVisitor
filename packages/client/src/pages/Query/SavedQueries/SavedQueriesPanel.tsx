@@ -377,7 +377,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
         $isActive={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        <IcoFolderOpen size={16} />
+        <IcoFolderOpen size={14} />
         Queries
       </StyledToggleButton>
 
