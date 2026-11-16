@@ -430,9 +430,13 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
     node: {
       type: Query.NodeType.E,
       id: uuidv4(),
+      // EQ and SUB start on for every node added in the builder; they widen a
+      // picked entity only, so they stay inert until one is picked
       params: {
         entityClasses: [],
         label: "",
+        includeEquivalents: true,
+        includeSubordinates: true,
       },
       operator: Query.NodeOperator.And,
       edges: [],
