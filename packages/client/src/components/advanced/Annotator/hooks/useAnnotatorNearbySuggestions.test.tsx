@@ -91,6 +91,15 @@ const Probe = ({ leafTerritoryId }: { leafTerritoryId?: string }) => {
 
 let view: Rendered | null = null;
 
+// the walk awaits one fetch after another; a few short turns let it finish
+const settle = async () => {
+  for (let turn = 0; turn < 10; turn++) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    });
+  }
+};
+
 const mount = async (leafTerritoryId: string | undefined) => {
   const client = new QueryClient();
   // the T tree the Main page keeps loaded
@@ -100,12 +109,8 @@ const mount = async (leafTerritoryId: string | undefined) => {
       <Probe leafTerritoryId={leafTerritoryId} />
     </QueryClientProvider>
   );
-  // the walk awaits one fetch after another; a few short turns let it finish
-  for (let turn = 0; turn < 10; turn++) {
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5));
-    });
-  }
+  await settle();
+  return client;
 };
 
 const fetchedTerritories = () => territoryGet.mock.calls.map(([id]) => id);
@@ -145,5 +150,27 @@ describe("useAnnotatorNearbySuggestions", () => {
     await mount(undefined);
     expect(view?.texts("li")).toEqual(ids(1, 3));
     expect(fetchedTerritories()).toEqual(["book", "root"]);
+  });
+
+  it("walks again with fresh statements once a save invalidates the statements", async () => {
+    serve(statement("s", "ch", ids(1, 1)), {
+      ch: [statement("c", "ch", ids(2, 2))],
+      book: [],
+      root: [],
+    });
+    const client = await mount("ch");
+    expect(view?.texts("li")).toEqual(ids(1, 2));
+
+    // the statement in the subT gets a new actant
+    serve(statement("s", "ch", ids(1, 1)), {
+      ch: [statement("c", "ch", ids(2, 3))],
+      book: [],
+      root: [],
+    });
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ["statement"] });
+    });
+    await settle();
+    expect(view?.texts("li")).toEqual(ids(1, 3));
   });
 });

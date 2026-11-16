@@ -19,9 +19,10 @@ const quiet = { ignoreErrorToast: true };
  * around the selection, closest first: the statements anchored around the
  * selection, then the statements of the subT the selection sits in (nearest
  * anchors first), then up the T tree. A territory is fetched only while the
- * list is not full, and an unreadable territory ends the walk. The keys stay
- * outside "territory" so the frequent territory invalidations do not refetch
- * the whole walk; it may lag by a minute. The T tree comes from the cache the
+ * list is not full, and an unreadable territory ends the walk. The keys sit
+ * under "statement", which statement saves invalidate, so the walk after a
+ * save reads fresh statements; changes saved by other users show once the
+ * one-minute caches go stale. The T tree comes from the cache the
  * Main page keeps loaded; without it only the anchored statements are listed.
  * While a new walk runs, e.g. for another class, the entities come from the
  * statements the previous walk fetched, so the list does not empty meanwhile.
@@ -47,7 +48,7 @@ export const useAnnotatorNearbySuggestions = (
   // the class they hold, so the fetched set depends on the spans and the class,
   // not on the index
   const { data } = useQuery({
-    queryKey: ["annotator-nearby-suggestions", containingIds, leafTerritoryId, entityClass],
+    queryKey: ["statement", "annotator-nearby", containingIds, leafTerritoryId, entityClass],
     queryFn: async () => {
       const anchored = (
         await Promise.all(
@@ -73,7 +74,7 @@ export const useAnnotatorNearbySuggestions = (
         }
         const territory = await queryClient
           .fetchQuery({
-            queryKey: ["annotator-nearby-territory", territoryId],
+            queryKey: ["statement", "annotator-nearby-territory", territoryId],
             queryFn: async () => (await api.territoryGet(territoryId, quiet, false)).data,
             staleTime: 60_000,
           })
