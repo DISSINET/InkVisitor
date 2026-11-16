@@ -9,6 +9,7 @@ import {
   ImportDraft,
   ImportIssue,
   leftOutDrafts,
+  removedFromProtocols,
   searchCandidates,
   tabEntities,
 } from "utils/entityImport";
@@ -238,6 +239,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             <EntityImportLeftOutPanel
               entity={selected}
               leftOut={leftOut}
+              isAppended={selected.id in (draft.appends ?? {})}
+              protocolTerritoryIds={removedFromProtocols(draft, selected.id)}
               labelOf={labelOf}
               onToggleLeftOut={onToggleLeftOut}
               onSelect={setSelectedId}

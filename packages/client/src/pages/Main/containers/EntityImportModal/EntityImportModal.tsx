@@ -1,9 +1,10 @@
-import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
   Button,
   ButtonGroup,
   CancelButton,
+  Input,
   Modal,
   Submit,
   ModalContent,
@@ -13,6 +14,7 @@ import {
 import { useUserQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { maxTabCount } from "Theme/constants";
 import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
 import {
   appendTargetsOf,
@@ -86,9 +88,14 @@ interface AppendRecord {
   storedLabel?: string;
 }
 
+// how many imported entities Create opens in Detail unless the user sets it
+const DEFAULT_DETAIL_OPEN_COUNT = 10;
+
 interface EntityImportModal {
   closeModal: () => void;
-  onImported: (entities: IEntity[]) => void;
+  // `detailOpenCount`: how many of the entities, Values not counted, to open
+  // in Detail
+  onImported: (entities: IEntity[], detailOpenCount: number) => void;
 }
 
 export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onImported }) => {
@@ -101,6 +108,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
   const [step, setStep] = useState<Step>("input");
   const [text, setText] = useState("");
+  // null: the default, capped by the number of entities that can open
+  const [detailOpenChoice, setDetailOpenChoice] = useState<number | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
   // the text Validate last refused; Validate stays off until it is changed
@@ -393,7 +402,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
 
     if (result.status === "created") {
-      onImported(plan.entities);
+      onImported(plan.entities, detailOpenCount);
       // the Value copies were made by the import, not given in the input
       const copyCount = result.entityIds.filter((id) => draft.valueCopyIds?.includes(id)).length;
       const relations = count(result.relationCount, "relation", "relations");
@@ -417,9 +426,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   };
 
   const leftOut = draft ? leftOutDrafts(draft) : new Map<string, string>();
-  const draftCount = draft
-    ? tabEntities(draft).filter((entity) => !leftOut.has(entity.id)).length
-    : 0;
+  const included = draft ? tabEntities(draft).filter((entity) => !leftOut.has(entity.id)) : [];
+  const draftCount = included.length;
+  // Values never open in Detail, and Detail holds at most maxTabCount tabs
+  const detailOpenMax = Math.min(
+    included.filter((entity) => entity.class !== EntityEnums.Class.Value).length,
+    maxTabCount
+  );
+  const detailOpenCount = Math.min(detailOpenChoice ?? DEFAULT_DETAIL_OPEN_COUNT, detailOpenMax);
 
   return (
     <Modal
@@ -545,6 +559,23 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               }
             </StyledDraftModeHint>
             <ButtonGroup>
+              <Input
+                type="number"
+                label="open in Detail"
+                labelSpaceNoWrap
+                width={50}
+                value={String(detailOpenCount)}
+                min={0}
+                max={detailOpenMax}
+                changeOnType
+                disabled={detailOpenMax === 0}
+                onChangeFn={(value) => {
+                  const count = Number(value);
+                  setDetailOpenChoice(
+                    Math.min(Math.max(0, Number.isFinite(count) ? count : 0), detailOpenMax)
+                  );
+                }}
+              />
               <CancelButton onClick={handleClose} />
               <Button
                 label={`Import ${entityCount(draftCount)}`}

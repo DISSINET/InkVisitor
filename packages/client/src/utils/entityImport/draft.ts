@@ -133,13 +133,13 @@ export const draftAfterAppend = (previous: ImportDraft, plan: ImportPlan): Impor
   const kept = [...leftOutEntities, ...leftOutCopies];
   const ids = new Set([...planIds, ...kept.map((entity) => entity.id)]);
 
-  // a relation with a left-out member went to the validation without it, a
-  // synonym cloud as its other members; the relation as it was replaces that
-  const leftOutRelations = previous.relations.filter((relation) =>
-    relation.entityIds.some((id) => leftOut.has(id))
+  // a relation the validation got changed or not at all, see sentRelation,
+  // comes back as it was and replaces what the validation made of it
+  const leftOutRelations = previous.relations.filter(
+    (relation) => sentRelation(previous, leftOut, relation) !== relation
   );
   const sentAs = (relation: Relation.IRelation) =>
-    relation.entityIds.filter((id) => !leftOut.has(id));
+    sentRelation(previous, leftOut, relation)?.entityIds ?? [];
   const relations = plan.relations.filter(
     (relation) =>
       !leftOutRelations.some(
@@ -613,9 +613,12 @@ export const buildDraftDetail = (
 /**
  * The drafts the import leaves out, each with the draft that is the reason:
  * a draft the user left out names itself; a draft that points at a left-out
- * one through a metaprop, a reference or its parent territory can't be created
- * without it and names that one; and a Value of the input that only left-out
- * drafts point at names the first of them.
+ * new one through a metaprop, a reference or its parent territory can't be
+ * created without it and names that one; and a Value of the input that only
+ * left-out drafts point at names the first of them. A left-out appended draft
+ * keeps the id of its stored entity, which stays in the database, so links to
+ * it stay valid. A protocol entry naming a left-out draft is dropped instead,
+ * see removedFromProtocols.
  */
 export const leftOutDrafts = (draft: ImportDraft): Map<string, string> => {
   const leftOut = new Map((draft.leftOutIds ?? []).map((entityId) => [entityId, entityId]));
@@ -624,17 +627,23 @@ export const leftOutDrafts = (draft: ImportDraft): Map<string, string> => {
   }
   const links = collectEntityRefs(
     draft.entities.map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
-  ).map((ref) => ({ from: draft.entities[ref.entityIndex - 1].id, to: ref.id }));
+  ).map((ref) => ({
+    from: draft.entities[ref.entityIndex - 1].id,
+    to: ref.id,
+    inProtocol: ref.path.startsWith("data.protocol"),
+  }));
   const values = new Set(
     tabEntities(draft)
       .filter((entity) => entity.class === EntityEnums.Class.Value)
       .map((entity) => entity.id)
   );
   // each round can leave out more, so it runs until a round adds nothing
+  const appended = draft.appends ?? {};
+  const cascading = links.filter((link) => !link.inProtocol && !(link.to in appended));
   let grew = true;
   while (grew) {
     grew = false;
-    for (const { from, to } of links) {
+    for (const { from, to } of cascading) {
       if (!leftOut.has(from) && leftOut.has(to)) {
         leftOut.set(from, to);
         grew = true;
@@ -663,41 +672,99 @@ export const toggleLeftOut = (draft: ImportDraft, entityId: string): ImportDraft
 };
 
 /** The draft entity a relation is written under in the import JSON. */
-const relationOwner = (draft: ImportDraft, relation: Relation.IRelation): string | undefined =>
+const relationOwner = (
+  draft: ImportDraft,
+  relation: Relation.IRelation,
+  leftOut: Map<string, string>
+): string | undefined =>
   isAsymmetrical(relation.type)
     ? relation.entityIds[0]
-    : relation.entityIds.find((id) => draft.entities.some((entity) => entity.id === id));
+    : relation.entityIds.find(
+        (id) => !leftOut.has(id) && draft.entities.some((entity) => entity.id === id)
+      );
 
-// the entities draftToImportJson lists, in its order
+// a left-out new draft is never created; a left-out appended draft keeps the
+// id of its stored entity, which stays in the database
+const isRemoved = (draft: ImportDraft, leftOut: Map<string, string>, entityId: string) =>
+  leftOut.has(entityId) && !(entityId in (draft.appends ?? {}));
+
+/**
+ * The included territories whose protocol names the left-out draft. The
+ * import drops those protocol entries and keeps the territories.
+ */
+export const removedFromProtocols = (draft: ImportDraft, entityId: string): string[] => {
+  const leftOut = leftOutDrafts(draft);
+  if (!isRemoved(draft, leftOut, entityId)) {
+    return [];
+  }
+  const territories = draft.entities.filter(
+    (entity) => entity.class === EntityEnums.Class.Territory && !leftOut.has(entity.id)
+  );
+  return unique(
+    collectEntityRefs(
+      territories.map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
+    )
+      .filter((ref) => ref.id === entityId && ref.path.startsWith("data.protocol"))
+      .map((ref) => territories[ref.entityIndex - 1].id)
+  );
+};
+
+// the entities draftToImportJson lists, in its order, their protocols without
+// the left-out new drafts
 const importJsonEntities = (draft: ImportDraft): IEntity[] => {
   const leftOut = leftOutDrafts(draft);
-  const included = tabEntities(draft).filter((entity) => !leftOut.has(entity.id));
+  const removedIds = [...leftOut.keys()].filter((id) => isRemoved(draft, leftOut, id));
+  const withoutRemoved = (entity: IEntity): IEntity =>
+    entity.class === EntityEnums.Class.Territory
+      ? removedIds.reduce((current, id) => unlinkEntity(current, id, undefined).entity, entity)
+      : entity;
+  const included = tabEntities(draft)
+    .filter((entity) => !leftOut.has(entity.id))
+    .map(withoutRemoved);
   // a Value copy no draft points at any more is not created
   const pointedAt = new Set(
     collectEntityRefs(
       included.map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
     ).map((ref) => ref.id)
   );
-  return draft.entities.filter((entity) =>
-    isValueCopy(draft, entity.id) ? pointedAt.has(entity.id) : !leftOut.has(entity.id)
-  );
+  return draft.entities
+    .filter((entity) =>
+      isValueCopy(draft, entity.id) ? pointedAt.has(entity.id) : !leftOut.has(entity.id)
+    )
+    .map(withoutRemoved);
 };
 
-// A relation keeps out the left-out drafts: a synonym cloud only drops them
-// as members, any other relation goes with them.
-const importJsonRelations = (draft: ImportDraft): Relation.IRelation[] => {
-  const leftOut = leftOutDrafts(draft);
-  return draft.relations
-    .map((relation) =>
-      Relation.RelationRules[relation.type]?.cloudType
-        ? { ...relation, entityIds: relation.entityIds.filter((id) => !leftOut.has(id)) }
-        : relation
-    )
-    .filter(
-      (relation) =>
-        relation.entityIds.length >= 2 && relation.entityIds.every((id) => !leftOut.has(id))
-    );
+/**
+ * The relation as the import JSON carries it, or undefined when the JSON
+ * leaves it out. A left-out new draft is never created: a synonym cloud drops
+ * it as a member, any other relation goes with it. A left-out appended draft
+ * stays a member, but a relation written under it goes.
+ */
+const sentRelation = (
+  draft: ImportDraft,
+  leftOut: Map<string, string>,
+  relation: Relation.IRelation
+): Relation.IRelation | undefined => {
+  const sent = Relation.RelationRules[relation.type]?.cloudType
+    ? {
+        ...relation,
+        entityIds: relation.entityIds.filter((id) => !isRemoved(draft, leftOut, id)),
+      }
+    : relation;
+  const owner = relationOwner(draft, sent, leftOut);
+  return sent.entityIds.length >= 2 &&
+    sent.entityIds.every((id) => !isRemoved(draft, leftOut, id)) &&
+    owner &&
+    !leftOut.has(owner)
+    ? sent
+    : undefined;
 };
+
+const importJsonRelations = (
+  draft: ImportDraft,
+  leftOut: Map<string, string>
+): Relation.IRelation[] =>
+  draft.relations.flatMap((relation) => sentRelation(draft, leftOut, relation) ?? []);
 
 /**
  * The issues of a validation of draftToImportJson(draft), each with the id of
@@ -716,11 +783,12 @@ export const issuesWithEntityIds = (draft: ImportDraft, issues: ImportIssue[]): 
  * pasted JSON. The drafts left out are not in it.
  */
 export const draftToImportJson = (draft: ImportDraft): object[] => {
-  const relations = importJsonRelations(draft);
+  const leftOut = leftOutDrafts(draft);
+  const relations = importJsonRelations(draft, leftOut);
   return importJsonEntities(draft).map((entity) => ({
     ...buildEntityJson(entity, undefined),
     relations: relations
-      .filter((relation) => relationOwner(draft, relation) === entity.id)
+      .filter((relation) => relationOwner(draft, relation, leftOut) === entity.id)
       .map((relation) => ({
         type: relation.type,
         entityIds: relation.entityIds,

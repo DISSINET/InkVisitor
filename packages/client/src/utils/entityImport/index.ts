@@ -20,6 +20,7 @@ export {
   draftToImportJson,
   issuesWithEntityIds,
   leftOutDrafts,
+  removedFromProtocols,
   missingEntityIds,
   missingSynonymGroupIds,
   reorderDraftRelations,

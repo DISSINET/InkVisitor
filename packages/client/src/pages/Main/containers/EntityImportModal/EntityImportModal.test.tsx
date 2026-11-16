@@ -106,6 +106,18 @@ describe("EntityImportModal", () => {
     expect(onImported).not.toHaveBeenCalled();
   });
 
+  it("opens at most the entities that are not Values in Detail", async () => {
+    entitiesGet.mockResolvedValueOnce({ data: [] });
+    await pasteAndValidate([
+      { class: "C", labels: ["TEST dog"] },
+      { class: "V", labels: ["TEST small"] },
+    ]);
+
+    const field = document.querySelector('input[type="number"]') as HTMLInputElement;
+    expect(field.value).toBe("1");
+    expect(field.max).toBe("1");
+  });
+
   it("undoes an append to a database entity, back to the new draft", async () => {
     const stored = {
       id: "stored-dog",

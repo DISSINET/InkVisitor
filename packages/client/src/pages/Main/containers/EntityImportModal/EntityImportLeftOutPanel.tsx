@@ -14,6 +14,10 @@ interface EntityImportLeftOutPanel {
   entity: IEntity;
   // every left-out draft with the draft that is the reason, see leftOutDrafts
   leftOut: Map<string, string>;
+  // a left-out appended draft leaves its stored entity as it is
+  isAppended: boolean;
+  // the included territories whose protocol entries naming it are dropped
+  protocolTerritoryIds: string[];
   labelOf: (entityId: string) => string;
   onToggleLeftOut: (entityId: string) => void;
   onSelect: (entityId: string) => void;
@@ -26,6 +30,8 @@ interface EntityImportLeftOutPanel {
 export const EntityImportLeftOutPanel: React.FC<EntityImportLeftOutPanel> = ({
   entity,
   leftOut,
+  isAppended,
+  protocolTerritoryIds,
   labelOf,
   onToggleLeftOut,
   onSelect,
@@ -59,7 +65,11 @@ export const EntityImportLeftOutPanel: React.FC<EntityImportLeftOutPanel> = ({
   return (
     <StyledAppendPanel>
       <StyledAppendSection>
-        <StyledAppendText>{"Left out of the import."}</StyledAppendText>
+        <StyledAppendText>
+          {isAppended
+            ? "Left out of the import: the stored entity stays as it is, and the drafts pointing at it keep their links."
+            : "Left out of the import."}
+        </StyledAppendText>
         <Button
           label="bring back"
           inverted
@@ -71,6 +81,16 @@ export const EntityImportLeftOutPanel: React.FC<EntityImportLeftOutPanel> = ({
         <StyledAppendSection>
           <StyledAppendRowLabel>{"Also left out, as they point at it:"}</StyledAppendRowLabel>
           {dependents.map((entityId) => (
+            <StyledAppendRow key={entityId}>
+              <Button label={labelOf(entityId)} inverted onClick={() => onSelect(entityId)} />
+            </StyledAppendRow>
+          ))}
+        </StyledAppendSection>
+      )}
+      {protocolTerritoryIds.length > 0 && (
+        <StyledAppendSection>
+          <StyledAppendRowLabel>{"Removed from the protocol of:"}</StyledAppendRowLabel>
+          {protocolTerritoryIds.map((entityId) => (
             <StyledAppendRow key={entityId}>
               <Button label={labelOf(entityId)} inverted onClick={() => onSelect(entityId)} />
             </StyledAppendRow>

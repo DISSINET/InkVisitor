@@ -12,6 +12,7 @@ import {
   issuesWithEntityIds,
   leftOutDrafts,
   mergeChanges,
+  removedFromProtocols,
   missingEntityIds,
   missingSynonymGroupIds,
   reorderDraftRelations,
@@ -349,6 +350,51 @@ describe("leaving drafts out", () => {
     expect(
       draftToImportJson(draft).flatMap((entity) => (entity as { relations: object[] }).relations)
     ).toEqual([]);
+  });
+
+  it("keeps the drafts and relations pointing at a left-out appended draft", () => {
+    const draft = toggleLeftOut(
+      {
+        ...withLinks(),
+        appends: { dog: { stored: existingEntity("dog"), conflicts: [], skipped: {} as never } },
+      },
+      "dog"
+    );
+
+    // the dog's stored entity stays in the database, so the kennel's link holds
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({ dog: "dog" });
+    expect(jsonIds(draft)).toEqual(["puppy", "kennel", "v-small", "v-loud", "bark"]);
+    // the puppy's superclass keeps the dog; the dog's own relations go
+    expect(
+      draftToImportJson(draft).flatMap(
+        (entity) => (entity as { relations: { entityIds: string[] }[] }).relations
+      )
+    ).toEqual([{ type: RelationEnums.Type.Superclass, entityIds: ["puppy", "dog"] }]);
+  });
+
+  it("drops a protocol entry naming a left-out draft and keeps the territory", () => {
+    const territory = (id: string, data: Record<string, unknown>) =>
+      newEntity(id, { class: "T", data }) as ITerritory;
+    const draft = toggleLeftOut(
+      {
+        entities: [
+          territory("t1", { protocol: { guidelines: ["rules", "manual"] } }),
+          territory("t2", { parent: { territoryId: "t1" } }),
+          newEntity("rules", { class: "R" }),
+          newEntity("manual", { class: "R" }),
+        ],
+        relations: [],
+        existing: {},
+      },
+      "rules"
+    );
+
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({ rules: "rules" });
+    const [t1] = draftToImportJson(draft) as { data: { protocol: { guidelines: string[] } } }[];
+    expect(jsonIds(draft)).toEqual(["t1", "t2", "manual"]);
+    expect(t1.data.protocol.guidelines).toEqual(["manual"]);
+    expect(removedFromProtocols(draft, "rules")).toEqual(["t1"]);
+    expect(removedFromProtocols(draft, "manual")).toEqual([]);
   });
 
   it("brings the drafts left out with one back with it", () => {
