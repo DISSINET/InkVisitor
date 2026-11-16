@@ -562,6 +562,21 @@ describe("queryReducer HP: value node", () => {
     expect(setValueNode(withValue, false).edges[0].valueNode).toBeUndefined();
   });
 
+  it("negates the value only while the value node is there", () => {
+    const negate = (state: Query.INode) =>
+      queryReducer(state, {
+        type: QueryActionType.updateEdgeValueLogic,
+        payload: { edgeId: state.edges[0].id, newLogic: Query.EdgeLogic.Negative },
+      });
+    expect(negate(addProp()).edges[0].valueLogic).toBeUndefined();
+    const negated = negate(setValueNode(addProp(), true));
+    expect(negated.edges[0].valueLogic).toBe(Query.EdgeLogic.Negative);
+    expect(negated.edges[0].logic).toBe(Query.EdgeLogic.Positive);
+    expect(setValueNode(negated, false).edges[0].valueLogic).toBeUndefined();
+    expect(switchTo(negate(setValueNode(addProp(), true)), Query.EdgeType["R:CLA"]).edges[0].valueLogic)
+      .toBeUndefined();
+  });
+
   it("adds no value node to an edge without one", () => {
     const relation = switchTo(addProp(), Query.EdgeType["R:CLA"]);
     expect(setValueNode(relation, true).edges[0].valueNode).toBeUndefined();

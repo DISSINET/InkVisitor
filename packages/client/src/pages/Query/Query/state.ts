@@ -70,6 +70,7 @@ enum QueryActionType {
   updateEdgeLogic,
   updateEdgePropPair,
   updateEdgeValueNode,
+  updateEdgeValueLogic,
   updateNodeType,
   updateNodeClass,
   clearNodeFilters,
@@ -104,6 +105,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateEdgeValueNode;
       payload: { edgeId: string; hasValueNode: boolean };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueLogic;
+      payload: { edgeId: string; newLogic: Query.EdgeLogic };
     }
   | {
       type: QueryActionType.updateNodeType;
@@ -213,6 +218,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       // the value node is optional on HP: / SP: and kept across a switch between them
       if (!Query.TupleValueEdgeTypes[newType]) {
         delete edgeToUpdate.valueNode;
+        delete edgeToUpdate.valueLogic;
       }
       reseedRelationTargetClasses(updatedStateUpdate, sourceClassesBeforeSwitch);
       return updatedStateUpdate;
@@ -247,8 +253,21 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         edgeWithValue.valueNode ??= newValueNode();
       } else {
         delete edgeWithValue.valueNode;
+        delete edgeWithValue.valueLogic;
       }
       return updatedStateValue;
+    }
+
+    case QueryActionType.updateEdgeValueLogic: {
+      const updatedStateValueLogic = { ...state };
+      const edgeWithValueLogic = getAllEdges(updatedStateValueLogic).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValueLogic?.valueNode) {
+        return updatedStateValueLogic;
+      }
+      edgeWithValueLogic.valueLogic = action.payload.newLogic;
+      return updatedStateValueLogic;
     }
 
     case QueryActionType.updateNodeType:

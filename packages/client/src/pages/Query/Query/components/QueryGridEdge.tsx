@@ -83,6 +83,13 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   // an exclusion at a glance; invalid still wins (its own red) over this
   const lineColor = isValid && isNegative ? theme.color.entityA : color;
 
+  // the value line of HP: / SP: is negated by NOT on the edge or on the value alone
+  const isValueNegated = edge.valueLogic === Query.EdgeLogic.Negative;
+  const isValueLineNegative = isNegative || isValueNegated;
+  const valueLineColor = isValid && isValueLineNegative ? theme.color.entityA : color;
+  const branchNegative = isValueConnector ? isValueLineNegative : isNegative;
+  const branchColor = isValueConnector ? valueLineColor : lineColor;
+
   const x = 20;
   const midY = QUERY_GRID_HEIGHT / 2;
   const curveRadius = 8;
@@ -100,11 +107,14 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
     <StyledEdgeContainer>
       <StyledEdgeSvg>
         <g style={{ strokeWidth: 3 }}>
-          <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
+          <g style={{ stroke: branchColor }} strokeDasharray={branchNegative ? "6 4" : undefined}>
             <path d={branchPath} fill="none" strokeLinecap="round" />
           </g>
           {edge.valueNode && !isValueConnector && (
-            <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
+            <g
+              style={{ stroke: valueLineColor }}
+              strokeDasharray={isValueLineNegative ? "6 4" : undefined}
+            >
               <line
                 x1={QUERY_PROP_VALUE_X}
                 x2={QUERY_PROP_VALUE_X}
@@ -128,7 +138,25 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
       </StyledEdgeSvg>
       <ControlsLayer>
         {isValueConnector ? (
-          <StyledEdgeValueBox $color={lineColor}>
+          <StyledEdgeValueBox $color={branchColor}>
+            <Checkbox
+              size={15}
+              key={`${edge.id}-value-not-${edge.valueLogic}`}
+              label="NOT"
+              value={isValueNegated}
+              color="primary"
+              noFill
+              tooltipLabel="match props of this type whose value does not match the value node, or that have no value"
+              onChangeFn={(checked) =>
+                dispatch({
+                  type: QueryActionType.updateEdgeValueLogic,
+                  payload: {
+                    edgeId: edge.id,
+                    newLogic: checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive,
+                  },
+                })
+              }
+            />
             <StyledEdgeValueLabel>with value</StyledEdgeValueLabel>
             <Button
               icon={<IcoClose size={12} />}

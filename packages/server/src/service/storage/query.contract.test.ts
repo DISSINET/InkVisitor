@@ -74,7 +74,8 @@ beforeAll(async () => {
     entity("a-1", C.Action, ["shine"]),
     entity("p-1", C.Person, ["Anna Nováková"]),
     entity("p-2", C.Person, undefined),
-    entity("l-1", C.Location, ["Prague (city)"]),
+    // a prop typed but never given a value keeps entityId ""
+    entity("l-1", C.Location, ["Prague (city)"], { props: [prop("", "c-2")] }),
     entity("r-1", C.Resource, ["Book one"], { data: { documentId: "d-1" } }),
     entity("r-2", C.Resource, ["Book two"], { data: {} }),
     // statements carry props and references arrays like every real one; the
@@ -472,6 +473,24 @@ describe("explore: relation, prop and reference edges", () => {
     ).toEqual(["c-2", "c-3", "c-4"]);
   });
 
+  it("HP: with a negated value node needs a prop of the type whose value the node does not match", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    const locations = { entityClasses: [C.Location] };
+    const notValue = (e: Partial<Query.IEdge>) => ({ ...e, valueLogic: Query.EdgeLogic.Negative });
+    // c-1's only c-2 typed prop has the value c-3
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual([]);
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-4" }))])).toEqual(["c-1"]);
+    expect(
+      await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityClasses: [C.Person] }))])
+    ).toEqual(["c-1"]);
+    // an empty value node keeps any value, negated only the props with none
+    expect(await explore(locations, [propEdge({ entityId: "c-2" }, {})])).toEqual(["l-1"]);
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, {}))])).toEqual([]);
+    expect(await explore(locations, [notValue(propEdge({ entityId: "c-2" }, {}))])).toEqual(["l-1"]);
+    // an empty value is not c-3 either
+    expect(await explore(locations, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual(["l-1"]);
+  });
+
   it("HR:R and HR:V need a non-empty side without a target and ignore non-array references", async () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HR:R", { entityId: "r-1" })])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept, C.Statement] }, [edge("HR:R")])).toEqual(["c-1", "s-1"]);
@@ -720,6 +739,11 @@ describe("explore: statement edges", () => {
     expect(
       await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
     ).toEqual(["s-2", "s-3"]);
+    // a negated value node: s-1's only c-2 typed prop has the value c-3, and none is empty
+    const notValue = (e: Partial<Query.IEdge>) => ({ ...e, valueLogic: Query.EdgeLogic.Negative });
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual([]);
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, { entityId: "c-4" }))])).toEqual(["s-1"]);
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, {}))])).toEqual([]);
   });
 
   it("a propPair on SP:T, SP:V, I_SP:T and I_SP:V needs both halves on the same prop, at any of the three levels", async () => {

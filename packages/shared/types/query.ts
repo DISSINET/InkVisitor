@@ -21,6 +21,10 @@ export namespace Query {
     // edge type TupleValueEdgeTypes names; `node` is the type half, and both halves
     // hold on the same prop
     valueNode?: INode;
+    // with valueNode: Negative keeps the props of the type whose value the value node does
+    // not match, an empty value included; an empty value node then keeps props with no value.
+    // `logic` still negates the whole edge
+    valueLogic?: EdgeLogic;
   }
 
   export interface INodeParams {

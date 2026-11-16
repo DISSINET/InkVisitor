@@ -169,7 +169,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
           const valueRailEdge = valueRailCells.get(railKey);
-          const valueRailNegative = valueRailEdge?.logic === Query.EdgeLogic.Negative;
+          // NOT on the edge or on its value alone both negate the value line
+          const valueRailNegative =
+            valueRailEdge?.logic === Query.EdgeLogic.Negative ||
+            valueRailEdge?.valueLogic === Query.EdgeLogic.Negative;
           // the value line belongs to one edge, so it takes that edge's colour as its box does:
           // the invalid colour over the red of NOT
           const valueRailInvalid =

@@ -1067,11 +1067,13 @@ export class EdgeHasPropValue extends SearchEdge {
  */
 export class EdgeHasProp extends EdgeHasPropType {
   private valueSide: EdgeHasPropValue | null;
+  private valueNegated: boolean;
 
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["HP:"];
     this.valueSide = data.valueNode ? new EdgeHasPropValue({ node: data.valueNode }) : null;
+    this.valueNegated = data.valueLogic === Query.EdgeLogic.Negative;
   }
 
   setResolvers(resolvers: ExploreResolvers): void {
@@ -1085,25 +1087,36 @@ export class EdgeHasProp extends EdgeHasPropType {
   }
 
   protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
-    return valueNodeFilter(this.valueSide);
+    return valueNodeFilter(this.valueSide, this.valueNegated);
   }
 }
 
 /**
  * keeps the props whose value the value node of HP: / SP: allows: its id set, else its
- * classes; every prop without a value node
+ * classes; every prop without a value node. Negated, it keeps the props it does not allow,
+ * an empty value included, and with no constraint of its own the props with no value
  */
-function valueNodeFilter(valueSide: SearchEdge | null): (prop: RDatum) => RValue<boolean> {
-  const ids = valueSide?.targetIds() ?? null;
-  const classes = valueSide?.node.params.entityClasses ?? [];
+function valueNodeFilter(
+  valueSide: SearchEdge | null,
+  negated: boolean
+): (prop: RDatum) => RValue<boolean> {
+  if (!valueSide) {
+    return () => r.expr(true);
+  }
+  const ids = valueSide.targetIds();
+  const classes = valueSide.node.params.entityClasses ?? [];
   const valueId = (prop: RDatum) => prop("value")("entityId").default("");
-  if (ids) {
-    return (prop: RDatum) => r.expr(ids).contains(valueId(prop));
+  const allows = ids
+    ? (prop: RDatum) => r.expr(ids).contains(valueId(prop))
+    : classes.length
+      ? (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes)
+      : null;
+  if (!negated) {
+    return allows ?? (() => r.expr(true));
   }
-  if (classes.length) {
-    return (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes);
-  }
-  return () => r.expr(true);
+  return allows
+    ? (prop: RDatum) => allows(prop).not()
+    : (prop: RDatum) => valueId(prop).eq("");
 }
 
 /**
@@ -1296,6 +1309,7 @@ export class EdgeStatementHasPropValue extends SearchEdge {
  */
 export class EdgeStatementHasProp extends EdgeStatementHasPropType {
   private valueSide: EdgeStatementHasPropValue | null;
+  private valueNegated: boolean;
 
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -1303,6 +1317,7 @@ export class EdgeStatementHasProp extends EdgeStatementHasPropType {
     this.valueSide = data.valueNode
       ? new EdgeStatementHasPropValue({ node: data.valueNode })
       : null;
+    this.valueNegated = data.valueLogic === Query.EdgeLogic.Negative;
   }
 
   setResolvers(resolvers: ExploreResolvers): void {
@@ -1316,7 +1331,7 @@ export class EdgeStatementHasProp extends EdgeStatementHasPropType {
   }
 
   protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
-    return valueNodeFilter(this.valueSide);
+    return valueNodeFilter(this.valueSide, this.valueNegated);
   }
 }
 

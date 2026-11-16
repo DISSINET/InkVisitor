@@ -34,6 +34,8 @@ export default class SearchEdge implements Query.IEdge {
   node: SearchNode;
   /** HP: and SP: only: the value half of the prop, resolved as the target of an HP:V / SP:V edge */
   valueSide: SearchEdge | null;
+  /** with a valueSide: the prop's value must not match it (valueLogic) */
+  valueNegated: boolean;
   /** id expansion and the territory lineage; injected by the plan, see setResolvers */
   protected resolvers?: ExploreResolvers;
 
@@ -48,6 +50,7 @@ export default class SearchEdge implements Query.IEdge {
       valueType && data.valueNode
         ? new SearchEdge({ type: valueType, node: data.valueNode })
         : null;
+    this.valueNegated = !!this.valueSide && data.valueLogic === Query.EdgeLogic.Negative;
   }
 
   setResolvers(resolvers: ExploreResolvers): void {
@@ -463,15 +466,22 @@ const propId = (kind: "type" | "value"): string => `coalesce(pr->'${kind}'->>'en
 
 /**
  * the prop `pr` holds a propPair entity on the half the propPair pins, or a value of the
- * classes the value node of HP: / SP: picks; TRUE without either
+ * classes the value node of HP: / SP: picks; TRUE without either. A negated value node keeps
+ * the props it does not match, an empty value included, and with no constraint of its own
+ * the props with no value
  */
 function pairMatch(e: SearchEdge, p: Params): string {
   const pair = e.propPair();
-  if (pair) {
-    return `${propId(pair.kind)} = ${anyOf(p, pair.ids)}`;
-  }
   const classes = e.valueClasses();
-  return classes.length ? entityMatches(p, propId("value"), classes) : "TRUE";
+  const match = pair
+    ? `${propId(pair.kind)} = ${anyOf(p, pair.ids)}`
+    : classes.length
+      ? entityMatches(p, propId("value"), classes)
+      : "TRUE";
+  if (!e.valueNegated) {
+    return match;
+  }
+  return match === "TRUE" ? `${propId("value")} = ''` : `NOT (${match})`;
 }
 
 /** the prop `pr` references a target by `kind`, an entity of the classes, or anything */
@@ -485,11 +495,12 @@ function propSide(e: SearchEdge, p: Params, kind: "type" | "value", classes: Ent
 
 /**
  * the row's own props hold a propPair entity, through the gin index that covers their types
- * and values (the column of the row the enclosing FROM reads); TRUE without a propPair
+ * and values (the column of the row the enclosing FROM reads); TRUE without a propPair, and
+ * for a negated value node, whose matching rows need not hold its ids
  */
 function holdsPropPair(e: SearchEdge, p: Params, index: string): string {
   const pair = e.propPair();
-  return pair ? ownCandidates(p, index, pair.ids) : "TRUE";
+  return pair && !e.valueNegated ? ownCandidates(p, index, pair.ids) : "TRUE";
 }
 
 /**
@@ -565,7 +576,7 @@ const propRows = (paths: string[], doc: string): string =>
  */
 function statementHasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string {
   const classes = narrowByClass ? e.targetClasses() : [];
-  if (!e.propPair() && !e.valueClasses().length) {
+  if (!e.propPair() && !e.valueClasses().length && !e.valueNegated) {
     return (
       `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds())}` +
       ` AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), classes)}`
