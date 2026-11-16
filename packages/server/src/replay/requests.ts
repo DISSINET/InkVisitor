@@ -343,7 +343,8 @@ const reads = (suffix: string): Step[] => [
     query: node(`n1${suffix}`, { entityClasses: ["L"] }),
     explore: table([], { sort: { columnId: "col-created", direction: "desc" } }),
   }, exploreOrder),
-  post("admin", `explore-stats${suffix}`, "/entities/query", { query: node(`n1${suffix}`, { entityClasses: ["C", "P"] }), explore: statsView }),
+  // the cap is the storage's own (AuditStore.entityIdsLimit), so it differs per adapter
+  post("admin", `explore-stats${suffix}`, "/entities/query", { query: node(`n1${suffix}`, { entityClasses: ["C", "P"] }), explore: statsView }, { strip: ["statsEntityLimit"] }),
   post("admin", `explore-export${suffix}`, "/entities/query-export", {
     query: node(`n1${suffix}`, { entityClasses: ["P"] }),
     explore: { ...table(), view: { mode: "table", columns: exportColumns } },
