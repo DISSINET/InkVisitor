@@ -6,9 +6,8 @@ import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { nodeLabel } from "../../../../common/searchLabel";
 import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
-import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
-import { auditAndCoOccurrenceIds, withinDataFields, withinIds } from "./filters";
+import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
@@ -82,16 +81,11 @@ export default class SearchEdge implements Query.IEdge {
    * prepare() must call super.prepare() so the target expansion stays resolved.
    */
   async prepare(db: Connection): Promise<void> {
-    const entityId = this.node.params.entityId;
+    const params = this.node.params;
+    const entityId = params.entityId;
     // the node filters narrow an empty target only: a pinned entity is the
     // target itself, whatever its status, and the query builder offers no
     // node filters while one is pinned
-    const filters: TargetFilters = {
-      statuses: this.node.params.entityStatuses ?? [],
-      languages: this.node.params.entityLanguages ?? [],
-      label: nodeLabel(this.node.params.label),
-    };
-
     if (!entityId) {
       // resolving the constraints into an id set here is what makes them
       // apply to every edge type: each run() already matches against
@@ -100,17 +94,17 @@ export default class SearchEdge implements Query.IEdge {
       // logical type or part of speech, so any of them takes the statuses
       // into the id set with it. The conditions nested under the target node
       // always go through the set, as only the node evaluator can test them.
-      const filteredIds = await auditAndCoOccurrenceIds(db, this.node.params);
+      const filteredIds = await auditAndCoOccurrenceIds(db, params);
       const constrained =
         filteredIds !== null ||
         this.node.edges.length > 0 ||
-        !!filters.label ||
-        filters.languages.length > 0 ||
-        !!this.node.params.entityLogicalTypes?.length ||
-        !!this.node.params.entityPartsOfSpeech?.length ||
-        (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
+        !!nodeLabel(params.label) ||
+        !!params.entityLanguages?.length ||
+        !!params.entityLogicalTypes?.length ||
+        !!params.entityPartsOfSpeech?.length ||
+        (!!params.entityStatuses?.length && !this.checksUnpinnedTargetStatusInRun);
       this.targetEntityIds = constrained
-        ? await this.constrainedTargetIds(db, filters, filteredIds)
+        ? await this.constrainedTargetIds(db, filteredIds)
         : null;
       return;
     }
@@ -131,8 +125,8 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Ids of entities passing `filters` and the target node's logical types and
-   * parts of speech (an empty list passes any), within
+   * Ids of entities passing the target node's status, language, logical type,
+   * part of speech and label filters (an empty list passes any), within
    * `filteredIds` (the date, user and co-occurrence filters, null for none) and
    * meeting the conditions nested under the target node, narrowed by the target node's
    * classes, else by the classes the edge's target can hold.
@@ -141,7 +135,6 @@ export default class SearchEdge implements Query.IEdge {
    */
   private async constrainedTargetIds(
     db: Connection,
-    { statuses, languages, label }: TargetFilters,
     filteredIds: string[] | null
   ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
@@ -150,14 +143,7 @@ export default class SearchEdge implements Query.IEdge {
       ? r.table(TABLE.entities).getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : r.table(TABLE.entities);
 
-    let q = statuses.length ? filterStreamByStatus(base, statuses) : base;
-    if (languages.length) {
-      q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
-    }
-    if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
-    }
-    q = withinDataFields(q, this.node.params);
+    const q = withinEntityFilters(base, this.node.params);
     return this.node.match(db, withinIds(q, filteredIds));
   }
 
@@ -179,23 +165,6 @@ export default class SearchEdge implements Query.IEdge {
   run(q: RStream): RStream {
     throw new Error("base SearchEdge does not implement run method");
   }
-}
-
-/**
- * Narrows a stream of entities to those carrying one of `statuses` and emits
- * their distinct ids.
- */
-/** an unpinned target node's filters; prepareLabel's parts for the label */
-type TargetFilters = {
-  statuses: EntityEnums.Status[];
-  languages: EntityEnums.Language[];
-  label: [string, string, string] | undefined;
-};
-
-function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStream {
-  return q.filter(function (e: RDatum<IEntity>) {
-    return r.expr(statuses).contains(e("status"));
-  });
 }
 
 /**

@@ -1,12 +1,10 @@
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { unwrap } from "../conn";
-import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edge";
-import { auditAndCoOccurrenceIds, withinDataFields, withinIds } from "./filters";
+import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchNode implements Query.INode, ExplorePlan {
@@ -57,27 +55,10 @@ export default class SearchNode implements Query.INode, ExplorePlan {
         return r.expr(classes).contains(row("class"));
       });
     }
-    if (this.params.entityStatuses?.length) {
-      const statuses = this.params.entityStatuses;
-      q = q.filter(function (row: RDatum) {
-        return r.expr(statuses).contains(row("status"));
-      });
-    }
-    if (this.params.entityLanguages?.length) {
-      const languages = this.params.entityLanguages;
-      q = q.filter(function (row: RDatum) {
-        return r.expr(languages).contains(row("language"));
-      });
-    }
-    q = withinDataFields(q, this.params);
     if (this.params.entityId) {
       q = q.filter({ id: this.params.entityId });
     }
-    const label = nodeLabel(this.params.label);
-    if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
-    }
-    return q;
+    return withinEntityFilters(q, this.params);
   }
 
   /**

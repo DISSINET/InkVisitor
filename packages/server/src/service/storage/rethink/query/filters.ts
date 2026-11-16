@@ -125,13 +125,26 @@ export const withinIds = (stream: RStream, ids: string[] | null): RStream =>
   ids ? stream.filter((row: RDatum) => r.expr(ids).contains(row("id"))) : stream;
 
 /**
- * `stream` kept to the entities whose data carries one of the node's logical types and one of
- * its parts of speech; an empty list keeps it whole. An entity without the field matches no list
+ * `stream` kept to the entities passing the node's status, language, logical type, part of
+ * speech and label filters; an empty list keeps it whole. Logical type and part of speech are
+ * read from the entity's data, and an entity without the field matches no list
  */
-export function withinDataFields(stream: RStream, params: Query.INodeParams): RStream {
+export function withinEntityFilters(stream: RStream, params: Query.INodeParams): RStream {
   let q = stream;
+  const statuses = params.entityStatuses ?? [];
+  const languages = params.entityLanguages ?? [];
   const logicalTypes = params.entityLogicalTypes ?? [];
   const partsOfSpeech = params.entityPartsOfSpeech ?? [];
+  const label = nodeLabel(params.label);
+  if (statuses.length) {
+    q = q.filter((row: RDatum) => r.expr(statuses).contains(row("status")));
+  }
+  if (languages.length) {
+    q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
+  }
+  if (label) {
+    q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
+  }
   if (logicalTypes.length) {
     q = q.filter((row: RDatum) =>
       r.expr(logicalTypes).contains(row("data")("logicalType").default(null))
@@ -155,19 +168,9 @@ export async function idsPassingFilters(
     return [];
   }
   const db = unwrap(conn);
-  const statuses = params.entityStatuses ?? [];
-  const languages = params.entityLanguages ?? [];
-  const label = nodeLabel(params.label);
-  let q: RStream = r.table(TABLE.entities).getAll(r.args(ids));
-  if (statuses.length) {
-    q = q.filter((row: RDatum) => r.expr(statuses).contains(row("status")));
-  }
-  if (languages.length) {
-    q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
-  }
-  if (label) {
-    q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
-  }
-  q = withinIds(withinDataFields(q, params), await auditAndCoOccurrenceIds(db, params));
+  const q = withinIds(
+    withinEntityFilters(r.table(TABLE.entities).getAll(r.args(ids)), params),
+    await auditAndCoOccurrenceIds(db, params)
+  );
   return (q as unknown as RDatum)("id").run(db, QUERY_RUN_OPTIONS);
 }
