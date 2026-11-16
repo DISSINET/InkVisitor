@@ -8,7 +8,7 @@ import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
 import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
-import { auditAndCoOccurrenceIds, withinIds } from "./filters";
+import { auditAndCoOccurrenceIds, withinDataFields, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
@@ -96,16 +96,18 @@ export default class SearchEdge implements Query.IEdge {
       // resolving the constraints into an id set here is what makes them
       // apply to every edge type: each run() already matches against
       // targetIds(), so no edge needs to know about them. The edges that check
-      // statuses per candidate have no such check for a language or label, so
-      // either takes the statuses into the id set with it. The conditions
-      // nested under the target node always go through the set, as only the
-      // node evaluator can test them.
+      // statuses per candidate have no such check for a language, label,
+      // logical type or part of speech, so any of them takes the statuses
+      // into the id set with it. The conditions nested under the target node
+      // always go through the set, as only the node evaluator can test them.
       const filteredIds = await auditAndCoOccurrenceIds(db, this.node.params);
       const constrained =
         filteredIds !== null ||
         this.node.edges.length > 0 ||
         !!filters.label ||
         filters.languages.length > 0 ||
+        !!this.node.params.entityLogicalTypes?.length ||
+        !!this.node.params.entityPartsOfSpeech?.length ||
         (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
       this.targetEntityIds = constrained
         ? await this.constrainedTargetIds(db, filters, filteredIds)
@@ -129,7 +131,8 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Ids of entities passing `filters` (an empty list passes any), within
+   * Ids of entities passing `filters` and the target node's logical types and
+   * parts of speech (an empty list passes any), within
    * `filteredIds` (the date, user and co-occurrence filters, null for none) and
    * meeting the conditions nested under the target node, narrowed by the target node's
    * classes, else by the classes the edge's target can hold.
@@ -154,6 +157,7 @@ export default class SearchEdge implements Query.IEdge {
     if (label) {
       q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
+    q = withinDataFields(q, this.node.params);
     return this.node.match(db, withinIds(q, filteredIds));
   }
 

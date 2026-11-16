@@ -6,7 +6,7 @@ import { unwrap } from "../conn";
 import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edge";
-import { auditAndCoOccurrenceIds, withinIds } from "./filters";
+import { auditAndCoOccurrenceIds, withinDataFields, withinIds } from "./filters";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchNode implements Query.INode, ExplorePlan {
@@ -44,7 +44,8 @@ export default class SearchNode implements Query.INode, ExplorePlan {
 
   /**
    * Builds the base entity stream for this node from its own params
-   * (entityClasses / entityStatuses / entityLanguages / entityId / label). Nested child-node params are NOT
+   * (entityClasses / entityStatuses / entityLanguages / entityLogicalTypes / entityPartsOfSpeech /
+   * entityId / label). Nested child-node params are NOT
    * applied here - they describe the target of the parent edge and are
    * consumed by that edge, not used to filter the entity stream.
    */
@@ -68,6 +69,7 @@ export default class SearchNode implements Query.INode, ExplorePlan {
         return r.expr(languages).contains(row("language"));
       });
     }
+    q = withinDataFields(q, this.params);
     if (this.params.entityId) {
       q = q.filter({ id: this.params.entityId });
     }

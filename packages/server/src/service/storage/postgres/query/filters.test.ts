@@ -32,6 +32,8 @@ describe("hasFilters", () => {
     {},
     { entityStatuses: ["1"] },
     { entityLanguages: ["eng"] },
+    { entityLogicalTypes: ["1"] },
+    { entityPartsOfSpeech: ["noun"] },
     { label: "star" },
     { createdAfter: "2026-01-01T00:00:00.000Z" },
     { createdBefore: "2026-01-01T00:00:00.000Z" },

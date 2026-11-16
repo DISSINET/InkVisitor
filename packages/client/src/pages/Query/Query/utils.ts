@@ -75,6 +75,8 @@ export const isQueryRequestEmpty = (query: Query.INode, explore: Explore.IExplor
 export const NODE_FILTER_KEYS = [
   "entityStatuses",
   "entityLanguages",
+  "entityLogicalTypes",
+  "entityPartsOfSpeech",
   "label",
   "createdAfter",
   "createdBefore",
@@ -91,6 +93,8 @@ export const countNodeFilters = (params: Query.INodeParams): number =>
   [
     params.entityStatuses?.length,
     params.entityLanguages?.length,
+    params.entityLogicalTypes?.length,
+    params.entityPartsOfSpeech?.length,
     params.label?.trim(),
     params.createdAfter || params.createdBefore,
     params.updatedAfter || params.updatedBefore,

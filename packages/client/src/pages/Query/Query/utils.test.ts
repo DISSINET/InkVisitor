@@ -189,6 +189,12 @@ describe("countNodeFilters", () => {
       countNodeFilters({ createdBy: "u-1", updatedBy: "u-2", editedBy: ["u-1"], coOccurrence: ["c-1"] }),
     ).toBe(4);
     expect(countNodeFilters({ editedBy: [], coOccurrence: [] })).toBe(0);
+    expect(
+      countNodeFilters({
+        entityLogicalTypes: ["1" as EntityEnums.LogicalType, "2" as EntityEnums.LogicalType],
+        entityPartsOfSpeech: ["noun" as EntityEnums.ConceptPartOfSpeech],
+      }),
+    ).toBe(2);
   });
 });
 

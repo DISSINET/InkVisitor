@@ -120,3 +120,24 @@ export async function auditAndCoOccurrenceIds(
 /** `stream` kept to the entities whose id is in `ids`; null keeps it whole */
 export const withinIds = (stream: RStream, ids: string[] | null): RStream =>
   ids ? stream.filter((row: RDatum) => r.expr(ids).contains(row("id"))) : stream;
+
+/**
+ * `stream` kept to the entities whose data carries one of the node's logical types and one of
+ * its parts of speech; an empty list keeps it whole. An entity without the field matches no list
+ */
+export function withinDataFields(stream: RStream, params: Query.INodeParams): RStream {
+  let q = stream;
+  const logicalTypes = params.entityLogicalTypes ?? [];
+  const partsOfSpeech = params.entityPartsOfSpeech ?? [];
+  if (logicalTypes.length) {
+    q = q.filter((row: RDatum) =>
+      r.expr(logicalTypes).contains(row("data")("logicalType").default(null))
+    );
+  }
+  if (partsOfSpeech.length) {
+    q = q.filter((row: RDatum) =>
+      r.expr(partsOfSpeech).contains(row("data")("pos").default(null))
+    );
+  }
+  return q;
+}

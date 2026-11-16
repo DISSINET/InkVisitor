@@ -23,6 +23,10 @@ export namespace Query {
     entityClasses?: EntityEnums.Class[];
     entityStatuses?: EntityEnums.Status[];
     entityLanguages?: EntityEnums.Language[];
+    // read from the entity's data: logicalType on actant classes, pos on
+    // concepts and actions; an entity without the field matches neither
+    entityLogicalTypes?: EntityEnums.LogicalType[];
+    entityPartsOfSpeech?: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
     label?: string;
     // the date and user filters read the entity's audits, as the Explorer's
     // created at / updated at / created by / updated by / edited by filters do;

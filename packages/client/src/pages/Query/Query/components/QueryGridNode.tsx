@@ -2,7 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
+import {
+  actantLogicalTypeDict,
+  actionPartOfSpeechDict,
+  conceptPartOfSpeechDict,
+  entitiesDict,
+  entityStatusDict,
+} from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
@@ -48,6 +54,20 @@ import {
   StyledTooltipListItem,
 } from "./QueryStyles";
 import { ButtonSize } from "types";
+
+// the dictionary types its values as plain strings
+const logicalTypeOptions = actantLogicalTypeDict as {
+  value: EntityEnums.LogicalType;
+  label: string;
+}[];
+
+// a concept without a part of speech stores the empty value, which has no label to pick it by
+const partOfSpeechOptions = [
+  ...conceptPartOfSpeechDict.filter(
+    (option) => option.value !== EntityEnums.ConceptPartOfSpeech.Empty,
+  ),
+  ...actionPartOfSpeechDict,
+];
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -382,39 +402,51 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 <StyledRow>
                   <StyledRowHeader>status</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      // params.entityStatuses is a list on purpose - the backend
-                      // matches any status in it, so the picker can become multi later
-                      value={node.params.entityStatuses?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityStatuses ?? []}
                       placeholder="any status"
-                      isClearable
                       width="full"
                       options={entityStatusDict.map((status) => ({
                         value: status.value,
                         label: status.label,
                       }))}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                        })
-                      }
+                      onChange={(entityStatuses) => updateFilters({ entityStatuses })}
                     />
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
                   <StyledRowHeader>language</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      value={node.params.entityLanguages?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityLanguages ?? []}
                       placeholder="any language"
-                      isClearable
                       width="full"
                       options={orderedLanguageDict}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityLanguages: newValue ? [newValue as EntityEnums.Language] : [],
-                        })
-                      }
+                      onChange={(entityLanguages) => updateFilters({ entityLanguages })}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>logical type</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityLogicalTypes ?? []}
+                      placeholder="any logical type"
+                      width="full"
+                      options={logicalTypeOptions}
+                      onChange={(entityLogicalTypes) => updateFilters({ entityLogicalTypes })}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>part of speech</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityPartsOfSpeech ?? []}
+                      placeholder="any part of speech"
+                      width="full"
+                      options={partOfSpeechOptions}
+                      onChange={(entityPartsOfSpeech) => updateFilters({ entityPartsOfSpeech })}
                     />
                   </StyledRowControl>
                 </StyledRow>
@@ -428,9 +460,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.CreatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date created</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.createdAfter)}
@@ -445,9 +475,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.UpdatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date updated</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.updatedAfter)}
