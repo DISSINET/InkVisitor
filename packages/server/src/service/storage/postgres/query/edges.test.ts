@@ -41,3 +41,10 @@ describe.each(INDEXED)("%s", (type, column) => {
     expect(sql(type, null)).not.toContain(`${column} &&`);
   });
 });
+
+describe("getEdgeInstance", () => {
+  it("takes a string for the edge type only", () => {
+    expect(() => getEdgeInstance({ type: ["SE"] as any })).toThrow("unknown edge type");
+    expect(() => getEdgeInstance({ type: "SE" as any })).not.toThrow();
+  });
+});

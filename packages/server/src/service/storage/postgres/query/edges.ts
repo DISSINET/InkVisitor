@@ -421,14 +421,14 @@ function hasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass
   return `${ownCandidates(p, DbEnums.Indexes.PropsRecursive, targets)} AND EXISTS (SELECT 1 FROM ${PROPS("e")} WHERE ${match})`;
 }
 
-/** the rows `s` an edge targets: by id when pinned, by the node's classes when unpinned, every row otherwise (entitiesOfClasses) */
-function targetRows(e: SearchEdge, p: Params): string {
+/** the rows `row` an edge targets: by id when pinned or constrained, by the node's classes otherwise, every row without either (entitiesOfClasses) */
+function targetRows(e: SearchEdge, p: Params, row = "s"): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
   if (targets) {
-    return `s.id = ${anyOf(p, targets)}`;
+    return `${row}.id = ${anyOf(p, targets)}`;
   }
-  return classes.length ? `s.class = ${anyOf(p, classes)}` : "TRUE";
+  return classes.length ? `${row}.class = ${anyOf(p, classes)}` : "TRUE";
 }
 
 /** e is a filled `kind` side of a top-level prop of a target entity (runInversePropEdge) */
@@ -674,11 +674,13 @@ export const PREDICATES: Record<string, Predicate> = {
   "CT:": (e, p) => territoryHasChild(e, p, "any"),
   "CT:D": (e, p) => territoryHasChild(e, p, "direct"),
   "I_CT:": territoryHasParent,
+  // e is itself a target row (EdgeIsEntity)
+  SE: (e, p) => targetRows(e, p, "e"),
 };
 
 export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreResolvers): SearchEdge {
   // the type comes from the request body, so inherited Object.prototype keys must not count as known
-  if (!data.type || !Object.prototype.hasOwnProperty.call(PREDICATES, data.type)) {
+  if (typeof data.type !== "string" || !Object.prototype.hasOwnProperty.call(PREDICATES, data.type)) {
     throw new InternalServerError(`unknown edge type: ${data.type}`);
   }
   const edge = new SearchEdge(data);

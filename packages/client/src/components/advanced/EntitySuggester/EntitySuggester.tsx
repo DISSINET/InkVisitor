@@ -15,14 +15,14 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
-import { Suggester, Button } from "components";
+import { Suggester, Button, IconWithTooltip } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useDetailPanelReveal, useEntityEditing, useSearchParams } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
-import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
+import { IcoHome } from "Theme/icons";
 import {
   ButtonSize,
   EntityColors,
@@ -92,6 +92,10 @@ interface EntitySuggesterProps {
   // highlights the elvl group while the suggester is focused)
   onFocusChange?: (isFocused: boolean) => void;
   preSuggestions?: IEntity[];
+  // listed in the given order above the search hits, whatever is typed, each
+  // marked with the home icon; not meant to be combined with preSuggestions,
+  // which would show a second list
+  prioritySuggestions?: IEntity[];
 
   disableCreate?: boolean;
   disableTemplateInstantiation?: boolean;
@@ -172,6 +176,7 @@ const EntitySuggesterFull: React.FC<
   rightContent,
   onFocusChange,
   preSuggestions,
+  prioritySuggestions = [],
 
   disableCreate: disableCreateProp = false,
   disableTemplateInstantiation: disableTemplateInstantiationProp = false,
@@ -305,16 +310,20 @@ const EntitySuggesterFull: React.FC<
     staleTime: Infinity,
   });
 
-  const filterSuggestions = (suggestions: IResponseEntity[]) => {
+  const filterSuggestions = (suggestions: IResponseEntity[]) =>
+    filterSuggestionsInOrder(
+      deepCopy(suggestions).sort((a, b) => {
+        if (a.status === EntityEnums.Status.Discouraged) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }),
+    );
+
+  const filterSuggestionsInOrder = (suggestions: IResponseEntity[]) => {
     return (
-      deepCopy(suggestions)
-        .sort((a, b) => {
-          if (a.status === EntityEnums.Status.Discouraged) {
-            return 1;
-          } else {
-            return -1;
-          }
-        })
+      suggestions
         .filter((s) =>
           filterEditorRights &&
           userRole !== UserEnums.Role.Admin &&
@@ -340,7 +349,7 @@ const EntitySuggesterFull: React.FC<
           const icons: React.ReactNode[] = [];
 
           if (territoryActantIds?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} size={12} />);
+            icons.push(<IcoHome key={entity.id} size={12} />);
           }
 
           return {
@@ -546,11 +555,25 @@ const EntitySuggesterFull: React.FC<
     return filteredSuggestions;
   };
 
+  const priorityRows = filterSuggestionsInOrder(
+    getClassFilteredPreSuggestions(prioritySuggestions),
+  ).map((suggestion) => ({
+    ...suggestion,
+    icons: [
+      <IconWithTooltip
+        key="priority"
+        icon={<IcoHome size={12} />}
+        tooltipLabel="Used in the statements nearby"
+      />,
+    ],
+  }));
+
   return selectedCategory && allCategories && user ? (
     <>
       <Suggester
         isFetching={isFetchingStatement}
         suggestions={suggestions || []}
+        prioritySuggestions={priorityRows}
         preSuggestions={
           preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }

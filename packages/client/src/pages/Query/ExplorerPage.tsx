@@ -911,6 +911,22 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               onHeaderClick={handleMaximizeExplorerBox}
               buttons={[
                 <>
+                  {!explorerBoxMaximized && (
+                    <SavedQueriesPanel
+                      queryState={queryState}
+                      queryStateDispatch={queryStateDispatch}
+                      includeEquivalents={includeEquivalents}
+                      includeSubordinates={includeSubordinates}
+                      onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                      onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                      exploreFilters={exploreState.filters}
+                      exploreDispatch={exploreStateDispatch}
+                      tableColumns={tableColumns}
+                      onLoadTableColumns={handleLoadTableColumns}
+                    />
+                  )}
+                </>,
+                <>
                   {/* collapsing the left panel only makes sense while the detail
                       panel is there to take over the freed width */}
                   {isDetailOpen && (
@@ -1039,20 +1055,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   />
                 </StyledSearchRow>
               </StyledSearchRows>
-              {!explorerBoxMaximized && (
-                <SavedQueriesPanel
-                  queryState={queryState}
-                  queryStateDispatch={queryStateDispatch}
-                  includeEquivalents={includeEquivalents}
-                  includeSubordinates={includeSubordinates}
-                  onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
-                  onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
-                  exploreFilters={exploreState.filters}
-                  exploreDispatch={exploreStateDispatch}
-                  tableColumns={tableColumns}
-                  onLoadTableColumns={handleLoadTableColumns}
-                />
-              )}
             </Box>
             <Box
               noFrame

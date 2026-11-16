@@ -539,6 +539,68 @@ describe("explore: operators, nesting and target expansion", () => {
   });
 });
 
+describe("explore: SE, the entity is the target node itself", () => {
+  it("matches by the target's classes, pinned entity or filters, and any entity without them", async () => {
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3" })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3", includeEquivalents: true })])).toEqual(["c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { label: "star" })])).toEqual(["c-2", "c-3"]);
+    const status1 = "1" as EntityEnums.Status;
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Concept], entityStatuses: [status1] })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE")])).toEqual(ALL);
+  });
+
+  it("stays within the base of the node it hangs off", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityId: "p-1" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept, C.Person] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+  });
+
+  it("each SE edge of an OR root is a start node with conditions of its own", async () => {
+    // every Location, and the Persons classified as c-2
+    const classified = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(
+      await explore({}, [edge("SE", { entityClasses: [C.Location] }), edge("SE", classified)], Query.NodeOperator.Or)
+    ).toEqual(["l-1", "p-1"]);
+    // an entity two start nodes match comes once
+    const all = await storage.explore
+      .plan(node({}, [edge("SE", { entityClasses: [C.Person] }), edge("SE", classified)], Query.NodeOperator.Or), resolvers)
+      .run(conn);
+    expect(all).toEqual(["p-1", "p-2"]);
+  });
+
+  it("a pinned start node keeps its nested conditions and a negative edge subtracts the target", async () => {
+    const c3SubclassOfC2 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC2)])).toEqual(["c-3"]);
+    const c3SubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC1)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { label: "star" }, Query.EdgeLogic.Negative)])).toEqual(["c-1", "c-4"]);
+  });
+
+  it("runs over the survivors of the edge before it and adds to an Or union", async () => {
+    // the Concepts with a superclass are c-1 and c-2
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { label: "star" })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { entityId: "c-1" })])).toEqual(["c-1"]);
+    expect(
+      await explore(
+        { entityClasses: [C.Concept] },
+        [edge("SE", { label: "star" }, Query.EdgeLogic.Negative), edge("SE", { entityId: "c-3" })],
+        Query.NodeOperator.Or
+      )
+    ).toEqual(["c-1", "c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { entityId: "nope" })])).toEqual([]);
+  });
+
+  // the stats view caps the list by position, so start nodes come mixed, as any other result
+  it("an Or union comes in code point order whatever the order of its edges", async () => {
+    const run = (edges: Partial<Query.IEdge>[]) => storage.explore.plan(node({}, edges, Query.NodeOperator.Or), resolvers).run(conn);
+    const persons = edge("SE", { entityClasses: [C.Person] });
+    const concepts = edge("SE", { entityClasses: [C.Concept] });
+    expect(await run([persons, concepts])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
+    expect(await run([concepts, persons])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
+  });
+});
+
 // the dates and users read the audits as the Explorer's created at / updated at / created by /
 // updated by / edited by filters do
 describe("explore: audit and co-occurrence filters", () => {
