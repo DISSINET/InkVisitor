@@ -14,15 +14,19 @@ import {
 
 const quiet = { ignoreErrorToast: true };
 
+// a walk reuses the statements fetched in this time and fetches older ones again
+const STATEMENTS_STALE_TIME = 10_000;
+
 /**
  * Entities of the class (any class for the wildcard) already used in statements
  * around the selection, closest first: the statements anchored around the
  * selection, then the statements of the subT the selection sits in (nearest
  * anchors first), then up the T tree. A territory is fetched only while the
- * list is not full, and an unreadable territory ends the walk. The keys sit
- * under "statement", which statement saves invalidate, so the walk after a
- * save reads fresh statements; changes saved by other users show once the
- * one-minute caches go stale. The T tree comes from the cache the
+ * list is not full, and an unreadable territory ends the walk. The walk runs
+ * again each time the highlight menu opens, reusing statements fetched in the
+ * last 10 seconds, so changes saved by other users show within that time. The
+ * keys sit under "statement", which statement saves invalidate, so the walk
+ * after a save reads fresh statements. The T tree comes from the cache the
  * Main page keeps loaded; without it only the anchored statements are listed.
  * While a new walk runs, e.g. for another class, the entities come from the
  * statements the previous walk fetched, so the list does not empty meanwhile.
@@ -57,7 +61,7 @@ export const useAnnotatorNearbySuggestions = (
               .fetchQuery({
                 queryKey: ["statement", id],
                 queryFn: async () => (await api.statementGet(id, quiet)).data,
-                staleTime: 60_000,
+                staleTime: STATEMENTS_STALE_TIME,
               })
               .catch(() => undefined)
           )
@@ -76,7 +80,7 @@ export const useAnnotatorNearbySuggestions = (
           .fetchQuery({
             queryKey: ["statement", "annotator-nearby-territory", territoryId],
             queryFn: async () => (await api.territoryGet(territoryId, quiet, false)).data,
-            staleTime: 60_000,
+            staleTime: STATEMENTS_STALE_TIME,
           })
           .catch(() => undefined);
         if (!territory) {
@@ -87,7 +91,8 @@ export const useAnnotatorNearbySuggestions = (
       return { anchored, levels };
     },
     enabled: enabled && api.isLoggedIn() && (containingIds.length > 0 || !!leafTerritoryId),
-    staleTime: 60_000,
+    // every open walks again, whatever the app-wide default
+    staleTime: 0,
     placeholderData: keepPreviousData,
     retry: false,
   });

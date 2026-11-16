@@ -100,8 +100,8 @@ const settle = async () => {
   }
 };
 
-const mount = async (leafTerritoryId: string | undefined) => {
-  const client = new QueryClient();
+// opens the highlight menu; a client passed in keeps the cache of an earlier open
+const mount = async (leafTerritoryId: string | undefined, client = new QueryClient()) => {
   // the T tree the Main page keeps loaded
   client.setQueryData(["tree"], tree);
   view = render(
@@ -113,12 +113,17 @@ const mount = async (leafTerritoryId: string | undefined) => {
   return client;
 };
 
+const close = () => {
+  view?.unmount();
+  view = null;
+};
+
 const fetchedTerritories = () => territoryGet.mock.calls.map(([id]) => id);
 
 afterEach(() => {
-  view?.unmount();
-  view = null;
+  close();
   vi.clearAllMocks();
+  vi.useRealTimers();
 });
 
 describe("useAnnotatorNearbySuggestions", () => {
@@ -171,6 +176,32 @@ describe("useAnnotatorNearbySuggestions", () => {
       await client.invalidateQueries({ queryKey: ["statement"] });
     });
     await settle();
+    expect(view?.texts("li")).toEqual(ids(1, 3));
+  });
+
+  it("walks again at every open, fetching only statements older than 10 seconds", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    serve(statement("s", "ch", ids(1, 1)), {
+      ch: [statement("c", "ch", ids(2, 2))],
+      book: [],
+      root: [],
+    });
+    const client = await mount("ch");
+    close();
+
+    // another user adds an actant to the statement in the subT
+    serve(statement("s", "ch", ids(1, 1)), {
+      ch: [statement("c", "ch", ids(2, 3))],
+      book: [],
+      root: [],
+    });
+    await mount("ch", client);
+    expect(view?.texts("li")).toEqual(ids(1, 2));
+    expect(fetchedTerritories()).toEqual(["ch", "book", "root"]);
+    close();
+
+    vi.setSystemTime(Date.now() + 10_000);
+    await mount("ch", client);
     expect(view?.texts("li")).toEqual(ids(1, 3));
   });
 });
