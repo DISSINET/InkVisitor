@@ -14,6 +14,7 @@ import {
 } from "./ExplorerTable/ExplorerTableStyles";
 import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
 import { ButtonSize } from "types";
+import { IcoExchange } from "Theme/icons";
 
 /** Row-selection + batch-action controls. Only meaningful for the table view
  * (the stats view has no row selection), so this block is optional. */
@@ -23,6 +24,7 @@ export interface ExplorerSelectionControls {
   hasPartialSelection: boolean;
   rowsTotal: number;
   onAllRowsSelect: (checked: boolean) => void;
+  onInvertSelection: () => void;
   setRowLastClicked: (value: number) => void;
   batchActionSelected: BatchAction;
   setBatchActionSelected: (value: BatchAction) => void;
@@ -91,6 +93,15 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
           <StyledBatchSelect>
             {renderHeaderCheckBox(selection)}
             <StyledCounter>{`${selection.selectedCount}/${selection.rowsTotal}`}</StyledCounter>
+            <Button
+              icon={<IcoExchange size={13} />}
+              color="primary"
+              inverted
+              noBackground
+              tooltipLabel="invert selection"
+              onClick={selection.onInvertSelection}
+              disabled={selection.rowsTotal === 0}
+            />
           </StyledBatchSelect>
           <Dropdown.Single.Basic
             width={140}

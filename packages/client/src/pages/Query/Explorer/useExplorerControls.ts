@@ -126,6 +126,13 @@ export const useExplorerControls = ({
     [entityIds],
   );
 
+  // over the whole result, not just the loaded rows; selected ids outside the
+  // current result are dropped
+  const handleInvertSelection = useCallback(() => {
+    setSelectedEntityIds(entityIds.filter((id) => !selectedEntityIdsSet.has(id)));
+    setRowLastClicked(-1);
+  }, [entityIds, selectedEntityIdsSet]);
+
   const selectedInCurrentCount = useMemo(
     () => entityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
     [entityIds, selectedEntityIdsSet],
@@ -159,21 +166,8 @@ export const useExplorerControls = ({
       toast.info("UUIDs copied to clipboard");
       return;
     }
-    if (batchActionSelected === BatchAction.invert_selection) {
-      // over the whole result, not just the loaded rows; selected ids outside
-      // the current result are dropped
-      setSelectedEntityIds(entityIds.filter((id) => !selectedEntityIdsSet.has(id)));
-      setRowLastClicked(-1);
-      return;
-    }
     setIsBatchModalOpen(true);
-  }, [
-    batchActionSelected,
-    selectedEntityIds,
-    selectedEntityIdsSet,
-    entityIds,
-    onOpenEntitiesInDetail,
-  ]);
+  }, [batchActionSelected, selectedEntityIds, onOpenEntitiesInDetail]);
 
   return {
     selectedEntityIds,
@@ -193,6 +187,7 @@ export const useExplorerControls = ({
     getEntityIdAtRow,
     handleRowSelect,
     handleAllRowsSelect,
+    handleInvertSelection,
     handleApplyBatchAction,
     handleExport,
   };
