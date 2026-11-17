@@ -104,6 +104,10 @@ type IFilterDocuments = {
 export const HTML_CAPTURE_STORAGE_KEY = "inkvisitor:htmlResponseCaptures";
 export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
 
+// parallel requests all receive the same proxy page, so one shared id keeps the
+// burst to a single toast while it is on screen
+const HTML_RESPONSE_TOAST_ID = "html-response";
+
 const triggerDownload = (blob: Blob, fileName: string) => {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -340,6 +344,7 @@ class Api {
           title={errors.HtmlResponseError.title}
           message={errors.HtmlResponseError.message}
         />,
+        { toastId: HTML_RESPONSE_TOAST_ID },
       );
       return Promise.reject(
         new AxiosError(
