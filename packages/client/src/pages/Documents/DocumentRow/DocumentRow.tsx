@@ -206,7 +206,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         ) : null}
       </StyledReference>
       <StyledCount>
-        {countTotal} anchors
+        {countTotal} {countTotal === 1 ? "entity" : "entities"}
         {Object.values(EntityEnums.Class)
           .filter((eClass) => {
             return document.entityIds[eClass]?.length;
@@ -226,7 +226,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
               <React.Fragment key={eClass}>
                 <StyledCountTag
                   style={{ backgroundColor: classColor }}
-                  title={`${count} ${entityClass.label}s anchors`}
+                  title={`${count} ${entityClass.label} ${count === 1 ? "entity" : "entities"}`}
                 >
                   {eClass} {count}
                 </StyledCountTag>

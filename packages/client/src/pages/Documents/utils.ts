@@ -2,7 +2,7 @@ import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { getEntityLabel } from "utils/utils";
 import { DocumentSortDirection, DocumentSortField, DocumentWithResource } from "./types";
 
-const getDocumentAnchorCount = (document: IDocument): number =>
+const getDocumentEntityCount = (document: IDocument): number =>
   Object.values(document.entityIds).reduce(
     (total, entityIds) => total + (Array.isArray(entityIds) ? entityIds.length : 0),
     0
@@ -42,11 +42,11 @@ export const compareDocuments = (
     );
   }
 
-  const anchorDiff = getDocumentAnchorCount(a.document) - getDocumentAnchorCount(b.document);
+  const entityDiff = getDocumentEntityCount(a.document) - getDocumentEntityCount(b.document);
   // ↑ asc = highest first; ↓ desc = lowest first (inverse of text columns)
-  const anchorDirection = sortDirection === "asc" ? -1 : 1;
-  if (anchorDiff !== 0) {
-    return anchorDiff * anchorDirection;
+  const entityDirection = sortDirection === "asc" ? -1 : 1;
+  if (entityDiff !== 0) {
+    return entityDiff * entityDirection;
   }
 
   return (

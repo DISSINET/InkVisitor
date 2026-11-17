@@ -97,6 +97,6 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
       </StyledBulkExportWrap>
     </StyledActionsHeaderCell>
     <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
-    <SortableHeader field="anchorCount" label="Anchors" sort={sort} onSort={onSort} />
+    <SortableHeader field="entityCount" label="Entities" sort={sort} onSort={onSort} />
   </StyledGridHeader>
 );
