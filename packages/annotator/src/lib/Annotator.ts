@@ -1061,7 +1061,8 @@ export class Annotator {
 
   /**
    * Detects whether the mouse is over tag markup (`<tag>` or `</tag>`) and
-   * emits the owning opening Tag, or null when not over any markup.
+   * emits the owning opening Tag, or null when not over any markup. An
+   * orphaned closing tag emits itself; listeners read only its tag name.
    *
    * In RAW mode this reports `<id>` markup under the pointer. In HIGHLIGHT mode
    * markup is hidden, but Territory anchor corner markers (#2887) are drawn and
@@ -1123,6 +1124,19 @@ export class Annotator {
 
         if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
           this.onAnchorTagHoverCb(openTag, position);
+          return;
+        }
+      }
+    }
+
+    // An orphaned closing tag has no opening tag to report, so it reports itself.
+    for (const segment of this.text.segments) {
+      for (const closeTag of segment.closingTags) {
+        const closeStart = closeTag.getAbsoluteTagPosition(this.text.segments);
+        const closeEnd = closeStart + closeTag.getTagLength();
+
+        if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
+          this.onAnchorTagHoverCb(closeTag, position);
           return;
         }
       }
