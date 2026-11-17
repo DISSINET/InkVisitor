@@ -90,7 +90,7 @@ export const EntityDetailInverseRelation: React.FC<
 
           return (
             <StyledTagWrapper key={key}>
-              <EntityTag entity={relationEntity}  />
+              <EntityTag entity={relationEntity} fullWidth />
             </StyledTagWrapper>
           );
         })}

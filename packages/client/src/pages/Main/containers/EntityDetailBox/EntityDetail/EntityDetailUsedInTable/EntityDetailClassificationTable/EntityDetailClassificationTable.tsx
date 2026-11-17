@@ -27,7 +27,7 @@ export const EntityDetailClassificationTable: React.FC<
           const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag key={entity.id} entity={entity} />}</>;
+          return <>{entity && <EntityTag key={entity.id} entity={entity} fullWidth />}</>;
         },
       },
       {
