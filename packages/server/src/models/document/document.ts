@@ -510,14 +510,19 @@ export default class Document implements IDocument, IDbModel {
   }
 
   static async backfillEntityIds(conn: Connection): Promise<number> {
+    const isEmpty = (entityIds: unknown) =>
+      Object.values(Document.normalizeEntityIds(entityIds)).every((arr) => arr.length === 0);
     const docs = await Document.getAll(conn);
     let count = 0;
     for (const raw of docs) {
       const doc = new Document(raw);
-      const normalized = Document.normalizeEntityIds(doc.entityIds);
-      const isEmpty = Object.values(normalized).every((arr) => arr.length === 0);
-      if (isEmpty && doc.content) {
+      if (isEmpty(doc.entityIds) && doc.content) {
         await doc.preprocess(conn);
+        // runs on every server start; a document with no anchor resolving to
+        // an existing entity still has empty entityIds, so there is nothing to store
+        if (isEmpty(doc.entityIds)) {
+          continue;
+        }
         await doc.update(conn, {
           entityIds: doc.entityIds,
           anchors: doc.anchors,
