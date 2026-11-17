@@ -13,6 +13,7 @@ import {
   StyledAppendSection,
   StyledAppendTag,
   StyledAppendText,
+  StyledAppendWarning,
   StyledConflictOption,
   StyledConflictSide,
 } from "./EntityImportModalStyles";
@@ -73,6 +74,11 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
           : undefined) ?? value;
     return (
       <StyledAppendPanel>
+        {append.labelMismatch && (
+          <StyledAppendWarning>
+            {`The id belongs to "${append.stored.labels[0]}" in the database, and none of the imported labels matches it. Check that the id points at the entity you mean.`}
+          </StyledAppendWarning>
+        )}
         {append.conflicts.length > 0 && (
           <>
             <StyledAppendHeading>

@@ -400,6 +400,16 @@ export const StyledConflictSide = styled.span`
   opacity: 0.7;
 `;
 
+// the id of the input may point at another entity than the input means
+export const StyledAppendWarning = styled.p`
+  padding: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["danger"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  overflow-wrap: anywhere;
+`;
+
 export const StyledAppendText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};

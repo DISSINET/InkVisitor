@@ -40,7 +40,25 @@ export interface AppendInfo {
   stored: IEntity;
   conflicts: AppendConflict[];
   skipped: AppendSkips;
+  // no label of the input matches a stored one: its id may point at another
+  // entity than the one the input means
+  labelMismatch?: boolean;
 }
+
+// case, accents and spacing don't tell two labels apart here
+const looseLabel = (label: string) =>
+  label
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+/** Whether none of the imported labels matches a stored one. */
+export const labelsDiffer = (stored: string[], imported: string[]): boolean => {
+  const known = new Set(stored.map(looseLabel));
+  return !imported.some((label) => known.has(looseLabel(label)));
+};
 
 export const emptySkips = (): AppendSkips => ({
   labels: 0,

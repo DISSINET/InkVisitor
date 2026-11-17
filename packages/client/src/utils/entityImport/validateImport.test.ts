@@ -289,6 +289,23 @@ describe("validateImport appending to a stored entity", () => {
     expect(wrongClass.errors.map((error) => error.path)).toEqual(["references[0].value"]);
   });
 
+  it("warns when the input's labels match none of the stored entity's", async () => {
+    const context = contextWith([stored]);
+    const validate = async (labels: string[], fromDrafts = false) =>
+      (
+        await validateImport(JSON.stringify({ id: "augustine", class: "P", labels }), {
+          ...context,
+          fromDrafts,
+        })
+      ).plan!.appends.augustine.labelMismatch;
+
+    expect(await validate(["Monica"])).toBe(true);
+    // case, accents and spacing don't count
+    expect(await validate(["Monica", "  augustíne "])).toBe(false);
+    // "append to it" was picked by the user
+    expect(await validate(["Monica"], true)).toBe(false);
+  });
+
   it("refuses to append to an entity of another class", async () => {
     const context = contextWith([stored]);
     const { errors } = await validateImport(

@@ -6,6 +6,7 @@ import {
   emptySkips,
   isStale,
   keepStoredIds,
+  labelsDiffer,
   mergeIntoStored,
   sameEntityBy,
 } from "./appendMerge";
@@ -365,6 +366,9 @@ export const validateImport = async (
       merged.set(item.entity.id, result.entity);
       appends[item.entity.id].conflicts = result.conflicts;
       appends[item.entity.id].skipped = result.skipped;
+      // the drafts' own append was picked by the user, the input's id was not
+      appends[item.entity.id].labelMismatch =
+        !context.fromDrafts && labelsDiffer(stored.labels, item.entity.labels);
     } else {
       merged.set(item.entity.id, keepStoredIds(stored, item.entity));
     }

@@ -14,6 +14,7 @@ import {
   IcoExclamation,
   IcoPlus,
   IcoWarning,
+  IcoWarningOutline,
 } from "Theme/icons";
 import { ImportDraft } from "utils/entityImport";
 import { getEntityLabel } from "utils/utils";
@@ -152,7 +153,10 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
         entities
           .filter(
             (entity) =>
-              !leftOut.has(entity.id) && (conflictsOf(entity) > 0 || errorIds.has(entity.id))
+              !leftOut.has(entity.id) &&
+              (conflictsOf(entity) > 0 ||
+                errorIds.has(entity.id) ||
+                !!draft.appends?.[entity.id]?.labelMismatch)
           )
           .map((entity) => entity.id)
       ),
@@ -412,6 +416,13 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                             icon={<IcoExclamation />}
                             color="danger"
                             tooltipLabel="the import can't create it as it is; see the errors above"
+                          />
+                        )}
+                        {!reason && append?.labelMismatch && (
+                          <IconWithTooltip
+                            icon={<IcoWarningOutline />}
+                            color="danger"
+                            tooltipLabel="its labels match none of the stored entity's; check the id"
                           />
                         )}
                         {!reason && rowConflicts > 0 && (
