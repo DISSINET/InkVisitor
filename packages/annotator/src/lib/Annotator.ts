@@ -1061,8 +1061,9 @@ export class Annotator {
 
   /**
    * Detects whether the mouse is over tag markup (`<tag>` or `</tag>`) and
-   * emits the owning opening Tag, or null when not over any markup. An
-   * orphaned closing tag emits itself; listeners read only its tag name.
+   * emits the Tag under the pointer, or null when not over any markup. A
+   * closing tag emits itself, paired or orphaned; listeners read only the tag
+   * name, which a paired closing tag shares with its opening tag.
    *
    * In RAW mode this reports `<id>` markup under the pointer. In HIGHLIGHT mode
    * markup is hidden, but Territory anchor corner markers (#2887) are drawn and
@@ -1105,38 +1106,12 @@ export class Annotator {
     const hoverAbsRawIndex = this.text.getAbsTextIndexFromPosition(segmentPos);
 
     for (const segment of this.text.segments) {
-      for (const openTag of segment.openingTags) {
-        const openStart = openTag.getAbsoluteTagPosition(this.text.segments);
-        const openEnd = openStart + openTag.getTagLength();
+      for (const tag of [...segment.openingTags, ...segment.closingTags]) {
+        const start = tag.getAbsoluteTagPosition(this.text.segments);
+        const end = start + tag.getTagLength();
 
-        if (hoverAbsRawIndex >= openStart && hoverAbsRawIndex < openEnd) {
-          this.onAnchorTagHoverCb(openTag, position);
-          return;
-        }
-
-        const match = this.findMatchingClosingTag(openTag);
-        if (!match) {
-          continue;
-        }
-
-        const closeStart = match.closeTag.getAbsoluteTagPosition(this.text.segments);
-        const closeEnd = closeStart + match.closeTag.getTagLength();
-
-        if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
-          this.onAnchorTagHoverCb(openTag, position);
-          return;
-        }
-      }
-    }
-
-    // An orphaned closing tag has no opening tag to report, so it reports itself.
-    for (const segment of this.text.segments) {
-      for (const closeTag of segment.closingTags) {
-        const closeStart = closeTag.getAbsoluteTagPosition(this.text.segments);
-        const closeEnd = closeStart + closeTag.getTagLength();
-
-        if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
-          this.onAnchorTagHoverCb(closeTag, position);
+        if (hoverAbsRawIndex >= start && hoverAbsRawIndex < end) {
+          this.onAnchorTagHoverCb(tag, position);
           return;
         }
       }
