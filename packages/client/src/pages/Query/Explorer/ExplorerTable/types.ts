@@ -1,6 +1,7 @@
 export enum BatchAction {
   open_in_detail = "open_in_detail",
   copy_uuids = "copy_uuids",
+  invert_selection = "invert_selection",
   export_tsv = "export_tsv",
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
@@ -17,6 +18,7 @@ export type BatchOption = {
 export const batchOptions: BatchOption[] = [
   { value: BatchAction.open_in_detail, label: "open in detail" },
   { value: BatchAction.copy_uuids, label: "copy UUIDs to clipboard" },
+  { value: BatchAction.invert_selection, label: "invert selection" },
   { value: BatchAction.export_tsv, label: "export as tsv" },
   { value: BatchAction.add_metaprop, label: "add new metaproperty" },
   { value: BatchAction.add_reference, label: "add new reference" },
