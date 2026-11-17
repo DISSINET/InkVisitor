@@ -111,11 +111,17 @@ export const RelationAuditTable: React.FC<RelationAuditTable> = ({
                     .map((id) => {
                       const ent = entities?.[id];
                       return ent ? (
-                        <EntityTag key={id} entity={ent} disableTooltip />
+                        <EntityTag key={id} entity={ent} disableTooltip fullWidth />
                       ) : (
                         // a since-deleted counterpart resolves to nothing - suppress
                         // the global 404 error toast; EntityTagById degrades to the id
-                        <EntityTagById key={id} entityId={id} disableTooltip disableToast />
+                        <EntityTagById
+                          key={id}
+                          entityId={id}
+                          disableTooltip
+                          disableToast
+                          fullWidth
+                        />
                       );
                     })}
                 </StyledRelationAuditEntities>

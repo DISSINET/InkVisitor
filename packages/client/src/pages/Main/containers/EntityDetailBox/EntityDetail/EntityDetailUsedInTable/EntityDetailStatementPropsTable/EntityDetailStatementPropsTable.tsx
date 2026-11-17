@@ -67,7 +67,7 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
       <TreeLineContainer $isLevel1={isLevel1} $marginLeft={isLevel1 ? 0 : (useCase.lvl - 1) * 1.5}>
         <StyledTableRow $isLevel1={isLevel1} $marginLeft={0}>
           <StyledTagWrapper>
-            {statementEntity && <EntityTag key={index} entity={statementEntity} />}
+            {statementEntity && <EntityTag key={index} entity={statementEntity} fullWidth />}
           </StyledTagWrapper>
           <div>{originEntity && renderEntityTag(originEntity)}</div>
           <div>{typeEntity && renderEntityTag(typeEntity)}</div>
