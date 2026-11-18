@@ -63,7 +63,8 @@ import {
   StyledSearchRow,
   StyledSearchRowCaption,
   StyledSearchRows,
-  StyledSearchRowSpacer,
+  StyledSearchRowStack,
+  StyledSearchRunCell,
 } from "./ExplorerPageStyles";
 import { FilterPopover } from "./FilterPopover/FilterPopover";
 import { SearchFiltersPopover } from "./FloatingSearchContainer/SearchFiltersPopover";
@@ -953,101 +954,107 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   filters narrow the query matches, then the expansion adds to
                   what is left */}
               <StyledSearchRows>
-                <StyledSearchRow data-run-on-enter="true">
-                  {!compactHeader && (
-                    <StyledSearchRowCaption>Narrow results</StyledSearchRowCaption>
-                  )}
-                  <ExplorerTableLabelFilter
-                    filters={exploreState.filters}
-                    dispatch={exploreStateDispatch}
-                  />
-                  <FilterPopover
-                    label="UUIDs"
-                    title="Entity UUIDs"
-                    count={uuidFilterCount}
-                    tooltipLabel="keep only the entities with these UUIDs"
-                    placement="top-start"
-                    onClear={() => {
-                      exploreStateDispatch({
-                        type: ExploreActionType.setUuidsFilter,
-                        payload: { ids: [] },
-                      });
-                      setUuidsClearSignal((signal) => signal + 1);
-                    }}
-                  >
-                    <ExplorerTableIdsFilter
+                <StyledSearchRowStack>
+                  <StyledSearchRow data-run-on-enter="true">
+                    {!compactHeader && (
+                      <StyledSearchRowCaption>Narrow results</StyledSearchRowCaption>
+                    )}
+                    <ExplorerTableLabelFilter
                       filters={exploreState.filters}
                       dispatch={exploreStateDispatch}
-                      clearSignal={uuidsClearSignal}
                     />
-                  </FilterPopover>
-                  <SearchFiltersPopover
-                    filters={exploreState.filters}
-                    dispatch={exploreStateDispatch}
-                    placement="top-start"
-                  />
-                </StyledSearchRow>
-                <StyledSearchRow data-run-on-enter="true">
-                  {!compactHeader && (
-                    <StyledSearchRowCaption>Expand results</StyledSearchRowCaption>
-                  )}
-                  <StyledResultExpansionButtons>
-                    {/* accent colours echo the eq/sub badges on the resulting
-                        entity tags (see StyledExpansionBadge). The pill takes the
-                        click as well as the box, and Checkbox stops its own click
-                        from bubbling, so a hit on the box toggles exactly once. */}
-                    <StyledExpansionToggle
-                      $active={includeEquivalents}
-                      $variant="equivalent"
-                      onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                    <FilterPopover
+                      label="UUIDs"
+                      title="Entity UUIDs"
+                      count={uuidFilterCount}
+                      tooltipLabel="keep only the entities with these UUIDs"
+                      placement="top-start"
+                      onClear={() => {
+                        exploreStateDispatch({
+                          type: ExploreActionType.setUuidsFilter,
+                          payload: { ids: [] },
+                        });
+                        setUuidsClearSignal((signal) => signal + 1);
+                      }}
                     >
-                      <Checkbox
-                        label="Equivalents"
-                        size={14}
-                        color="info"
-                        value={includeEquivalents}
-                        tooltipLabel="include equivalents"
-                        tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                        onChangeFn={handleToggleIncludeEquivalents}
-                        disableEnterKey
+                      <ExplorerTableIdsFilter
+                        filters={exploreState.filters}
+                        dispatch={exploreStateDispatch}
+                        clearSignal={uuidsClearSignal}
                       />
-                      {includeEquivalents && expansionCounts !== undefined && (
-                        <StyledExpansionCount $variant="equivalent">
-                          +{expansionCounts.equivalents}
-                        </StyledExpansionCount>
-                      )}
-                    </StyledExpansionToggle>
-                    <StyledExpansionToggle
-                      $active={includeSubordinates}
-                      $variant="subordinate"
-                      onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
-                    >
-                      <Checkbox
-                        label="Subordinates"
-                        size={14}
-                        color="warning"
-                        value={includeSubordinates}
-                        tooltipLabel="include subordinates"
-                        tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                        onChangeFn={handleToggleIncludeSubordinates}
-                        disableEnterKey
-                      />
-                      {includeSubordinates && expansionCounts !== undefined && (
-                        <StyledExpansionCount $variant="subordinate">
-                          +{expansionCounts.subordinates}
-                        </StyledExpansionCount>
-                      )}
-                    </StyledExpansionToggle>
-                  </StyledResultExpansionButtons>
-                  <StyledSearchRowSpacer />
+                    </FilterPopover>
+                    <SearchFiltersPopover
+                      filters={exploreState.filters}
+                      dispatch={exploreStateDispatch}
+                      placement="top-start"
+                    />
+                  </StyledSearchRow>
+                  <StyledSearchRow data-run-on-enter="true">
+                    {!compactHeader && (
+                      <StyledSearchRowCaption>Expand results</StyledSearchRowCaption>
+                    )}
+                    <StyledResultExpansionButtons>
+                      {/* accent colours echo the eq/sub badges on the resulting
+                          entity tags (see StyledExpansionBadge). The pill takes the
+                          click as well as the box, and Checkbox stops its own click
+                          from bubbling, so a hit on the box toggles exactly once. */}
+                      <StyledExpansionToggle
+                        $active={includeEquivalents}
+                        $variant="equivalent"
+                        onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                      >
+                        <Checkbox
+                          label="Equivalents"
+                          size={14}
+                          color="info"
+                          value={includeEquivalents}
+                          tooltipLabel="include equivalents"
+                          tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                          onChangeFn={handleToggleIncludeEquivalents}
+                          disableEnterKey
+                        />
+                        {includeEquivalents && expansionCounts !== undefined && (
+                          <StyledExpansionCount $variant="equivalent">
+                            +{expansionCounts.equivalents}
+                          </StyledExpansionCount>
+                        )}
+                      </StyledExpansionToggle>
+                      <StyledExpansionToggle
+                        $active={includeSubordinates}
+                        $variant="subordinate"
+                        onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
+                      >
+                        <Checkbox
+                          label="Subordinates"
+                          size={14}
+                          color="warning"
+                          value={includeSubordinates}
+                          tooltipLabel="include subordinates"
+                          tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                          onChangeFn={handleToggleIncludeSubordinates}
+                          disableEnterKey
+                        />
+                        {includeSubordinates && expansionCounts !== undefined && (
+                          <StyledExpansionCount $variant="subordinate">
+                            +{expansionCounts.subordinates}
+                          </StyledExpansionCount>
+                        )}
+                      </StyledExpansionToggle>
+                    </StyledResultExpansionButtons>
+                  </StyledSearchRow>
+                </StyledSearchRowStack>
+                {/* sits beside both rows, as it runs the search with the settings of both */}
+                <StyledSearchRunCell>
                   <Button
                     tooltipLabel="run search (Enter)"
-                    label="run search"
-                    icon={<IcoSearch size={13} />}
+                    label="search"
+                    icon={<IcoSearch size={14} />}
+                    color="query2"
+                    textColor="query2Text"
                     disabled={!isSearchPending}
                     onClick={handleRunSearch}
                   />
-                </StyledSearchRow>
+                </StyledSearchRunCell>
               </StyledSearchRows>
             </Box>
             <Box

@@ -80,19 +80,32 @@ export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
 
 // The query tree scrolls on its own above the search rows, which stay in place
 // at the bottom of the Query Builder box.
+// a thinner scrollbar than the global one, so the builder's horizontal scrollbar does not
+// read as the edge between the Query Builder and the Explorer
 export const StyledQueryScroller = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: auto;
+  /* room below the last node for its EQ / SUB badges, which hang over its bottom border */
+  padding-bottom: ${({ theme }) => theme.space[3]};
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 `;
 
+// a card inset at the bottom of the Query Builder box, with page background below and at
+// its sides, so the result rows read as part of the builder, not the top of the Explorer
 export const StyledSearchRows = styled.div`
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  /* the extra bottom space is what the resize handle, which straddles the box edge, covers */
+  margin: 0 ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
 `;
 
@@ -116,6 +129,27 @@ export const StyledSearchRowCaption = styled.span`
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
 
-export const StyledSearchRowSpacer = styled.div`
+export const StyledSearchRowStack = styled.div`
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  min-width: 0;
+`;
+
+// the run button stacks its icon over its label, as the annotator warning actions do
+export const StyledSearchRunCell = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: ${({ theme }) => theme.space[2]};
+  && button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    min-width: 6.4rem;
+    min-height: 5rem;
+  }
+  && button span {
+    margin-left: 0;
+  }
 `;
