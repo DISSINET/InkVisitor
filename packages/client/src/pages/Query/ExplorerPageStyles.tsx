@@ -80,8 +80,8 @@ export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
 
 // The query tree scrolls on its own above the search rows, which stay in place
 // at the bottom of the Query Builder box.
-// a thinner scrollbar than the global one, so the builder's horizontal scrollbar does not
-// read as the edge between the Query Builder and the Explorer
+// a thinner and quieter scrollbar than the global one, so the builder's horizontal scrollbar
+// does not read as the edge between the Query Builder and the Explorer
 export const StyledQueryScroller = styled.div`
   display: flex;
   flex-direction: column;
@@ -94,10 +94,17 @@ export const StyledQueryScroller = styled.div`
     width: 8px;
     height: 8px;
   }
+  /* on hover the thumb takes the global hover colour */
+  &::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.color.gray[400]};
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: ${({ theme }) => theme.color.gray[700]};
+  }
 `;
 
-// a card inset at the bottom of the Query Builder box, with page background below and at
-// its sides, so the result rows read as part of the builder, not the top of the Explorer.
+// a card inset at the bottom of the Query Builder box, with page background around it, so
+// the result rows read as part of the builder, not the top of the Explorer.
 // It is as wide as its rows, left-aligned with the query tree, so on a wide screen the
 // search button stays next to the filters
 export const StyledSearchRows = styled.div`
@@ -108,7 +115,9 @@ export const StyledSearchRows = styled.div`
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   /* the extra bottom space is what the resize handle, which straddles the box edge, covers */
-  margin: 0 ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  /* a smaller gap above than below ties the card to the builder rather than the Explorer */
+  margin: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]}
+    ${({ theme }) => theme.space[4]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
 `;
 
