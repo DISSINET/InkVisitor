@@ -47,11 +47,18 @@ import {
   soeIdsForValidation,
 } from "./validation-expansion";
 
+/**
+ * Whether an entity update may set the field. `entityAllowedFields` lists
+ * read-only fields too, marked false, so being listed is not enough.
+ */
+const isWritableField = (key: string): boolean =>
+  entityAllowedFields[key as keyof IEntity] === true;
+
 /** `data` without the fields an entity update may not set. */
 function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
   const allowed: Partial<IEntity> = { ...data };
   Object.keys(allowed).forEach(
-    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+    (key) => !isWritableField(key) && delete allowed[key as keyof IEntity]
   );
   return allowed;
 }
@@ -156,7 +163,7 @@ export default class Entity implements IEntity, IDbModel {
     // replace AND remove unwanted fields in passed object
     Object.keys(updateData).forEach(
       (key) =>
-        !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
+        !isWritableField(key) && delete updateData[key as keyof IEntity]
     );
 
     const result = await rethink.table(Entity.table).get(this.id).update(updateData).run(db);

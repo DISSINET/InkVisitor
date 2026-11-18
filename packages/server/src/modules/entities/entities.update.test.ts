@@ -10,7 +10,8 @@ import {
   testErroneousResponse,
 } from "@modules/common.test";
 import { Db } from "@service/rethink";
-import { findEntityById } from "@service/shorthands";
+import Person from "@models/person/person";
+import { createEntity, findEntityById } from "@service/shorthands";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
@@ -74,6 +75,26 @@ describe("Entities update", function () {
         });
 
       await clean(db);
+    });
+
+    it("should not store a field the server only computes for responses", async () => {
+      const db = new Db();
+      await db.initDb();
+      const person = new Person({ id: Math.random().toString().replace(/\./g, "") });
+      await createEntity(db, person);
+
+      try {
+        await authAgent
+          .put(`${apiPath}/entities/${person.id}`)
+          .send({ labels: ["renamed"], anchorTexts: ["forged span"] })
+          .expect(200);
+
+        const stored = await findEntityById<IEntity>(db, person.id);
+        expect(stored.labels).toEqual(["renamed"]);
+        expect(stored.anchorTexts).toBeUndefined();
+      } finally {
+        await clean(db);
+      }
     });
   });
 });
