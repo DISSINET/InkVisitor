@@ -53,6 +53,9 @@ interface EntityImportDraftList {
   // drafts opened in the Detail so far
   reviewedIds: Set<string>;
   onAllConflictChoices: (useImported: boolean) => void;
+  // the list's width in px, which the column beside the Detail shares
+  width: number;
+  onWidthChange: (width: number) => void;
 }
 
 /**
@@ -85,7 +88,7 @@ export const matchesSearch = (entity: IEntity, query: string): boolean => {
 const LIST_WIDTH_KEY = "entityImportListWidth";
 const LIST_WIDTH = { min: 200, max: 450, initial: 250 };
 const clampWidth = (width: number) => Math.min(LIST_WIDTH.max, Math.max(LIST_WIDTH.min, width));
-const readListWidth = () => {
+export const readListWidth = () => {
   try {
     const stored = Number(localStorage.getItem(LIST_WIDTH_KEY));
     return stored ? clampWidth(stored) : LIST_WIDTH.initial;
@@ -117,18 +120,20 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
   onToggleLeftOut,
   reviewedIds,
   onAllConflictChoices,
+  width,
+  onWidthChange,
 }) => {
-  const [width, setWidth] = useState(readListWidth);
   const resizeTo = (next: number) => {
     const clamped = clampWidth(next);
-    setWidth(clamped);
+    onWidthChange(clamped);
     storeListWidth(clamped);
   };
   const startResize = (event: React.MouseEvent) => {
     event.preventDefault();
     const startX = event.clientX;
     const startWidth = width;
-    const onMove = (move: MouseEvent) => setWidth(clampWidth(startWidth + move.clientX - startX));
+    const onMove = (move: MouseEvent) =>
+      onWidthChange(clampWidth(startWidth + move.clientX - startX));
     const onUp = (up: MouseEvent) => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
@@ -259,7 +264,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
     });
 
   return (
-    <StyledDraftListBox $width={width}>
+    <StyledDraftListBox>
       <StyledDraftListResize
         role="separator"
         aria-orientation="vertical"

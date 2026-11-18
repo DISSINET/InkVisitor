@@ -17,7 +17,7 @@ import {
 import { getStoredUserRole } from "utils/userStorage";
 import { getEntityLabel } from "utils/utils";
 import { canAppend, EntityImportAppendPanel } from "./EntityImportAppendPanel";
-import { EntityImportDraftList, groupDrafts } from "./EntityImportDraftList";
+import { EntityImportDraftList, groupDrafts, readListWidth } from "./EntityImportDraftList";
 import { EntityImportLeftOutPanel } from "./EntityImportLeftOutPanel";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
@@ -67,6 +67,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   // the first row of the list, where the selection goes when it has none
   const firstId = () => groupDrafts(tabs)[0]?.[1][0]?.id;
   const [selectedId, setSelectedId] = useState<string | undefined>(firstId);
+  const [sideWidth, setSideWidth] = useState(readListWidth);
 
   // the import id of each draft appended in the tabs, by stored id
   const appendedFrom = useRef<Record<string, string>>({});
@@ -215,7 +216,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
           </StyledDraftIssues>
         )}
 
-        <StyledDraftBody>
+        <StyledDraftBody $sideWidth={sideWidth}>
           <EntityImportDraftList
             draft={draft}
             entities={tabs}
@@ -227,6 +228,8 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             onToggleLeftOut={onToggleLeftOut}
             reviewedIds={reviewedIds}
             onAllConflictChoices={onAllConflictChoices}
+            width={sideWidth}
+            onWidthChange={setSideWidth}
           />
 
           <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>

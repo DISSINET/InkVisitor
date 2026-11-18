@@ -111,13 +111,13 @@ export const StyledDraftDetail = styled.div`
 // class, as tabs turned on their side. Each piece draws its part of the edge
 // shared with the Detail, so the selected row can leave its part out and open
 // into the Detail.
-export const StyledDraftListBox = styled.div<{ $width: number }>`
+export const StyledDraftListBox = styled.div`
   /* holds the resize handle on its right edge */
   position: relative;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: ${({ $width }) => $width}px;
+  width: var(--import-side-width);
   min-height: 0;
   border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
   border-right: none;
@@ -339,7 +339,9 @@ export const StyledLoadArea = styled.button`
 `;
 
 // the list, the Detail and the side column of the selected draft
-export const StyledDraftBody = styled.div`
+// the draft list and the column beside the Detail share one width
+export const StyledDraftBody = styled.div<{ $sideWidth: number }>`
+  --import-side-width: ${({ $sideWidth }) => $sideWidth}px;
   display: flex;
   flex: 1;
   min-height: 0;
@@ -351,7 +353,7 @@ export const StyledAppendPanel = styled.div`
   flex-direction: column;
   flex-shrink: 0;
   gap: ${({ theme }) => theme.space[4]};
-  width: 23rem;
+  width: var(--import-side-width);
   min-height: 0;
   margin-left: ${({ theme }) => theme.space[4]};
   overflow-y: auto;
