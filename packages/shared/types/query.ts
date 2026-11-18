@@ -31,6 +31,10 @@ export namespace Query {
     entityClasses?: EntityEnums.Class[];
     entityStatuses?: EntityEnums.Status[];
     entityLanguages?: EntityEnums.Language[];
+    // read from the entity's data: logicalType on actant classes, pos on
+    // concepts and actions; an entity without the field matches neither
+    entityLogicalTypes?: EntityEnums.LogicalType[];
+    entityPartsOfSpeech?: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
     label?: string;
     // the date and user filters read the entity's audits, as the Explorer's
     // created at / updated at / created by / updated by / edited by filters do;
@@ -151,6 +155,7 @@ export namespace Query {
     "I_R:A2S" = "I_R:A2S",
     "R:REL" = "R:REL",
     "I_R:REL" = "I_R:REL",
+    "SE" = "SE",
   }
 
   /**
@@ -490,6 +495,10 @@ export namespace Query {
       entityId: { allowedClasses: [] },
     },
     "I_R:REL": {},
+    SE: {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
@@ -1088,6 +1097,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
+    SE: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
     "HP:": "has property",
@@ -1160,6 +1173,7 @@ export namespace Query {
     "I_R:A2S": "has relation: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
+    SE: "is",
   };
 
   /**
@@ -1241,6 +1255,37 @@ export namespace Query {
     "I_R:A2S": "Finds entities used as the actant2 semantics of the target action",
     "R:REL": "Finds entities related to the target",
     "I_R:REL": "Finds entities related to the target",
+    SE: "Finds the entities the target describes: the target is the entity itself",
+  };
+
+  /** the edges of a node of a request body, which can hold anything in their place */
+  const edgesOf = (node: INode | undefined): IEdge[] =>
+    Array.isArray(node?.edges) ? node.edges : [];
+
+  /**
+   * Whether the query has start nodes. An SE edge of the root describes the
+   * root's entity itself, so its target node starts the query from the
+   * entities it finds, with conditions of its own.
+   */
+  export const hasStartNodes = (root: INode): boolean =>
+    edgesOf(root).some((edge) => edge.type === EdgeType.SE);
+
+  /**
+   * Start nodes are alternatives - a result is an entity any of them finds -
+   * so they are the root's only edges and its operator is Or. Any node can be
+   * sent as the root of a query of its own, so no node below the root has an
+   * SE edge.
+   */
+  export const areStartNodesValid = (root: INode): boolean => {
+    const noneBelow = (node: INode): boolean =>
+      edgesOf(node).every((edge) => !hasStartNodes(edge.node) && noneBelow(edge.node));
+    if (!noneBelow(root)) {
+      return false;
+    }
+    return (
+      !hasStartNodes(root) ||
+      (root.operator === NodeOperator.Or && edgesOf(root).every((edge) => edge.type === EdgeType.SE))
+    );
   };
 
   export enum EdgeProblemSource {
@@ -1302,6 +1347,8 @@ export namespace Explore {
     UUIDs = "uuids",
     Status = "status",
     Language = "language",
+    LogicalType = "logical type",
+    PartOfSpeech = "part of speech",
     CreatedAt = "created at",
     UpdatedAt = "updated at",
     CreatedBy = "created by",
@@ -1316,6 +1363,8 @@ export namespace Explore {
     | IExploreUuidsFilter
     | IExploreStatusFilter
     | IExploreLanguageFilter
+    | IExploreLogicalTypeFilter
+    | IExplorePartOfSpeechFilter
     | IExploreCreatedAtFilter
     | IExploreUpdatedAtFilter
     | IExploreCreatedByFilter
@@ -1340,14 +1389,62 @@ export namespace Explore {
     // listed entities; the listed entities themselves are never matched
     entityIds: string[];
   }
+  // OR semantics for the status, language, logical type and part of speech
+  // filters - matches an entity with any of the listed values
   interface IExploreStatusFilter {
     type: SearchOption.Status;
-    status: EntityEnums.Status;
+    statuses?: EntityEnums.Status[];
+    // the single value of a filter saved before it took a list
+    status?: EntityEnums.Status;
   }
   interface IExploreLanguageFilter {
     type: SearchOption.Language;
-    language: EntityEnums.Language;
+    languages?: EntityEnums.Language[];
+    // the single value of a filter saved before it took a list
+    language?: EntityEnums.Language;
   }
+  interface IExploreLogicalTypeFilter {
+    type: SearchOption.LogicalType;
+    logicalTypes: EntityEnums.LogicalType[];
+  }
+  interface IExplorePartOfSpeechFilter {
+    type: SearchOption.PartOfSpeech;
+    partsOfSpeech: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
+  }
+
+  export type IExploreAttributeParams = Pick<
+    Query.INodeParams,
+    "entityStatuses" | "entityLanguages" | "entityLogicalTypes" | "entityPartsOfSpeech"
+  >;
+
+  /**
+   * The status, language, logical type and part of speech filters as the node params
+   * that test the same entity fields; a filter that is missing or empty leaves its param out
+   */
+  export const attributeFilterParams = (
+    filters: IExploreSearchFilter[]
+  ): IExploreAttributeParams => {
+    const params: IExploreAttributeParams = {};
+    for (const filter of filters) {
+      if (filter.type === SearchOption.Status) {
+        params.entityStatuses =
+          filter.statuses ?? (filter.status ? [filter.status] : undefined);
+      } else if (filter.type === SearchOption.Language) {
+        params.entityLanguages =
+          filter.languages ?? (filter.language !== undefined ? [filter.language] : undefined);
+      } else if (filter.type === SearchOption.LogicalType) {
+        params.entityLogicalTypes = filter.logicalTypes;
+      } else if (filter.type === SearchOption.PartOfSpeech) {
+        params.entityPartsOfSpeech = filter.partsOfSpeech;
+      }
+    }
+    (Object.keys(params) as (keyof IExploreAttributeParams)[]).forEach((key) => {
+      if (!params[key]?.length) {
+        delete params[key];
+      }
+    });
+    return params;
+  };
   interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
     createdAfter?: string;

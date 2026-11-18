@@ -3,7 +3,10 @@ import { Query, Explore } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
+  classesReach,
   countNodeFilters,
+  LOGICAL_TYPE_CLASSES,
+  PART_OF_SPEECH_CLASSES,
   isQueryRequestEmpty,
   QUERY_NAME_MAX_LENGTH,
   suggestQueryName,
@@ -87,6 +90,91 @@ describe("isQueryRequestEmpty", () => {
       ),
     ).toBe(false);
   });
+
+  // an SE edge says the entity is its target node, so it narrows only as far as that node does
+  const startNode = (params: Query.INodeParams, edges: Query.IEdge[] = []): Query.IEdge => ({
+    ...makeEdge(),
+    type: Query.EdgeType.SE,
+    node: { ...makeRoot(params), edges },
+  });
+  const startNodesRoot = (...edges: Query.IEdge[]): Query.INode => ({
+    ...makeRoot(),
+    operator: Query.NodeOperator.Or,
+    edges,
+  });
+
+  it("is empty when a start node has nothing to narrow it", () => {
+    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+    expect(isQueryRequestEmpty(startNodesRoot(startNode({})), makeExplore())).toBe(true);
+    expect(
+      isQueryRequestEmpty(startNodesRoot(startNode({ entityClasses: classesAll })), makeExplore()),
+    ).toBe(true);
+    expect(isQueryRequestEmpty(startNodesRoot(concepts, startNode({})), makeExplore())).toBe(true);
+    expect(
+      isQueryRequestEmpty(startNodesRoot(concepts, startNode({}, [startNode({})])), makeExplore()),
+    ).toBe(true);
+  });
+
+  it("is not empty when every start node is narrowed", () => {
+    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+    expect(isQueryRequestEmpty(startNodesRoot(concepts), makeExplore())).toBe(false);
+    expect(
+      isQueryRequestEmpty(startNodesRoot(concepts, startNode({}, [makeEdge()])), makeExplore()),
+    ).toBe(false);
+    expect(
+      isQueryRequestEmpty(
+        startNodesRoot(startNode({ entityId: "abc" }), startNode({ entityStatuses: ["1" as EntityEnums.Status] })),
+        makeExplore(),
+      ),
+    ).toBe(false);
+  });
+
+  it("reads the edges of an And node together and those of any other operator apart", () => {
+    const and = (...edges: Query.IEdge[]): Query.INode => ({ ...makeRoot(), edges });
+    expect(isQueryRequestEmpty(and(startNode({}), makeEdge()), makeExplore())).toBe(false);
+    expect(isQueryRequestEmpty(and(startNode({}), startNode({})), makeExplore())).toBe(true);
+    expect(isQueryRequestEmpty(startNodesRoot(), makeExplore())).toBe(true);
+    // the server evaluates every operator but And as Or
+    const odd = { ...startNodesRoot(startNode({}), makeEdge()), operator: "xor" as Query.NodeOperator };
+    expect(isQueryRequestEmpty(odd, makeExplore())).toBe(true);
+  });
+
+  it("is not empty when a negative SE edge takes entities away", () => {
+    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+    const notAnything = { ...startNode({}), logic: Query.EdgeLogic.Negative };
+    expect(isQueryRequestEmpty(startNodesRoot(concepts, notAnything), makeExplore())).toBe(false);
+  });
+
+  it("is not empty when a node filter narrows the root", () => {
+    expect(
+      isQueryRequestEmpty(makeRoot({ entityStatuses: ["1" as EntityEnums.Status] }), makeExplore()),
+    ).toBe(false);
+  });
+
+  it("reads a null class list as any class", () => {
+    const root = makeRoot({ entityClasses: null as unknown as EntityEnums.Class[] });
+    expect(isQueryRequestEmpty(root, makeExplore())).toBe(true);
+  });
+
+  it("is not empty when an explore filter narrows start nodes that are not", () => {
+    expect(
+      isQueryRequestEmpty(
+        startNodesRoot(startNode({})),
+        makeExplore([{ type: Explore.SearchOption.Label, label: "x" }]),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("classesReach", () => {
+  it("is true for any class, or when one class carries the field", () => {
+    const C = EntityEnums.Class;
+    expect(classesReach([], LOGICAL_TYPE_CLASSES)).toBe(true);
+    expect(classesReach([C.Concept, C.Person], LOGICAL_TYPE_CLASSES)).toBe(true);
+    expect(classesReach([C.Concept], LOGICAL_TYPE_CLASSES)).toBe(false);
+    expect(classesReach([C.Action], PART_OF_SPEECH_CLASSES)).toBe(true);
+    expect(classesReach([C.Person, C.Territory], PART_OF_SPEECH_CLASSES)).toBe(false);
+  });
 });
 
 describe("countNodeFilters", () => {
@@ -115,6 +203,12 @@ describe("countNodeFilters", () => {
       countNodeFilters({ createdBy: "u-1", updatedBy: "u-2", editedBy: ["u-1"], coOccurrence: ["c-1"] }),
     ).toBe(4);
     expect(countNodeFilters({ editedBy: [], coOccurrence: [] })).toBe(0);
+    expect(
+      countNodeFilters({
+        entityLogicalTypes: ["1" as EntityEnums.LogicalType, "2" as EntityEnums.LogicalType],
+        entityPartsOfSpeech: ["noun" as EntityEnums.ConceptPartOfSpeech],
+      }),
+    ).toBe(2);
   });
 });
 

@@ -62,17 +62,18 @@ beforeAll(async () => {
     entity("t-child", C.Territory, ["Child territory"], { data: { parent: { territoryId: "t-root", order: 0 } } }),
     entity("c-1", C.Concept, ["Étoile bleue"], {
       language: "eng",
+      data: { pos: "noun" },
       props: [prop("c-3", "c-2", [prop("x-1", "c-4")])],
       references: [
         { id: "ref-1", resource: "r-1", value: "c-3" },
         { id: "ref-2", resource: "", value: "" },
       ],
     }),
-    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1" }),
-    entity("c-3", C.Concept, ["star-shaped object"], { status: "1" }),
+    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1", data: { pos: "" } }),
+    entity("c-3", C.Concept, ["star-shaped object"], { status: "1", data: { pos: "adj" } }),
     entity("c-4", C.Concept, ["Object"], { isTemplate: true }),
-    entity("a-1", C.Action, ["shine"]),
-    entity("p-1", C.Person, ["Anna Nováková"]),
+    entity("a-1", C.Action, ["shine"], { data: { pos: "verb" } }),
+    entity("p-1", C.Person, ["Anna Nováková"], { data: { logicalType: "1" } }),
     entity("p-2", C.Person, undefined),
     // a prop typed but never given a value keeps entityId ""
     entity("l-1", C.Location, ["Prague (city)"], { props: [prop("", "c-2")] }),
@@ -587,6 +588,34 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("I_HP:V", { entityLanguages: [eng] })])).toEqual(["c-3"]);
   });
 
+  it("entityLogicalTypes and entityPartsOfSpeech narrow a node's base and an unpinned target", async () => {
+    const definite = "1" as EntityEnums.LogicalType;
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const adj = "adj" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await explore({ entityLogicalTypes: [definite] })).toEqual(["p-1"]);
+    expect(await explore({ entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], entityPartsOfSpeech: [adj] })).toEqual(["c-3"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityPartsOfSpeech: [noun] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:CLA", { entityLogicalTypes: [definite] })])).toEqual(["c-2"]);
+  });
+
+  it("filterIds keeps the listed ids whose entities pass the node filters", async () => {
+    const filterIds = async (ids: string[], params: Query.INodeParams) =>
+      sorted(await storage.explore.filterIds(conn, ids, params));
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    // the empty part of speech of a concept; classes without the field never match it
+    const none = "" as EntityEnums.ConceptPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [none] })).toEqual(["c-2"]);
+    expect(await filterIds(ALL, { entityStatuses: ["1" as EntityEnums.Status] })).toEqual(["c-3"]);
+    expect(await filterIds(ALL, { entityLanguages: ["eng" as EntityEnums.Language] })).toEqual(["c-1"]);
+    expect(await filterIds(["c-1", "p-2"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual([]);
+    expect(await filterIds(["c-1", "p-1"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual(["p-1"]);
+    expect(await filterIds([], { entityPartsOfSpeech: [noun] })).toEqual([]);
+  });
+
   // ReQL takes a language or label into the target id set, which R: matches the source entity against
   itPg("the relation edges test a language or label on the partner, never the entity itself", async () => {
     const eng = "eng" as EntityEnums.Language;
@@ -619,6 +648,68 @@ describe("explore: operators, nesting and target expansion", () => {
   // RethinkDB builds an ordered-relation edge for it: its dispatch reads the relation maps without an own-key check
   itPg("rejects an Object.prototype key as an edge type", () => {
     expect(() => storage.explore.plan(node({}, [edge("hasOwnProperty")]), resolvers)).toThrow(InternalServerError);
+  });
+});
+
+describe("explore: SE, the entity is the target node itself", () => {
+  it("matches by the target's classes, pinned entity or filters, and any entity without them", async () => {
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3" })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3", includeEquivalents: true })])).toEqual(["c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { label: "star" })])).toEqual(["c-2", "c-3"]);
+    const status1 = "1" as EntityEnums.Status;
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Concept], entityStatuses: [status1] })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE")])).toEqual(ALL);
+  });
+
+  it("stays within the base of the node it hangs off", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityId: "p-1" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept, C.Person] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+  });
+
+  it("each SE edge of an OR root is a start node with conditions of its own", async () => {
+    // every Location, and the Persons classified as c-2
+    const classified = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(
+      await explore({}, [edge("SE", { entityClasses: [C.Location] }), edge("SE", classified)], Query.NodeOperator.Or)
+    ).toEqual(["l-1", "p-1"]);
+    // an entity two start nodes match comes once
+    const all = await storage.explore
+      .plan(node({}, [edge("SE", { entityClasses: [C.Person] }), edge("SE", classified)], Query.NodeOperator.Or), resolvers)
+      .run(conn);
+    expect(all).toEqual(["p-1", "p-2"]);
+  });
+
+  it("a pinned start node keeps its nested conditions and a negative edge subtracts the target", async () => {
+    const c3SubclassOfC2 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC2)])).toEqual(["c-3"]);
+    const c3SubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC1)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { label: "star" }, Query.EdgeLogic.Negative)])).toEqual(["c-1", "c-4"]);
+  });
+
+  it("runs over the survivors of the edge before it and adds to an Or union", async () => {
+    // the Concepts with a superclass are c-1 and c-2
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { label: "star" })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { entityId: "c-1" })])).toEqual(["c-1"]);
+    expect(
+      await explore(
+        { entityClasses: [C.Concept] },
+        [edge("SE", { label: "star" }, Query.EdgeLogic.Negative), edge("SE", { entityId: "c-3" })],
+        Query.NodeOperator.Or
+      )
+    ).toEqual(["c-1", "c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { entityId: "nope" })])).toEqual([]);
+  });
+
+  // the stats view caps the list by position, so start nodes come mixed, as any other result
+  it("an Or union comes in code point order whatever the order of its edges", async () => {
+    const run = (edges: Partial<Query.IEdge>[]) => storage.explore.plan(node({}, edges, Query.NodeOperator.Or), resolvers).run(conn);
+    const persons = edge("SE", { entityClasses: [C.Person] });
+    const concepts = edge("SE", { entityClasses: [C.Concept] });
+    expect(await run([persons, concepts])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
+    expect(await run([concepts, persons])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
   });
 });
 

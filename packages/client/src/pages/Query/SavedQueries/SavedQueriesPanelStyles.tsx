@@ -13,36 +13,36 @@ const QUERY_BULLET_GAP = "0.3rem";
 // reveal animation, the group itself is sized by its icons
 const QUERY_ACTIONS_WIDTH = "4rem";
 
-// sits top-right; panel opens to the left of the Queries toggle via floating-ui
+// sits in the Query Builder box header among its buttons; the panel opens to
+// the left of the Queries toggle via floating-ui
 export const StyledSavedQueriesRoot = styled.div`
-  position: absolute;
-  right: 2rem;
-  top: 4.5rem;
-  // below the filter panels (164)
-  z-index: 163;
+  display: flex;
+  align-items: center;
+  // the ButtonGroup gap only reaches its button and span children
+  &:not(:last-child) {
+    margin-right: var(--button-group-gap, 0.5rem);
+  }
 `;
 
+// flat: the header ButtonGroup clips overflow, which would cut a shadow off
 export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
+  padding: 0.3rem 1rem;
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background-color: ${({ theme }) => theme.color["blue"][50]};
-  box-shadow: ${({ theme, $isActive }) =>
-    $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
   filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
   cursor: pointer;
   white-space: nowrap;
+  // the box header sets uppercase for its label
+  text-transform: none;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.color["primary"]};
-  transition:
-    filter 0.2s,
-    box-shadow 0.2s;
+  transition: filter 0.2s;
   &:hover {
-    box-shadow: ${({ theme }) => theme.boxShadow.normal};
     filter: brightness(0.94);
   }
 `;
@@ -64,8 +64,7 @@ export const StyledPanel = styled.div`
   background-color: ${({ theme }) => theme.color["blue"][50]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   overflow: hidden;
-  // same stacking as StyledSavedQueriesRoot; needed because the panel is
-  // portaled out of that root's stacking context
+  // below the filter panels (164)
   z-index: 163;
 `;
 

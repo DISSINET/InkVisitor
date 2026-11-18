@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
@@ -92,8 +92,7 @@ enum ExploreActionType {
   sort,
   setLabelFilter,
   setUuidsFilter,
-  setStatusFilter,
-  setLanguageFilter,
+  setAttributeFilter,
   setCreatedAtFilter,
   setUpdatedAtFilter,
   setCreatedByFilter,
@@ -105,9 +104,22 @@ enum ExploreActionType {
   clearFloatingSearchFilters,
 }
 
+export type AttributeFilter = Extract<
+  Explore.IExploreSearchFilter,
+  {
+    type:
+      | Explore.SearchOption.Status
+      | Explore.SearchOption.Language
+      | Explore.SearchOption.LogicalType
+      | Explore.SearchOption.PartOfSpeech;
+  }
+>;
+
 const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
   Explore.SearchOption.Status,
   Explore.SearchOption.Language,
+  Explore.SearchOption.LogicalType,
+  Explore.SearchOption.PartOfSpeech,
   Explore.SearchOption.CreatedAt,
   Explore.SearchOption.UpdatedAt,
   Explore.SearchOption.CreatedBy,
@@ -325,30 +337,14 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
     }
 
-    case ExploreActionType.setStatusFilter: {
-      const { status } = action.payload as { status?: EntityEnums.Status };
-      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Status);
-      const filters: Explore.IExploreSearchFilter[] =
-        status !== undefined
-          ? [...otherFilters, { type: Explore.SearchOption.Status, status }]
-          : otherFilters;
+    // the status, language, logical type or part of speech filter; an empty list removes it
+    case ExploreActionType.setAttributeFilter: {
+      const filter = action.payload as AttributeFilter;
+      const otherFilters = state.filters.filter((f) => f.type !== filter.type);
+      const isEmpty = Object.keys(Explore.attributeFilterParams([filter])).length === 0;
       return {
         ...state,
-        filters,
-        offset: 0,
-      };
-    }
-
-    case ExploreActionType.setLanguageFilter: {
-      const { language } = action.payload as { language?: EntityEnums.Language };
-      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Language);
-      const filters: Explore.IExploreSearchFilter[] =
-        language !== undefined
-          ? [...otherFilters, { type: Explore.SearchOption.Language, language }]
-          : otherFilters;
-      return {
-        ...state,
-        filters,
+        filters: isEmpty ? otherFilters : [...otherFilters, filter],
         offset: 0,
       };
     }

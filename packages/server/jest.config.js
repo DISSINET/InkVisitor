@@ -65,6 +65,7 @@ const UNIT_TEST_PATHS = [
   "src/models/document/anchors.audit.test.ts",
   "src/models/document/anchors.tagdiff.test.ts",
   "src/models/document/anchors.test.ts",
+  "src/models/document/document.removeAnchor.test.ts",
   "src/models/entity/entity.rights.test.ts",
   "src/models/entity/response-search-root-validity.test.ts",
   "src/models/entity/validation-expansion.test.ts",
@@ -101,6 +102,7 @@ const UNIT_TEST_PATHS = [
   "src/service/query/explore-label-filter.test.ts",
   "src/service/query/explore-to-request-search.test.ts",
   "src/service/query/results.test.ts",
+  "src/service/query/search-start-nodes.test.ts",
   "src/service/storage/rethink/query/superordinate-edge.test.ts",
   "src/service/ttlCache.test.ts",
 ];

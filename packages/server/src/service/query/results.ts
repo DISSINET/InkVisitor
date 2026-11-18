@@ -9,7 +9,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IStatement, ITerritory, IUser, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { Conn } from "@service/storage";
+import { Conn, storage } from "@service/storage";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 import {
@@ -214,14 +214,25 @@ export default class Results<T extends { id: string }> {
       }
     }
 
-    // 4. Search-box filters (status, language, dates, created/updated/edited by)
-    //    reused via the existing SearchQuery backend.
+    // 4. Status, language, logical type and part of speech, tested as the
+    //    node filters test them. Order of the items is preserved.
+    const attributeParams = Explore.attributeFilterParams(exploreData.filters);
+    if (Object.keys(attributeParams).length) {
+      const passing = new Set(await storage.explore.filterIds(db, this.items, attributeParams));
+      this.items = this.items.filter((id) => passing.has(id));
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    // 5. Search-box filters (dates, created/updated/edited by) reused via the
+    //    existing SearchQuery backend.
     this.items = await applyRequestSearchFilters(db, this.items, exploreData.filters);
     if (!this.items.length) {
       return;
     }
 
-    // 5. Root validity (most expensive: per-entity relation queries) - run last
+    // 6. Root validity (most expensive: per-entity relation queries) - run last
     //    on the smallest candidate set.
     const rootValidityFilter = getRootValidityFilter(exploreData.filters);
     if (rootValidityFilter) {

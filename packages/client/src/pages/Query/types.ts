@@ -176,7 +176,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
  * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
  * direct-vs-any distinction to begin with (a statement sits under exactly one
- * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off.
+ * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off. "SE" makes
+ * its target a start node of the query, which is not a condition to pick
+ * among the others.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -193,6 +195,7 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["SUT:D"],
   Query.EdgeType["I_SUT:D"],
   Query.EdgeType["I_CT:D"],
+  Query.EdgeType.SE,
 ];
 
 /**

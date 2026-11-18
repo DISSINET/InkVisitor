@@ -70,6 +70,9 @@ export default class QuerySearch {
     if (!this.root.type) {
       throw new BadParams();
     }
+    if (!Query.areStartNodesValid(query)) {
+      throw new SearchEdgeTypesInvalid("Start nodes must be the only conditions of the root, joined by OR");
+    }
   }
 
   /**

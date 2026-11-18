@@ -11,6 +11,7 @@ import {
   tableList,
 } from "./conn";
 import { watch } from "./invalidation";
+import { idsPassingFilters } from "./query/filters";
 import SearchNode from "./query/nodes";
 import { sessions } from "./sessions";
 import { entities, relations } from "./entities";
@@ -44,6 +45,7 @@ export function createPostgresStorage(): Storage {
       plan(query, resolvers) {
         return new SearchNode(query, resolvers);
       },
+      filterIds: idsPassingFilters,
     },
   };
 }

@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
@@ -46,13 +47,6 @@ export const getEdgeSourceNode = (root: Query.INode, edgeId: string): Query.INod
   getAllNodes(root).find((node) => node.edges.some((edge) => edge.id === edgeId));
 
 /**
- * A query request is "empty" when nothing constrains the search: no edges, no
- * explore filters, and the root node neither targets a specific entity / label
- * nor narrows the entity classes (an empty or full class set means "any class").
- * Such a request would scan the whole database, so the explorer skips it instead
- * of firing it automatically (e.g. on page load with the default root node).
- */
-/**
  * A stats view with every event type switched off aggregates nothing, so the
  * request can only come back empty - there is no point sending it.
  */
@@ -60,39 +54,45 @@ export const isStatsRequestEmpty = (explore: Explore.IExplore): boolean =>
   explore.view.mode === Explore.EViewMode.Stats &&
   explore.view.stats.eventType.length === 0;
 
-export const isQueryRequestEmpty = (
-  query: Query.INode,
-  explore: Explore.IExplore,
-): boolean => {
-  if (getAllEdges(query).length > 0) {
-    return false;
+/**
+ * Whether anything narrows the entities a node stands for: a pinned entity, a
+ * subset of the classes (an empty or full class set means "any class"), a node
+ * filter, or its edges - any of them under And, each of them under any other
+ * operator, which the server evaluates as Or. An SE edge says the entity is
+ * its target node, so a positive one narrows only when that node is narrowed.
+ */
+const isNodeNarrowed = (node: Query.INode): boolean => {
+  const entityClasses = node.params.entityClasses ?? [];
+  if (node.params.entityId || countNodeFilters(node.params) > 0) {
+    return true;
   }
-  if (explore.filters.length > 0) {
-    return false;
+  if (entityClasses.length > 0 && entityClasses.length < classesAll.length) {
+    return true;
   }
-
-  const { entityId, label, entityClasses } = query.params;
-  if (entityId) {
-    return false;
-  }
-  if (label && label.trim().length > 0) {
-    return false;
-  }
-
-  const classes = entityClasses ?? [];
-  const narrowsClasses =
-    classes.length > 0 && classes.length < classesAll.length;
-  if (narrowsClasses) {
-    return false;
-  }
-
-  return true;
+  const narrows = (edge: Query.IEdge) =>
+    edge.type !== Query.EdgeType.SE ||
+    edge.logic === Query.EdgeLogic.Negative ||
+    isNodeNarrowed(edge.node);
+  return node.operator === Query.NodeOperator.And
+    ? node.edges.some(narrows)
+    : node.edges.length > 0 && node.edges.every(narrows);
 };
+
+/**
+ * A query request is "empty" when nothing constrains the search: no explore
+ * filters and a root node nothing narrows. Such a request would scan the whole
+ * database, so the explorer skips it instead of firing it automatically (e.g.
+ * on page load with the default root node).
+ */
+export const isQueryRequestEmpty = (query: Query.INode, explore: Explore.IExplore): boolean =>
+  explore.filters.length === 0 && !isNodeNarrowed(query);
 
 /** the params the node filters panel sets, cleared together and dropped when an entity is pinned */
 export const NODE_FILTER_KEYS = [
   "entityStatuses",
   "entityLanguages",
+  "entityLogicalTypes",
+  "entityPartsOfSpeech",
   "label",
   "createdAfter",
   "createdBefore",
@@ -104,11 +104,35 @@ export const NODE_FILTER_KEYS = [
   "coOccurrence",
 ] as const satisfies readonly (keyof Query.INodeParams)[];
 
+const C = EntityEnums.Class;
+
+/** the classes whose entities carry data.logicalType */
+export const LOGICAL_TYPE_CLASSES = [
+  C.Person,
+  C.Group,
+  C.Being,
+  C.Object,
+  C.Location,
+  C.Event,
+  C.Value,
+];
+
+/** the classes whose entities carry data.pos */
+export const PART_OF_SPEECH_CLASSES = [C.Concept, C.Action];
+
+/** an entity of one of `classes` (empty for any class) can be of one of `carriers` */
+export const classesReach = (
+  classes: EntityEnums.Class[],
+  carriers: EntityEnums.Class[],
+): boolean => classes.length === 0 || classes.some((c) => carriers.includes(c));
+
 /** how many node filters a node applies; a date range counts once, whichever ends are set */
 export const countNodeFilters = (params: Query.INodeParams): number =>
   [
     params.entityStatuses?.length,
     params.entityLanguages?.length,
+    params.entityLogicalTypes?.length,
+    params.entityPartsOfSpeech?.length,
     params.label?.trim(),
     params.createdAfter || params.createdBefore,
     params.updatedAfter || params.updatedBefore,

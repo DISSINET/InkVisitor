@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
@@ -19,7 +19,12 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
-import { countNodeFilters } from "../utils";
+import {
+  classesReach,
+  countNodeFilters,
+  LOGICAL_TYPE_CLASSES,
+  PART_OF_SPEECH_CLASSES,
+} from "../utils";
 import { FilterPopover } from "../../FilterPopover/FilterPopover";
 import {
   StyledForm,
@@ -28,6 +33,11 @@ import {
   StyledRowHeader,
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { CoOccurrencePicker } from "../../FloatingSearchContainer/CoOccurrencePicker";
+import {
+  logicalTypeFilterOptions,
+  partOfSpeechFilterOptions,
+  statusFilterOptions,
+} from "../../FloatingSearchContainer/attributeFilterOptions";
 import {
   DateRangeFilter,
   parseDate,
@@ -84,9 +94,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   }));
 
   const edgeType = edge?.type;
-  const edgeLabel = edgeType ? Query.EdgeTypeLabels[edgeType] : "related";
+  // a saved query can hold an edge type from a newer build, with no label or target params here
+  const edgeLabel = edgeType ? (Query.EdgeTypeLabels[edgeType] ?? edgeType) : "related";
 
-  const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
+  const nodeParams = (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]) || {};
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
@@ -132,6 +143,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const entityId = node.params.entityId;
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  // the classes this node's entities can be of, empty for any; a filter on a field none of
+  // them carries is offered only while it still holds a value, so it can be cleared
+  const nodeClasses = node.params.entityClasses?.length
+    ? node.params.entityClasses
+    : (relationConstrainedCategoryTypes ?? paramEntityId?.allowedClasses ?? []);
+  const showLogicalType =
+    classesReach(nodeClasses, LOGICAL_TYPE_CLASSES) || !!node.params.entityLogicalTypes?.length;
+  const showPartOfSpeech =
+    classesReach(nodeClasses, PART_OF_SPEECH_CLASSES) ||
+    !!node.params.entityPartsOfSpeech?.length;
 
   const updateFilters = (changes: Partial<Query.INodeParams>) =>
     dispatch({ type: QueryActionType.updateNodeFilters, payload: { nodeId: node.id, changes } });
@@ -190,7 +212,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
   }, [theme, isValid, isRoot]);
 
-  const hasParallelEdges = isRoot && node.edges.length > 1;
+  // start nodes are joined by Or alone, so their root has no operator to choose
+  const hasParallelEdges = isRoot && node.edges.length > 1 && !Query.hasStartNodes(node);
 
   return (
     <StyledNodeContainer>
@@ -341,42 +364,57 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 <StyledRow>
                   <StyledRowHeader>status</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      // params.entityStatuses is a list on purpose - the backend
-                      // matches any status in it, so the picker can become multi later
-                      value={node.params.entityStatuses?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityStatuses ?? []}
                       placeholder="any status"
-                      isClearable
                       width="full"
-                      options={entityStatusDict.map((status) => ({
-                        value: status.value,
-                        label: status.label,
-                      }))}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                        })
-                      }
+                      options={statusFilterOptions}
+                      onChange={(entityStatuses) => updateFilters({ entityStatuses })}
                     />
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
                   <StyledRowHeader>language</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      value={node.params.entityLanguages?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityLanguages ?? []}
                       placeholder="any language"
-                      isClearable
                       width="full"
                       options={orderedLanguageDict}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityLanguages: newValue ? [newValue as EntityEnums.Language] : [],
-                        })
-                      }
+                      onChange={(entityLanguages) => updateFilters({ entityLanguages })}
                     />
                   </StyledRowControl>
                 </StyledRow>
+                {showLogicalType && (
+                  <StyledRow>
+                    <StyledRowHeader>logical type</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityLogicalTypes ?? []}
+                        placeholder="any logical type"
+                        width="full"
+                        options={logicalTypeFilterOptions}
+                        onChange={(entityLogicalTypes) => updateFilters({ entityLogicalTypes })}
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
+                {showPartOfSpeech && (
+                  <StyledRow>
+                    <StyledRowHeader>part of speech</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityPartsOfSpeech ?? []}
+                        placeholder="any part of speech"
+                        width="full"
+                        options={partOfSpeechFilterOptions}
+                        onChange={(entityPartsOfSpeech) =>
+                          updateFilters({ entityPartsOfSpeech })
+                        }
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
                 <StyledRow>
                   <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
                   <StyledRowControl>
@@ -387,9 +425,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.CreatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date created</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.createdAfter)}
@@ -404,9 +440,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.UpdatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date updated</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.updatedAfter)}

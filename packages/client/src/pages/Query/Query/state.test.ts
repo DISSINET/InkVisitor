@@ -70,6 +70,19 @@ describe("queryReducer node filters", () => {
   });
 });
 
+describe("queryReducer addNode", () => {
+  it("adds the new node with EQ and SUB on", () => {
+    const next = queryReducer(makeNode("root"), {
+      type: QueryActionType.addNode,
+      payload: { parentId: "root" },
+    });
+    expect(next.edges[0].node.params).toMatchObject({
+      includeEquivalents: true,
+      includeSubordinates: true,
+    });
+  });
+});
+
 describe("queryReducer setQueryState", () => {
   it("replaces the whole tree with the payload state", () => {
     const oldState = makeNode("root");

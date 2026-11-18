@@ -292,31 +292,36 @@ export default class Document implements IDocument, IDbModel {
   }
 
   removeAnchor(entityId: string, index: number) {
-    const openingTagRegex = createSpecificOpeningTagRegex(entityId);
-    const closingTagRegexInstance = new RegExp(`</${entityId}>`, "g");
-    
+    const tagRegex = new RegExp(
+      `${createSpecificOpeningTagRegex(entityId).source}|</${entityId}>`,
+      "g"
+    );
+
     let match;
-    let count = 0;
     const positions: { start: number; end: number; openingTagLength: number }[] = [];
+    // anchors of the entity open at the current tag, innermost last
+    const open: number[] = [];
 
-    // Find all opening tags in the content
-    while ((match = openingTagRegex.exec(this.content)) !== null) {
-      positions.push({ 
-        start: match.index, 
-        end: -1, 
-        openingTagLength: match[0].length 
-      });
-    }
-
-    // Find corresponding closing tags
-    while ((match = closingTagRegexInstance.exec(this.content)) !== null) {
-      // Find the matching opening tag (the one without an end position)
-      for (let i = positions.length - 1; i >= 0; i--) {
-        if (positions[i].end === -1) {
-          positions[i].end = match.index + match[0].length;
-          count++;
-          break;
+    // The entity's tags are walked in document order, so a closing tag ends
+    // the nearest anchor still open before it. `positions` keeps the order of
+    // the opening tags, which is the order anchorIndex counts in.
+    while ((match = tagRegex.exec(this.content)) !== null) {
+      // <id n="2"/> spans no text, so it is not an anchor
+      if (match[0].endsWith("/>")) {
+        continue;
+      }
+      if (match[0].startsWith("</")) {
+        const closed = open.pop();
+        if (closed !== undefined) {
+          positions[closed].end = match.index + match[0].length;
         }
+      } else {
+        open.push(positions.length);
+        positions.push({
+          start: match.index,
+          end: -1,
+          openingTagLength: match[0].length,
+        });
       }
     }
 
@@ -464,14 +469,19 @@ export default class Document implements IDocument, IDbModel {
   }
 
   static async backfillEntityIds(conn: Conn): Promise<number> {
+    const isEmpty = (entityIds: unknown) =>
+      Object.values(Document.normalizeEntityIds(entityIds)).every((arr) => arr.length === 0);
     const docs = await Document.getAll(conn);
     let count = 0;
     for (const raw of docs) {
       const doc = new Document(raw);
-      const normalized = Document.normalizeEntityIds(doc.entityIds);
-      const isEmpty = Object.values(normalized).every((arr) => arr.length === 0);
-      if (isEmpty && doc.content) {
+      if (isEmpty(doc.entityIds) && doc.content) {
         await doc.preprocess(conn);
+        // runs on every server start; a document with no anchor resolving to
+        // an existing entity still has empty entityIds, so there is nothing to store
+        if (isEmpty(doc.entityIds)) {
+          continue;
+        }
         await doc.update(conn, {
           entityIds: doc.entityIds,
           anchors: doc.anchors,
