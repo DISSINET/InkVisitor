@@ -498,7 +498,13 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
                     placeholder={
-                      isRelationEntityPickerDisabled ? "no class for this edge" : "entity"
+                      isRelationEntityPickerDisabled
+                        ? "no class for this edge"
+                        : isValueNode
+                          ? "value"
+                          : edgeType && Query.TupleValueEdgeTypes[edgeType]
+                            ? "type"
+                            : "entity"
                     }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
