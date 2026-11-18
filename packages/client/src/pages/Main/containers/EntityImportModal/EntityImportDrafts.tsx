@@ -124,8 +124,13 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       createsEntities: false,
       offersStoredEntityFeatures: false,
       hostElementId: DRAFT_DETAIL_ELEMENT_ID,
-      // a double click on the tag of another draft opens that draft
-      openUnstored: setSelectedId,
+      // a double click on the tag of another draft opens that draft; a Value
+      // copy has no row to open
+      openUnstored: (entityId: string) => {
+        if (tabs.some((entity) => entity.id === entityId)) {
+          setSelectedId(entityId);
+        }
+      },
       // a new entity is one more draft; the Detail stays where the user
       // created it, such as at a metaprop
       createDraft: (entity: IEntity) => {
@@ -133,7 +138,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       },
       importMarks: selectedId ? importMarksOf(draft, selectedId) : undefined,
     }),
-    [writes, draftEntityIds, onDraftChange, draft, selectedId]
+    [writes, draftEntityIds, onDraftChange, draft, selectedId, tabs]
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;
