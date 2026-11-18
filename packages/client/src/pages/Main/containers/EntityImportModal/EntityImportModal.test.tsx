@@ -162,8 +162,11 @@ describe("EntityImportModal", () => {
 
     await act(async () => buttonNamed("Cancel").click());
     expect(closeModal).not.toHaveBeenCalled();
+    await act(async () => buttonNamed("Keep editing").click());
+    expect(closeModal).not.toHaveBeenCalled();
 
-    await act(async () => buttonNamed("Close").click());
+    await act(async () => buttonNamed("Cancel").click());
+    await act(async () => buttonNamed("Discard changes and close").click());
     expect(closeModal).toHaveBeenCalled();
   });
 });

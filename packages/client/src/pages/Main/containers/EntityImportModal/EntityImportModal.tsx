@@ -660,7 +660,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <Submit
         title="Back to JSON"
         text="The JSON field shows the input as you pasted it. Your changes in the drafts will be lost."
-        submitLabel="Back to JSON"
+        submitLabel="Discard changes and go back"
+        cancelLabel="Keep editing"
         show={showBackSubmit}
         onSubmit={goBackToJson}
         onCancel={() => setShowBackSubmit(false)}
@@ -688,7 +689,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <Submit
         title="Close the import"
         text="Nothing has been imported. Your changes in the drafts will be lost."
-        submitLabel="Close"
+        submitLabel="Discard changes and close"
+        cancelLabel="Keep editing"
         show={showCloseSubmit}
         onSubmit={closeNow}
         onCancel={() => setShowCloseSubmit(false)}
