@@ -17,6 +17,14 @@ export namespace Query {
     params: IEdgeParams;
     logic: EdgeLogic;
     node: INode;
+    // HP: and SP: only: the value half of the prop, matched like a target of the
+    // edge type TupleValueEdgeTypes names; `node` is the type half, and both halves
+    // hold on the same prop
+    valueNode?: INode;
+    // with valueNode: Negative keeps the props of the type whose value the value node does
+    // not match, an empty value included; an empty value node then keeps props with no value.
+    // `logic` still negates the whole edge
+    valueLogic?: EdgeLogic;
   }
 
   export interface INodeParams {
@@ -46,12 +54,38 @@ export namespace Query {
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;
   }
-  export interface IEdgeParams {}
+  export interface IEdgeParams {
+    // prop edges (PropPairEdges) only: the other half of the matched prop, so
+    // a prop matches only when its type and its value both hold
+    propPair?: IPropPair;
+  }
+
+  export interface IPropPair {
+    entityId: string;
+    includeEquivalents?: boolean;
+    includeSubordinates?: boolean;
+  }
+
+  /**
+   * The prop edges whose propPair pins the other half of the same prop, by the
+   * half it pins: the type for the value edges, the value for the type edges.
+   */
+  export const PropPairEdges: Partial<Record<EdgeType, "type" | "value">> = {
+    "HP:V": "type",
+    "I_HP:V": "type",
+    "SP:V": "type",
+    "I_SP:V": "type",
+    "EP:T": "value",
+    "I_EP:T": "value",
+    "SP:T": "value",
+    "I_SP:T": "value",
+  };
 
   export enum NodeType {
     E = "Entity",
   }
   export enum EdgeType {
+    "HP:" = "HP:",
     "HP:V" = "HP:V",
     "I_HP:V" = "I_HP:V",
     "EP:T" = "EP:T",
@@ -82,6 +116,7 @@ export namespace Query {
     "I_CT:D" = "I_CT:D",
     "CT:G" = "CT:G",
     "I_CT:G" = "I_CT:G",
+    "SP:" = "SP:",
     "SP:T" = "SP:T",
     "I_SP:T" = "I_SP:T",
     "SP:V" = "SP:V",
@@ -122,6 +157,15 @@ export namespace Query {
     "I_R:REL" = "I_R:REL",
     "SE" = "SE",
   }
+
+  /**
+   * The edges with a type node and a value node, by the edge type whose target the
+   * value node is picked and matched as.
+   */
+  export const TupleValueEdgeTypes: Partial<Record<EdgeType, EdgeType>> = {
+    "HP:": EdgeType["HP:V"],
+    "SP:": EdgeType["SP:V"],
+  };
 
   export enum NodeOperator {
     And = "and",
@@ -171,6 +215,10 @@ export namespace Query {
   ];
 
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
+    // the type node; the value node takes the HP:V target params
+    "HP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "HP:V": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
@@ -262,6 +310,10 @@ export namespace Query {
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
+    // the type node; the value node takes the SP:V target params
+    "SP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "SP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -450,6 +502,13 @@ export namespace Query {
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
+    "HP:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
     "HP:V": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
@@ -692,6 +751,16 @@ export namespace Query {
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "SP:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
     ],
     "SP:T": [
@@ -1034,6 +1103,7 @@ export namespace Query {
     ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
+    "HP:": "has property",
     "HP:V": "has property: value",
     "I_HP:V": "is property: value",
     "EP:T": "has property: type",
@@ -1064,6 +1134,7 @@ export namespace Query {
     "I_CT:D": "T has parent T: direct parent",
     "CT:G": "T has child T: any",
     "I_CT:G": "T has parent T: any",
+    "SP:": "has S prop",
     "SP:T": "has S prop: type",
     "I_SP:T": "is S prop: type",
     "SP:V": "has S prop: value",
@@ -1112,6 +1183,7 @@ export namespace Query {
    * direction is known.
    */
   export const EdgeTypeDescriptions: Record<EdgeType, string> = {
+    "HP:": "Finds entities with an own prop whose type is the type node and whose value is the value node",
     "HP:V": "Finds entities whose own props have the target as a value",
     "I_HP:V": "Finds the prop values in the target entity's own props",
     "EP:T": "Finds entities whose own props have the target as a type",
@@ -1143,6 +1215,8 @@ export namespace Query {
     "I_CT:D": "Finds territories directly below the target territory",
     "CT:G": "Finds territories that have the target territory anywhere below them",
     "I_CT:G": "Finds territories anywhere below the target territory",
+    "SP:":
+      "Finds statements with an action or actant prop whose type is the type node and whose value is the value node",
     "SP:T": "Finds statements with an action or actant prop whose type is the target",
     "I_SP:T": "Finds actants that carry a prop in a statement whose type is the target",
     "SP:V": "Finds statements with an action or actant prop whose value is the target",

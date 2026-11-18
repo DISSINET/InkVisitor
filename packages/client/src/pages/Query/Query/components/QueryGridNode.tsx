@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
@@ -43,6 +43,7 @@ import {
   parseDate,
 } from "../../FloatingSearchContainer/DateRangeFilter";
 import { expansionCount } from "../nodeExpansion";
+import { useEntityExpansion } from "../useEntityExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { NodeFilterMatches } from "./NodeFilterMatches";
 import { NodeUserFilterRows } from "./NodeUserFilterRows";
@@ -69,6 +70,8 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // the value node of an HP: / SP: edge goes away with the edge, removed from the type node
+  isValueNode?: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -79,6 +82,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
   onOpenEntityInDetail,
+  isValueNode = false,
 }) => {
   const theme = useTheme();
   const isValid = problems.every((problem) => problem.warning);
@@ -171,71 +175,38 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const subordinatesApply = !!entityId && !withoutSubordinates;
   const includeEquivalents = equivalentsApply && node.params.includeEquivalents === true;
   const includeSubordinates = subordinatesApply && node.params.includeSubordinates === true;
-
-  // The expansion is fetched only when the user asks for it, never as a side
-  // effect of editing the query: this signature identifies the toggle
-  // combination that was asked for, and the request runs only while the node
-  // still carries it. Flipping a toggle therefore costs nothing until the new
-  // combination is asked for in turn.
-  const expansionSignature = `${entityId}|${includeEquivalents}|${includeSubordinates}`;
-  const [requestedExpansionSignature, setRequestedExpansionSignature] = useState<
-    string | null
-  >(null);
+  // with no entity picked yet, a toggle shows the params it will apply once one is picked,
+  // disabled; on an edge without subordinates SUB stays off, as it never applies there
+  const showEquivalents = entityId ? includeEquivalents : node.params.includeEquivalents === true;
+  const showSubordinates =
+    entityId || withoutSubordinates
+      ? includeSubordinates
+      : node.params.includeSubordinates === true;
 
   const {
-    data: dataExpansion,
-    isFetching: isExpansionFetching,
-    isError: isExpansionError,
-  } = useQuery({
-    queryKey: [
-      "node-expansion",
-      entityId,
-      includeEquivalents,
-      includeSubordinates,
-    ],
-    queryFn: async () => {
-      const res = await api.entityExpansion(entityId!, {
-        equivalents: includeEquivalents,
-        subordinates: includeSubordinates,
-      });
-      return res.data;
-    },
-    enabled:
-      !!entityId &&
-      requestedExpansionSignature === expansionSignature &&
-      api.isLoggedIn(),
-    // the relation graph does not move while a query is being built, so
-    // returning to a combination already asked for reads from the cache and
-    // shows its count without a second request
-    staleTime: 5 * 60 * 1000,
-  });
+    dataExpansion,
+    isExpansionFetching,
+    isExpansionError,
+    openExpansionGroup,
+    setOpenExpansionGroup,
+    equivalentsBadgeRef,
+    subordinatesBadgeRef,
+    openExpansion,
+  } = useEntityExpansion(entityId, includeEquivalents, includeSubordinates);
 
-  const [openExpansionGroup, setOpenExpansionGroup] = useState<
-    "equivalents" | "subordinates" | null
-  >(null);
-  const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
-  const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
-
-  const openExpansion = (group: "equivalents" | "subordinates") => {
-    setRequestedExpansionSignature(expansionSignature);
-    setOpenExpansionGroup(openExpansionGroup === group ? null : group);
-  };
-
-  // a popover describes one toggle combination, so editing the node closes it
-  useEffect(() => {
-    setOpenExpansionGroup(null);
-  }, [expansionSignature]);
-
-  // a node reached through a negative ("NOT") edge gets a red border to match
-  // that edge; scoped to this node only - deeper nodes have their own edges
-  const isNegativeEdge = edge?.logic === Query.EdgeLogic.Negative;
+  // a node reached through a negative ("NOT") edge gets a grey border to match
+  // that edge; scoped to this node only - deeper nodes have their own edges. The value node
+  // of HP: / SP: also turns grey when NOT is on its "with value" box alone
+  const isNegativeEdge =
+    edge?.logic === Query.EdgeLogic.Negative ||
+    (isValueNode && edge?.valueLogic === Query.EdgeLogic.Negative);
 
   const nodeBorder = useMemo(() => {
     if (!isValid) {
       return "none";
     }
     if (isNegativeEdge) {
-      return theme.color.entityA;
+      return theme.color.queryNegative;
     }
     return theme.color.query2;
   }, [theme, isValid, isNegativeEdge]);
@@ -537,18 +508,26 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
                     placeholder={
-                      isRelationEntityPickerDisabled ? "no class for this edge" : "entity"
+                      isRelationEntityPickerDisabled
+                        ? "no class for this edge"
+                        : isValueNode
+                          ? "value"
+                          : edgeType && Query.TupleValueEdgeTypes[edgeType]
+                            ? "type"
+                            : "entity"
                     }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
                     // seeds the class shown on mount / edge switch: the node's
-                    // committed class, else the first class the edge allows.
-                    // The suggester owns the selection afterwards, so a wildcard
-                    // pick (which clears entityClasses) is not re-derived here.
+                    // committed class, the wildcard when its class filter is
+                    // cleared (no initCategory), else the first class the edge
+                    // allows. The suggester owns the selection afterwards.
                     initCategory={
-                      node.params.entityClasses?.[0] ??
-                      entityIdCategoryTypes[0] ??
-                      EntityEnums.Class.Concept
+                      paramEntityClass && node.params.entityClasses?.length === 0
+                        ? undefined
+                        : (node.params.entityClasses?.[0] ??
+                          entityIdCategoryTypes[0] ??
+                          EntityEnums.Class.Concept)
                     }
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {
@@ -631,7 +610,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="EQ"
                   size={13}
                   color="info"
-                  value={includeEquivalents}
+                  value={showEquivalents}
                   disabled={!equivalentsApply}
                   tooltipLabel="include equivalents"
                   tooltipContent={
@@ -667,7 +646,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="SUB"
                   size={13}
                   color="warning"
-                  value={includeSubordinates}
+                  value={showSubordinates}
                   disabled={!subordinatesApply}
                   tooltipLabel={
                     subordinatesAsDepth ? "match the whole subtree" : "include subordinates"
@@ -738,7 +717,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </div>
-        {node.gridX !== 0 && node.gridY !== 0 && edge && (
+        {node.gridX !== 0 && node.gridY !== 0 && edge && !isValueNode && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}

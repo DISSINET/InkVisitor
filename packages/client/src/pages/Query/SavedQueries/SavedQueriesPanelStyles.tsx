@@ -29,9 +29,12 @@ export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.3rem 1rem;
-  border: none;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
+  // the height and corners of the small square icon buttons beside it in the box header
+  height: 2rem;
+  padding: 0 0.8rem;
+  // the query builder blue, so the button stands out from the box header in both themes
+  border: 1px solid ${({ theme }) => theme.color.query2};
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
   background-color: ${({ theme }) => theme.color["blue"][50]};
   filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
   cursor: pointer;

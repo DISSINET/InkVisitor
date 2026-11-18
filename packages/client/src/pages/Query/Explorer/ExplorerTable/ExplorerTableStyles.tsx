@@ -290,10 +290,12 @@ export const StyledCounter = styled.div`
 `;
 
 // takes up to 36rem of the search row and gives way first when the row runs
-// out of width, so the buttons beside it keep their size on one line
+// out of width, so the buttons beside it keep their size on one line. The width
+// is what sizes the result rows card, which is only as wide as its rows
 export const StyledLabelFilter = styled.div`
   display: flex;
   flex: 0 1 36rem;
+  width: 36rem;
   align-items: center;
   gap: 0.2rem;
   min-width: 10rem;

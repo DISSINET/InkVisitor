@@ -11,10 +11,11 @@ const checkmarkPop = keyframes`
 // this element so moving across it never leaves the hovered area
 interface StyledCheckbox {
   $disabled?: boolean;
+  $labelColor: FlatThemeColor;
 }
 export const StyledCheckbox = styled.div<StyledCheckbox>`
-  color: ${({ theme, $disabled }) =>
-    $disabled ? theme.color["gray"][500] : theme.color["black"]};
+  color: ${({ theme, $disabled, $labelColor }) =>
+    $disabled ? theme.color["gray"][500] : theme.color[$labelColor]};
   display: flex;
   align-items: center;
   gap: 0.4rem;
