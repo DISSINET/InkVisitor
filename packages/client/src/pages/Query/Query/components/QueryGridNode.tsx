@@ -175,6 +175,13 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const subordinatesApply = !!entityId && !withoutSubordinates;
   const includeEquivalents = equivalentsApply && node.params.includeEquivalents === true;
   const includeSubordinates = subordinatesApply && node.params.includeSubordinates === true;
+  // with no entity picked yet, a toggle shows the params it will apply once one is picked,
+  // disabled; on an edge without subordinates SUB stays off, as it never applies there
+  const showEquivalents = entityId ? includeEquivalents : node.params.includeEquivalents === true;
+  const showSubordinates =
+    entityId || withoutSubordinates
+      ? includeSubordinates
+      : node.params.includeSubordinates === true;
 
   const {
     dataExpansion,
@@ -600,7 +607,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="EQ"
                   size={13}
                   color="info"
-                  value={includeEquivalents}
+                  value={showEquivalents}
                   disabled={!equivalentsApply}
                   tooltipLabel="include equivalents"
                   tooltipContent={
@@ -636,7 +643,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="SUB"
                   size={13}
                   color="warning"
-                  value={includeSubordinates}
+                  value={showSubordinates}
                   disabled={!subordinatesApply}
                   tooltipLabel={
                     subordinatesAsDepth ? "match the whole subtree" : "include subordinates"
