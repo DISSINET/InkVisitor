@@ -43,6 +43,9 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
         warnings.push({ source: edge.id, text: PINNED_CONDITION_WARNING, warning: true });
       }
       visit(edge.node, edge.type);
+      if (edge.valueNode) {
+        visit(edge.valueNode, Query.TupleValueEdgeTypes[edge.type]);
+      }
     }
   };
   visit(root);
@@ -50,12 +53,17 @@ export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [
+  // HP: matches the type and the value of the same prop (server: EdgeHasProp in edge.ts)
+  Query.EdgeType["HP:"],
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
   // inverse entity-prop edges: match the prop types / values found in the
   // target entity's own props (server: runInversePropEdge in edge.ts)
   Query.EdgeType["I_EP:T"],
   Query.EdgeType["I_HP:V"],
+  // SP: matches the type and the value of the same in-statement prop (server:
+  // EdgeStatementHasProp in edge.ts)
+  Query.EdgeType["SP:"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
   // statement actant-field edges: match a Statement that has some actant
@@ -168,7 +176,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
  * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
  * direct-vs-any distinction to begin with (a statement sits under exactly one
- * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off.
+ * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off. "SE" makes
+ * its target a start node of the query, which is not a condition to pick
+ * among the others.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -185,6 +195,19 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["SUT:D"],
   Query.EdgeType["I_SUT:D"],
   Query.EdgeType["I_CT:D"],
+  Query.EdgeType.SE,
+];
+
+/**
+ * Implemented edge types offered only on an edge that already has them, as in a saved
+ * query: "EP:T" / "HP:V" are HP: with its value or its type left empty, "SP:T" / "SP:V" the
+ * same for SP:.
+ */
+export const edgeTypesRetired: Query.EdgeType[] = [
+  Query.EdgeType["EP:T"],
+  Query.EdgeType["HP:V"],
+  Query.EdgeType["SP:T"],
+  Query.EdgeType["SP:V"],
 ];
 
 /**

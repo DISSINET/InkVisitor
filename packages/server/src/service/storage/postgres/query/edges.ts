@@ -4,7 +4,7 @@ import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { TABLE } from "../../names";
 import { Conn, ExploreResolvers } from "../../types";
-import { collect, propPaths } from "../provision";
+import { collect, propLevels, propPaths } from "../provision";
 import { Params, arr, ident, indexHolds } from "../sql";
 import { q } from "../tables";
 import {
@@ -32,6 +32,10 @@ export default class SearchEdge implements Query.IEdge {
   logic: Query.EdgeLogic;
   id: string;
   node: SearchNode;
+  /** HP: and SP: only: the value half of the prop, resolved as the target of an HP:V / SP:V edge */
+  valueSide: SearchEdge | null;
+  /** with a valueSide: the prop's value must not match it (valueLogic) */
+  valueNegated: boolean;
   /** id expansion and the territory lineage; injected by the plan, see setResolvers */
   protected resolvers?: ExploreResolvers;
 
@@ -41,11 +45,18 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+    const valueType = Query.TupleValueEdgeTypes[this.type];
+    this.valueSide =
+      valueType && data.valueNode
+        ? new SearchEdge({ type: valueType, node: data.valueNode })
+        : null;
+    this.valueNegated = !!this.valueSide && data.valueLogic === Query.EdgeLogic.Negative;
   }
 
   setResolvers(resolvers: ExploreResolvers): void {
     this.resolvers = resolvers;
     this.node.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
   }
 
   protected resolve(): ExploreResolvers {
@@ -70,6 +81,9 @@ export default class SearchEdge implements Query.IEdge {
   /** the subtree below the pinned targets, resolved for I_CT: with the SUB toggle */
   protected descendantIds: string[] | null = null;
 
+  /** the propPair entity with its EQ / SUB expansion, resolved in prepare(); null without a propPair */
+  protected propPairIds: string[] | null = null;
+
   /** the relation edges check an unpinned target's filters on the far-side entity per relation */
   private checksUnpinnedTargetInRun(): boolean {
     return this.type.startsWith("R:") || this.type.startsWith("I_R:");
@@ -90,6 +104,8 @@ export default class SearchEdge implements Query.IEdge {
     const entityId = this.node.params.entityId;
     // the node filters narrow an empty target only: a pinned entity is the target itself, whatever its status
     this.descendantIds = null;
+    this.propPairIds = await this.resolvePropPair(conn);
+    await this.valueSide?.prepare(conn);
 
     if (!entityId) {
       // every other predicate applies the filters through the targetIds() set; the relation edges
@@ -107,11 +123,10 @@ export default class SearchEdge implements Query.IEdge {
       return;
     }
 
-    const expansion = await this.resolve().expand(conn, entityId, {
+    const expanded = await this.expandedIds(conn, entityId, {
       equivalents: this.node.params.includeEquivalents === true,
       subordinates: this.expandsPinnedSubordinates() && this.node.params.includeSubordinates === true,
     });
-    const expanded = [entityId, ...expansion.equivalents, ...expansion.subordinates];
     // the nested conditions keep the expanded targets that meet them
     this.targetEntityIds = this.node.edges.length
       ? await this.node.match(conn, { kind: "ids", ids: expanded })
@@ -120,6 +135,45 @@ export default class SearchEdge implements Query.IEdge {
     if (this.type === Query.EdgeType["I_CT:"] && this.node.params.includeSubordinates === true) {
       this.descendantIds = await this.resolve().subordinates(conn, this.targetEntityIds);
     }
+  }
+
+  /** `entityId` with the equivalents and subordinates the toggles ask for */
+  private async expandedIds(
+    conn: Conn,
+    entityId: string,
+    toggles: { equivalents: boolean; subordinates: boolean }
+  ): Promise<string[]> {
+    const expansion = await this.resolve().expand(conn, entityId, toggles);
+    return [entityId, ...expansion.equivalents, ...expansion.subordinates];
+  }
+
+  private async resolvePropPair(conn: Conn): Promise<string[] | null> {
+    const pair = this.params.propPair;
+    if (!pair?.entityId || !Query.PropPairEdges[this.type]) {
+      return null;
+    }
+    return this.expandedIds(conn, pair.entityId, {
+      equivalents: pair.includeEquivalents === true,
+      subordinates: pair.includeSubordinates === true,
+    });
+  }
+
+  /**
+   * the half of the same prop the propPair pins, or the value node of HP: / SP: holds, with the
+   * entities it allows; null without a propPair and for a value node constrained by class only
+   */
+  propPair(): { kind: "type" | "value"; ids: string[] } | null {
+    if (this.valueSide) {
+      const ids = this.valueSide.targetIds();
+      return ids ? { kind: "value", ids } : null;
+    }
+    const kind = Query.PropPairEdges[this.type];
+    return kind && this.propPairIds ? { kind, ids: this.propPairIds } : null;
+  }
+
+  /** the classes the value node of HP: / SP: narrows the value to when it holds no id set */
+  valueClasses(): EntityEnums.Class[] {
+    return this.valueSide && !this.valueSide.targetIds() ? this.valueSide.targetClasses() : [];
   }
 
   /**
@@ -240,6 +294,25 @@ function idsMatch(p: Params, idsSql: string, targets: string[] | null, classes: 
   }
   return `cardinality(${idsSql}) > 0`;
 }
+
+/** candidate rows through `index` for the targets; every row without a target (candidateStatements) */
+const candidates = (p: Params, index: string, targets: string[] | null): string =>
+  targets ? p.index(TABLE.entities, index, targets) : "TRUE";
+
+/**
+ * the longest target list ownCandidates probes a gin index with. When the planner runs the
+ * overlap as a filter it compares every key of a row with every target, so the list an unpinned
+ * target resolves to (thousands of ids) costs more there than reading the documents does
+ */
+const INDEXED_TARGETS_LIMIT = 100;
+
+/**
+ * candidates() ahead of a predicate over e's own document. The index keys are a superset of the
+ * ids the predicate reads at the same paths, so a row the index leaves out cannot match and its
+ * document is never read; a long target list is left to the predicate alone
+ */
+const ownCandidates = (p: Params, index: string, targets: string[] | null): string =>
+  targets && targets.length <= INDEXED_TARGETS_LIMIT ? candidates(p, index, targets) : "TRUE";
 
 /** text[] of the ids `paths` collect from document `doc`; null and empty ids are dropped, as every ReQL collector does */
 const collected = (paths: string[], doc: string): string => `(${collect(paths, "v IS NOT NULL AND v <> ''", doc)})`;
@@ -391,30 +464,77 @@ function fromMap(map: Record<string, RelationEnums.Type>, build: (type: Relation
 const PROPS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'props'`)}) pr`;
 const propId = (kind: "type" | "value"): string => `coalesce(pr->'${kind}'->>'entityId', '')`;
 
-/** a top-level prop of e whose `kind` side is a target, or any filled one (EP:T, HP:V); HP:V narrows an empty target by class */
+/**
+ * the prop `pr` holds a propPair entity on the half the propPair pins, or a value of the
+ * classes the value node of HP: / SP: picks; TRUE without either. A negated value node keeps
+ * the props it does not match, an empty value included, and with no constraint of its own
+ * the props with no value
+ */
+function pairMatch(e: SearchEdge, p: Params): string {
+  const pair = e.propPair();
+  const classes = e.valueClasses();
+  const match = pair
+    ? `${propId(pair.kind)} = ${anyOf(p, pair.ids)}`
+    : classes.length
+      ? entityMatches(p, propId("value"), classes)
+      : "TRUE";
+  if (!e.valueNegated) {
+    return match;
+  }
+  return match === "TRUE" ? `${propId("value")} = ''` : `NOT (${match})`;
+}
+
+/** the prop `pr` references a target by `kind`, an entity of the classes, or anything */
+function propSide(e: SearchEdge, p: Params, kind: "type" | "value", classes: EntityEnums.Class[]): string {
+  const targets = e.targetIds();
+  if (targets) {
+    return `${propId(kind)} = ${anyOf(p, targets)}`;
+  }
+  return classes.length ? entityMatches(p, propId(kind), classes) : `${propId(kind)} <> ''`;
+}
+
+/**
+ * the row's own props hold a propPair entity, through the gin index that covers their types
+ * and values (the column of the row the enclosing FROM reads); TRUE without a propPair, and
+ * for a negated value node, whose matching rows need not hold its ids
+ */
+function holdsPropPair(e: SearchEdge, p: Params, index: string): string {
+  const pair = e.propPair();
+  return pair && !e.valueNegated ? ownCandidates(p, index, pair.ids) : "TRUE";
+}
+
+/**
+ * a top-level prop of e whose `kind` side is a target, or any filled one (EP:T, HP:V); HP:V
+ * narrows an empty target by class; with a propPair, the same prop holds its other half too
+ */
 function hasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
+  const holds = holdsPropPair(e, p, DbEnums.Indexes.PropsRecursive);
+  const pair = pairMatch(e, p);
   if (!targets && narrowByClass && classes.length) {
-    return hasIdOfClasses(p, `ARRAY(SELECT ${propId(kind)} FROM ${PROPS("e")})`, classes);
+    return `${holds} AND ${hasIdOfClasses(p, `ARRAY(SELECT ${propId(kind)} FROM ${PROPS("e")} WHERE ${pair})`, classes)}`;
   }
-  const match = targets ? `${propId(kind)} = ${anyOf(p, targets)}` : `${propId(kind)} <> ''`;
-  return `EXISTS (SELECT 1 FROM ${PROPS("e")} WHERE ${match})`;
+  return (
+    `${ownCandidates(p, DbEnums.Indexes.PropsRecursive, targets)} AND ${holds}` +
+    ` AND EXISTS (SELECT 1 FROM ${PROPS("e")} WHERE ${propSide(e, p, kind, [])} AND ${pair})`
+  );
 }
 
-/** the rows `s` an edge targets: by id when pinned, by the node's classes when unpinned, every row otherwise (entitiesOfClasses) */
-function targetRows(e: SearchEdge, p: Params): string {
+/** the rows `row` an edge targets: by id when pinned or constrained, by the node's classes otherwise, every row without either (entitiesOfClasses) */
+function targetRows(e: SearchEdge, p: Params, row = "s"): string {
   const targets = e.targetIds();
   const classes = e.targetClasses();
   if (targets) {
-    return `s.id = ${anyOf(p, targets)}`;
+    return `${row}.id = ${anyOf(p, targets)}`;
   }
-  return classes.length ? `s.class = ${anyOf(p, classes)}` : "TRUE";
+  return classes.length ? `${row}.class = ${anyOf(p, classes)}` : "TRUE";
 }
 
-/** e is a filled `kind` side of a top-level prop of a target entity (runInversePropEdge) */
+/** e is a filled `kind` side of a top-level prop of a target entity, holding the propPair too (runInversePropEdge) */
 const isProp = (e: SearchEdge, p: Params, kind: "type" | "value"): string =>
-  `e.id IN (SELECT ${propId(kind)} FROM ${ENTITIES} s, ${PROPS("s")} WHERE ${targetRows(e, p)})`;
+  `e.id IN (SELECT ${propId(kind)} FROM ${ENTITIES} s, ${PROPS("s")} WHERE ${targetRows(e, p)}` +
+  ` AND ${holdsPropPair(e, p, DbEnums.Indexes.PropsRecursive)} AND ${pairMatch(e, p)})`;
 
 /** the references of row `x`, one element `ref` each; a string `references` reads as empty */
 const REFS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'references'`)}) ref`;
@@ -423,7 +543,7 @@ const REFS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'refe
 function hasReference(e: SearchEdge, p: Params, kind: "resource" | "value"): string {
   const targets = e.targetIds();
   const match = targets ? `ref->>'${kind}' = ${anyOf(p, targets)}` : nonEmpty(`ref->>'${kind}'`);
-  return `EXISTS (SELECT 1 FROM ${REFS("e")} WHERE ${match})`;
+  return `${ownCandidates(p, DbEnums.Indexes.EntityReferences, targets)} AND EXISTS (SELECT 1 FROM ${REFS("e")} WHERE ${match})`;
 }
 
 /** e is a resource the target entities' references point at (runIsReferenceResourceEdge) */
@@ -438,19 +558,40 @@ function targetStatements(e: SearchEdge, p: Params): string {
   return targets ? `s.id = ${anyOf(p, targets)}` : "TRUE";
 }
 
+/** the in-statement props: those of the actions and of the actants, three levels deep */
+const STATEMENT_PROP_ROOTS = ["$.data.actions[*].props[*]", "$.data.actants[*].props[*]"];
+
 /** one side of the in-statement props (actions and actants), three levels deep */
-const statementPropPaths = (kind: "type" | "value"): string[] => [
-  ...propPaths("$.data.actions[*].props[*]", 3, kind),
-  ...propPaths("$.data.actants[*].props[*]", 3, kind),
-];
+const statementPropPaths = (kind: "type" | "value"): string[] =>
+  ([] as string[]).concat(...STATEMENT_PROP_ROOTS.map((root) => propPaths(root, 3, kind)));
 
-/** statements whose in-statement props reference a target by `kind`, an entity of the classes (SP:V), or anything (runStatementPropEdge) */
-const statementHasProp = (e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string =>
-  `${isClass("e", S)} AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), narrowByClass ? e.targetClasses() : [])}`;
+/** one row `pr` per prop object the `paths` reach in document `doc` */
+const propRows = (paths: string[], doc: string): string =>
+  `(${paths.map((path) => `SELECT jsonb_path_query(${doc}, '${path}', '{}', true) pr`).join(" UNION ALL ")}) props`;
 
-/** candidate statements through `index` for the targets; every statement without a target (candidateStatements) */
-const candidates = (p: Params, index: string, targets: string[] | null): string =>
-  targets ? p.index(TABLE.entities, index, targets) : "TRUE";
+/**
+ * statements whose in-statement props reference a target by `kind`, an entity of the classes
+ * (SP:V), or anything (runStatementPropEdge); with a propPair or the value node of SP:, one
+ * prop holds both halves
+ */
+function statementHasProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string {
+  const classes = narrowByClass ? e.targetClasses() : [];
+  if (!e.propPair() && !e.valueClasses().length && !e.valueNegated) {
+    return (
+      `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds())}` +
+      ` AND ${idsMatch(p, collected(statementPropPaths(kind), "e.doc"), e.targetIds(), classes)}`
+    );
+  }
+  const props = propRows(
+    ([] as string[]).concat(...STATEMENT_PROP_ROOTS.map((root) => propLevels(root, 3))),
+    "e.doc"
+  );
+  return (
+    `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds())}` +
+    ` AND ${holdsPropPair(e, p, DbEnums.Indexes.StatementDataProps)}` +
+    ` AND EXISTS (SELECT 1 FROM ${props} WHERE ${propSide(e, p, kind, classes)} AND ${pairMatch(e, p)})`
+  );
+}
 
 /** the actants of the statement row `x`, one element `a` each */
 const ACTANTS = (x: string): string => `jsonb_array_elements(${arr(`${x}.doc->'data'->'actants'`)}) a`;
@@ -460,18 +601,34 @@ function actantEdge(cands: string, actantMatch: string): string {
   return `e.id IN (SELECT a->>'entityId' FROM ${ENTITIES} s, ${ACTANTS("s")} WHERE ${isClass("s", S)} AND ${cands} AND ${actantMatch})`;
 }
 
-/** the actant carrying an in-statement prop that references a target by `kind` (runInverseStatementPropEdge) */
-const isStatementProp = (e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string =>
-  actantEdge(
-    candidates(p, DbEnums.Indexes.StatementDataProps, e.targetIds()),
-    idsMatch(p, collected(propPaths("$.props[*]", 3, kind), "a"), e.targetIds(), narrowByClass ? e.targetClasses() : [])
+/**
+ * the actant carrying an in-statement prop that references a target by `kind`
+ * (runInverseStatementPropEdge); with a propPair, one prop holds both halves, and the index
+ * narrows the candidate statements to those holding the propPair too
+ */
+function isStatementProp(e: SearchEdge, p: Params, kind: "type" | "value", narrowByClass: boolean): string {
+  const targets = e.targetIds();
+  const classes = narrowByClass ? e.targetClasses() : [];
+  const pair = e.propPair();
+  if (!pair) {
+    return actantEdge(
+      candidates(p, DbEnums.Indexes.StatementDataProps, targets),
+      idsMatch(p, collected(propPaths("$.props[*]", 3, kind), "a"), targets, classes)
+    );
+  }
+  const props = propRows(propLevels("$.props[*]", 3), "a");
+  return actantEdge(
+    `${candidates(p, DbEnums.Indexes.StatementDataProps, targets)} AND ${holdsPropPair(e, p, DbEnums.Indexes.StatementDataProps)}`,
+    `EXISTS (SELECT 1 FROM ${props} WHERE ${propSide(e, p, kind, classes)} AND ${pairMatch(e, p)})`
   );
+}
 
 type ActantField = "classifications" | "identifications";
 
 /** statements with an actant classification or identification pointing at a target, or any (runStatementActantFieldEdge) */
 const statementHasActantField = (e: SearchEdge, p: Params, field: ActantField): string =>
-  `${isClass("e", S)} AND ${idsMatch(p, collected([`$.data.actants[*].${field}[*].entityId`], "e.doc"), e.targetIds(), [])}`;
+  `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementActantsCI, e.targetIds())}` +
+  ` AND ${idsMatch(p, collected([`$.data.actants[*].${field}[*].entityId`], "e.doc"), e.targetIds(), [])}`;
 
 /** the actant whose classifications or identifications point at a target (runInverseStatementActantFieldEdge) */
 const isActantField = (e: SearchEdge, p: Params, field: ActantField): string =>
@@ -490,7 +647,10 @@ function statementHasActant(e: SearchEdge, p: Params, positions: EntityEnums.Pos
   } else if (classes.length) {
     check = entityMatches(p, "a->>'entityId'", classes);
   }
-  return `${isClass("e", S)} AND EXISTS (SELECT 1 FROM ${ACTANTS("e")} WHERE a->>'position' = ${anyOf(p, positions)} AND ${check})`;
+  return (
+    `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementEntities, targets)}` +
+    ` AND EXISTS (SELECT 1 FROM ${ACTANTS("e")} WHERE a->>'position' = ${anyOf(p, positions)} AND ${check})`
+  );
 }
 
 /**
@@ -503,7 +663,10 @@ function statementHasAction(e: SearchEdge, p: Params): string {
   if (!targets && !classes.length) {
     return `${isClass("e", S)} AND jsonb_path_exists(e.doc, '$.data.actions[*].actionId')`;
   }
-  return `${isClass("e", S)} AND ${idsMatch(p, collected(["$.data.actions[*].actionId"], "e.doc"), targets, classes)}`;
+  return (
+    `${isClass("e", S)} AND ${ownCandidates(p, DbEnums.Indexes.StatementEntities, targets)}` +
+    ` AND ${idsMatch(p, collected(["$.data.actions[*].actionId"], "e.doc"), targets, classes)}`
+  );
 }
 
 /** every id the two statement indexes cover: actions, actants, tags, the direct territory, in-statement prop types and values */
@@ -547,12 +710,14 @@ const isInStatementAsAction = (e: SearchEdge, p: Params): string =>
  * props, references, actions with their props, actants with classifications,
  * identifications and props, tags. The reference paths are strict because
  * ReQL reads references only when they are an array; a strict path over
- * anything else yields nothing.
+ * anything else yields nothing. Their filter skips a legacy reference row
+ * that lacks the side, where a strict member access would fail and, errors
+ * being silenced, empty the result for every reference of the statement.
  */
 const STATEMENT_ENTITY_PATHS = [
   ...propPaths("$.props[*]", 3),
-  "strict $.references[*].resource",
-  "strict $.references[*].value",
+  "strict $.references[*] ? (exists(@.resource)).resource",
+  "strict $.references[*] ? (exists(@.value)).value",
   "$.data.actions[*].actionId",
   ...propPaths("$.data.actions[*].props[*]", 3),
   "$.data.actants[*].entityId",
@@ -613,6 +778,7 @@ export const PREDICATES: Record<string, Predicate> = {
   ...fromMap(ORDERED, (type) => (e, p) => relationTarget(e, p, type)),
   ...fromMap(INVERSE_ORDERED, (type) => (e, p) => relationTarget(e, p, type, true)),
   ...fromMap(UNORDERED, (type) => (e, p) => unorderedRelation(e, p, type)),
+  "HP:": (e, p) => hasProp(e, p, "type", false),
   "EP:T": (e, p) => hasProp(e, p, "type", false),
   "HP:V": (e, p) => hasProp(e, p, "value", true),
   "I_EP:T": (e, p) => isProp(e, p, "type"),
@@ -620,6 +786,7 @@ export const PREDICATES: Record<string, Predicate> = {
   "HR:R": (e, p) => hasReference(e, p, "resource"),
   "HR:V": (e, p) => hasReference(e, p, "value"),
   "I_HR:R": isReferenceResource,
+  "SP:": (e, p) => statementHasProp(e, p, "type", false),
   "SP:T": (e, p) => statementHasProp(e, p, "type", false),
   "SP:V": (e, p) => statementHasProp(e, p, "value", true),
   "I_SP:T": (e, p) => isStatementProp(e, p, "type", false),
@@ -649,11 +816,13 @@ export const PREDICATES: Record<string, Predicate> = {
   "CT:": (e, p) => territoryHasChild(e, p, "any"),
   "CT:D": (e, p) => territoryHasChild(e, p, "direct"),
   "I_CT:": territoryHasParent,
+  // e is itself a target row (EdgeIsEntity)
+  SE: (e, p) => targetRows(e, p, "e"),
 };
 
 export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreResolvers): SearchEdge {
   // the type comes from the request body, so inherited Object.prototype keys must not count as known
-  if (!data.type || !Object.prototype.hasOwnProperty.call(PREDICATES, data.type)) {
+  if (typeof data.type !== "string" || !Object.prototype.hasOwnProperty.call(PREDICATES, data.type)) {
     throw new InternalServerError(`unknown edge type: ${data.type}`);
   }
   const edge = new SearchEdge(data);

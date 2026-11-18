@@ -63,13 +63,14 @@ import {
   StyledSearchRow,
   StyledSearchRowCaption,
   StyledSearchRows,
-  StyledSearchRowSpacer,
+  StyledSearchRowStack,
+  StyledSearchRunCell,
 } from "./ExplorerPageStyles";
 import { FilterPopover } from "./FilterPopover/FilterPopover";
 import { SearchFiltersPopover } from "./FloatingSearchContainer/SearchFiltersPopover";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
-import { queryReducer, queryStateInitial } from "./Query/state";
+import { QueryAction, QueryActionType, queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem, queryWarnings } from "./types";
 import {
@@ -99,7 +100,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     setStatementId,
   } = useSearchParams();
 
-  const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
+  const [queryState, dispatchQueryState] = useReducer(queryReducer, queryStateInitial);
+  // the builder's suggesters keep the class they show in their own state, so
+  // every loaded query gets a builder mounted for it
+  const [queryLoadCount, countQueryLoad] = useReducer((count: number) => count + 1, 0);
+  const queryStateDispatch = useCallback((action: QueryAction) => {
+    if (action.type === QueryActionType.setQueryState) {
+      countQueryLoad();
+    }
+    dispatchQueryState(action);
+  }, []);
 
   // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
   // and/or subordinates (inverse SCL/SOE/HOL + child territories) of the final
@@ -900,6 +910,22 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               onHeaderClick={handleMaximizeExplorerBox}
               buttons={[
                 <>
+                  {!explorerBoxMaximized && (
+                    <SavedQueriesPanel
+                      queryState={queryState}
+                      queryStateDispatch={queryStateDispatch}
+                      includeEquivalents={includeEquivalents}
+                      includeSubordinates={includeSubordinates}
+                      onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                      onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                      exploreFilters={exploreState.filters}
+                      exploreDispatch={exploreStateDispatch}
+                      tableColumns={tableColumns}
+                      onLoadTableColumns={handleLoadTableColumns}
+                    />
+                  )}
+                </>,
+                <>
                   {/* collapsing the left panel only makes sense while the detail
                       panel is there to take over the freed width */}
                   {isDetailOpen && (
@@ -915,6 +941,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             >
               <StyledQueryScroller>
                 <MemoizedQueryBox
+                  key={queryLoadCount}
                   state={queryState}
                   dispatch={queryStateDispatch}
                   isQueryFetching={queryIsFetching}
@@ -927,116 +954,109 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   filters narrow the query matches, then the expansion adds to
                   what is left */}
               <StyledSearchRows>
-                <StyledSearchRow data-run-on-enter="true">
-                  {!compactHeader && (
-                    <StyledSearchRowCaption>Narrow results</StyledSearchRowCaption>
-                  )}
-                  <ExplorerTableLabelFilter
-                    filters={exploreState.filters}
-                    dispatch={exploreStateDispatch}
-                  />
-                  <FilterPopover
-                    label="UUIDs"
-                    title="Entity UUIDs"
-                    count={uuidFilterCount}
-                    tooltipLabel="keep only the entities with these UUIDs"
-                    placement="top-start"
-                    onClear={() => {
-                      exploreStateDispatch({
-                        type: ExploreActionType.setUuidsFilter,
-                        payload: { ids: [] },
-                      });
-                      setUuidsClearSignal((signal) => signal + 1);
-                    }}
-                  >
-                    <ExplorerTableIdsFilter
+                <StyledSearchRowStack>
+                  <StyledSearchRow data-run-on-enter="true">
+                    {!compactHeader && (
+                      <StyledSearchRowCaption>Narrow results</StyledSearchRowCaption>
+                    )}
+                    <ExplorerTableLabelFilter
                       filters={exploreState.filters}
                       dispatch={exploreStateDispatch}
-                      clearSignal={uuidsClearSignal}
                     />
-                  </FilterPopover>
-                  <SearchFiltersPopover
-                    filters={exploreState.filters}
-                    dispatch={exploreStateDispatch}
-                    placement="top-start"
-                  />
-                </StyledSearchRow>
-                <StyledSearchRow data-run-on-enter="true">
-                  {!compactHeader && (
-                    <StyledSearchRowCaption>Expand results</StyledSearchRowCaption>
-                  )}
-                  <StyledResultExpansionButtons>
-                    {/* accent colours echo the eq/sub badges on the resulting
-                        entity tags (see StyledExpansionBadge). The pill takes the
-                        click as well as the box, and Checkbox stops its own click
-                        from bubbling, so a hit on the box toggles exactly once. */}
-                    <StyledExpansionToggle
-                      $active={includeEquivalents}
-                      $variant="equivalent"
-                      onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                    <FilterPopover
+                      label="UUIDs"
+                      title="Entity UUIDs"
+                      count={uuidFilterCount}
+                      tooltipLabel="keep only the entities with these UUIDs"
+                      placement="top-start"
+                      onClear={() => {
+                        exploreStateDispatch({
+                          type: ExploreActionType.setUuidsFilter,
+                          payload: { ids: [] },
+                        });
+                        setUuidsClearSignal((signal) => signal + 1);
+                      }}
                     >
-                      <Checkbox
-                        label="Equivalents"
-                        size={14}
-                        color="info"
-                        value={includeEquivalents}
-                        tooltipLabel="include equivalents"
-                        tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                        onChangeFn={handleToggleIncludeEquivalents}
-                        disableEnterKey
+                      <ExplorerTableIdsFilter
+                        filters={exploreState.filters}
+                        dispatch={exploreStateDispatch}
+                        clearSignal={uuidsClearSignal}
                       />
-                      {includeEquivalents && expansionCounts !== undefined && (
-                        <StyledExpansionCount $variant="equivalent">
-                          +{expansionCounts.equivalents}
-                        </StyledExpansionCount>
-                      )}
-                    </StyledExpansionToggle>
-                    <StyledExpansionToggle
-                      $active={includeSubordinates}
-                      $variant="subordinate"
-                      onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
-                    >
-                      <Checkbox
-                        label="Subordinates"
-                        size={14}
-                        color="warning"
-                        value={includeSubordinates}
-                        tooltipLabel="include subordinates"
-                        tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                        onChangeFn={handleToggleIncludeSubordinates}
-                        disableEnterKey
-                      />
-                      {includeSubordinates && expansionCounts !== undefined && (
-                        <StyledExpansionCount $variant="subordinate">
-                          +{expansionCounts.subordinates}
-                        </StyledExpansionCount>
-                      )}
-                    </StyledExpansionToggle>
-                  </StyledResultExpansionButtons>
-                  <StyledSearchRowSpacer />
+                    </FilterPopover>
+                    <SearchFiltersPopover
+                      filters={exploreState.filters}
+                      dispatch={exploreStateDispatch}
+                      placement="top-start"
+                    />
+                  </StyledSearchRow>
+                  <StyledSearchRow data-run-on-enter="true">
+                    {!compactHeader && (
+                      <StyledSearchRowCaption>Expand results</StyledSearchRowCaption>
+                    )}
+                    <StyledResultExpansionButtons>
+                      {/* accent colours echo the eq/sub badges on the resulting
+                          entity tags (see StyledExpansionBadge). The pill takes the
+                          click as well as the box, and Checkbox stops its own click
+                          from bubbling, so a hit on the box toggles exactly once. */}
+                      <StyledExpansionToggle
+                        $active={includeEquivalents}
+                        $variant="equivalent"
+                        onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                      >
+                        <Checkbox
+                          label="Equivalents"
+                          size={14}
+                          color="info"
+                          value={includeEquivalents}
+                          tooltipLabel="include equivalents"
+                          tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                          onChangeFn={handleToggleIncludeEquivalents}
+                          disableEnterKey
+                        />
+                        {includeEquivalents && expansionCounts !== undefined && (
+                          <StyledExpansionCount $variant="equivalent">
+                            +{expansionCounts.equivalents}
+                          </StyledExpansionCount>
+                        )}
+                      </StyledExpansionToggle>
+                      <StyledExpansionToggle
+                        $active={includeSubordinates}
+                        $variant="subordinate"
+                        onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
+                      >
+                        <Checkbox
+                          label="Subordinates"
+                          size={14}
+                          color="warning"
+                          value={includeSubordinates}
+                          tooltipLabel="include subordinates"
+                          tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                          onChangeFn={handleToggleIncludeSubordinates}
+                          disableEnterKey
+                        />
+                        {includeSubordinates && expansionCounts !== undefined && (
+                          <StyledExpansionCount $variant="subordinate">
+                            +{expansionCounts.subordinates}
+                          </StyledExpansionCount>
+                        )}
+                      </StyledExpansionToggle>
+                    </StyledResultExpansionButtons>
+                  </StyledSearchRow>
+                </StyledSearchRowStack>
+                {/* sits beside both rows, as it runs the search with the settings of both */}
+                <StyledSearchRunCell>
                   <Button
                     tooltipLabel="run search (Enter)"
-                    label="run search"
-                    icon={<IcoSearch size={13} />}
+                    label="search"
+                    icon={<IcoSearch size={14} />}
+                    color="query2"
+                    textColor="query2Text"
                     disabled={!isSearchPending}
                     onClick={handleRunSearch}
+                    fullHeight
                   />
-                </StyledSearchRow>
+                </StyledSearchRunCell>
               </StyledSearchRows>
-              {!explorerBoxMaximized && (
-                <SavedQueriesPanel
-                  queryState={queryState}
-                  queryStateDispatch={queryStateDispatch}
-                  includeEquivalents={includeEquivalents}
-                  includeSubordinates={includeSubordinates}
-                  onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
-                  onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
-                  exploreFilters={exploreState.filters}
-                  exploreDispatch={exploreStateDispatch}
-                  tableColumns={tableColumns}
-                  onLoadTableColumns={handleLoadTableColumns}
-                />
-              )}
             </Box>
             <Box
               noFrame

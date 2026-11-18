@@ -223,7 +223,7 @@ export const DocumentsPage: React.FC = ({}) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const documentToDelete = documents?.find((doc) => doc.id === docToDelete);
-  const documentToDeleteAnchorCount = useMemo(() => {
+  const documentToDeleteEntityCount = useMemo(() => {
     if (!documentToDelete) {
       return 0;
     }
@@ -317,8 +317,8 @@ export const DocumentsPage: React.FC = ({}) => {
 
       <Submit
         title={`Delete document "${documentToDelete?.title ?? ""}"`}
-        text={`Do you really want to delete this document? It has ${documentToDeleteAnchorCount} anchor${
-          documentToDeleteAnchorCount === 1 ? "" : "s"
+        text={`Do you really want to delete this document? It references ${documentToDeleteEntityCount} ${
+          documentToDeleteEntityCount === 1 ? "entity" : "entities"
         }.`}
         show={docToDelete !== false}
         onSubmit={() => docToDelete && documentDeleteMutation.mutate(docToDelete)}

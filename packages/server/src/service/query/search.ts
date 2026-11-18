@@ -70,6 +70,9 @@ export default class QuerySearch {
     if (!this.root.type) {
       throw new BadParams();
     }
+    if (!Query.areStartNodesValid(query)) {
+      throw new SearchEdgeTypesInvalid("Start nodes must be the only conditions of the root, joined by OR");
+    }
   }
 
   /**
@@ -212,12 +215,7 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(
-            db,
-            entity,
-            columns,
-            columnsContext
-          ),
+          columnData: this.results!.columns(entity, columns, columnsContext),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)

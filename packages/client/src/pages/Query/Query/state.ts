@@ -1,10 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
-import { NODE_FILTER_KEYS, getAllEdges, getAllNodes } from "./utils";
+import { NODE_FILTER_KEYS, getAllEdges, getAllNodes, getEdgeSourceNode } from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { deepCopy } from "utils/utils";
-import { getRelationConstrainedCategoryTypes } from "../utils";
+import { getEdgeSourceClasses, getRelationConstrainedCategoryTypes } from "../utils";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -68,6 +68,9 @@ enum QueryActionType {
   removeEdge,
   updateEdgeType,
   updateEdgeLogic,
+  updateEdgePropPair,
+  updateEdgeValueNode,
+  updateEdgeValueLogic,
   updateNodeType,
   updateNodeClass,
   clearNodeFilters,
@@ -93,6 +96,18 @@ type QueryAction =
     }
   | {
       type: QueryActionType.updateEdgeLogic;
+      payload: { edgeId: string; newLogic: Query.EdgeLogic };
+    }
+  | {
+      type: QueryActionType.updateEdgePropPair;
+      payload: { edgeId: string; propPair: Query.IPropPair | undefined };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueNode;
+      payload: { edgeId: string; hasValueNode: boolean };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueLogic;
       payload: { edgeId: string; newLogic: Query.EdgeLogic };
     }
   | {
@@ -145,9 +160,7 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!edge) {
         return updatedStateRemove;
       }
-      const parentNode2 = getAllNodes(updatedStateRemove).find((node) =>
-        node.edges.some((e) => e.id === edgeToRemove),
-      );
+      const parentNode2 = getEdgeSourceNode(updatedStateRemove, edgeToRemove);
       if (!parentNode2) {
         return updatedStateRemove;
       }
@@ -165,6 +178,12 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!edgeToUpdate) {
         return updatedStateUpdate;
       }
+      const sourceClassesBeforeSwitch = sourceClassesByEdge(updatedStateUpdate);
+      // the propPair pins one half of the prop, so it survives only a switch to
+      // an edge that pins the same half
+      if (Query.PropPairEdges[edgeToUpdate.type] !== Query.PropPairEdges[newType]) {
+        delete edgeToUpdate.params?.propPair;
+      }
       edgeToUpdate.type = newType;
 
       // the child node's params are edge-type specific. On a type switch, drop
@@ -174,15 +193,15 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       // type must never survive the switch - so the class filter and its tooltip
       // hint match what the suggester shows immediately on switch. The seed is
       // the first class the suggester offers - for relation edges that depends
-      // on the query root's class, as in QueryGridNode. The suggester never
-      // writes its initial class back, so a seed outside its options would
-      // filter on a class no relation of the root can reach.
+      // on the classes the edge's source node can hold, as in QueryGridNode.
+      // The suggester never writes its initial class back, so a seed outside
+      // its options would filter on a class no relation of the source can reach.
       const newTargetParams = Query.EdgeTypeTargetNodeParams[newType] ?? {};
       if (newTargetParams.entityClass) {
         const allowed: EntityEnums.Class[] = newTargetParams.entityClass.allowedClasses ?? [];
         const relationConstrained = getRelationConstrainedCategoryTypes(
           newType,
-          updatedStateUpdate.params.entityClasses,
+          getEdgeSourceClasses(updatedStateUpdate, edgeId),
         );
         const defaultClasses = relationConstrained?.length
           ? relationConstrained
@@ -196,6 +215,12 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!newTargetParams.entityId) {
         edgeToUpdate.node.params.entityId = undefined;
       }
+      // the value node is optional on HP: / SP: and kept across a switch between them
+      if (!Query.TupleValueEdgeTypes[newType]) {
+        delete edgeToUpdate.valueNode;
+        delete edgeToUpdate.valueLogic;
+      }
+      reseedRelationTargetClasses(updatedStateUpdate, sourceClassesBeforeSwitch);
       return updatedStateUpdate;
 
     case QueryActionType.updateEdgeLogic:
@@ -212,6 +237,38 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       }
       edgeToUpdateLogic.logic = newLogic;
       return updatedStateLogic;
+
+    case QueryActionType.updateEdgePropPair:
+      return updateEdgePropPair(state, action.payload.edgeId, action.payload.propPair);
+
+    case QueryActionType.updateEdgeValueNode: {
+      const updatedStateValue = { ...state };
+      const edgeWithValue = getAllEdges(updatedStateValue).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValue || !Query.TupleValueEdgeTypes[edgeWithValue.type]) {
+        return updatedStateValue;
+      }
+      if (action.payload.hasValueNode) {
+        edgeWithValue.valueNode ??= newValueNode();
+      } else {
+        delete edgeWithValue.valueNode;
+        delete edgeWithValue.valueLogic;
+      }
+      return updatedStateValue;
+    }
+
+    case QueryActionType.updateEdgeValueLogic: {
+      const updatedStateValueLogic = { ...state };
+      const edgeWithValueLogic = getAllEdges(updatedStateValueLogic).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValueLogic?.valueNode) {
+        return updatedStateValueLogic;
+      }
+      edgeWithValueLogic.valueLogic = action.payload.newLogic;
+      return updatedStateValueLogic;
+    }
 
     case QueryActionType.updateNodeType:
       return updateNodeType(state, action.payload.nodeId, action.payload.newType);
@@ -249,6 +306,26 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
   }
 };
 
+const updateEdgePropPair = (
+  state: Query.INode,
+  edgeId: string,
+  propPair: Query.IPropPair | undefined,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const edgeToUpdate = getAllEdges(updatedState).find((edge) => edge.id === edgeId);
+  if (!edgeToUpdate) {
+    return updatedState;
+  }
+  if (propPair) {
+    edgeToUpdate.params = { ...edgeToUpdate.params, propPair };
+  } else {
+    delete edgeToUpdate.params?.propPair;
+  }
+
+  return updatedState;
+};
+
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
@@ -260,31 +337,42 @@ const updateNodeClass = (
   if (!nodeToUpdate) {
     return updatedState;
   }
+  const sourceClassesBefore = sourceClassesByEdge(updatedState);
   nodeToUpdate.params.entityClasses = newEntityClasses;
-
-  if (nodeToUpdate === updatedState) {
-    reseedRelationTargetClasses(updatedState);
-  }
+  reseedRelationTargetClasses(updatedState, sourceClassesBefore);
 
   return updatedState;
 };
 
+// the classes each edge's source node can hold, by edge id
+const sourceClassesByEdge = (root: Query.INode): Map<string, string> =>
+  new Map(getAllEdges(root).map((edge) => [edge.id, getEdgeSourceClasses(root, edge.id).join()]));
+
 /**
- * Relation edges constrain their target classes by the root's classes, so a
- * root class change can leave a target filtering on a class the relation no
- * longer reaches. Such a target moves to the first class the relation allows
- * from the new root, which is what its class picker offers first. Targets with
- * a picked entity, an empty (any-class) filter, or no allowed class at all (its
- * picker is disabled) keep their classes.
+ * Relation edges constrain their target classes by the classes their source
+ * node can hold, so a change to a node can leave a target under it filtering
+ * on a class the relation no longer reaches. Such a target moves to the first
+ * class the relation allows, which is what its class picker offers first.
+ * Only a target whose source classes differ from `before` moves: its picker
+ * re-seeds the class it shows on that very difference, so the class shown and
+ * the class stored stay the same. Sources come before their targets here, so a
+ * moved target already counts for the edges under it. Targets with a picked
+ * entity, an empty (any-class) filter, or no allowed class at all (its picker
+ * is disabled) keep their classes.
  */
-const reseedRelationTargetClasses = (root: Query.INode) => {
+const reseedRelationTargetClasses = (root: Query.INode, before: Map<string, string>) => {
   for (const edge of getAllEdges(root)) {
+    const sourceClasses = getEdgeSourceClasses(root, edge.id);
     const target = edge.node;
     const currentClasses = target.params.entityClasses ?? [];
-    if (target.params.entityId !== undefined || currentClasses.length === 0) {
+    if (
+      sourceClasses.join() === before.get(edge.id) ||
+      target.params.entityId !== undefined ||
+      currentClasses.length === 0
+    ) {
       continue;
     }
-    const allowed = getRelationConstrainedCategoryTypes(edge.type, root.params.entityClasses);
+    const allowed = getRelationConstrainedCategoryTypes(edge.type, sourceClasses);
     if (!allowed?.length || currentClasses.every((cls) => allowed.includes(cls))) {
       continue;
     }
@@ -339,6 +427,7 @@ const updateNodeEntityId = (
   if (!nodeToUpdate) {
     return updatedState;
   }
+  const sourceClassesBefore = sourceClassesByEdge(updatedState);
   if (newEntityId === undefined) {
     delete nodeToUpdate.params.entityId;
   } else {
@@ -348,6 +437,7 @@ const updateNodeEntityId = (
     // while one is set
     NODE_FILTER_KEYS.forEach((key) => delete nodeToUpdate.params[key]);
   }
+  reseedRelationTargetClasses(updatedState, sourceClassesBefore);
 
   return updatedState;
 };
@@ -381,11 +471,13 @@ const updateNodeExpansionToggles = (
     return updatedState;
   }
 
+  const sourceClassesBefore = sourceClassesByEdge(updatedState);
   if (value === undefined) {
     delete nodeToUpdate.params[field];
   } else {
     nodeToUpdate.params[field] = value;
   }
+  reseedRelationTargetClasses(updatedState, sourceClassesBefore);
 
   return updatedState;
 };
@@ -406,22 +498,26 @@ const updateNodeType = (
   return updatedState;
 };
 
+const newNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
+  type: Query.NodeType.E,
+  id: uuidv4(),
+  // EQ and SUB start on for every node added in the builder; they widen a
+  // picked entity only, so they stay inert until one is picked
+  params: { entityClasses, label: "", includeEquivalents: true, includeSubordinates: true },
+  operator: Query.NodeOperator.And,
+  edges: [],
+});
+
+/** The value node of an HP: / SP: edge, with no class, so left untouched it matches any value */
+const newValueNode = (): Query.INode => newNode([]);
+
 const addNode = (state: Query.INode, parentId: string): Query.INode => {
   const newEdge: Query.IEdge = {
-    type: Query.EdgeType["EP:T"],
+    type: Query.EdgeType["HP:"],
     id: uuidv4(),
     params: {},
     logic: Query.EdgeLogic.Positive,
-    node: {
-      type: Query.NodeType.E,
-      id: uuidv4(),
-      params: {
-        entityClasses: [],
-        label: "",
-      },
-      operator: Query.NodeOperator.And,
-      edges: [],
-    },
+    node: newNode([]),
   };
 
   // Recursively clone the node tree, adding the new edge to the parent node
@@ -439,6 +535,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
       edges: node.edges.map((edge) => ({
         ...edge,
         node: cloneNode(edge.node),
+        ...(edge.valueNode && { valueNode: cloneNode(edge.valueNode) }),
       })),
     };
   };

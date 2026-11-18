@@ -16,14 +16,13 @@ describe("exploreFiltersToRequestSearch", () => {
     ).toBeNull();
   });
 
-  it("maps status and language", () => {
-    const req = exploreFiltersToRequestSearch([
-      { type: Explore.SearchOption.Status, status: EntityEnums.Status.Approved },
-      { type: Explore.SearchOption.Language, language: EntityEnums.Language.Latin },
-    ]);
-    expect(req).not.toBeNull();
-    expect(req!.status).toBe(EntityEnums.Status.Approved);
-    expect(req!.language).toBe(EntityEnums.Language.Latin);
+  it("leaves status and language to their own step", () => {
+    expect(
+      exploreFiltersToRequestSearch([
+        { type: Explore.SearchOption.Status, statuses: [EntityEnums.Status.Approved] },
+        { type: Explore.SearchOption.Language, language: EntityEnums.Language.Latin },
+      ])
+    ).toBeNull();
   });
 
   it("maps created/updated dates from ISO strings to Date", () => {

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
@@ -19,7 +19,12 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
-import { countNodeFilters } from "../utils";
+import {
+  classesReach,
+  countNodeFilters,
+  LOGICAL_TYPE_CLASSES,
+  PART_OF_SPEECH_CLASSES,
+} from "../utils";
 import { FilterPopover } from "../../FilterPopover/FilterPopover";
 import {
   StyledForm,
@@ -29,10 +34,16 @@ import {
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { CoOccurrencePicker } from "../../FloatingSearchContainer/CoOccurrencePicker";
 import {
+  logicalTypeFilterOptions,
+  partOfSpeechFilterOptions,
+  statusFilterOptions,
+} from "../../FloatingSearchContainer/attributeFilterOptions";
+import {
   DateRangeFilter,
   parseDate,
 } from "../../FloatingSearchContainer/DateRangeFilter";
 import { expansionCount } from "../nodeExpansion";
+import { useEntityExpansion } from "../useEntityExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { NodeFilterMatches } from "./NodeFilterMatches";
 import { NodeUserFilterRows } from "./NodeUserFilterRows";
@@ -52,21 +63,26 @@ import { ButtonSize } from "types";
 interface QueryGridNodeProps {
   node: INodeItem;
   edge: Query.IEdge | undefined;
-  rootNode: Query.INode;
+  // classes the node this node's edge hangs off can hold, empty for any; the
+  // root has no such node
+  sourceClasses?: EntityEnums.Class[];
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // the value node of an HP: / SP: edge goes away with the edge, removed from the type node
+  isValueNode?: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   node,
   edge,
-  rootNode,
+  sourceClasses,
   dispatch,
   problems,
   isRoot = false,
   onOpenEntityInDetail,
+  isValueNode = false,
 }) => {
   const theme = useTheme();
   const isValid = problems.every((problem) => problem.warning);
@@ -78,15 +94,21 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   }));
 
   const edgeType = edge?.type;
-  const edgeLabel = edgeType ? Query.EdgeTypeLabels[edgeType] : "related";
+  // a saved query can hold an edge type from a newer build, with no label or target params here
+  const edgeLabel = edgeType ? (Query.EdgeTypeLabels[edgeType] ?? edgeType) : "related";
 
-  const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
+  const nodeParams = (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]) || {};
 
   const { entityId: paramEntityId, entityClass: paramEntityClass } = nodeParams;
 
+  // the suggester below re-seeds the class it shows whenever it is handed a new
+  // list of allowed classes, so the list is rebuilt only when the source's
+  // classes differ in content
+  const sourceClassesKey = sourceClasses?.join();
   const relationConstrainedCategoryTypes = useMemo(
-    () => getRelationConstrainedCategoryTypes(edgeType, rootNode.params.entityClasses),
-    [edgeType, rootNode.params.entityClasses],
+    () => getRelationConstrainedCategoryTypes(edgeType, sourceClasses),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [edgeType, sourceClassesKey],
   );
 
   const entityIdCategoryTypes = useMemo(() => {
@@ -113,17 +135,25 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
 
-  // the constraint comes from the root class and the edge together, so neither
-  // named alone tells the user what to change
-  const rootClassLabels =
-    rootNode.params.entityClasses && rootNode.params.entityClasses.length > 0
-      ? rootNode.params.entityClasses
-          .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
-          .join(", ")
-      : "";
+  // the constraint comes from the source node's class and the edge together,
+  // so neither named alone tells the user what to change
+  const sourceClassLabels = (sourceClasses ?? [])
+    .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
+    .join(", ");
 
   const entityId = node.params.entityId;
   const orderedLanguageDict = useOrderedLanguageDict();
+
+  // the classes this node's entities can be of, empty for any; a filter on a field none of
+  // them carries is offered only while it still holds a value, so it can be cleared
+  const nodeClasses = node.params.entityClasses?.length
+    ? node.params.entityClasses
+    : (relationConstrainedCategoryTypes ?? paramEntityId?.allowedClasses ?? []);
+  const showLogicalType =
+    classesReach(nodeClasses, LOGICAL_TYPE_CLASSES) || !!node.params.entityLogicalTypes?.length;
+  const showPartOfSpeech =
+    classesReach(nodeClasses, PART_OF_SPEECH_CLASSES) ||
+    !!node.params.entityPartsOfSpeech?.length;
 
   const updateFilters = (changes: Partial<Query.INodeParams>) =>
     dispatch({ type: QueryActionType.updateNodeFilters, payload: { nodeId: node.id, changes } });
@@ -145,71 +175,38 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const subordinatesApply = !!entityId && !withoutSubordinates;
   const includeEquivalents = equivalentsApply && node.params.includeEquivalents === true;
   const includeSubordinates = subordinatesApply && node.params.includeSubordinates === true;
-
-  // The expansion is fetched only when the user asks for it, never as a side
-  // effect of editing the query: this signature identifies the toggle
-  // combination that was asked for, and the request runs only while the node
-  // still carries it. Flipping a toggle therefore costs nothing until the new
-  // combination is asked for in turn.
-  const expansionSignature = `${entityId}|${includeEquivalents}|${includeSubordinates}`;
-  const [requestedExpansionSignature, setRequestedExpansionSignature] = useState<
-    string | null
-  >(null);
+  // with no entity picked yet, a toggle shows the params it will apply once one is picked,
+  // disabled; on an edge without subordinates SUB stays off, as it never applies there
+  const showEquivalents = entityId ? includeEquivalents : node.params.includeEquivalents === true;
+  const showSubordinates =
+    entityId || withoutSubordinates
+      ? includeSubordinates
+      : node.params.includeSubordinates === true;
 
   const {
-    data: dataExpansion,
-    isFetching: isExpansionFetching,
-    isError: isExpansionError,
-  } = useQuery({
-    queryKey: [
-      "node-expansion",
-      entityId,
-      includeEquivalents,
-      includeSubordinates,
-    ],
-    queryFn: async () => {
-      const res = await api.entityExpansion(entityId!, {
-        equivalents: includeEquivalents,
-        subordinates: includeSubordinates,
-      });
-      return res.data;
-    },
-    enabled:
-      !!entityId &&
-      requestedExpansionSignature === expansionSignature &&
-      api.isLoggedIn(),
-    // the relation graph does not move while a query is being built, so
-    // returning to a combination already asked for reads from the cache and
-    // shows its count without a second request
-    staleTime: 5 * 60 * 1000,
-  });
+    dataExpansion,
+    isExpansionFetching,
+    isExpansionError,
+    openExpansionGroup,
+    setOpenExpansionGroup,
+    equivalentsBadgeRef,
+    subordinatesBadgeRef,
+    openExpansion,
+  } = useEntityExpansion(entityId, includeEquivalents, includeSubordinates);
 
-  const [openExpansionGroup, setOpenExpansionGroup] = useState<
-    "equivalents" | "subordinates" | null
-  >(null);
-  const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
-  const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
-
-  const openExpansion = (group: "equivalents" | "subordinates") => {
-    setRequestedExpansionSignature(expansionSignature);
-    setOpenExpansionGroup(openExpansionGroup === group ? null : group);
-  };
-
-  // a popover describes one toggle combination, so editing the node closes it
-  useEffect(() => {
-    setOpenExpansionGroup(null);
-  }, [expansionSignature]);
-
-  // a node reached through a negative ("NOT") edge gets a red border to match
-  // that edge; scoped to this node only - deeper nodes have their own edges
-  const isNegativeEdge = edge?.logic === Query.EdgeLogic.Negative;
+  // a node reached through a negative ("NOT") edge gets a grey border to match
+  // that edge; scoped to this node only - deeper nodes have their own edges. The value node
+  // of HP: / SP: also turns grey when NOT is on its "with value" box alone
+  const isNegativeEdge =
+    edge?.logic === Query.EdgeLogic.Negative ||
+    (isValueNode && edge?.valueLogic === Query.EdgeLogic.Negative);
 
   const nodeBorder = useMemo(() => {
     if (!isValid) {
       return "none";
     }
     if (isNegativeEdge) {
-      return theme.color.entityA;
+      return theme.color.queryNegative;
     }
     return theme.color.query2;
   }, [theme, isValid, isNegativeEdge]);
@@ -225,7 +222,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
   }, [theme, isValid, isRoot]);
 
-  const hasParallelEdges = isRoot && node.edges.length > 1;
+  // start nodes are joined by Or alone, so their root has no operator to choose
+  const hasParallelEdges = isRoot && node.edges.length > 1 && !Query.hasStartNodes(node);
 
   return (
     <StyledNodeContainer>
@@ -376,42 +374,57 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 <StyledRow>
                   <StyledRowHeader>status</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      // params.entityStatuses is a list on purpose - the backend
-                      // matches any status in it, so the picker can become multi later
-                      value={node.params.entityStatuses?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityStatuses ?? []}
                       placeholder="any status"
-                      isClearable
                       width="full"
-                      options={entityStatusDict.map((status) => ({
-                        value: status.value,
-                        label: status.label,
-                      }))}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                        })
-                      }
+                      options={statusFilterOptions}
+                      onChange={(entityStatuses) => updateFilters({ entityStatuses })}
                     />
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
                   <StyledRowHeader>language</StyledRowHeader>
                   <StyledRowControl>
-                    <Dropdown.Single.Basic
-                      value={node.params.entityLanguages?.[0] ?? null}
+                    <Dropdown.Multi.Basic
+                      value={node.params.entityLanguages ?? []}
                       placeholder="any language"
-                      isClearable
                       width="full"
                       options={orderedLanguageDict}
-                      onChange={(newValue) =>
-                        updateFilters({
-                          entityLanguages: newValue ? [newValue as EntityEnums.Language] : [],
-                        })
-                      }
+                      onChange={(entityLanguages) => updateFilters({ entityLanguages })}
                     />
                   </StyledRowControl>
                 </StyledRow>
+                {showLogicalType && (
+                  <StyledRow>
+                    <StyledRowHeader>logical type</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityLogicalTypes ?? []}
+                        placeholder="any logical type"
+                        width="full"
+                        options={logicalTypeFilterOptions}
+                        onChange={(entityLogicalTypes) => updateFilters({ entityLogicalTypes })}
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
+                {showPartOfSpeech && (
+                  <StyledRow>
+                    <StyledRowHeader>part of speech</StyledRowHeader>
+                    <StyledRowControl>
+                      <Dropdown.Multi.Basic
+                        value={node.params.entityPartsOfSpeech ?? []}
+                        placeholder="any part of speech"
+                        width="full"
+                        options={partOfSpeechFilterOptions}
+                        onChange={(entityPartsOfSpeech) =>
+                          updateFilters({ entityPartsOfSpeech })
+                        }
+                      />
+                    </StyledRowControl>
+                  </StyledRow>
+                )}
                 <StyledRow>
                   <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
                   <StyledRowControl>
@@ -422,9 +435,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.CreatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date created</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.createdAfter)}
@@ -439,9 +450,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   </StyledRowControl>
                 </StyledRow>
                 <StyledRow>
-                  <StyledRowHeader $belowFieldLabel>
-                    {Explore.SearchOption.UpdatedAt}
-                  </StyledRowHeader>
+                  <StyledRowHeader $belowFieldLabel>date updated</StyledRowHeader>
                   <StyledRowControl>
                     <DateRangeFilter
                       after={parseDate(node.params.updatedAfter)}
@@ -491,24 +500,34 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 ) : (
                   <EntitySuggester
                     // remount on edge type switch so the typed input and other
-                    // internal state don't carry over to a different edge
-                    key={edgeType}
+                    // internal state don't carry over to a different edge, and
+                    // per node, since a grid cell passes to another node when
+                    // one above it is removed
+                    key={`${node.id}:${edgeType}`}
                     inputWidth={212}
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
                     placeholder={
-                      isRelationEntityPickerDisabled ? "no class for this edge" : "entity"
+                      isRelationEntityPickerDisabled
+                        ? "no class for this edge"
+                        : isValueNode
+                          ? "value"
+                          : edgeType && Query.TupleValueEdgeTypes[edgeType]
+                            ? "type"
+                            : "entity"
                     }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
                     // seeds the class shown on mount / edge switch: the node's
-                    // committed class, else the first class the edge allows.
-                    // The suggester owns the selection afterwards, so a wildcard
-                    // pick (which clears entityClasses) is not re-derived here.
+                    // committed class, the wildcard when its class filter is
+                    // cleared (no initCategory), else the first class the edge
+                    // allows. The suggester owns the selection afterwards.
                     initCategory={
-                      node.params.entityClasses?.[0] ??
-                      entityIdCategoryTypes[0] ??
-                      EntityEnums.Class.Concept
+                      paramEntityClass && node.params.entityClasses?.length === 0
+                        ? undefined
+                        : (node.params.entityClasses?.[0] ??
+                          entityIdCategoryTypes[0] ??
+                          EntityEnums.Class.Concept)
                     }
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {
@@ -557,8 +576,12 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           isRelationEntityPickerDisabled ? (
                             <p>
                               The "{edgeLabel}" relation allows no target class for{" "}
-                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}
-                              . Change the root class or the edge type.
+                              {sourceClassLabels ? (
+                                <b>{sourceClassLabels}</b>
+                              ) : (
+                                "the node it starts from"
+                              )}
+                              . Change that node's class or the edge type.
                             </p>
                           ) : (
                             <StyledTooltipList>
@@ -587,7 +610,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="EQ"
                   size={13}
                   color="info"
-                  value={includeEquivalents}
+                  value={showEquivalents}
                   disabled={!equivalentsApply}
                   tooltipLabel="include equivalents"
                   tooltipContent={
@@ -623,7 +646,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   label="SUB"
                   size={13}
                   color="warning"
-                  value={includeSubordinates}
+                  value={showSubordinates}
                   disabled={!subordinatesApply}
                   tooltipLabel={
                     subordinatesAsDepth ? "match the whole subtree" : "include subordinates"
@@ -694,7 +717,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </div>
-        {node.gridX !== 0 && node.gridY !== 0 && edge && (
+        {node.gridX !== 0 && node.gridY !== 0 && edge && !isValueNode && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}

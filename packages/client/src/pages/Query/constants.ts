@@ -8,3 +8,7 @@ export const QUERY_SEARCH_PANEL_MIN_HEIGHT = 34;
 export const QUERY_BUILDER_MIN_HEIGHT = 200;
 export const QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT = 150;
 export const QUERY_DETAIL_SEPARATOR_Y_PERCENT_POSITION = 50;
+
+// x of the line an HP: / SP: edge's "with value" branch hangs from: under the edge's box, so
+// the line leaves the box itself and not the parent's spine (x 20)
+export const QUERY_PROP_VALUE_X = 100;

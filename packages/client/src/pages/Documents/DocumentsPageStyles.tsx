@@ -3,7 +3,7 @@ import { IcoDownload, IcoFileText } from "Theme/icons";
 
 /**
  * Box body. The table is as wide as its columns need and sits in the middle of
- * the box - stretched across a wide monitor, a document's name and its anchor
+ * the box - stretched across a wide monitor, a document's name and its entity
  * counts end up at opposite edges of the screen.
  *
  * The toolbar, the list and the upload area are one vertically centered group,

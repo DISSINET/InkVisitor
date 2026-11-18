@@ -62,19 +62,21 @@ beforeAll(async () => {
     entity("t-child", C.Territory, ["Child territory"], { data: { parent: { territoryId: "t-root", order: 0 } } }),
     entity("c-1", C.Concept, ["Étoile bleue"], {
       language: "eng",
+      data: { pos: "noun" },
       props: [prop("c-3", "c-2", [prop("x-1", "c-4")])],
       references: [
         { id: "ref-1", resource: "r-1", value: "c-3" },
         { id: "ref-2", resource: "", value: "" },
       ],
     }),
-    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1" }),
-    entity("c-3", C.Concept, ["star-shaped object"], { status: "1" }),
+    entity("c-2", C.Concept, ["Blue star"], { usedTemplate: "tpl-1", data: { pos: "" } }),
+    entity("c-3", C.Concept, ["star-shaped object"], { status: "1", data: { pos: "adj" } }),
     entity("c-4", C.Concept, ["Object"], { isTemplate: true }),
-    entity("a-1", C.Action, ["shine"]),
-    entity("p-1", C.Person, ["Anna Nováková"]),
+    entity("a-1", C.Action, ["shine"], { data: { pos: "verb" } }),
+    entity("p-1", C.Person, ["Anna Nováková"], { data: { logicalType: "1" } }),
     entity("p-2", C.Person, undefined),
-    entity("l-1", C.Location, ["Prague (city)"]),
+    // a prop typed but never given a value keeps entityId ""
+    entity("l-1", C.Location, ["Prague (city)"], { props: [prop("", "c-2")] }),
     entity("r-1", C.Resource, ["Book one"], { data: { documentId: "d-1" } }),
     entity("r-2", C.Resource, ["Book two"], { data: {} }),
     // statements carry props and references arrays like every real one; the
@@ -205,6 +207,12 @@ describe("entity search", () => {
   // RethinkDB returns ["p-1"]: its filter skips p-2, which has no `labels`
   itPg("labelOrId matches the id prefix of an entity without labels", async () => {
     expect(await search({ labelOrId: "p-" })).toEqual(["p-1", "p-2"]);
+  });
+
+  // a stored document never holds U+0000 on PostgreSQL, so a search drops it too
+  itPg("ignores a NUL character in the search input", async () => {
+    expect(await search({ label: "st\u0000ar" })).toEqual(["c-2", "c-3"]);
+    expect(await search({ labelOrId: "c-1\u0000" })).toEqual(["c-1"]);
   });
 
   it("idsMatchingLabel keeps the given ids whose label matches; labelsOf returns labels only when present", async () => {
@@ -366,6 +374,24 @@ const node = (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], ope
 /** an edge to a target node given as node params (pinned entity, classes, toggles) or as a full node with edges of its own */
 const edge = (type: string, target: Query.INodeParams | Query.INode = {}, logic = Query.EdgeLogic.Positive): Partial<Query.IEdge> =>
   ({ id: "", type: type as Query.EdgeType, params: {}, logic, node: "type" in target ? (target as Query.INode) : node(target) });
+/** a prop edge whose propPair pins the other half of the matched prop */
+const pairedEdge = (type: string, target: Query.INodeParams, propPair: Query.IPropPair, logic = Query.EdgeLogic.Positive): Partial<Query.IEdge> =>
+  ({ ...edge(type, target, logic), params: { propPair } });
+/** an HP: edge to a type node and a value node, each given as node params or a full node */
+const propEdge = (
+  type: Query.INodeParams | Query.INode,
+  value: Query.INodeParams | Query.INode,
+  logic = Query.EdgeLogic.Positive
+): Partial<Query.IEdge> => ({
+  ...edge("HP:", type, logic),
+  valueNode: "type" in value ? (value as Query.INode) : node(value),
+});
+/** an SP: edge to a type node and a value node, as propEdge */
+const statementPropEdge = (
+  type: Query.INodeParams | Query.INode,
+  value: Query.INodeParams | Query.INode,
+  logic = Query.EdgeLogic.Positive
+): Partial<Query.IEdge> => ({ ...propEdge(type, value, logic), type: Query.EdgeType["SP:"] });
 const explore = async (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = [], operator = Query.NodeOperator.And) =>
   sorted(await storage.explore.plan(node(params, edges, operator), resolvers).run(conn));
 
@@ -400,6 +426,70 @@ describe("explore: relation, prop and reference edges", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("EP:T")])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { entityId: "c-3" })])).toEqual(["c-1"]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { entityId: "x-1" })])).toEqual([]);
+  });
+
+  it("a propPair on EP:T, HP:V, I_EP:T and I_HP:V needs both halves on the same top-level prop", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    expect(await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(
+      await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])
+    ).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityId: "c-3" }, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityId: "c-3" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("HP:V", {}, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityClasses: [C.Concept] }, { entityId: "c-2" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [pairedEdge("HP:V", { entityClasses: [C.Person] }, { entityId: "c-2" })])).toEqual([]);
+    // the subprop x-1 / c-4 is not a top-level prop
+    expect(await explore(concepts, [pairedEdge("HP:V", {}, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("I_HP:V", { entityId: "c-1" }, { entityId: "c-2" })])).toEqual(["c-3"]);
+    expect(await explore(concepts, [pairedEdge("I_HP:V", { entityId: "c-1" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(concepts, [pairedEdge("I_EP:T", { entityId: "c-1" }, { entityId: "c-3" })])).toEqual(["c-2"]);
+    expect(await explore(concepts, [pairedEdge("I_EP:T", { entityId: "c-1" }, { entityId: "x-1" })])).toEqual([]);
+    expect(
+      await explore(concepts, [pairedEdge("EP:T", { entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["c-2", "c-3", "c-4"]);
+  });
+
+  it("HP: needs its type node and its value node on the same top-level prop", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({}, { entityId: "c-3" })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, {})])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityClasses: [C.Concept] })])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, { entityClasses: [C.Person] })])).toEqual([]);
+    // the subprop x-1 / c-4 is not a top-level prop
+    expect(await explore(concepts, [propEdge({ entityId: "c-4" }, { entityId: "x-1" })])).toEqual([]);
+    // conditions nested under the value node narrow the values: c-3 is the superclass of c-2 only
+    const valueUnder = (superclassOf: string) =>
+      node({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityId: superclassOf })]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, valueUnder("c-2"))])).toEqual(["c-1"]);
+    expect(await explore(concepts, [propEdge({ entityId: "c-2" }, valueUnder("c-4"))])).toEqual([]);
+    expect(
+      await explore(concepts, [propEdge({ entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["c-2", "c-3", "c-4"]);
+  });
+
+  it("HP: with a negated value node needs a prop of the type whose value the node does not match", async () => {
+    const concepts = { entityClasses: [C.Concept] };
+    const locations = { entityClasses: [C.Location] };
+    const notValue = (e: Partial<Query.IEdge>) => ({ ...e, valueLogic: Query.EdgeLogic.Negative });
+    // c-1's only c-2 typed prop has the value c-3
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual([]);
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-4" }))])).toEqual(["c-1"]);
+    expect(
+      await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, { entityClasses: [C.Person] }))])
+    ).toEqual(["c-1"]);
+    // an empty value node keeps any value, negated only the props with none
+    expect(await explore(locations, [propEdge({ entityId: "c-2" }, {})])).toEqual(["l-1"]);
+    expect(await explore(concepts, [notValue(propEdge({ entityId: "c-2" }, {}))])).toEqual([]);
+    expect(await explore(locations, [notValue(propEdge({ entityId: "c-2" }, {}))])).toEqual(["l-1"]);
+    // an empty value is not c-3 either
+    expect(await explore(locations, [notValue(propEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual(["l-1"]);
   });
 
   it("HR:R and HR:V need a non-empty side without a target and ignore non-array references", async () => {
@@ -498,6 +588,34 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("I_HP:V", { entityLanguages: [eng] })])).toEqual(["c-3"]);
   });
 
+  it("entityLogicalTypes and entityPartsOfSpeech narrow a node's base and an unpinned target", async () => {
+    const definite = "1" as EntityEnums.LogicalType;
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const adj = "adj" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await explore({ entityLogicalTypes: [definite] })).toEqual(["p-1"]);
+    expect(await explore({ entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], entityPartsOfSpeech: [adj] })).toEqual(["c-3"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityPartsOfSpeech: [noun] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:CLA", { entityLogicalTypes: [definite] })])).toEqual(["c-2"]);
+  });
+
+  it("filterIds keeps the listed ids whose entities pass the node filters", async () => {
+    const filterIds = async (ids: string[], params: Query.INodeParams) =>
+      sorted(await storage.explore.filterIds(conn, ids, params));
+    const noun = "noun" as EntityEnums.ConceptPartOfSpeech;
+    const verb = "verb" as EntityEnums.ActionPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [noun, verb] })).toEqual(["a-1", "c-1"]);
+    // the empty part of speech of a concept; classes without the field never match it
+    const none = "" as EntityEnums.ConceptPartOfSpeech;
+    expect(await filterIds(ALL, { entityPartsOfSpeech: [none] })).toEqual(["c-2"]);
+    expect(await filterIds(ALL, { entityStatuses: ["1" as EntityEnums.Status] })).toEqual(["c-3"]);
+    expect(await filterIds(ALL, { entityLanguages: ["eng" as EntityEnums.Language] })).toEqual(["c-1"]);
+    expect(await filterIds(["c-1", "p-2"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual([]);
+    expect(await filterIds(["c-1", "p-1"], { entityLogicalTypes: ["1" as EntityEnums.LogicalType] })).toEqual(["p-1"]);
+    expect(await filterIds([], { entityPartsOfSpeech: [noun] })).toEqual([]);
+  });
+
   // ReQL takes a language or label into the target id set, which R: matches the source entity against
   itPg("the relation edges test a language or label on the partner, never the entity itself", async () => {
     const eng = "eng" as EntityEnums.Language;
@@ -530,6 +648,68 @@ describe("explore: operators, nesting and target expansion", () => {
   // RethinkDB builds an ordered-relation edge for it: its dispatch reads the relation maps without an own-key check
   itPg("rejects an Object.prototype key as an edge type", () => {
     expect(() => storage.explore.plan(node({}, [edge("hasOwnProperty")]), resolvers)).toThrow(InternalServerError);
+  });
+});
+
+describe("explore: SE, the entity is the target node itself", () => {
+  it("matches by the target's classes, pinned entity or filters, and any entity without them", async () => {
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3" })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE", { entityId: "c-3", includeEquivalents: true })])).toEqual(["c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { label: "star" })])).toEqual(["c-2", "c-3"]);
+    const status1 = "1" as EntityEnums.Status;
+    expect(await explore({}, [edge("SE", { entityClasses: [C.Concept], entityStatuses: [status1] })])).toEqual(["c-3"]);
+    expect(await explore({}, [edge("SE")])).toEqual(ALL);
+  });
+
+  it("stays within the base of the node it hangs off", async () => {
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { entityId: "p-1" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept, C.Person] }, [edge("SE", { entityClasses: [C.Person] })])).toEqual(["p-1", "p-2"]);
+  });
+
+  it("each SE edge of an OR root is a start node with conditions of its own", async () => {
+    // every Location, and the Persons classified as c-2
+    const classified = node({ entityClasses: [C.Person] }, [edge("R:CLA", { entityId: "c-2" })]);
+    expect(
+      await explore({}, [edge("SE", { entityClasses: [C.Location] }), edge("SE", classified)], Query.NodeOperator.Or)
+    ).toEqual(["l-1", "p-1"]);
+    // an entity two start nodes match comes once
+    const all = await storage.explore
+      .plan(node({}, [edge("SE", { entityClasses: [C.Person] }), edge("SE", classified)], Query.NodeOperator.Or), resolvers)
+      .run(conn);
+    expect(all).toEqual(["p-1", "p-2"]);
+  });
+
+  it("a pinned start node keeps its nested conditions and a negative edge subtracts the target", async () => {
+    const c3SubclassOfC2 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-2" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC2)])).toEqual(["c-3"]);
+    const c3SubclassOfC1 = node({ entityId: "c-3" }, [edge("I_R:SCL", { entityId: "c-1" })]);
+    expect(await explore({}, [edge("SE", c3SubclassOfC1)])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("SE", { label: "star" }, Query.EdgeLogic.Negative)])).toEqual(["c-1", "c-4"]);
+  });
+
+  it("runs over the survivors of the edge before it and adds to an Or union", async () => {
+    // the Concepts with a superclass are c-1 and c-2
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { label: "star" })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL"), edge("SE", { entityId: "c-1" })])).toEqual(["c-1"]);
+    expect(
+      await explore(
+        { entityClasses: [C.Concept] },
+        [edge("SE", { label: "star" }, Query.EdgeLogic.Negative), edge("SE", { entityId: "c-3" })],
+        Query.NodeOperator.Or
+      )
+    ).toEqual(["c-1", "c-3", "c-4"]);
+    expect(await explore({}, [edge("SE", { entityId: "nope" })])).toEqual([]);
+  });
+
+  // the stats view caps the list by position, so start nodes come mixed, as any other result
+  it("an Or union comes in code point order whatever the order of its edges", async () => {
+    const run = (edges: Partial<Query.IEdge>[]) => storage.explore.plan(node({}, edges, Query.NodeOperator.Or), resolvers).run(conn);
+    const persons = edge("SE", { entityClasses: [C.Person] });
+    const concepts = edge("SE", { entityClasses: [C.Concept] });
+    expect(await run([persons, concepts])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
+    expect(await run([concepts, persons])).toEqual(["c-1", "c-2", "c-3", "c-4", "p-1", "p-2"]);
   });
 });
 
@@ -627,6 +807,58 @@ describe("explore: statement edges", () => {
     expect(await explore({ entityClasses: [C.Person] }, [edge("I_SC")])).toEqual(["p-1"]);
   });
 
+  it("SP: needs its type node and its value node on the same prop, at any of the three levels", async () => {
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["s-1"]);
+    // s-1 has a c-2 typed prop and a c-4 valued prop, but not one prop with both
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    // c-4 is a SYN equivalent of c-3
+    expect(
+      await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-4", includeEquivalents: true })])
+    ).toEqual(["s-1"]);
+    // a third-level actant prop and an action prop
+    expect(await explore(S, [statementPropEdge({ entityId: "x-4" }, { entityId: "x-5" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-4" }, { entityId: "x-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({}, { entityId: "c-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, {})])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityClasses: [C.Concept] })])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityClasses: [C.Person] })])).toEqual([]);
+    // conditions nested under the value node narrow the values: c-3 is the superclass of c-2 only
+    const valueUnder = (superclassOf: string) =>
+      node({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityId: superclassOf })]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, valueUnder("c-2"))])).toEqual(["s-1"]);
+    expect(await explore(S, [statementPropEdge({ entityId: "c-2" }, valueUnder("c-4"))])).toEqual([]);
+    expect(
+      await explore(S, [statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["s-2", "s-3"]);
+    // a negated value node: s-1's only c-2 typed prop has the value c-3, and none is empty
+    const notValue = (e: Partial<Query.IEdge>) => ({ ...e, valueLogic: Query.EdgeLogic.Negative });
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, { entityId: "c-3" }))])).toEqual([]);
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, { entityId: "c-4" }))])).toEqual(["s-1"]);
+    expect(await explore(S, [notValue(statementPropEdge({ entityId: "c-2" }, {}))])).toEqual([]);
+  });
+
+  it("a propPair on SP:T, SP:V, I_SP:T and I_SP:V needs both halves on the same prop, at any of the three levels", async () => {
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["s-1"]);
+    // s-1 has a c-2 typed prop and a c-4 valued prop, but not one prop with both
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "x-2" }, { entityId: "c-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:T", { entityId: "c-4" }, { entityId: "x-3" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityId: "x-5" }, { entityId: "x-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityId: "x-5" }, { entityId: "c-2" })])).toEqual([]);
+    expect(await explore(S, [pairedEdge("SP:V", {}, { entityId: "x-4" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityClasses: [C.Concept] }, { entityId: "c-2" })])).toEqual(["s-1"]);
+    expect(await explore(S, [pairedEdge("SP:V", { entityClasses: [C.Person] }, { entityId: "c-2" })])).toEqual([]);
+
+    const L = { entityClasses: [C.Location] };
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-2" }, { entityId: "c-3" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-2" }, { entityId: "c-4" })])).toEqual([]);
+    expect(await explore(L, [pairedEdge("I_SP:V", {}, { entityId: "x-2" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:V", { entityId: "c-4" }, { entityId: "x-2" })])).toEqual(["l-1"]);
+    expect(await explore(L, [pairedEdge("I_SP:V", { entityId: "c-4" }, { entityId: "c-2" })])).toEqual([]);
+    // an action prop belongs to no actant
+    expect(await explore(L, [pairedEdge("I_SP:T", { entityId: "c-4" }, { entityId: "x-3" })])).toEqual([]);
+  });
+
   it("I_IS:S, I_IS:A1 and I_IS:A2 match by target, by class or by presence", async () => {
     expect(await explore(S, [edge("I_IS:S", { entityId: "p-1" })])).toEqual(["s-1"]);
     expect(await explore(S, [edge("I_IS:S", { entityId: "p-2" })])).toEqual(["s-3"]);
@@ -667,6 +899,28 @@ describe("explore: statement edges", () => {
     // a target that is not a statement selects nothing
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:", { entityId: "c-1" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:")])).toEqual(["p-1", "p-2"]);
+  });
+
+  it("IS: reads every reference side present when a legacy reference row lacks one", async () => {
+    await storage.entities.insert(
+      conn,
+      entity("s-legacy", C.Statement, [""], {
+        props: [],
+        references: [
+          { id: "ref-l1", value: "c-4" },
+          { id: "ref-l2", resource: "r-2", value: "" },
+        ],
+        data: { text: "", territory: { territoryId: "t-child", order: 2 }, tags: [], actions: [], actants: [] },
+      })
+    );
+    try {
+      expect(await explore({ entityClasses: [C.Concept, C.Resource] }, [edge("IS:", { entityId: "s-legacy" })])).toEqual([
+        "c-4",
+        "r-2",
+      ]);
+    } finally {
+      await storage.entities.delete(conn, "s-legacy");
+    }
   });
 });
 

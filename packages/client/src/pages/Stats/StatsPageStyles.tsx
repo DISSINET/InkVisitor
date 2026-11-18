@@ -194,6 +194,18 @@ export const StyledResultsTable = styled.div`
 export const StyledHeading = styled.h1`
   color: ${({ theme }) => theme.color["primary"]};
 `;
+export const StyledDocumentHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+export const StyledDocumentFilters = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: 2rem;
+  row-gap: 0.5rem;
+`;
 export const StyledDocumentRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -257,9 +269,12 @@ export const StyledDocumentChangesOverflow = styled.span`
   font-size: ${({ theme }) => theme.fontSize.xs};
   font-style: italic;
 `;
+// an id stays on one line and is cut with an ellipsis when the row is narrow
 export const StyledDocumentChangeFallback = styled.span`
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   border: ${({ theme }) => `1px solid ${theme.color.gray[400]}`};

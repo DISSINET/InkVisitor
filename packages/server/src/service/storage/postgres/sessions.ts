@@ -27,12 +27,22 @@ export const sessions: SessionStore = {
     );
   },
 
+  async touch(conn, row) {
+    await query(conn, `UPDATE sessions SET doc = $2::jsonb WHERE id = $1`, [
+      row.id,
+      encode(row),
+    ]);
+  },
+
   async delete(conn, sid) {
     await query(conn, `DELETE FROM sessions WHERE id = $1`, [sid]);
   },
 
-  async deleteByUser(conn, userId) {
-    await query(conn, `DELETE FROM sessions WHERE user_id = $1`, [userId]);
+  async deleteByUser(conn, userId, exceptSid) {
+    await query(conn, `DELETE FROM sessions WHERE user_id = $1 AND id <> $2`, [
+      userId,
+      exceptSid ?? "",
+    ]);
   },
 
   async deleteExpired(conn, now) {

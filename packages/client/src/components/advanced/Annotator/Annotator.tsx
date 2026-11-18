@@ -94,6 +94,7 @@ import {
   TerritoryCreateModalType,
   W_SCROLL,
 } from "./types";
+import { isForeignLanguageEntity } from "./utils/anchorElvl";
 import { annotatorHighlight } from "./utils/highlight";
 
 const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
@@ -634,7 +635,7 @@ export const TextAnnotator = ({
     dragHandleProps: menuDragHandleProps,
     draggableRef: menuDraggableRef,
     dragOffset: menuDragOffset,
-  } = useAnnotatorMenuDrag();
+  } = useAnnotatorMenuDrag({ blurOnDragStart: true });
 
   /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and dropdowns so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
@@ -738,6 +739,18 @@ export const TextAnnotator = ({
     await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
     toast.info(`Anchor created ${entityId}.`);
+  };
+
+  const sourceLanguage = userData?.options.defaultStatementLanguage;
+
+  const handleAddEntityAnchor = (entity: IEntity, elvl: EntityEnums.Elvl): Promise<void> => {
+    if (elvl === EntityEnums.Elvl.Textual && isForeignLanguageEntity(entity, sourceLanguage)) {
+      toast.info(
+        `Anchored entity language (${entity.language}) does not correspond with the user statement language (${sourceLanguage}). Anchor epistemic level changed to "inferential".`,
+      );
+      return handleAddAnchor(entity.id, EntityEnums.Elvl.Inferential);
+    }
+    return handleAddAnchor(entity.id, elvl);
   };
 
   const handleRefreshEntityAndStatement = (entityId: string) => {
@@ -1643,6 +1656,7 @@ export const TextAnnotator = ({
           }
           selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
+          sourceLanguage={sourceLanguage}
         />
       )}
 
@@ -1760,10 +1774,12 @@ export const TextAnnotator = ({
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
-                      onAnchorAdd={handleAddAnchor}
+                      onAnchorAdd={handleAddEntityAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
+                      documentAnchors={dataDocument.anchors}
+                      selectionIndex={selectionStartIndex}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       onMoveAnchorBoundary={isMenuReadOnly ? undefined : handleMoveAnchorBoundary}

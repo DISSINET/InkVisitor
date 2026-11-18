@@ -4,6 +4,7 @@ import { List } from "react-window";
 import { AnchorOpenTagRef, MoveAnchorBoundaryResult, Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
+import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonGroup, IconWithTooltip, Loader, SwitchGroup } from "components";
 import { Button } from "components/basic/Button/Button";
@@ -30,6 +31,7 @@ import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPan
 import { useAppDispatch } from "redux/hooks";
 import { IcoPlus, IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
+import { useAnnotatorNearbySuggestions } from "../hooks/useAnnotatorNearbySuggestions";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
@@ -75,7 +77,7 @@ interface TextAnnotatorMenuProps {
   text: string;
   anchors: Tag[];
   entities: Record<string, IEntity | false>;
-  onAnchorAdd: (entityId: string, elvl: EntityEnums.Elvl) => void;
+  onAnchorAdd: (entity: IEntity, elvl: EntityEnums.Elvl) => void;
   onCreateStatement?: (
     elvl: EntityEnums.Elvl,
     entityCreateModalProps?: {
@@ -93,6 +95,9 @@ interface TextAnnotatorMenuProps {
    * this document's text down to the deepest leaf at the cursor.
    */
   annotatorPositionHierarchy: AnnotatorPositionTNode[];
+  /** The document's anchors and where the selection starts in its text. */
+  documentAnchors?: IAnchorsNode[];
+  selectionIndex: number;
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl,
@@ -143,6 +148,8 @@ export const TextAnnotatorMenu = ({
   onAnchorAdd,
   onCreateStatement = undefined,
   annotatorPositionHierarchy,
+  documentAnchors,
+  selectionIndex,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
@@ -167,6 +174,20 @@ export const TextAnnotatorMenu = ({
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const { setStatementId, setTerritoryId } = useSearchParams();
+
+  // the class picked in the entity suggester; it seeds the suggester again when
+  // the anchor-move panel has unmounted it
+  const [suggesterClass, setSuggesterClass] = useState<
+    EntityEnums.Class | EntityEnums.Extension.Any
+  >(EntityEnums.Extension.Any);
+  // listed only in the Create Anchors section, which disableCreate leaves out
+  const nearbySuggestions = useAnnotatorNearbySuggestions(
+    documentAnchors,
+    selectionIndex,
+    annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1]?.id,
+    suggesterClass,
+    !disableCreate && selectionIndex !== -1,
+  );
 
   // #2885 — non-null while an anchor span is being moved with the arrow
   // buttons; the menu body is replaced by the move panel. openTagRef is
@@ -659,8 +680,13 @@ export const TextAnnotatorMenu = ({
                     categoryTypes={classesAnnotator}
                     statementLabelHint
                     initTyped={text.length > 30 ? text.substring(0, 30) : text}
-                    onSelected={(newAnchorId) => {
-                      onAnchorAdd(newAnchorId, suggesterElvl);
+                    prioritySuggestions={nearbySuggestions}
+                    initCategory={
+                      suggesterClass === EntityEnums.Extension.Any ? undefined : suggesterClass
+                    }
+                    onChangeCategory={setSuggesterClass}
+                    onPicked={(entity) => {
+                      onAnchorAdd(entity, suggesterElvl);
                     }}
                     inputWidth="full"
                     openDetailOnCreate

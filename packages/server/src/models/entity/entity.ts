@@ -9,6 +9,7 @@ import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import {
   DbEnums,
   EntityEnums,
@@ -47,11 +48,18 @@ import {
   soeIdsForValidation,
 } from "./validation-expansion";
 
+/**
+ * Whether an entity update may set the field. `entityAllowedFields` lists
+ * read-only fields too, marked false, so being listed is not enough.
+ */
+const isWritableField = (key: string): boolean =>
+  entityAllowedFields[key as keyof IEntity] === true;
+
 /** `data` without the fields an entity update may not set. */
 function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
   const allowed: Partial<IEntity> = { ...data };
   Object.keys(allowed).forEach(
-    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+    (key) => !isWritableField(key) && delete allowed[key as keyof IEntity]
   );
   return allowed;
 }
@@ -156,7 +164,7 @@ export default class Entity implements IEntity, IDbModel {
     // replace AND remove unwanted fields in passed object
     Object.keys(updateData).forEach(
       (key) =>
-        !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
+        !isWritableField(key) && delete updateData[key as keyof IEntity]
     );
 
     const result = await storage.entities.update(db as Conn, this.id, updateData);
@@ -543,6 +551,7 @@ export default class Entity implements IEntity, IDbModel {
         entitySOEs,
         entityLanguages,
         entityStatuses,
+        entityLabelContains,
         tieType,
         propType,
         allowedClasses,
@@ -596,12 +605,19 @@ export default class Entity implements IEntity, IDbModel {
           soeEs.map((e) => e.id)
         ).some((id) => acceptedSOEs.includes(id));
 
+      // quote marks fold to one char on both sides, as in the label search
+      const labelText = foldQuotes(entityLabelContains?.trim() ?? "").toLowerCase();
+      const labelCheck =
+        !labelText ||
+        this.labels.some((label) => foldQuotes(label).toLowerCase().includes(labelText));
+
       if (
         entityCheck &&
         classificationCheck &&
         languageCheck &&
         statusCheck &&
-        soeCheck
+        soeCheck &&
+        labelCheck
       ) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
