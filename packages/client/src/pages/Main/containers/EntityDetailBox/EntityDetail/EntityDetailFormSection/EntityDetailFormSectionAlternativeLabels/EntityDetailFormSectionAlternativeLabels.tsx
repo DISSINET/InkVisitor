@@ -64,13 +64,14 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
     <>
       <StyledAlternativeLabels>
         {alternativeLabels.map((label, key) => {
+          const isImportAdded = !!importMarks?.addedLabels.has(label);
           return (
             <StyledAlternativeLabelWrap
               key={key}
               $isEditing={currentlyEditedAltLabel === key}
-              $importMark={importMarks?.addedLabels.has(label) ? "added" : undefined}
+              $isImportAdded={isImportAdded}
             >
-              <StyledGreyBar />
+              <StyledGreyBar $isImportAdded={isImportAdded} />
               <>
                 {currentlyEditedAltLabel === key ? (
                   <Input
