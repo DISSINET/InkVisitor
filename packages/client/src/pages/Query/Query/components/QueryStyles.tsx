@@ -1,5 +1,6 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
+import { StyledLabel } from "components/basic/Checkbox/CheckboxStyles";
 import {
   StyledControl,
   StyledSingleValue,
@@ -201,6 +202,20 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   margin-top: 1.4rem;
 `;
 
+// the label of an unticked NOT is faded so the box reads as its edge type alone, not as
+// "NOT <type>"; the box itself stays full so the toggle does not read as disabled
+export const StyledEdgeNotToggle = styled.div<{ $active: boolean }>`
+  ${StyledLabel} {
+    opacity: ${({ $active }) => ($active ? 1 : 0.55)};
+    font-weight: ${({ theme, $active }) =>
+      $active ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+    transition: opacity 0.15s ease;
+  }
+  &:hover ${StyledLabel} {
+    opacity: 1;
+  }
+`;
+
 // the "with value" box is shorter than an edge's own box, so it is centred on the connector
 // line (half the row height) rather than offset by the edge box's top margin
 export const StyledEdgeValueControlsLayer = styled(StyledEdgeControlsLayer)`
@@ -214,7 +229,7 @@ export const StyledEdgeValueBox = styled(StyledEdgeBox)`
 // the "with value" label leading from the edge's spine to the value node of an HP: / SP: edge
 export const StyledEdgeValueLabel = styled.span`
   padding-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["query2Text"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   white-space: nowrap;

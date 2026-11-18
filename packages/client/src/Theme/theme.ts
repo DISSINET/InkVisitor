@@ -84,6 +84,9 @@ const theme = {
     query3: "#324185",
     query4: "#1A2332",
     queryInvalid: "#EF4444",
+    // a negated ("NOT") edge, its lines and its node border; the same in both themes so the
+    // query2Text labels on it stay readable
+    queryNegative: "#64748B",
 
     iconButtonGroupColor: "#C4C4C4",
 

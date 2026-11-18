@@ -18,6 +18,7 @@ import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "page
 import {
   StyledEdgeBox,
   StyledEdgeContainer,
+  StyledEdgeNotToggle,
   StyledEdgeControlsLayer,
   StyledEdgePropPairSlot,
   StyledEdgeSvg,
@@ -39,7 +40,7 @@ interface QueryGridEdgeProps {
   // spine must continue down past this branch to reach the siblings below
   extendVertical?: boolean;
   // the pass-through (lower) part of the spine feeds the NEXT sibling, so it is
-  // coloured by that sibling's logic - red when the sibling below is negative
+  // coloured by that sibling's logic - grey when the sibling below is negative
   extendNegative?: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
   // the connector to the value node of an HP: / SP: edge, which the edge's own controls
@@ -79,14 +80,14 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
 
   const isNegative = edge.logic === Query.EdgeLogic.Negative;
 
-  // a valid negative ("NOT") edge gets a distinct red connector so it reads as
-  // an exclusion at a glance; invalid still wins (its own red) over this
-  const lineColor = isValid && isNegative ? theme.color.entityA : color;
+  // a valid negative ("NOT") edge gets a distinct grey connector so it reads as
+  // an exclusion at a glance; invalid still wins (its red) over this
+  const lineColor = isValid && isNegative ? theme.color.queryNegative : color;
 
   // the value line of HP: / SP: is negated by NOT on the edge or on the value alone
   const isValueNegated = edge.valueLogic === Query.EdgeLogic.Negative;
   const isValueLineNegative = isNegative || isValueNegated;
-  const valueLineColor = isValid && isValueLineNegative ? theme.color.entityA : color;
+  const valueLineColor = isValid && isValueLineNegative ? theme.color.queryNegative : color;
   const branchNegative = isValueConnector ? isValueLineNegative : isNegative;
   const branchColor = isValueConnector ? valueLineColor : lineColor;
 
@@ -127,7 +128,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           {extendVertical && (
             <g
               style={{
-                stroke: extendNegative ? theme.color.entityA : theme.color.query2,
+                stroke: extendNegative ? theme.color.queryNegative : theme.color.query2,
               }}
               strokeDasharray={extendNegative ? "6 4" : undefined}
             >
@@ -139,30 +140,33 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
       <ControlsLayer>
         {isValueConnector ? (
           <StyledEdgeValueBox $color={branchColor}>
-            <Checkbox
-              size={15}
-              key={`${edge.id}-value-not-${edge.valueLogic}`}
-              label="NOT"
-              value={isValueNegated}
-              color="primary"
-              noFill
-              tooltipLabel="match props of this type whose value does not match the value node, or that have no value"
-              onChangeFn={(checked) =>
-                dispatch({
-                  type: QueryActionType.updateEdgeValueLogic,
-                  payload: {
-                    edgeId: edge.id,
-                    newLogic: checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive,
-                  },
-                })
-              }
-            />
+            <StyledEdgeNotToggle $active={isValueNegated}>
+              <Checkbox
+                size={15}
+                key={`${edge.id}-value-not-${edge.valueLogic}`}
+                label="NOT"
+                labelColor="query2Text"
+                value={isValueNegated}
+                color="primary"
+                noFill
+                tooltipLabel="match props of this type whose value does not match the value node, or that have no value"
+                onChangeFn={(checked) =>
+                  dispatch({
+                    type: QueryActionType.updateEdgeValueLogic,
+                    payload: {
+                      edgeId: edge.id,
+                      newLogic: checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive,
+                    },
+                  })
+                }
+              />
+            </StyledEdgeNotToggle>
             <StyledEdgeValueLabel>with value</StyledEdgeValueLabel>
             <Button
               icon={<IcoClose size={12} />}
               noBackground
               noBorder
-              textColor="white"
+              textColor="query2Text"
               tooltipLabel="remove the value node"
               onClick={() =>
                 dispatch({
@@ -174,30 +178,33 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           </StyledEdgeValueBox>
         ) : (
           <StyledEdgeBox $color={lineColor}>
-            <Checkbox
-              size={15}
-              key={`${edge.id}-not-${edge.logic}`}
-              label="NOT"
-              value={isNegative}
-              // neutral white box + dark check, reads as a control resting on the
-              // red negated edge rather than competing with it
-              color="primary"
-              noFill
-              tooltipLabel="negate this condition (find entities that do NOT match)"
-              onChangeFn={(checked) => {
-                const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
-                if (newLogic === edge.logic) {
-                  return;
-                }
-                dispatch({
-                  type: QueryActionType.updateEdgeLogic,
-                  payload: {
-                    edgeId: edge.id,
-                    newLogic,
-                  },
-                });
-              }}
-            />
+            <StyledEdgeNotToggle $active={isNegative}>
+              <Checkbox
+                size={15}
+                key={`${edge.id}-not-${edge.logic}`}
+                label="NOT"
+                labelColor="query2Text"
+                value={isNegative}
+                // neutral white box + dark check, reads as a control resting on the
+                // grey negated edge rather than competing with it
+                color="primary"
+                noFill
+                tooltipLabel="negate this condition (find entities that do NOT match)"
+                onChangeFn={(checked) => {
+                  const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
+                  if (newLogic === edge.logic) {
+                    return;
+                  }
+                  dispatch({
+                    type: QueryActionType.updateEdgeLogic,
+                    payload: {
+                      edgeId: edge.id,
+                      newLogic,
+                    },
+                  });
+                }}
+              />
+            </StyledEdgeNotToggle>
             <StyledEdgeTypeCell>
               <Dropdown.Single.Basic
                 options={edgeTypeOptions}

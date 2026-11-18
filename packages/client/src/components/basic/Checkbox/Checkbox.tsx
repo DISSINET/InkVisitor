@@ -21,6 +21,8 @@ interface Checkbox {
   size?: number;
   // accent colour for the checked border and checkmark (defaults to "info")
   color?: FlatThemeColor;
+  // label colour while enabled (defaults to "black"), for a checkbox on a coloured fill
+  labelColor?: FlatThemeColor;
   // when true the checked box stays a plain (white) box with a coloured check
   // instead of the default fill (see CheckboxStyles)
   noFill?: boolean;
@@ -43,6 +45,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   icon,
   size = 14,
   color = "info",
+  labelColor = "black",
   noFill = false,
   tooltipLabel,
   tooltipContent,
@@ -112,6 +115,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
           $disabled={disabled}
+          $labelColor={labelColor}
         >
           <StyledCheckboxWrapper>
             <StyledCheckboxIndicator

@@ -194,16 +194,19 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     openExpansion,
   } = useEntityExpansion(entityId, includeEquivalents, includeSubordinates);
 
-  // a node reached through a negative ("NOT") edge gets a red border to match
-  // that edge; scoped to this node only - deeper nodes have their own edges
-  const isNegativeEdge = edge?.logic === Query.EdgeLogic.Negative;
+  // a node reached through a negative ("NOT") edge gets a grey border to match
+  // that edge; scoped to this node only - deeper nodes have their own edges. The value node
+  // of HP: / SP: also turns grey when NOT is on its "with value" box alone
+  const isNegativeEdge =
+    edge?.logic === Query.EdgeLogic.Negative ||
+    (isValueNode && edge?.valueLogic === Query.EdgeLogic.Negative);
 
   const nodeBorder = useMemo(() => {
     if (!isValid) {
       return "none";
     }
     if (isNegativeEdge) {
-      return theme.color.entityA;
+      return theme.color.queryNegative;
     }
     return theme.color.query2;
   }, [theme, isValid, isNegativeEdge]);

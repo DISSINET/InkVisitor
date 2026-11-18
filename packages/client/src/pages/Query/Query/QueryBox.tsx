@@ -93,7 +93,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     const idToItem = new Map(nodeItems.map((n) => [n.id, n]));
     const extend = new Set<string>();
     const extendNeg = new Set<string>();
-    // cellKey -> whether the segment feeds a negative sibling (paint it red)
+    // cellKey -> whether the segment feeds a negative sibling (paint it in the NOT colour)
     const rails = new Map<string, boolean>();
     // cellKey -> the HP: / SP: edge whose value line passes the cell
     const valueRails = new Map<string, Query.IEdge>();
@@ -174,7 +174,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
             valueRailEdge?.logic === Query.EdgeLogic.Negative ||
             valueRailEdge?.valueLogic === Query.EdgeLogic.Negative;
           // the value line belongs to one edge, so it takes that edge's colour as its box does:
-          // the invalid colour over the red of NOT
+          // the invalid colour over the grey of NOT
           const valueRailInvalid =
             !!valueRailEdge &&
             queryStateValidity.problems.some(
@@ -207,7 +207,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={20}
                     y1={0}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={railNegative ? theme.color.entityA : theme.color.query2}
+                    stroke={railNegative ? theme.color.queryNegative : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={railNegative ? "6 4" : undefined}
                     strokeLinecap="round"
@@ -234,7 +234,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                       valueRailInvalid
                         ? theme.color.queryInvalid
                         : valueRailNegative
-                          ? theme.color.entityA
+                          ? theme.color.queryNegative
                           : theme.color.query2
                     }
                     strokeWidth={3}
@@ -259,7 +259,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={20}
                     y1={QUERY_GRID_HEIGHT - 8}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={childStubNegative ? theme.color.entityA : theme.color.query2}
+                    stroke={childStubNegative ? theme.color.queryNegative : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={childStubNegative ? "6 4" : undefined}
                     strokeLinecap="round"
