@@ -78,8 +78,8 @@ const theme = {
 
     /* query explorer colors */
     query1: "#E6F0FF",
-    query2: "#6174C2",
-    // text on a query2 fill, the same in both themes as query2 is
+    query2: "#4C5DAE",
+    // text on a query2 fill, the same in both themes as white reads on either blue
     query2Text: "#fff",
     query3: "#324185",
     query4: "#1A2332",
@@ -101,7 +101,7 @@ const theme = {
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
-    explorerHeader: "#6174C2",
+    explorerHeader: "#4C5DAE",
     headerTextColor: " #fff",
     // chrome on the header (borders, dividers) — present without competing with the text
     headerChromeColor: "rgba(255,255,255,0.6)",
