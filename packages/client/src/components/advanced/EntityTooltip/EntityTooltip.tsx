@@ -81,6 +81,8 @@ interface EntityTooltip {
   referenceElement: HTMLDivElement | null;
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
   isTemplate?: boolean;
+  // an entity not stored yet: its tooltip shows only what the entity holds
+  skipFetch?: boolean;
 }
 
 const getAnchorLines = (distinctCount: number) =>
@@ -110,6 +112,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   referenceElement,
   customTooltipAttributes,
   isTemplate = false,
+  skipFetch = false,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -134,7 +137,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       setTooltipData(res.data ?? false);
       return res.data;
     },
-    enabled: api.isLoggedIn() && !!entityId && allowFetch,
+    enabled: api.isLoggedIn() && !!entityId && allowFetch && !skipFetch,
   });
 
   // one entry per distinct anchor text in a document, with its count
