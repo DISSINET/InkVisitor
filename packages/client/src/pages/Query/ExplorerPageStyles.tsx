@@ -105,7 +105,6 @@ export const StyledSearchRows = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   /* the extra bottom space is what the resize handle, which straddles the box edge, covers */
   margin: 0 ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
-  padding-bottom: ${({ theme }) => theme.space[1]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
 `;
 
@@ -114,7 +113,14 @@ export const StyledSearchRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
-  & + & {
+  /* the divider starts at the row content, clear of the card's rounded border */
+  position: relative;
+  & + &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: ${({ theme }) => theme.space[3]};
+    right: 0;
     border-top: 1px dashed ${({ theme }) => theme.color["gray"][300]};
   }
 `;
@@ -129,11 +135,13 @@ export const StyledSearchRowCaption = styled.span`
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
 
+// the bottom padding sits on the rows only, so the search button centres on the whole card
 export const StyledSearchRowStack = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 
 // the run button stacks its icon over its label, as the annotator warning actions do
@@ -141,7 +149,8 @@ export const StyledSearchRunCell = styled.div`
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  padding: ${({ theme }) => theme.space[2]};
+  /* the left padding is the gap after the row divider, as wide as its inset on the left */
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   && button {
     flex-direction: column;
     justify-content: center;
