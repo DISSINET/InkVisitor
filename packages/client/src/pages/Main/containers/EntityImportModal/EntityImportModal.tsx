@@ -248,6 +248,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
   };
 
+  const canValidate = !!text.trim() && text !== refusedText && !isValidating && !!user;
   const handleValidate = async () => {
     if (!user) {
       return;
@@ -524,6 +525,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               value={text}
               onChange={setText}
               placeholder={INPUT_PLACEHOLDER}
+              onSubmit={() => canValidate && handleValidate()}
             />
             <StyledHiddenFileInput
               ref={fileInputRef}
@@ -594,7 +596,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               <Button
                 label="Validate"
                 color="info"
-                disabled={!text.trim() || text === refusedText || isValidating || !user}
+                disabled={!canValidate}
                 onClick={handleValidate}
               />
             </ButtonGroup>

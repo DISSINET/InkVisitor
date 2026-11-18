@@ -128,14 +128,14 @@ describe("mergeIntoStored", () => {
     ]);
   });
 
-  it("compares the status only when the input set it", () => {
+  it("keeps the stored status", () => {
     const stored = concept({ status: EntityEnums.Status.Approved });
     const imported = concept({ status: EntityEnums.Status.Pending });
 
-    expect(mergeIntoStored(stored, imported, same, {}).conflicts).toEqual([]);
-    expect(mergeIntoStored(stored, imported, same, { status: true }).conflicts).toMatchObject([
-      { path: "status", stored: EntityEnums.Status.Approved, imported: EntityEnums.Status.Pending },
-    ]);
+    const { entity, conflicts } = mergeIntoStored(stored, imported, same, {});
+
+    expect(entity.status).toBe(EntityEnums.Status.Approved);
+    expect(conflicts).toEqual([]);
   });
 
   it("ignores a language the input did not set", () => {
@@ -224,7 +224,7 @@ describe("appendChanges and storedFields", () => {
     expect(storedFields(stored, changes)).toEqual({ notes: ["bishop"], data: { logicalType: null } });
   });
 
-  it("send a status picked in a conflict", () => {
+  it("sends a status changed in Detail", () => {
     const stored = concept();
     const appended = { ...stored, status: EntityEnums.Status.Pending };
     expect(appendChanges(stored, appended)).toEqual({ status: EntityEnums.Status.Pending });

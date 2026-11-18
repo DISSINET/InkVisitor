@@ -9,10 +9,10 @@ import {
   IcoArrowUp,
   IcoCaretDown,
   IcoCaretRight,
-  IcoCheck,
   IcoCloseCg,
   IcoExclamation,
   IcoPlus,
+  IcoShow,
   IcoWarning,
   IcoWarningOutline,
 } from "Theme/icons";
@@ -220,7 +220,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
     .filter((entity) => !leftOut.has(entity.id))
     .reduce((total, entity) => total + conflictsOf(entity), 0);
   const summary = [
-    `${reviewedCount}/${entities.length} reviewed`,
+    `${reviewedCount}/${entities.length} viewed`,
     appendCount ? `${appendCount} append` : "",
     leftOutCount ? `${leftOutCount} left out` : "",
   ]
@@ -436,9 +436,9 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
                         )}
                         {reviewedIds.has(entity.id) && (
                           <IconWithTooltip
-                            icon={<IcoCheck />}
+                            icon={<IcoShow />}
                             color="greyer"
-                            tooltipLabel="reviewed: opened in the Detail"
+                            tooltipLabel="viewed: opened in the Detail"
                           />
                         )}
                         <StyledDraftListBadge>

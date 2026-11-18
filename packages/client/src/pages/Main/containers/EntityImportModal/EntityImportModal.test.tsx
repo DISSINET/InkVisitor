@@ -106,6 +106,24 @@ describe("EntityImportModal", () => {
     expect(onImported).not.toHaveBeenCalled();
   });
 
+  it("validates on Cmd+Enter in the JSON field", async () => {
+    entitiesGet.mockResolvedValueOnce({ data: [] });
+    const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
+    const setValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!;
+    await act(async () => {
+      setValue.call(textarea, JSON.stringify({ class: "C", labels: ["TEST dog"] }));
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    await act(async () => {
+      textarea.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", metaKey: true, bubbles: true })
+      );
+    });
+
+    expect(buttonNamed("Import 1 entity")).toBeDefined();
+  });
+
   it("opens at most the entities that are not Values in Detail", async () => {
     entitiesGet.mockResolvedValueOnce({ data: [] });
     await pasteAndValidate([

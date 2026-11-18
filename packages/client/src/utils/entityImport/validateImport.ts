@@ -359,9 +359,7 @@ export const validateImport = async (
     }
     if (toMerge.has(item.entity.id)) {
       const raw = parsed.items[item.index - 1] as Record<string, unknown>;
-      const given = context.fromDrafts
-        ? {}
-        : { language: raw.language !== undefined, status: raw.status !== undefined };
+      const given = context.fromDrafts ? {} : { language: raw.language !== undefined };
       const result = mergeIntoStored(stored, item.entity, same, given);
       merged.set(item.entity.id, result.entity);
       appends[item.entity.id].conflicts = result.conflicts;

@@ -123,7 +123,7 @@ describe("buildEntityJson", () => {
       labels: 1,
       notes: 1,
       // detail, language, legacy id and part of speech
-      fields: 5,
+      fields: 4,
       props: 1,
       references: 1,
       relations: 2,

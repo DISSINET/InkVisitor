@@ -10,6 +10,8 @@ interface EntityImportJsonEditor {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  // Cmd+Enter or Ctrl+Enter
+  onSubmit?: () => void;
 }
 
 /**
@@ -20,12 +22,20 @@ export const EntityImportJsonEditor: React.FC<EntityImportJsonEditor> = ({
   value,
   onChange,
   placeholder,
+  onSubmit,
 }) => {
   return (
     <StyledJsonEditor>
       <Editor
         value={value}
         onValueChange={onChange}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && onSubmit) {
+            // the editor skips its own Enter handling for a prevented event
+            event.preventDefault();
+            onSubmit();
+          }
+        }}
         highlight={highlightJson}
         placeholder={placeholder}
         padding={8}

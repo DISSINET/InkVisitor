@@ -71,17 +71,15 @@ export const emptySkips = (): AppendSkips => ({
 });
 
 // Detail lets the user edit these; a territory keeps its place in the tree
-// and a resource its document
-const SCALAR_FIELDS = ["detail", "language", "status", "legacyId"] as const;
+// and a resource its document. The status always stays as stored.
+const SCALAR_FIELDS = ["detail", "language", "legacyId"] as const;
 
 /**
- * The fields the input set itself. A field it leaves out is filled with a
- * default, the user's language or the pending status, which must not compete
- * with the stored value.
+ * The fields the input set itself. A language it leaves out is filled with
+ * the user's language, which must not compete with the stored value.
  */
 export interface GivenFields {
   language?: boolean;
-  status?: boolean;
 }
 const SKIPPED_DATA_KEYS = ["parent", "validations", "documentId"];
 
@@ -305,7 +303,7 @@ export const mergeIntoStored = (
 
   for (const field of SCALAR_FIELDS) {
     const value = imported[field];
-    if (isEmpty(value) || ((field === "language" || field === "status") && !given[field])) {
+    if (isEmpty(value) || (field === "language" && !given.language)) {
       continue;
     }
     (entity as unknown as Record<string, unknown>)[field] = mergeScalar(
