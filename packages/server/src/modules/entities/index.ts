@@ -1028,14 +1028,22 @@ export default Router()
 
       const results = await querySearch.getResults(request.db.connection, rowIndices);
 
+      const exportColumns =
+        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
+
       // create csv text
       const tsvBodyRows = results
         .map((result) => {
           const rEntity = result.entity;
           const rowColValues: string[] = [parseColumnValue(rEntity)];
 
-          Object.values(result.columnData).forEach((columnValue) => {
-            if (columnValue instanceof Array) {
+          // columnData has no key for an empty Created by or Parent Territory cell, so the row
+          // follows the header columns to keep every cell under its own header
+          exportColumns.forEach((column) => {
+            const columnValue = result.columnData[column.id];
+            if (columnValue === undefined) {
+              rowColValues.push("");
+            } else if (columnValue instanceof Array) {
               rowColValues.push(
                 columnValue.map((columnValuePart) => parseColumnValue(columnValuePart)).join(",")
               );
@@ -1047,8 +1055,6 @@ export default Router()
         })
         .join("\n");
 
-      const exportColumns =
-        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
       const tsvHeader =
         "result\t" + exportColumns.map((c) => c.name).join("\t");
 
