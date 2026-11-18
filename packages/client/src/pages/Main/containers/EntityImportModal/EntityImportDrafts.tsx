@@ -125,9 +125,9 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       // a double click on the tag of another draft opens that draft
       openUnstored: setSelectedId,
       // a new entity is one more draft, opened at once
+      // the Detail stays where the user created it, such as at a metaprop
       createDraft: (entity: IEntity) => {
         onDraftChange((current) => addDraftEntity(current, entity));
-        setSelectedId(entity.id);
       },
     }),
     [writes, draftEntityIds, onDraftChange]

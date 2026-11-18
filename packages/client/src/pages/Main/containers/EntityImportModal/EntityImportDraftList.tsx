@@ -477,6 +477,7 @@ export const EntityImportDraftList: React.FC<EntityImportDraftList> = ({
         <EntityCreateModal
           categorySelected={EntityEnums.Class.Concept}
           closeModal={() => setShowCreate(false)}
+          onMutationSuccess={(entity) => onSelect(entity.id)}
         />
       )}
       <Tooltip
