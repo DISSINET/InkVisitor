@@ -145,18 +145,17 @@ export const StyledSearchRowStack = styled.div`
 `;
 
 // the run button stacks its icon over its label, as the annotator warning actions do
+// the button fills the card's height with the same gap to the card edges and to the end of
+// the row divider
 export const StyledSearchRunCell = styled.div`
   display: flex;
-  align-items: center;
   flex-shrink: 0;
-  /* the left padding is the gap after the row divider, as wide as its inset on the left */
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  padding: ${({ theme }) => theme.space[4]};
   && button {
     flex-direction: column;
     justify-content: center;
     gap: 0.1rem;
     min-width: 6.4rem;
-    min-height: 5rem;
   }
   && button span {
     margin-left: 0;

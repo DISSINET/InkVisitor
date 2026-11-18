@@ -1053,6 +1053,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     textColor="query2Text"
                     disabled={!isSearchPending}
                     onClick={handleRunSearch}
+                    fullHeight
                   />
                 </StyledSearchRunCell>
               </StyledSearchRows>
