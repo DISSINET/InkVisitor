@@ -104,3 +104,41 @@ describe("AnchorsNode.buildAnchorsTree with self-closing tags", () => {
     expect(tree[0].content).toEqual("text  more");
   });
 });
+
+describe("AnchorsNode.buildAnchorsTree with paired tags that are not anchors", () => {
+  // only e1 and e2 are entities; <hi> is markup of an imported document
+  const entityIds = (ids: string[]) => ({
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Concept]: ids,
+  });
+
+  test("a paired tag that is not an anchor leaves the anchor around it open", () => {
+    const content = "<e1>text <hi>bold</hi> more <e2>x</e2></e1>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].content).toEqual("text bold more x");
+    expect(tree[0].indexEnd).toEqual(content.length);
+    expect(tree[0].children.map((node) => node.anchor)).toEqual(["e2"]);
+  });
+
+  test("an anchor ends at its own closing tag when another anchor crosses it", () => {
+    const content = "<e1>a <e2>b</e1> c</e2> <e3>d</e3>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1", "e3"]);
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    expect(tree[0].children.map((node) => node.anchor)).toEqual(["e2"]);
+    expect(tree[0].children[0].indexEnd).toEqual(content.indexOf("</e2>") + "</e2>".length);
+  });
+
+  test("an anchor crossed by another one keeps the anchors opened after the crossing", () => {
+    const content = "<e1>A <e2>B </e1> <e3>C</e3></e2>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    const crossed = tree[0].children[0];
+    expect(crossed.anchor).toEqual("e2");
+    expect(crossed.indexEnd).toEqual(content.length);
+    expect(crossed.children.map((node) => node.anchor)).toEqual(["e3"]);
+  });
+});

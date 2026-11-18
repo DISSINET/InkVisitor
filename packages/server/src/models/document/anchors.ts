@@ -95,17 +95,25 @@ export class AnchorsNode implements IAnchorsNode {
           nodeStack.push(newNode);
         }
       } else if (isClosingTag) {
-        // Close tag: Pop the node off the stack
-        const closedNode = nodeStack.pop();
-
-        // Set the end index when closing tag is found
-        if (closedNode) {
-          closedNode.indexEnd = match.index + match[0].length;
+        // A closing tag ends the nearest open anchor of its name and nothing
+        // else, the way the Annotator pairs tags: an anchor opened inside it and
+        // still open (crossing anchors) runs on to its own closing tag. The
+        // closing tag of anything that opened no node (markup of an imported
+        // document, an entity the database does not hold) closes nothing.
+        let openAt = nodeStack.length - 1;
+        while (openAt >= 0 && nodeStack[openAt].anchor !== tag) {
+          openAt--;
         }
+        if (openAt !== -1) {
+          const [closedNode] = nodeStack.splice(openAt, 1);
+          closedNode.indexEnd = match.index + match[0].length;
 
-        // If there's a parent node, merge the content of the closed node into its parent (remove tag, keep content)
-        if (closedNode && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += closedNode.content;
+          // merge the content of the closed node into the open node below it
+          // (remove tag, keep content); a crossed node's text from before the
+          // crossing reaches it only once that node closes
+          if (openAt > 0) {
+            nodeStack[openAt - 1].content += closedNode.content;
+          }
         }
       }
 
