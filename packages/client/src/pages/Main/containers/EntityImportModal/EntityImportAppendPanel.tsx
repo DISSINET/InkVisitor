@@ -23,16 +23,13 @@ import {
   StyledAppendWarning,
   StyledConflictOption,
   StyledConflictSide,
+  StyledPairTitle,
+  StyledPairValues,
+  StyledPairWarning,
 } from "./EntityImportModalStyles";
 
 const STORED_RELATIONS_HINT =
   "Detail shows its stored relations too; unlinking or changing one is written on Import.";
-
-const describePair = (warning: AppendPairWarning, labelOf: (entityId: string) => string) => {
-  const key = [...warning.parentTypeIds, warning.keyId].map(labelOf).reverse().join(" under ");
-  const stored = warning.storedValueIds.map(labelOf).join(", ");
-  return `${warning.kind === "prop" ? "Metaprop" : "Reference"} ${key}: stored ${stored}, the import adds ${labelOf(warning.addedValueId)}.`;
-};
 
 // a Value is always created, never appended
 export const canAppend = (entity: IEntity) => entity.class !== EntityEnums.Class.Value;
@@ -80,8 +77,15 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
     const skipped = describeSkips(append.skipped);
     const entityOf = (entityId: string) =>
       draft.entities.find((candidate) => candidate.id === entityId) ?? draft.existing[entityId];
-    const labelOf = (entityId: string) =>
-      entityId ? `"${entityOf(entityId)?.labels[0] ?? entityId}"` : "no value";
+    const labelOf = (entityId: string) => entityOf(entityId)?.labels[0] ?? entityId;
+    const tagOf = (entityId: string) => {
+      const tagged = entityOf(entityId);
+      return tagged ? (
+        <EntityTag key={entityId} entity={tagged} fullWidth />
+      ) : (
+        <StyledAppendText key={entityId}>{entityId || "no value"}</StyledAppendText>
+      );
+    };
     const pairs = pairWarnings(append.stored, entity, sameEntityBy(entityOf));
     // a language and a status show by their names, as Detail shows them
     const shown = (path: string, value: string) =>
@@ -100,10 +104,25 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
         {pairs.length > 0 && (
           <StyledAppendSoftWarning>
             <StyledAppendRowLabel>
-              {"Added beside a stored one with another value; check it is meant:"}
+              {"Added beside a stored one with another value; check it is meant"}
             </StyledAppendRowLabel>
-            {pairs.map((warning, warningIndex) => (
-              <StyledAppendText key={warningIndex}>{describePair(warning, labelOf)}</StyledAppendText>
+            {pairs.map((warning: AppendPairWarning, warningIndex) => (
+              <StyledPairWarning key={warningIndex}>
+                <StyledPairTitle>
+                  <StyledConflictSide>
+                    {warning.kind === "prop" ? "metaprop" : "reference"}
+                  </StyledConflictSide>
+                  {[...warning.parentTypeIds, warning.keyId].map(labelOf).join(" › ")}
+                </StyledPairTitle>
+                <StyledAppendRow $noWrap>
+                  <StyledConflictSide>{"stored"}</StyledConflictSide>
+                  <StyledPairValues>{warning.storedValueIds.map(tagOf)}</StyledPairValues>
+                </StyledAppendRow>
+                <StyledAppendRow $noWrap>
+                  <StyledConflictSide>{"added"}</StyledConflictSide>
+                  <StyledPairValues>{tagOf(warning.addedValueId)}</StyledPairValues>
+                </StyledAppendRow>
+              </StyledPairWarning>
             ))}
           </StyledAppendSoftWarning>
         )}

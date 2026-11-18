@@ -419,6 +419,33 @@ export const StyledAppendSoftWarning = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
+// one metaprop or reference of a soft warning, apart from the next by a line
+export const StyledPairWarning = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  padding-top: ${({ theme }) => theme.space[2]};
+  border-top: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["grey"]};
+`;
+
+export const StyledPairTitle = styled.p`
+  display: flex;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+  overflow-wrap: anywhere;
+`;
+
+export const StyledPairValues = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  flex: 1;
+  min-width: 0;
+`;
+
 export const StyledAppendText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
