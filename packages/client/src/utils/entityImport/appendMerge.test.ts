@@ -7,6 +7,7 @@ import {
   describeSkips,
   keepStoredIds,
   mergeIntoStored,
+  pairWarnings,
   sameEntityBy,
   storedFields,
 } from "./appendMerge";
@@ -41,6 +42,56 @@ const entities = new Map(
   ])
 );
 const same = sameEntityBy((entityId) => entities.get(entityId));
+
+describe("pairWarnings", () => {
+  it("warns of an added metaprop or reference beside a stored one with another value", () => {
+    const stored = concept({
+      props: [prop("born", "v-354", [prop("place", "thagaste")])],
+      references: [CReference("book", "p1")],
+    });
+    const { entity } = mergeIntoStored(
+      stored,
+      concept({
+        props: [
+          prop("born", "v-430"),
+          prop("born", "v-354-copy", [prop("place", "hippo"), prop("note", "x")]),
+          prop("died", "v-430"),
+        ],
+        references: [CReference("book", "p2"), CReference("letter", "p1")],
+      }),
+      same,
+      {}
+    );
+
+    expect(
+      pairWarnings(stored, entity, same).map((warning) => [
+        warning.kind,
+        warning.parentTypeIds,
+        warning.keyId,
+        warning.storedValueIds,
+        warning.addedValueId,
+      ])
+    ).toEqual([
+      ["prop", ["born"], "place", ["thagaste"], "hippo"],
+      ["prop", [], "born", ["v-354"], "v-430"],
+      ["reference", [], "book", ["p1"], "p2"],
+    ]);
+  });
+
+  it("compares a metaprop only with the stored metaprops on its own level", () => {
+    const stored = concept({ props: [prop("trait", "pious", [prop("colour", "red")])] });
+    const { entity } = mergeIntoStored(
+      stored,
+      concept({ props: [prop("trait", "devout", [prop("colour", "blue")])] }),
+      same,
+      {}
+    );
+
+    expect(pairWarnings(stored, entity, same).map((warning) => warning.keyId)).toEqual([
+      "trait",
+    ]);
+  });
+});
 
 describe("mergeIntoStored", () => {
   it("appends what is missing and counts what is stored already", () => {

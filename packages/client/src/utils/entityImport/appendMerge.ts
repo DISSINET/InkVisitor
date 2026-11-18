@@ -155,6 +155,92 @@ const mergeProps = (
   return merged;
 };
 
+/**
+ * A metaprop or reference the append adds beside a stored one with the same
+ * type or resource and another value. It may be a second value or a
+ * replacement the import can't make, so the user is told.
+ */
+export interface AppendPairWarning {
+  kind: "prop" | "reference";
+  // the metaprop type or the resource
+  keyId: string;
+  storedValueIds: string[];
+  addedValueId: string;
+  // the types of the stored metaprops it sits under, outermost first
+  parentTypeIds: string[];
+}
+
+/**
+ * The pair warnings of an appended draft as it is now, edits in Detail
+ * included. Metaprops are compared only with the stored metaprops on the same
+ * level: the top level, or the children of one stored metaprop.
+ */
+export const pairWarnings = (
+  stored: IEntity,
+  entity: IEntity,
+  same: SameEntity
+): AppendPairWarning[] => {
+  const warnings: AppendPairWarning[] = [];
+
+  const compareProps = (storedProps: IProp[], props: IProp[], parentTypeIds: string[]) => {
+    const storedIds = new Set(storedProps.map((prop) => prop.id));
+    for (const prop of props) {
+      const storedProp = storedProps.find((candidate) => candidate.id === prop.id);
+      if (storedProp) {
+        compareProps(storedProp.children, prop.children, [
+          ...parentTypeIds,
+          storedProp.type.entityId,
+        ]);
+        continue;
+      }
+      const storedValueIds = props
+        .filter(
+          (candidate) =>
+            storedIds.has(candidate.id) &&
+            same(candidate.type.entityId, prop.type.entityId) &&
+            !same(candidate.value.entityId, prop.value.entityId)
+        )
+        .map((candidate) => candidate.value.entityId);
+      if (storedValueIds.length) {
+        warnings.push({
+          kind: "prop",
+          keyId: prop.type.entityId,
+          storedValueIds,
+          addedValueId: prop.value.entityId,
+          parentTypeIds,
+        });
+      }
+    }
+  };
+  compareProps(stored.props, entity.props, []);
+
+  const storedReferenceIds = new Set(stored.references.map((reference) => reference.id));
+  for (const reference of entity.references) {
+    if (storedReferenceIds.has(reference.id)) {
+      continue;
+    }
+    const storedValueIds = entity.references
+      .filter(
+        (candidate) =>
+          storedReferenceIds.has(candidate.id) &&
+          same(candidate.resource, reference.resource) &&
+          !same(candidate.value, reference.value)
+      )
+      .map((candidate) => candidate.value);
+    if (storedValueIds.length) {
+      warnings.push({
+        kind: "reference",
+        keyId: reference.resource,
+        storedValueIds,
+        addedValueId: reference.value,
+        parentTypeIds: [],
+      });
+    }
+  }
+
+  return warnings;
+};
+
 const mergeReferences = (
   stored: IReference[],
   imported: IReference[],

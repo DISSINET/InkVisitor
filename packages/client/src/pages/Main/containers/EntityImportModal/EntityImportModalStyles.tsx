@@ -410,6 +410,15 @@ export const StyledAppendWarning = styled.p`
   overflow-wrap: anywhere;
 `;
 
+export const StyledAppendSoftWarning = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["warning"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+`;
+
 export const StyledAppendText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};

@@ -11,8 +11,8 @@ export type { ImportIssue, ImportPlan, ImportValidation, StoredRelationChanges }
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
-export { describeSkips } from "./appendMerge";
-export type { AppendConflict, AppendInfo } from "./appendMerge";
+export { describeSkips, pairWarnings, sameEntityBy } from "./appendMerge";
+export type { AppendConflict, AppendInfo, AppendPairWarning } from "./appendMerge";
 export {
   addDraftEntity,
   addStoredRelations,
