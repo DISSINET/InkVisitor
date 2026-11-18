@@ -97,10 +97,14 @@ export const StyledQueryScroller = styled.div`
 `;
 
 // a card inset at the bottom of the Query Builder box, with page background below and at
-// its sides, so the result rows read as part of the builder, not the top of the Explorer
+// its sides, so the result rows read as part of the builder, not the top of the Explorer.
+// It is as wide as its rows, left-aligned with the query tree, so on a wide screen the
+// search button stays next to the filters
 export const StyledSearchRows = styled.div`
   flex-shrink: 0;
   display: flex;
+  width: fit-content;
+  max-width: calc(100% - 2 * ${({ theme }) => theme.space[3]});
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   /* the extra bottom space is what the resize handle, which straddles the box edge, covers */
@@ -113,14 +117,15 @@ export const StyledSearchRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
-  /* the divider starts at the row content, clear of the card's rounded border */
+  /* the divider starts at the row content, clear of the card's rounded border, and
+     ends as far from the search button: it reaches into the button cell's padding */
   position: relative;
   & + &::before {
     content: "";
     position: absolute;
     top: 0;
     left: ${({ theme }) => theme.space[3]};
-    right: 0;
+    right: calc(${({ theme }) => theme.space[3]} - ${({ theme }) => theme.space[4]});
     border-top: 1px dashed ${({ theme }) => theme.color["gray"][300]};
   }
 `;
@@ -145,8 +150,7 @@ export const StyledSearchRowStack = styled.div`
 `;
 
 // the run button stacks its icon over its label, as the annotator warning actions do
-// the button fills the card's height with the same gap to the card edges and to the end of
-// the row divider
+// the button fills the card's height with the same gap to every card edge
 export const StyledSearchRunCell = styled.div`
   display: flex;
   flex-shrink: 0;
