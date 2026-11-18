@@ -1,8 +1,11 @@
+import { ImportMark } from "hooks/useEntityEditing";
+import { importMarkCss } from "Theme/importMark";
 import { FaGripVertical } from "react-icons/fa";
 import styled, { DefaultTheme } from "styled-components";
 
 interface StyledGrid {
   $tempDisabled?: boolean;
+  $importMark?: ImportMark;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
@@ -16,6 +19,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
+  ${importMarkCss}
 
   opacity: ${({ $tempDisabled }) => ($tempDisabled ? 0.2 : 1)};
   margin-bottom: ${({ theme }) => theme.space[2]};

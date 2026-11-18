@@ -9,6 +9,7 @@ import {
   addDraftEntity,
   ImportDraft,
   ImportIssue,
+  importMarksOf,
   leftOutDrafts,
   removedFromProtocols,
   searchCandidates,
@@ -125,13 +126,14 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       hostElementId: DRAFT_DETAIL_ELEMENT_ID,
       // a double click on the tag of another draft opens that draft
       openUnstored: setSelectedId,
-      // a new entity is one more draft, opened at once
-      // the Detail stays where the user created it, such as at a metaprop
+      // a new entity is one more draft; the Detail stays where the user
+      // created it, such as at a metaprop
       createDraft: (entity: IEntity) => {
         onDraftChange((current) => addDraftEntity(current, entity));
       },
+      importMarks: selectedId ? importMarksOf(draft, selectedId) : undefined,
     }),
-    [writes, draftEntityIds, onDraftChange]
+    [writes, draftEntityIds, onDraftChange, draft, selectedId]
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;

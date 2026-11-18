@@ -35,6 +35,22 @@ export interface EntityWrites {
 }
 
 /**
+ * What an append adds to a stored entity, for Detail to mark. Stored items
+ * stay unmarked.
+ */
+export interface ImportMarks {
+  // metaprops (children too), references and relations the import adds
+  addedIds: Set<string>;
+  // stored relations edited in the drafts
+  changedIds: Set<string>;
+  // alternative labels and notes the import adds, by their text
+  addedLabels: Set<string>;
+  addedNotes: Set<string>;
+}
+
+export type ImportMark = "added" | "changed";
+
+/**
  * What editing an entity means where Detail and the components inside it are
  * rendered. The default is the database; the JSON import sets its own around
  * the Detail of its drafts, which do not exist in the database yet.
@@ -61,6 +77,8 @@ export interface EntityEditing {
   // of writing it to the database; what needs a stored entity (templates,
   // copies of a dropped Value) stays off while createsEntities is false.
   createDraft?: (entity: IEntity) => void;
+  // given for an appended draft
+  importMarks?: ImportMarks;
 }
 
 export const STORED_ENTITY_EDITING: EntityEditing = {
@@ -72,6 +90,15 @@ export const STORED_ENTITY_EDITING: EntityEditing = {
 export const EntityEditingContext = createContext<EntityEditing>(STORED_ENTITY_EDITING);
 
 export const useEntityEditing = () => useContext(EntityEditingContext);
+
+/** How Detail marks the metaprop, reference or relation with this id. */
+export const useImportMark = (id: string): ImportMark | undefined => {
+  const { importMarks } = useEntityEditing();
+  if (importMarks?.addedIds.has(id)) {
+    return "added";
+  }
+  return importMarks?.changedIds.has(id) ? "changed" : undefined;
+};
 
 /** The writes Detail uses, set by Detail around its content. */
 export const EntityWritesContext = createContext<EntityWrites | null>(null);

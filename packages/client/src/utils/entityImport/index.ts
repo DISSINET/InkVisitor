@@ -26,6 +26,7 @@ export {
   draftFromPlan,
   draftToImportJson,
   issuesWithEntityIds,
+  importMarksOf,
   leftOutDrafts,
   removedFromProtocols,
   missingEntityIds,

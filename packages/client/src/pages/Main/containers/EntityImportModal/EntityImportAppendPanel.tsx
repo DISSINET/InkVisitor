@@ -28,6 +28,9 @@ import {
   StyledPairWarning,
 } from "./EntityImportModalStyles";
 
+const IMPORT_MARKS_HINT =
+  "In Detail, a stripe on the left marks what the import adds; a dashed one, a stored relation changed here.";
+
 const STORED_RELATIONS_HINT =
   "Detail shows its stored relations too; unlinking or changing one is written on Import.";
 
@@ -166,6 +169,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
             </>
           )}
           <StyledAppendRowLabel>{STORED_RELATIONS_HINT}</StyledAppendRowLabel>
+          <StyledAppendRowLabel>{IMPORT_MARKS_HINT}</StyledAppendRowLabel>
         </StyledAppendSection>
       </StyledAppendPanel>
     );

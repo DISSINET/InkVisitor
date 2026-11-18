@@ -1,5 +1,5 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IProp, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
   addStoredRelations,
   appendUndoOf,
@@ -10,6 +10,7 @@ import {
   deleteDraftRelation,
   draftToImportJson,
   ImportDraft,
+  importMarksOf,
   issuesWithEntityIds,
   leftOutDrafts,
   mergeChanges,
@@ -616,5 +617,45 @@ describe("stored relations of an appended draft", () => {
   it("leaves a stored relation with a left-out member as it is stored", () => {
     const draft = toggleLeftOut(deleteDraftRelation(withStored(), "s1"), "dog");
     expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
+  });
+});
+
+describe("importMarksOf", () => {
+  it("marks what the append adds and the stored relations edited in the drafts", () => {
+    const prop = (id: string, children: IProp[] = []) =>
+      ({ id, type: { entityId: "t" }, value: { entityId: "v" }, children }) as unknown as IProp;
+    const born = prop("p-born");
+    const place = prop("p-place");
+    const stored = {
+      ...newEntity("dog", { labels: ["dog", "hound"], notes: ["old"] }),
+      props: [born],
+      references: [{ id: "r-stored", resource: "book", value: "p1" }],
+    } as IEntity;
+    const appended = {
+      ...stored,
+      labels: ["dog", "hound", "canine"],
+      notes: ["old", "new"],
+      props: [{ ...born, children: [place] }, { ...born, id: "p-born-2" }],
+      references: [...stored.references, { id: "r-added", resource: "book", value: "p2" }],
+    } as IEntity;
+    const storedRelation = relation("stored-scl", RelationEnums.Type.Superclass, "dog", "animal");
+    const draft: ImportDraft = {
+      entities: [appended],
+      relations: [
+        { ...storedRelation, entityIds: ["dog", "mammal"] },
+        relation("added-syn", RelationEnums.Type.Synonym, "dog", "hound"),
+      ],
+      existing: {},
+      appends: { dog: { stored, conflicts: [], skipped: {} as never } },
+      storedRelations: [storedRelation],
+    };
+
+    const marks = importMarksOf(draft, "dog")!;
+
+    expect([...marks.addedIds]).toEqual(["p-place", "p-born-2", "r-added", "added-syn"]);
+    expect([...marks.changedIds]).toEqual(["stored-scl"]);
+    expect([...marks.addedLabels]).toEqual(["canine"]);
+    expect([...marks.addedNotes]).toEqual(["new"]);
+    expect(importMarksOf(draft, "puppy")).toBeUndefined();
   });
 });

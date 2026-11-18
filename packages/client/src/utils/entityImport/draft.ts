@@ -1,6 +1,6 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IResponseDetail, ITerritory, Relation } from "@inkvisitor/shared/types";
-import { EntityWrites, LOCAL_WRITE_RESPONSE } from "hooks/useEntityEditing";
+import { EntityWrites, ImportMarks, LOCAL_WRITE_RESPONSE } from "hooks/useEntityEditing";
 import { v4 as uuidv4 } from "uuid";
 import { AppendInfo, applyConflictChoice } from "./appendMerge";
 import { buildEntityJson } from "./entityJson";
@@ -231,6 +231,41 @@ export const storedRelationChanges = (draft: ImportDraft): StoredRelationChanges
     }
   }
   return changes;
+};
+
+const propIds = (props: IProp[]): string[] =>
+  props.flatMap((prop) => [prop.id, ...propIds(prop.children)]);
+
+/**
+ * What the append of this draft adds to the stored entity, as the draft is
+ * now; undefined for a draft that is not appended.
+ */
+export const importMarksOf = (draft: ImportDraft, entityId: string): ImportMarks | undefined => {
+  const stored = draft.appends?.[entityId]?.stored;
+  const entity = draft.entities.find((candidate) => candidate.id === entityId);
+  if (!stored || !entity) {
+    return undefined;
+  }
+  const storedPropIds = new Set(propIds(stored.props));
+  const storedReferenceIds = new Set(stored.references.map((reference) => reference.id));
+  const storedRelationIds = new Set((draft.storedRelations ?? []).map((relation) => relation.id));
+  return {
+    addedIds: new Set([
+      ...propIds(entity.props).filter((id) => !storedPropIds.has(id)),
+      ...entity.references
+        .filter((reference) => !storedReferenceIds.has(reference.id))
+        .map((reference) => reference.id),
+      ...draft.relations
+        .filter(
+          (relation) =>
+            relation.entityIds.includes(entityId) && !storedRelationIds.has(relation.id)
+        )
+        .map((relation) => relation.id),
+    ]),
+    changedIds: new Set(storedRelationChanges(draft).updated.map(({ before }) => before.id)),
+    addedLabels: new Set(entity.labels.filter((label) => !stored.labels.includes(label))),
+    addedNotes: new Set(entity.notes.filter((note) => !stored.notes.includes(note))),
+  };
 };
 
 /** What undoing one "append to it" needs, taken just before the append. */

@@ -1,3 +1,5 @@
+import { ImportMark } from "hooks/useEntityEditing";
+import { importMarkCss } from "Theme/importMark";
 import { IoClose, IoStar, IoStarOutline } from "react-icons/io5";
 import styled from "styled-components";
 
@@ -8,6 +10,7 @@ export const StyledAlternativeLabels = styled.div`
 `;
 interface StyledAlternativeLabelWrapProps {
   $isEditing: boolean;
+  $importMark?: ImportMark;
 }
 export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapProps>`
   position: relative;
@@ -34,6 +37,7 @@ export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapP
     border-color: ${({ theme }) => theme.color["primary"]};
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
+  ${importMarkCss}
 `;
 export const StyledGreyBar = styled.div`
   position: absolute;
