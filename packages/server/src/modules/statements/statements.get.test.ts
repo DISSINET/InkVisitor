@@ -12,6 +12,12 @@ import Statement, {
 } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import Territory from "@models/territory/territory";
+import Person from "@models/person/person";
+import Location from "@models/location/location";
+import Document from "@models/document/document";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IStatementActant } from "@inkvisitor/shared/types";
+import { NEARBY_SUGGESTIONS_LIMIT } from "@inkvisitor/shared/constants";
 import treeCache from "@service/treeCache";
 import { pool } from "@middlewares/db";
 
@@ -98,6 +104,168 @@ describe("Statements get", function () {
         .expect(testValidStatement);
 
       await clean(db);
+    });
+
+    it("should list the entities anchored around the statement, closest first", async () => {
+      const db = new Db();
+      await db.initDb();
+      // document tag names exclude ".", so the anchored ids are dot-free
+      const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+      const tag = (id: string, text: string) => `<${id}>${text}</${id}>`;
+
+      const territoryId = `root${tagSafeId()}`;
+      const statementId = tagSafeId();
+      const inSpan = new Person({ id: tagSafeId() });
+      const discouraged = new Person({
+        id: tagSafeId(),
+        status: EntityEnums.Status.Discouraged,
+      });
+      const inTerritory = new Location({ id: tagSafeId() });
+
+      await createEntity(db, new Territory({ id: territoryId }));
+      await createEntity(
+        db,
+        new Statement({
+          id: statementId,
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId }),
+          }),
+        })
+      );
+      await createEntity(db, inSpan);
+      await createEntity(db, discouraged);
+      await createEntity(db, inTerritory);
+
+      // the entities must exist before preprocess so the anchors resolve
+      const document = new Document({
+        id: tagSafeId(),
+        content: tag(
+          territoryId,
+          `${tag(inTerritory.id, "Rome")}: ` +
+            tag(statementId, `${tag(discouraged.id, "he")} saw ${tag(inSpan.id, "Peter")}`)
+        ),
+      });
+      await document.preprocess(db.connection);
+      await document.save(db.connection);
+
+      treeCache.db = db.connection;
+      treeCache.tree = await treeCache.createTree();
+
+      try {
+        const res = await authAgent.get(`${apiPath}/statements/${statementId}`).expect(200);
+
+        expect(res.body.anchoredNearby.map((entity: IEntity) => entity.id)).toEqual([
+          inSpan.id,
+          inTerritory.id,
+        ]);
+      } finally {
+        // a second root territory left behind breaks the tree of the next test
+        await clean(db);
+      }
+    });
+
+    it("should leave discouraged entities out of the per-class cap", async () => {
+      const db = new Db();
+      await db.initDb();
+      const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+      const tag = (id: string, text: string) => `<${id}>${text}</${id}>`;
+
+      const territoryId = `root${tagSafeId()}`;
+      const statementId = tagSafeId();
+      const discouraged = Array.from(
+        { length: NEARBY_SUGGESTIONS_LIMIT },
+        () => new Person({ id: tagSafeId(), status: EntityEnums.Status.Discouraged })
+      );
+      const approved = new Person({ id: tagSafeId() });
+
+      await createEntity(db, new Territory({ id: territoryId }));
+      await createEntity(
+        db,
+        new Statement({
+          id: statementId,
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId }),
+          }),
+        })
+      );
+      for (const person of [...discouraged, approved]) {
+        await createEntity(db, person);
+      }
+
+      // the discouraged persons are closer to the statement than the approved one
+      const document = new Document({
+        id: tagSafeId(),
+        content: tag(
+          territoryId,
+          tag(statementId, discouraged.map((person) => tag(person.id, "he")).join(" ")) +
+            ` and ${tag(approved.id, "Peter")}`
+        ),
+      });
+      await document.preprocess(db.connection);
+      await document.save(db.connection);
+
+      treeCache.db = db.connection;
+      treeCache.tree = await treeCache.createTree();
+
+      try {
+        const res = await authAgent.get(`${apiPath}/statements/${statementId}`).expect(200);
+
+        expect(res.body.anchoredNearby.map((entity: IEntity) => entity.id)).toEqual([
+          approved.id,
+        ]);
+      } finally {
+        await clean(db);
+      }
+    });
+
+    it("should list the entities the statement already uses after the others", async () => {
+      const db = new Db();
+      await db.initDb();
+      const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+      const tag = (id: string, text: string) => `<${id}>${text}</${id}>`;
+
+      const territoryId = `root${tagSafeId()}`;
+      const statementId = tagSafeId();
+      const used = new Person({ id: tagSafeId() });
+      const unused = new Person({ id: tagSafeId() });
+
+      await createEntity(db, new Territory({ id: territoryId }));
+      await createEntity(
+        db,
+        new Statement({
+          id: statementId,
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId }),
+            actants: [{ id: tagSafeId(), entityId: used.id } as IStatementActant],
+          }),
+        })
+      );
+      await createEntity(db, used);
+      await createEntity(db, unused);
+
+      const document = new Document({
+        id: tagSafeId(),
+        content: tag(
+          territoryId,
+          tag(statementId, `${tag(used.id, "Peter")} saw ${tag(unused.id, "Paul")}`)
+        ),
+      });
+      await document.preprocess(db.connection);
+      await document.save(db.connection);
+
+      treeCache.db = db.connection;
+      treeCache.tree = await treeCache.createTree();
+
+      try {
+        const res = await authAgent.get(`${apiPath}/statements/${statementId}`).expect(200);
+
+        expect(res.body.anchoredNearby.map((entity: IEntity) => entity.id)).toEqual([
+          unused.id,
+          used.id,
+        ]);
+      } finally {
+        await clean(db);
+      }
     });
   });
 });

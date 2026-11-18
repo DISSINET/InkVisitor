@@ -1,6 +1,7 @@
 import "ts-jest";
 import { createOpeningTagRegex } from "@common/regex";
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { AnchorsNode } from "./anchors";
 
 const BASE_CONTENT = `<test>
@@ -140,5 +141,73 @@ describe("AnchorsNode.buildAnchorsTree with paired tags that are not anchors", (
     expect(crossed.anchor).toEqual("e2");
     expect(crossed.indexEnd).toEqual(content.length);
     expect(crossed.children.map((node) => node.anchor)).toEqual(["e3"]);
+  });
+});
+
+describe("AnchorsNode.collectAnchoredNearby", () => {
+  const entityIds = {
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Territory]: ["t1", "t2"],
+    [EntityEnums.Class.Statement]: ["s1", "s2"],
+    [EntityEnums.Class.Person]: ["p1", "p2", "p3", "p4", "p5", "p9"],
+    [EntityEnums.Class.Location]: ["l1", "l2"],
+  };
+  const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
+  const nearby = (trees: IAnchorsNode[][], entityId = "s1") =>
+    AnchorsNode.collectAnchoredNearby(trees, entityId).map((node) => node.id);
+
+  test("lists the statement's span first, then each territory anchor around it, nearest anchors first", () => {
+    // s1 sits in the subT t2, which sits in t1
+    const document = tree(
+      "<t1><p1>Anna</p1> came. " +
+        "<t2><l1>Rome</l1> <s1><p2>Peter</p2> saw <p3>Paul</p3></s1> in <l2>Milan</l2> " +
+        "<s2>and <p4>Eve</p4></s2></t2> <p5>Tom</p5></t1>"
+    );
+
+    expect(nearby([document])).toEqual(["p2", "p3", "l1", "l2", "p4", "p1", "p5"]);
+    expect(AnchorsNode.collectAnchoredNearby([document], "s1")[2]).toEqual({
+      id: "l1",
+      class: EntityEnums.Class.Location,
+    });
+  });
+
+  test("lists an entity anchored several times once, at its closest anchor", () => {
+    const repeated = tree("<t1><p1>Anna</p1> <s1><p2>Peter</p2></s1> <p2>he</p2> <p1>she</p1></t1>");
+
+    expect(nearby([repeated])).toEqual(["p2", "p1"]);
+  });
+
+  test("covers every span of a statement anchored several times, across documents", () => {
+    const first = tree("<t1><s1><p1>Anna</p1></s1> <p3>Paul</p3></t1>");
+    const second = tree("<s1><p2>Peter</p2></s1> and <s1><l1>Rome</l1></s1>");
+
+    expect(nearby([first, second])).toEqual(["p1", "p2", "l1", "p3"]);
+  });
+
+  test("counts the distance from the nearest of the statement's spans", () => {
+    const twice = tree(
+      "<t1><s1>a</s1> <p1>1</p1> <p2>2</p2> <p3>3</p3> <p9>9</p9> <s1>b</s1></t1>"
+    );
+
+    expect(nearby([twice])).toEqual(["p1", "p9", "p2", "p3"]);
+  });
+
+  test("walks every anchor of the subT, not only the one around the statement", () => {
+    expect(nearby([tree("<t1><s1>a</s1></t1> mid <t1><p3>C</p3></t1>")])).toEqual(["p3"]);
+    expect(
+      nearby([tree("<t1><t2><s1>a</s1></t2> <p1>x</p1> <t2><p2>y</p2></t2></t1>")])
+    ).toEqual(["p2", "p1"]);
+  });
+
+  test("keeps the entities anchored after an anchor crossing the statement's span", () => {
+    expect(nearby([tree("<t1><p1>A</p1> <s1><p2>B</p2> </t1> <p3>C</p3></s1>")])).toEqual([
+      "p2",
+      "p3",
+      "p1",
+    ]);
+  });
+
+  test("lists nothing for a statement that is not anchored", () => {
+    expect(nearby([tree("<t1><p1>Anna</p1></t1>")], "s3")).toEqual([]);
   });
 });

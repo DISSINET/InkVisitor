@@ -4,6 +4,7 @@ import {
   dropdownWildCard,
   entitiesDictKeys,
 } from "@inkvisitor/shared/dictionaries/entity";
+import { NEARBY_SUGGESTIONS_LIMIT } from "@inkvisitor/shared/constants";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
@@ -19,10 +20,10 @@ import { Suggester, Button, IconWithTooltip } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useDetailPanelReveal, useEntityEditing, useSearchParams } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { LuScanSearch } from "react-icons/lu";
-import { IcoHome } from "Theme/icons";
+import { IcoAnchor, IcoHome } from "Theme/icons";
 import {
   ButtonSize,
   EntityColors,
@@ -35,6 +36,7 @@ import { deepCopy } from "utils/utils";
 import { canCreateEntities, copiesDroppedValue } from "utils/valueDropCopy";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { useBookmarksQuery, useUserQuery } from "hooks/react-query";
+import { AnchoredNearbyContext, anchoredMatchingTyped } from "./anchoredNearby";
 
 interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
@@ -93,8 +95,8 @@ interface EntitySuggesterProps {
   onFocusChange?: (isFocused: boolean) => void;
   preSuggestions?: IEntity[];
   // listed in the given order above the search hits, whatever is typed, each
-  // marked with the home icon; not meant to be combined with preSuggestions,
-  // which would show a second list
+  // marked with the home icon. A suggester without them lists the entities of
+  // AnchoredNearbyContext in their place, which the Editor provides.
   prioritySuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -176,7 +178,7 @@ const EntitySuggesterFull: React.FC<
   rightContent,
   onFocusChange,
   preSuggestions,
-  prioritySuggestions = [],
+  prioritySuggestions,
 
   disableCreate: disableCreateProp = false,
   disableTemplateInstantiation: disableTemplateInstantiationProp = false,
@@ -555,28 +557,49 @@ const EntitySuggesterFull: React.FC<
     return filteredSuggestions;
   };
 
+  const anchoredNearby = useContext(AnchoredNearbyContext);
+  // the list is cut after the class filter, so a suggester narrowed to one
+  // class still lists its closest entities
   const priorityRows = filterSuggestionsInOrder(
-    getClassFilteredPreSuggestions(prioritySuggestions),
-  ).map((suggestion) => ({
-    ...suggestion,
-    icons: [
-      <IconWithTooltip
-        key="priority"
-        icon={<IcoHome size={12} />}
-        tooltipLabel="Used in the statements nearby"
-      />,
-    ],
-  }));
+    getClassFilteredPreSuggestions(
+      prioritySuggestions ?? anchoredMatchingTyped(anchoredNearby ?? [], typed),
+    ),
+  )
+    .slice(0, NEARBY_SUGGESTIONS_LIMIT)
+    .map((suggestion) => ({
+      ...suggestion,
+      icons: prioritySuggestions
+        ? [
+            <IconWithTooltip
+              key="priority"
+              icon={<IcoHome size={12} />}
+              tooltipLabel="Used in the statements nearby"
+            />,
+          ]
+        : // the home icon of an entity used in the territory stays beside it
+          [
+            ...suggestion.icons,
+            <IconWithTooltip
+              key="priority"
+              icon={<IcoAnchor size={12} />}
+              tooltipLabel="Anchored in the text nearby"
+            />,
+          ],
+    }));
+
+  const preRows =
+    preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions));
+  // on an empty input the pre-suggestions follow the priority rows in one list,
+  // which leaves out the entities listed twice
+  const listsPreRows = !!preRows && priorityRows.length > 0 && typed.length === 0;
 
   return selectedCategory && allCategories && user ? (
     <>
       <Suggester
         isFetching={isFetchingStatement}
-        suggestions={suggestions || []}
+        suggestions={listsPreRows ? preRows : suggestions || []}
         prioritySuggestions={priorityRows}
-        preSuggestions={
-          preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
-        }
+        preSuggestions={listsPreRows ? undefined : preRows}
         contextSuggestions={
           bookmarkFolders &&
           filterSuggestions(getClassFilteredPreSuggestions(bookmarkedEntities(bookmarkFolders)))

@@ -226,7 +226,8 @@ export const Suggester: React.FC<Suggester> = ({
   const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
     prioritySuggestions,
     suggestions,
-    isFocused || isHovered
+    isFocused || isHovered,
+    `${category} ${typed}`
   );
 
   // the input blurs on the mousedown that picks a row, so the right-click list
@@ -368,7 +369,12 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      const listed = contextListed ? (contextSuggestions ?? []) : listedSuggestions;
+      // the list on screen, the one the arrow keys walk
+      const listed = contextListed
+        ? (contextSuggestions ?? [])
+        : listedSuggestions.length || typed.length > 0
+          ? listedSuggestions
+          : (preSuggestions ?? []);
       const entity = listed[selected]?.entity;
       if (!disableEnter && entity) {
         if (entity.status !== EntityEnums.Status.Discouraged) {

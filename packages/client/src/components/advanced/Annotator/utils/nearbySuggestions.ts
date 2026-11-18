@@ -1,3 +1,4 @@
+import { NEARBY_SUGGESTIONS_LIMIT } from "@inkvisitor/shared/constants";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
@@ -8,9 +9,6 @@ import {
 } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import { collectStatementAnchors, searchTree } from "utils/utils";
-
-// how many nearby entities the Annotator suggester lists above the search hits
-export const NEARBY_SUGGESTIONS_LIMIT = 10;
 
 const collectPropEntityIds = (props: IProp[] | undefined, ids: string[]) => {
   props?.forEach((prop) => {

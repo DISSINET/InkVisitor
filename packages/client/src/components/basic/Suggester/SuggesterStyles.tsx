@@ -188,6 +188,8 @@ export const StyledSuggestionLineTag = styled.div<Column>`
 `;
 export const StyledSuggestionLineIcons = styled.div<Column>`
   display: grid;
+  grid-auto-flow: column;
+  column-gap: ${({ theme }) => theme.space[1]};
   height: 100%;
   align-items: center;
   justify-content: center;

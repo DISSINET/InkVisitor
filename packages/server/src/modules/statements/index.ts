@@ -82,7 +82,7 @@ export default Router()
       // statement.right in the response (write/admin vs read-only).
 
       const response = new ResponseStatement(statementData);
-      await response.prepare(request);
+      await response.prepare(request, undefined, { anchoredNearby: true });
 
       return response;
     })

@@ -33,6 +33,7 @@ export const useDocumentContentSave = ({
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
       if (variables.successMessage) {
         toast.info(variables.successMessage);
       }

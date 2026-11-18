@@ -13,12 +13,19 @@ const Probe = ({
   priority,
   hits,
   open,
+  search,
 }: {
   priority: EntitySuggestion[];
   hits: EntitySuggestion[];
   open: boolean;
+  search?: string;
 }) => {
-  const { listedSuggestions, listedPriorityCount } = useListedSuggestions(priority, hits, open);
+  const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
+    priority,
+    hits,
+    open,
+    search,
+  );
   return (
     <ol data-priority-count={listedPriorityCount}>
       {listedSuggestions.map((s) => (
@@ -80,5 +87,18 @@ describe("useListedSuggestions", () => {
     view.update(<Probe priority={[home("a"), home("b")]} hits={[hit("x")]} open />);
     view.update(<Probe priority={[home("b")]} hits={[hit("x")]} open />);
     expect(rows()).toEqual(["b home", "x"]);
+  });
+
+  it("lists a row arriving with a new search at once", () => {
+    view = render(<Probe priority={[home("a")]} hits={[hit("x")]} open={false} search="m" />);
+    view.update(<Probe priority={[home("a")]} hits={[hit("x")]} open search="m" />);
+    view.update(<Probe priority={[home("a"), home("b")]} hits={[hit("y")]} open search="" />);
+    expect(rows()).toEqual(["a home", "b home", "y"]);
+
+    // a row arriving later under the same search still waits
+    view.update(
+      <Probe priority={[home("a"), home("b"), home("c")]} hits={[hit("y")]} open search="" />,
+    );
+    expect(rows()).toEqual(["a home", "b home", "y"]);
   });
 });

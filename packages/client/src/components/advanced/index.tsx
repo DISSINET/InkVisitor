@@ -18,6 +18,7 @@ import { EmptyEntityTag } from "./EntityTag/EmptyEntityTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
+import { AnchoredNearbyContext } from "./EntitySuggester/anchoredNearby";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
 import { ElvlButtonGroup } from "./IconButtonGroups/ElvlButtonGroup";
@@ -74,6 +75,7 @@ export {
   EntityCreateModal,
   EntityDropzone,
   EntitySuggester,
+  AnchoredNearbyContext,
   EntityTag,
   EntityTagById,
   EntityTooltip,
