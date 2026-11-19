@@ -1,3 +1,4 @@
+import { NEARBY_SUGGESTIONS_LIMIT } from "@inkvisitor/shared/constants";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseStatement, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
@@ -8,7 +9,6 @@ import {
   collectNearbyEntities,
   getStatementAnchorContext,
   getTerritoryChain,
-  NEARBY_SUGGESTIONS_LIMIT,
   sortStatementsByDistance,
 } from "../utils/nearbySuggestions";
 

@@ -376,9 +376,13 @@ export const classesPropValue = [
   EntityEnums.Class.Value,
 ];
 
+// a suggester lists the icons of each kind in a column of their own, in this order
+export const SUGGESTION_ICON_KINDS = ["home", "anchor"] as const;
+export type SuggestionIconKind = (typeof SUGGESTION_ICON_KINDS)[number];
+
 export interface EntitySuggestion {
   entity: IEntity;
-  icons?: React.ReactNode[];
+  icons?: Partial<Record<SuggestionIconKind, React.ReactNode>>;
 }
 export interface SuggesterItemToCreate {
   label: string;

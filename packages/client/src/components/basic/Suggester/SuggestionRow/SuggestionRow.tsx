@@ -3,9 +3,10 @@ import { IEntity, IResponseEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { FaLink, FaPlusSquare } from "react-icons/fa";
-import { EntitySuggestion } from "types";
+import { EntitySuggestion, SUGGESTION_ICON_KINDS } from "types";
 import {
   StyledSuggestionLineActions,
+  StyledSuggestionLineIcon,
   StyledSuggestionLineIcons,
   StyledSuggestionLineTag,
   StyledSuggestionRow,
@@ -105,9 +106,11 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
   };
 
   const entityIsTemplate = entity.isTemplate || false;
-  // the trailing column is shared by every row, so it is reserved only when some
-  // suggestion in the list actually carries an icon
-  const hasTrailingIcons = items.some((item) => (item.icons?.length ?? 0) > 0);
+  // every row lists the same icon columns, one per kind some suggestion in the
+  // list carries, so an icon of one kind sits in the same column on every row
+  const iconKinds = SUGGESTION_ICON_KINDS.filter((kind) =>
+    items.some((item) => item.icons?.[kind]),
+  );
 
   return (
     <StyledSuggestionRow
@@ -115,7 +118,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
       style={style}
       $twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
       $isSelected={selected === index}
-      $hasTrailingIcons={hasTrailingIcons}
+      $iconColumns={iconKinds.length}
     >
       <StyledSuggestionLineActions>
         {!disableButtons && isNotDiscouraged && <>{renderIcons()}</>}
@@ -131,7 +134,11 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
           />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
-      <StyledSuggestionLineIcons>{icons}</StyledSuggestionLineIcons>
+      <StyledSuggestionLineIcons $columns={iconKinds.length}>
+        {iconKinds.map((kind) => (
+          <StyledSuggestionLineIcon key={kind}>{icons?.[kind]}</StyledSuggestionLineIcon>
+        ))}
+      </StyledSuggestionLineIcons>
     </StyledSuggestionRow>
   );
 };

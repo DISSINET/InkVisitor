@@ -468,6 +468,55 @@ export default class Document implements IDocument, IDbModel {
     return entries && entries.length ? entries : [];
   }
 
+  /**
+   * Builds the anchors tree and entity ids of every document again from its
+   * content and stores them where they differ. A stored tree is only rebuilt
+   * when the document is saved, so one written by an older parser keeps its
+   * shape until then. Content and updatedAt are left as they are.
+   */
+  static async rebuildAnchors(
+    conn: Conn,
+    options?: { dryRun?: boolean }
+  ): Promise<{ checked: number; rebuilt: number }> {
+    // key order and the order of ids within a class differ between storages
+    const shape = (doc: Pick<IDocument, "anchors" | "entityIds">): string => {
+      const nodes = (list: IDocument["anchors"]): unknown[] =>
+        (list || []).map((node) => [
+          node.anchor,
+          node.class,
+          node.indexStart,
+          node.indexEnd,
+          node.content,
+          nodes(node.children),
+        ]);
+      const ids = Document.normalizeEntityIds(doc.entityIds);
+      return JSON.stringify([
+        nodes(doc.anchors),
+        Object.keys(ids)
+          .sort()
+          .map((key) => [key, [...ids[key as EntityEnums.Class]].sort()]),
+      ]);
+    };
+
+    const docs = await Document.getAll(conn);
+    let rebuilt = 0;
+    for (const raw of docs) {
+      const doc = new Document(raw);
+      await doc.preprocess(conn);
+      if (shape(raw) === shape(doc)) {
+        continue;
+      }
+      rebuilt++;
+      if (!options?.dryRun) {
+        await storage.documents.update(conn, doc.id, {
+          entityIds: doc.entityIds,
+          anchors: doc.anchors,
+        });
+      }
+    }
+    return { checked: docs.length, rebuilt };
+  }
+
   static async backfillEntityIds(conn: Conn): Promise<number> {
     const isEmpty = (entityIds: unknown) =>
       Object.values(Document.normalizeEntityIds(entityIds)).every((arr) => arr.length === 0);
