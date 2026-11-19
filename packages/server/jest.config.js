@@ -87,7 +87,6 @@ const UNIT_TEST_PATHS = [
   "src/modules/geocoding/geocoding.test.ts",
   // Mocks the driver (jest.mock) - evaluateEdges runs against an in-memory proxy.
   "src/service/storage/rethink/query/nesting.test.ts",
-  "src/service/storage/rethink/query/anchored.test.ts",
   "src/service/storage/catalogue.test.ts",
   "src/service/storage/config.test.ts",
   "src/service/storage/postgres/sql.test.ts",
@@ -105,6 +104,7 @@ const UNIT_TEST_PATHS = [
   "src/service/query/results.test.ts",
   "src/service/query/search-start-nodes.test.ts",
   "src/service/storage/rethink/query/superordinate-edge.test.ts",
+  "src/service/storage/rethink/query/anchored.test.ts",
   "src/service/ttlCache.test.ts",
 ];
 

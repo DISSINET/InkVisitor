@@ -295,7 +295,7 @@ const EDGE_TYPE_GROUPS: IEdgeTypeGroupDefinition[] = [
   { label: "Relation", families: ["R"], labelPrefixes: ["has relation: ", "has: "] },
   { label: "Position in statement", families: ["IS"], labelPrefixes: ["is in S: "] },
   { label: "Statement property", families: ["SP", "SI", "SC"], labelPrefixes: [] },
-  { label: "Territory", families: ["SUT", "EUT"], labelPrefixes: [] },
+  { label: "Territory", families: ["SUT", "EUT", "EAT"], labelPrefixes: [] },
   { label: "Territory hierarchy", families: ["CT"], labelPrefixes: [] },
 ];
 

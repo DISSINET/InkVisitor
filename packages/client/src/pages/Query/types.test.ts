@@ -1,7 +1,12 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesHidden, edgeTypesImplemented } from "./types";
+import {
+  edgeTypesHidden,
+  edgeTypesImplemented,
+  edgeTypesWithoutSubordinates,
+  edgeTypesWithSubtreeDepth,
+} from "./types";
 import {
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
@@ -221,6 +226,11 @@ describe("query builder offers the 'anchored under T' edge (EAT:)", () => {
         edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Person])),
       ).valid,
     ).toBe(false);
+  });
+
+  it("the SUB toggle widens the picked Territory to its subTs", () => {
+    expect(edgeTypesWithoutSubordinates).not.toContain(Query.EdgeType["EAT:"]);
+    expect(edgeTypesWithSubtreeDepth).not.toContain(Query.EdgeType["EAT:"]);
   });
 });
 

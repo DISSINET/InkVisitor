@@ -1,6 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
+import { AnchorsNode } from "@models/document/anchors";
 import { getSubordinateEntityIds } from "@models/relation/functions";
 import { filterEntityIdsByRowLabelFilter } from "@service/query/explore-label-filter";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
@@ -1132,43 +1133,55 @@ describe("explore: edges and node params of 1.6.1", () => {
 });
 
 describe("explore: EAT:, the entities anchored under a territory", () => {
-  const anchor = (id: string, cls: EntityEnums.Class, children: Row[] = []): Row => ({
-    anchor: id,
-    class: cls,
-    content: "",
-    children,
-    indexStart: 0,
-    indexEnd: 0,
+  const E = { entityClasses: [C.Action, C.Concept, C.Location, C.Person, C.Resource, C.Statement, C.Territory] };
+  /** a document as a save stores it: the entity ids by class and the anchors tree of the content */
+  const document = (id: string, content: string, entityIds: Partial<Record<EntityEnums.Class, string[]>>): Row => ({
+    id,
+    title: id,
+    content,
+    entityIds,
+    anchors: JSON.parse(
+      JSON.stringify(AnchorsNode.buildAnchorsTree(content, entityIds as Record<EntityEnums.Class, string[]>))
+    ),
   });
-  const E = { entityClasses: [C.Concept, C.Location, C.Person, C.Resource, C.Statement, C.Territory] };
 
   beforeAll(async () => {
     await storage.entities.insert(conn, [
       entity("t-leaf", C.Territory, ["Leaf territory"], { data: { parent: { territoryId: "t-child", order: 9 } } }),
       entity("t-bare", C.Territory, ["Unanchored territory"], { data: { parent: { territoryId: "t-root", order: 9 } } }),
+      entity("t-cross", C.Territory, ["Crossed territory"], { data: { parent: false } }),
+      entity("t-after", C.Territory, ["Territory after the crossed one"], { data: { parent: false } }),
+      entity("t-open", C.Territory, ["Territory with a lone opening tag"], { data: { parent: false } }),
+      // with t-leaf, more territories of one label than either adapter looks up through the documents index
+      ...Array.from({ length: 105 }, (_, i) => entity(`t-many-${i}`, C.Territory, [`Leaf lookalike ${i}`], { data: { parent: false } })),
     ]);
-    // <c-4/> <t-root> <p-2/> <t-child> <l-1/> <s-2><c-1/></s-2> </t-child> </t-root>
-    await storage.documents.insert(conn, {
-      id: "d-2",
-      title: "Book two",
-      content: "",
-      entityIds: { T: ["t-root", "t-child"], P: ["p-2"], L: ["l-1"], S: ["s-2"], C: ["c-4", "c-1"] },
-      anchors: [
-        anchor("c-4", C.Concept),
-        anchor("t-root", C.Territory, [
-          anchor("p-2", C.Person),
-          anchor("t-child", C.Territory, [anchor("l-1", C.Location), anchor("s-2", C.Statement, [anchor("c-1", C.Concept)])]),
-        ]),
-      ],
-    });
-    // <t-child> <p-1/> </t-child> <t-leaf> <r-2/> </t-leaf>
-    await storage.documents.insert(conn, {
-      id: "d-3",
-      title: "Appendix",
-      content: "",
-      entityIds: { T: ["t-child", "t-leaf"], P: ["p-1"], R: ["r-2"] },
-      anchors: [anchor("t-child", C.Territory, [anchor("p-1", C.Person)]), anchor("t-leaf", C.Territory, [anchor("r-2", C.Resource)])],
-    });
+    await storage.documents.insert(
+      conn,
+      document(
+        "d-2",
+        "<c-4>a</c-4> <s-1> <c-2>j</c-2> </s-1> <t-root> <p-2>b</p-2> <t-child> <l-1>c</l-1> <s-2> <c-1>d</c-1> </s-2> </t-child> </t-root>",
+        { T: ["t-root", "t-child"], P: ["p-2"], L: ["l-1"], S: ["s-1", "s-2"], C: ["c-4", "c-2", "c-1"] }
+      )
+    );
+    await storage.documents.insert(
+      conn,
+      document("d-3", "<t-child> <p-1>e</p-1> </t-child> <t-leaf> <r-2>f</r-2> </t-leaf>", {
+        T: ["t-child", "t-leaf"],
+        P: ["p-1"],
+        R: ["r-2"],
+      })
+    );
+    // s-3 opens inside t-cross and closes after t-after, so the tree nests t-after below t-cross
+    await storage.documents.insert(
+      conn,
+      document("d-4", "<t-cross> <a-1>g</a-1> <s-3> h </t-cross> <t-after> <c-3>i</c-3> </t-after> </s-3>", {
+        T: ["t-cross", "t-after"],
+        A: ["a-1"],
+        S: ["s-3"],
+        C: ["c-3"],
+      })
+    );
+    await storage.documents.insert(conn, document("d-5", "<t-open> <r-1>k</r-1>", { T: ["t-open"], R: ["r-1"] }));
   });
 
   it("emits every entity anchored inside the territory's span, at any depth", async () => {
@@ -1196,8 +1209,38 @@ describe("explore: EAT:, the entities anchored under a territory", () => {
     ]);
   });
 
+  it("only a territory's anchor opens a span", async () => {
+    // c-1 lies inside the anchor of s-2, and c-2 inside s-1 outside every territory
+    expect(await explore(E, [edge("EAT:", { entityId: "s-2" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("EAT:")])).toEqual(["c-1", "c-3"]);
+  });
+
+  it("an anchor crossing the end of the span keeps what follows the span out", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-cross" })])).toEqual(["a-1", "s-3"]);
+    expect(await explore(E, [edge("EAT:", { entityId: "t-after" })])).toEqual(["c-3"]);
+  });
+
+  it("a territory tag that never closes spans nothing", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-open" })])).toEqual([]);
+  });
+
+  it("a long list of target territories reads the same spans", async () => {
+    expect(await explore(E, [edge("EAT:", { label: "Leaf" })])).toEqual(["r-2"]);
+  });
+
   it("without a target reads the span of every territory", async () => {
-    expect(await explore(E, [edge("EAT:")])).toEqual(["c-1", "l-1", "p-1", "p-2", "r-2", "s-2", "t-child"]);
+    expect(await explore(E, [edge("EAT:")])).toEqual([
+      "a-1",
+      "c-1",
+      "c-3",
+      "l-1",
+      "p-1",
+      "p-2",
+      "r-2",
+      "s-2",
+      "s-3",
+      "t-child",
+    ]);
   });
 
   it("an unpinned target narrows to the territories passing its filters and conditions", async () => {

@@ -511,6 +511,11 @@ describe("buildEdgeTypeOptionGroups", () => {
     expect(groups.map((g) => g.label)).toEqual(["Property", "Relation", "Position in statement"]);
   });
 
+  it("lists the edges reading what lies under a territory in one Territory group", () => {
+    const groups = buildEdgeTypeOptionGroups([T["SUT:"], T["EUT:"], T["EAT:"]], []);
+    expect(groups.map((g) => g.label)).toEqual(["Territory"]);
+  });
+
   it("puts the any variant first, then sorts alphabetically by menu label", () => {
     const [relation] = buildEdgeTypeOptionGroups([T["R:SYN"], T["R:"], T["R:ANT"]], []);
     expect(relation.options.map((o) => o.value)).toEqual([T["R:"], T["R:ANT"], T["R:SYN"]]);

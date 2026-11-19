@@ -1216,7 +1216,7 @@ export namespace Query {
     "SUT:": "Finds statements directly under the target territory (with SUB: anywhere below it)",
     "I_SUT:": "Finds the territory that directly holds the target statement",
     "EUT:": "Finds entities used in statements directly under the target territory",
-    "EAT:": "Finds entities anchored in the full text inside the target territory's span (with SUB: inside the spans of its subTs too)",
+    "EAT:": "Finds entities anchored in the full text anywhere inside the target territory's span (with SUB: also inside the spans of its subTs anchored elsewhere)",
     "SUT:D": "Finds statements directly under the target territory",
     "I_SUT:D": "Finds the territory that directly holds the target statement",
     "HR:R": "Finds entities whose references point to the target resource",
