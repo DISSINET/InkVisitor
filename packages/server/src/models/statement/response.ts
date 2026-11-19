@@ -184,8 +184,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     );
 
     // stamp document anchor spans onto statement entities so tags can show
-    // them as labels (response-only field, see IEntity.anchorTexts)
-    await Entity.applyAnchorTexts(db, this.entities);
+    // them as labels (response-only field, see IEntity.anchorTexts); the
+    // statements anchored nearby share the one document read
+    await Entity.applyAnchorTexts(db, [
+      ...Object.values(this.entities),
+      ...(this.anchoredNearby ?? []),
+    ]);
   }
 
   /**

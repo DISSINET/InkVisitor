@@ -137,8 +137,8 @@ export class AnchorsNode implements IAnchorsNode {
    * innermost territory around a span (every anchor of that territory), then
    * the territory around that, and so on. Within a territory, the fewer
    * anchors lie between an anchor and the nearest span, the earlier it comes.
-   * Territory and statement anchors are never listed, and an entity is listed
-   * once. `trees` holds one anchors tree per document.
+   * Territory anchors and the entity itself are never listed, and an entity is
+   * listed once. `trees` holds one anchors tree per document.
    */
   static collectAnchoredNearby(
     trees: IAnchorsNode[][],
@@ -218,7 +218,7 @@ export class AnchorsNode implements IAnchorsNode {
         if (
           levels[i] !== Infinity &&
           node.class !== EntityEnums.Class.Territory &&
-          node.class !== EntityEnums.Class.Statement
+          node.anchor !== entityId
         ) {
           candidates.push({ node, level: levels[i], distance: levels[i] ? distances[i] : 0 });
         }

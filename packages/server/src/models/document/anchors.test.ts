@@ -164,11 +164,21 @@ describe("AnchorsNode.collectAnchoredNearby", () => {
         "<s2>and <p4>Eve</p4></s2></t2> <p5>Tom</p5></t1>"
     );
 
-    expect(nearby([document])).toEqual(["p2", "p3", "l1", "l2", "p4", "p1", "p5"]);
+    expect(nearby([document])).toEqual(["p2", "p3", "l1", "l2", "s2", "p4", "p1", "p5"]);
     expect(AnchorsNode.collectAnchoredNearby([document], "s1")[2]).toEqual({
       id: "l1",
       class: EntityEnums.Class.Location,
     });
+  });
+
+  test("lists the statements anchored nearby, never a territory or the statement itself", () => {
+    // s2 is anchored in the span of s1, which is anchored twice in the subT t2
+    const document = tree(
+      "<t1><t2><s1>a <s2>b</s2></s1> <p1>Anna</p1> <s1>c</s1></t2> <t2>d</t2></t1>"
+    );
+
+    expect(nearby([document])).toEqual(["s2", "p1"]);
+    expect(nearby([document], "s2")).toEqual(["s1", "p1"]);
   });
 
   test("lists an entity anchored several times once, at its closest anchor", () => {

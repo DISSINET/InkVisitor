@@ -17,13 +17,14 @@ const fold = (text: string) => foldQuotes(foldText(text));
  * empty input, then those with a label holding every typed word. Accents,
  * quote marks and a `*` wildcard are ignored, close to how label search
  * treats them, though a word matches anywhere in a label, not only at a word
- * start.
+ * start. The row of a statement shows its anchored text, so that text counts
+ * as a label.
  */
 export const anchoredMatchingTyped = (anchored: IEntity[], typed: string): IEntity[] => {
   const words = fold(typed.replace(/\*/g, " ")).split(/\s+/).filter(Boolean);
   return words.length
     ? anchored.filter((entity) =>
-        (entity.labels ?? []).some(
+        [...(entity.labels ?? []), ...(entity.anchorTexts ?? [])].some(
           (label) =>
             typeof label === "string" && words.every((word) => fold(label).includes(word))
         )

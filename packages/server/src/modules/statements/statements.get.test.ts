@@ -164,6 +164,52 @@ describe("Statements get", function () {
       }
     });
 
+    it("should list a statement anchored nearby under its anchored text", async () => {
+      const db = new Db();
+      await db.initDb();
+      const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+      const tag = (id: string, text: string) => `<${id}>${text}</${id}>`;
+
+      const territoryId = `root${tagSafeId()}`;
+      const [statementId, neighbourId] = [tagSafeId(), tagSafeId()];
+
+      await createEntity(db, new Territory({ id: territoryId }));
+      for (const id of [statementId, neighbourId]) {
+        await createEntity(
+          db,
+          new Statement({
+            id,
+            data: new StatementData({
+              territory: new StatementTerritory({ territoryId }),
+            }),
+          })
+        );
+      }
+
+      const document = new Document({
+        id: tagSafeId(),
+        content: tag(
+          territoryId,
+          `${tag(statementId, "Peter came")} ${tag(neighbourId, "and Paul left")}`
+        ),
+      });
+      await document.preprocess(db.connection);
+      await document.save(db.connection);
+
+      treeCache.db = db.connection;
+      treeCache.tree = await treeCache.createTree();
+
+      try {
+        const res = await authAgent.get(`${apiPath}/statements/${statementId}`).expect(200);
+
+        expect(
+          res.body.anchoredNearby.map((entity: IEntity) => [entity.id, entity.anchorTexts])
+        ).toEqual([[neighbourId, ["and Paul left"]]]);
+      } finally {
+        await clean(db);
+      }
+    });
+
     it("should leave discouraged entities out of the per-class cap", async () => {
       const db = new Db();
       await db.initDb();

@@ -43,6 +43,15 @@ describe("anchoredMatchingTyped", () => {
     expect(ids(anchoredMatchingTyped(labelled, "*aur"))).toEqual(["m1"]);
   });
 
+  it("matches a statement by its anchored text, the label its row shows", () => {
+    const statements = [
+      { ...entity("s1", ""), anchorTexts: ["Petrus vidit Paulum"] },
+      { ...entity("s2"), anchorTexts: ["et dixit"] },
+    ];
+
+    expect(ids(anchoredMatchingTyped(statements, "vidit"))).toEqual(["s1"]);
+  });
+
   it("skips an entity without labels instead of failing", () => {
     const broken = [{ id: "x" } as IEntity, entity("n", null as unknown as string, "Peter")];
 
