@@ -271,7 +271,9 @@ export const StyledExpansionToggleGroup = styled.div`
 `;
 
 // the count beside a checked EQ / SUB toggle; opens the expansion popover
-export const StyledExpansionCountButton = styled.button`
+// black on the light node and page backgrounds; a start node takes query2Text, as the
+// other labels on its background do
+export const StyledExpansionCountButton = styled.button<{ $color?: "black" | "query2Text" }>`
   border: none;
   background: none;
   padding: 0;
@@ -283,7 +285,7 @@ export const StyledExpansionCountButton = styled.button`
   line-height: inherit;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme, $color = "black" }) => theme.color[$color]};
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;

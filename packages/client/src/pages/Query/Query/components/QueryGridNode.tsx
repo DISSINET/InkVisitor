@@ -486,6 +486,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 node={node}
                 edgeType={edgeType}
                 onOpenEntityInDetail={onOpenEntityInDetail}
+                isOnStartNode={isStartNode}
               />
             )}
           {showsEntityPicker && (

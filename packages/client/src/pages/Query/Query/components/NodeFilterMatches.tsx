@@ -19,6 +19,8 @@ interface NodeFilterMatches {
   node: Query.INode;
   edgeType: Query.EdgeType | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // the badge sits on a start node's darker background
+  isOnStartNode?: boolean;
 }
 
 /**
@@ -31,6 +33,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   node,
   edgeType,
   onOpenEntityInDetail,
+  isOnStartNode = false,
 }) => {
   const { entityClasses } = node.params;
   const classes = entityClasses?.length
@@ -85,6 +88,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
       <StyledExpansionCountButton
         ref={badgeRef}
         type="button"
+        $color={isOnStartNode ? "query2Text" : "black"}
         onClick={() => {
           setRequestedSignature(filtersSignature);
           setIsOpen((open) => !open);
