@@ -1,5 +1,5 @@
-import { Button, Checkbox, IconWithTooltip } from "components";
-import { IcoClose, IcoWarning } from "Theme/icons";
+import { Checkbox, IconWithTooltip } from "components";
+import { IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -159,19 +159,6 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               />
             </StyledEdgeNotToggle>
             <StyledEdgeValueLabel>with value</StyledEdgeValueLabel>
-            <Button
-              icon={<IcoClose size={12} />}
-              noBackground
-              noBorder
-              textColor="query2Text"
-              tooltipLabel="remove the value node"
-              onClick={() =>
-                dispatch({
-                  type: QueryActionType.updateEdgeValueNode,
-                  payload: { edgeId: edge.id, hasValueNode: false },
-                })
-              }
-            />
           </StyledEdgeValueBox>
         ) : (
           <StyledEdgeBox $color={lineColor}>

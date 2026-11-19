@@ -1,5 +1,5 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { IcoNodeTree } from "Theme/icons";
 import { StyledLabel } from "components/basic/Checkbox/CheckboxStyles";
 import {
@@ -202,7 +202,7 @@ export const StyledEdgeControlsLayer = styled.div`
   z-index: 1;
 `;
 
-export const StyledEdgeBox = styled.div<{ $color: string }>`
+const edgeBox = css<{ $color: string }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -211,6 +211,10 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   padding: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[3]};
+`;
+
+export const StyledEdgeBox = styled.div<{ $color: string }>`
+  ${edgeBox}
   margin-top: 1.4rem;
 `;
 
@@ -231,11 +235,15 @@ export const StyledEdgeNotToggle = styled.div<{ $active: boolean }>`
 // the "with value" box is shorter than an edge's own box, so it is centred on the connector
 // line (half the row height) rather than offset by the edge box's top margin
 export const StyledEdgeValueControlsLayer = styled(StyledEdgeControlsLayer)`
-  height: ${QUERY_GRID_HEIGHT}px;
+  position: absolute;
+  top: ${QUERY_GRID_HEIGHT / 2}px;
+  left: 0;
+  height: auto;
+  transform: translateY(-50%);
 `;
 
-export const StyledEdgeValueBox = styled(StyledEdgeBox)`
-  margin-top: 0;
+export const StyledEdgeValueBox = styled.div<{ $color: string }>`
+  ${edgeBox}
 `;
 
 // the "with value" label leading from the edge's spine to the value node of an HP: / SP: edge

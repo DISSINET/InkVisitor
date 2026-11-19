@@ -72,7 +72,7 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // the value node of an HP: / SP: edge goes away with the edge, removed from the type node
+  // the value node of an HP: / SP: edge; removing it keeps the edge and its type node
   isValueNode?: boolean;
 }
 
@@ -742,19 +742,22 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             />
           </div>
         )}
-        {edge && !isValueNode && (
+        {edge && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}
-              tooltipLabel="remove this node"
+              tooltipLabel={isValueNode ? "remove the value node" : "remove this node"}
               color="warning"
               onClick={() => {
-                dispatch({
-                  type: QueryActionType.removeEdge,
-                  payload: {
-                    edgeId: edge.id,
-                  },
-                });
+                // a value node's edge is its HP: / SP: edge, under that edge's id
+                dispatch(
+                  isValueNode
+                    ? {
+                        type: QueryActionType.updateEdgeValueNode,
+                        payload: { edgeId: edge.id, hasValueNode: false },
+                      }
+                    : { type: QueryActionType.removeEdge, payload: { edgeId: edge.id } },
+                );
               }}
             />
           </div>

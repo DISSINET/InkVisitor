@@ -1,5 +1,5 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useTheme } from "styled-components";
 import { INodeItem, QueryValidity } from "../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../constants";
@@ -36,6 +36,22 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     () => (hasStartNodes ? state.edges.map((edge) => edge.node) : [state]),
     [state, hasStartNodes],
   );
+
+  // a start node added by the user is scrolled into view, as a narrow box may show it
+  // below the fold; a loaded query remounts this box, so its start nodes count as seen
+  const boxRef = useRef<HTMLDivElement>(null);
+  const startNodeIdsKey = hasStartNodes ? state.edges.map((edge) => edge.node.id).join() : "";
+  const seenStartNodeIds = useRef(new Set(startNodeIdsKey.split(",")));
+  useEffect(() => {
+    const ids = startNodeIdsKey.split(",");
+    const added = ids.filter((id) => id && !seenStartNodeIds.current.has(id)).at(-1);
+    seenStartNodeIds.current = new Set(ids);
+    if (added) {
+      boxRef.current
+        ?.querySelector(`[data-node-id="${added}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    }
+  }, [startNodeIdsKey]);
 
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 0;
@@ -176,7 +192,12 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
-    <StyledQueryBox $gridWeight={gridWeight} $rowCount={rowCount} $gutterRows={gutterRows}>
+    <StyledQueryBox
+      ref={boxRef}
+      $gridWeight={gridWeight}
+      $rowCount={rowCount}
+      $gutterRows={gutterRows}
+    >
       {[...Array(gridWeight + 1).keys()].map((wi) => {
         // a gutter row holds no node and no line
         const rows = [...Array(rowCount).keys()].filter((hi) => !gutterRows.includes(hi));
@@ -214,6 +235,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               $column={wi + 1}
               $row={hi + 1}
               $hasNode={!!thisCellNode}
+              data-node-id={thisCellNode?.id}
             >
               {showRail && (
                 <svg

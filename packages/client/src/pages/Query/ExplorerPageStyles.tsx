@@ -104,6 +104,10 @@ export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
     ${({ theme }) => theme.space[3]} + ${({ $searchRowsHeight }) => $searchRowsHeight}px +
       ${({ theme }) => theme.space[4]}
   );
+  /* a node scrolled into view stops above the search rows, not behind them */
+  scroll-padding-bottom: calc(
+    ${({ $searchRowsHeight }) => $searchRowsHeight}px + ${({ theme }) => theme.space[2]}
+  );
 `;
 
 // a card floating over the bottom of the Query Builder box, the query tree visible around
