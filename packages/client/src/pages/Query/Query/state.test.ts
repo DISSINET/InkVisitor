@@ -637,24 +637,48 @@ describe("queryReducer addStartNode", () => {
 });
 
 describe("queryReducer removeEdge of a start node", () => {
-  const startNodes = () =>
-    queryReducer(classNode("root", [EntityEnums.Class.Person]), {
-      type: QueryActionType.addStartNode,
-    });
   const remove = (state: Query.INode, edgeId: string) =>
     queryReducer(state, { type: QueryActionType.removeEdge, payload: { edgeId } });
+  const withStartNodes = (...nodes: Query.INode[]): Query.INode => ({
+    ...classNode("root", [], nodes.map((node, i) => makeEdge(`se${i}`, Query.EdgeType.SE, node))),
+    operator: Query.NodeOperator.Or,
+  });
+  const filtered = (id: string): Query.INode => ({ ...makeNode(id), params: { label: "star" } });
 
-  it("keeps Or while a start node is left, and the single one stays a start node", () => {
-    const state = startNodes();
-    const next = remove(state, state.edges[1].id);
+  it("puts the start node left alone back in the root's place", () => {
+    const original: Query.INode = {
+      ...classNode("root", [EntityEnums.Class.Person], [
+        makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1")),
+      ]),
+      params: { entityClasses: [EntityEnums.Class.Person], includeEquivalents: true },
+    };
+    const wrapped = queryReducer(original, { type: QueryActionType.addStartNode });
+    expect(remove(wrapped, wrapped.edges[1].id)).toEqual(original);
+  });
+
+  it("keeps the other start nodes while two or more are left", () => {
+    const next = remove(withStartNodes(makeNode("s0"), makeNode("s1"), makeNode("s2")), "se1");
+    expect(next.id).toBe("root");
     expect(next.operator).toBe(Query.NodeOperator.Or);
-    expect(next.edges.map((edge) => edge.type)).toEqual([Query.EdgeType.SE]);
-    expect(next.params.entityClasses).toEqual([]);
+    expect(next.edges.map((edge) => edge.id)).toEqual(["se0", "se2"]);
+  });
+
+  it("keeps a lone start node that holds what the root cannot show", () => {
+    const pinned = { ...makeNode("s0"), params: { entityId: "c-1" } };
+    expect(remove(withStartNodes(filtered("s0"), makeNode("s1")), "se1").edges[0].id).toBe("se0");
+    expect(remove(withStartNodes(pinned, makeNode("s1")), "se1").edges[0].id).toBe("se0");
+
+    const negated = withStartNodes(makeNode("s0"), makeNode("s1"));
+    negated.edges[0].logic = Query.EdgeLogic.Negative;
+    expect(remove(negated, "se1").edges[0].id).toBe("se0");
+
+    const rootClasses = withStartNodes(makeNode("s0"), makeNode("s1"));
+    rootClasses.params.entityClasses = [EntityEnums.Class.Concept];
+    expect(remove(rootClasses, "se1").edges[0].id).toBe("se0");
   });
 
   it("sets the root back to And once the last start node is removed", () => {
-    const state = startNodes();
-    const next = remove(remove(state, state.edges[1].id), state.edges[0].id);
+    const next = remove(remove(withStartNodes(filtered("s0"), makeNode("s1")), "se1"), "se0");
     expect(next.edges).toEqual([]);
     expect(next.operator).toBe(Query.NodeOperator.And);
   });

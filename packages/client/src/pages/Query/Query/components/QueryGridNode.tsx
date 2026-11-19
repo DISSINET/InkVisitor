@@ -55,6 +55,7 @@ import {
   StyledNodeContainer,
   StyledNodeExpansionToggles,
   StyledNodeMainRow,
+  StyledParallelOperatorSlot,
   StyledStartNodeIcon,
   StyledTooltipList,
   StyledTooltipListItem,
@@ -87,6 +88,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 }) => {
   const theme = useTheme();
   const isValid = problems.every((problem) => problem.warning);
+  // a node's warnings are those of a start node's SE edge, which is not drawn
+  const warning = problems.find((problem) => problem.warning);
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
     value: type,
@@ -97,9 +100,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const edgeType = edge?.type;
   // a saved query can hold an edge type from a newer build, with no label or target params here
   const edgeLabel = edgeType ? (Query.EdgeTypeLabels[edgeType] ?? edgeType) : "related";
-  // a start node is the entity itself, so it is narrowed by its classes, as the root is
+  // a start node is the entity itself, so it is narrowed by its classes, as the root
+  // is; it sits in the root's column and is drawn as a root
   const isStartNode = edgeType === Query.EdgeType.SE;
-  const hasStartNodes = isRoot && Query.hasStartNodes(node);
 
   const nodeParams = (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]) || {};
 
@@ -220,73 +223,73 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const nodeColor = useMemo(() => {
     if (isValid) {
-      if (isRoot) {
+      if (isRoot || isStartNode) {
         return theme.color.query2;
       }
       return theme.color.query1;
     } else {
       return theme.color.queryInvalid;
     }
-  }, [theme, isValid, isRoot]);
+  }, [theme, isValid, isRoot, isStartNode]);
 
-  // the root and each start node choose how their parallel edges combine; start
-  // nodes are joined by Or alone, so their root has no operator to choose
-  const hasParallelEdges = (isStartNode || (isRoot && !hasStartNodes)) && node.edges.length > 1;
+  const hasParallelEdges = (isRoot || isStartNode) && node.edges.length > 1;
 
   return (
     <StyledNodeContainer data-testid={isStartNode ? "query-start-node" : undefined}>
       {hasParallelEdges && (
-        <SwitchGroup
-          $column
-          $zIndex={10}
-          pillColor="info"
-          activeIndex={node.operator === Query.NodeOperator.And ? 0 : 1}
-        >
-          <Button
-            size={ButtonSize.Medium}
-            label="AND"
-            shape="rounded-sm"
-            noBorder
-            inverted
-            noBackground
-            textColor={node.operator === Query.NodeOperator.And ? "white" : undefined}
-            noHoverBackground={node.operator === Query.NodeOperator.And}
-            color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
-            textRegular={node.operator !== Query.NodeOperator.And}
-            tooltipLabel="match all parallel branches"
-            onClick={() => {
-              dispatch({
-                type: QueryActionType.updateNodeOperator,
-                payload: {
-                  nodeId: node.id,
-                  newOperator: Query.NodeOperator.And,
-                },
-              });
-            }}
-          />
-          <Button
-            size={ButtonSize.Medium}
-            label="OR"
-            shape="rounded-sm"
-            noBorder
-            inverted
-            noBackground
-            textColor={node.operator === Query.NodeOperator.Or ? "white" : undefined}
-            noHoverBackground={node.operator === Query.NodeOperator.Or}
-            color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
-            textRegular={node.operator !== Query.NodeOperator.Or}
-            tooltipLabel="match any parallel branch"
-            onClick={() => {
-              dispatch({
-                type: QueryActionType.updateNodeOperator,
-                payload: {
-                  nodeId: node.id,
-                  newOperator: Query.NodeOperator.Or,
-                },
-              });
-            }}
-          />
-        </SwitchGroup>
+        <StyledParallelOperatorSlot>
+          <SwitchGroup
+            $column
+            $zIndex={10}
+            pillColor="info"
+            activeIndex={node.operator === Query.NodeOperator.And ? 0 : 1}
+          >
+            <Button
+              size={ButtonSize.Medium}
+              label="AND"
+              shape="rounded-sm"
+              noBorder
+              inverted
+              noBackground
+              textColor={node.operator === Query.NodeOperator.And ? "white" : undefined}
+              noHoverBackground={node.operator === Query.NodeOperator.And}
+              color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
+              textRegular={node.operator !== Query.NodeOperator.And}
+              tooltipLabel="match all parallel branches"
+              onClick={() => {
+                dispatch({
+                  type: QueryActionType.updateNodeOperator,
+                  payload: {
+                    nodeId: node.id,
+                    newOperator: Query.NodeOperator.And,
+                  },
+                });
+              }}
+            />
+            <Button
+              size={ButtonSize.Medium}
+              label="OR"
+              shape="rounded-sm"
+              noBorder
+              inverted
+              noBackground
+              textColor={node.operator === Query.NodeOperator.Or ? "white" : undefined}
+              noHoverBackground={node.operator === Query.NodeOperator.Or}
+              color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
+              textRegular={node.operator !== Query.NodeOperator.Or}
+              tooltipLabel="match any parallel branch"
+              onClick={() => {
+                dispatch({
+                  type: QueryActionType.updateNodeOperator,
+                  payload: {
+                    nodeId: node.id,
+                    newOperator: Query.NodeOperator.Or,
+                  },
+                });
+              }}
+            />
+          </SwitchGroup>
+        </StyledParallelOperatorSlot>
       )}
       <StyledNodeMainRow>
         <StyledGraphNode
@@ -346,12 +349,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               }
               noOptionsMessage="entity class"
               placeholder="all classes"
-              // the root of a query with start nodes matches any class; one
-              // loaded with classes keeps its picker, so they can be cleared
-              disabled={
-                node.params.entityId !== undefined ||
-                (hasStartNodes && !node.params.entityClasses?.length)
-              }
+              disabled={node.params.entityId !== undefined}
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />
           )}
@@ -720,26 +718,19 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         <div>
           <Button
             icon={<IcoPlusBold style={{ fontSize: "16px", padding: "2px" }} />}
-            tooltipLabel={hasStartNodes ? "add start node" : "add new edge"}
-            dataTestId={hasStartNodes ? "add-start-node" : undefined}
+            tooltipLabel="add new edge"
             color="primary"
             onClick={() => {
-              // the root of a query with start nodes holds no other edge
-              // (Query.areStartNodesValid)
-              dispatch(
-                hasStartNodes
-                  ? { type: QueryActionType.addStartNode }
-                  : {
-                      type: QueryActionType.addNode,
-                      payload: {
-                        parentId: node.id,
-                      },
-                    },
-              );
+              dispatch({
+                type: QueryActionType.addNode,
+                payload: {
+                  parentId: node.id,
+                },
+              });
             }}
           />
         </div>
-        {isRoot && !hasStartNodes && (
+        {(isRoot || isStartNode) && (
           <div>
             <Button
               icon={<StyledStartNodeIcon />}
@@ -750,7 +741,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             />
           </div>
         )}
-        {node.gridX !== 0 && node.gridY !== 0 && edge && !isValueNode && (
+        {edge && !isValueNode && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}
@@ -766,6 +757,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               }}
             />
           </div>
+        )}
+        {warning && (
+          <IconWithTooltip
+            icon={<IcoWarning size={16} />}
+            color="warning"
+            tooltipText={warning.text}
+            tooltipPosition="top"
+          />
         )}
       </StyledNodeMainRow>
     </StyledNodeContainer>

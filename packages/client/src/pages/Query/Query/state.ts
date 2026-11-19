@@ -1,7 +1,13 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
-import { NODE_FILTER_KEYS, getAllEdges, getAllNodes, getEdgeSourceNode } from "./utils";
+import {
+  NODE_FILTER_KEYS,
+  countNodeFilters,
+  getAllEdges,
+  getAllNodes,
+  getEdgeSourceNode,
+} from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { deepCopy } from "utils/utils";
 import { getEdgeSourceClasses, getRelationConstrainedCategoryTypes } from "../utils";
@@ -172,9 +178,12 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         return updatedStateRemove;
       }
       parentNode2.edges = parentNode2.edges.filter((e) => e.id !== edgeToRemove);
-      // start nodes are joined by Or alone; a root that holds none has And, as a new query has
-      if (edge.type === Query.EdgeType.SE && !Query.hasStartNodes(parentNode2)) {
-        parentNode2.operator = Query.NodeOperator.And;
+      if (edge.type === Query.EdgeType.SE) {
+        // start nodes are joined by Or alone; a root that holds none has And, as a new query has
+        if (!Query.hasStartNodes(parentNode2)) {
+          parentNode2.operator = Query.NodeOperator.And;
+        }
+        return liftLoneStartNode(updatedStateRemove);
       }
 
       return updatedStateRemove;
@@ -597,6 +606,30 @@ const addStartNode = (state: Query.INode): Query.INode => {
     operator: Query.NodeOperator.Or,
     edges: [startNodeEdge({ ...state, id: uuidv4(), params }), emptyStartNode],
   };
+};
+
+/**
+ * A root left with one start node takes that node's place, as addStartNode
+ * made it from the root, while the root can show all the node holds: the root
+ * offers no node filters or entity, and has no NOT. A root with classes of its
+ * own narrows every start node, so it keeps them.
+ */
+const liftLoneStartNode = (root: Query.INode): Query.INode => {
+  if (root.edges.length !== 1) {
+    return root;
+  }
+  const [{ type, logic, node }] = root.edges;
+  if (
+    type !== Query.EdgeType.SE ||
+    logic === Query.EdgeLogic.Negative ||
+    root.params.entityClasses?.length ||
+    node.params.entityId ||
+    countNodeFilters(node.params) > 0
+  ) {
+    return root;
+  }
+  const { includeEquivalents, includeSubordinates } = root.params;
+  return { ...node, id: root.id, params: { ...node.params, includeEquivalents, includeSubordinates } };
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {

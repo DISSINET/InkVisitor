@@ -39,6 +39,11 @@ export const StyledStartNodeIcon = styled(IcoNodeTree)`
   padding: ${({ theme }) => theme.space[1]};
 `;
 
+// a node row wider than its cell would squeeze the AND / OR switch beside it
+export const StyledParallelOperatorSlot = styled.div`
+  flex-shrink: 0;
+`;
+
 export const StyledParallelOperator = styled.div`
   display: flex;
   flex-direction: column;
@@ -207,14 +212,6 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   padding: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[3]};
   margin-top: 1.4rem;
-`;
-
-// the type of an edge that offers no other type to pick
-export const StyledEdgeTypeLabel = styled.span`
-  padding-right: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme }) => theme.color["query2Text"]};
 `;
 
 // the label of an unticked NOT is faded so the box reads as its edge type alone, not as

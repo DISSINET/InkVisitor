@@ -28,6 +28,15 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
+  // the start nodes sit in the root's column, each drawn as a root; the root
+  // holds no other edge (Query.areStartNodesValid), so it and its SE edges are
+  // not drawn
+  const hasStartNodes = Query.hasStartNodes(state);
+  const layoutRoots = useMemo<Query.INode[]>(
+    () => (hasStartNodes ? state.edges.map((edge) => edge.node) : [state]),
+    [state, hasStartNodes],
+  );
+
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 0;
 
@@ -39,10 +48,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root) => traverse(root, 0));
 
     return maxNodeDepth;
-  }, [state]);
+  }, [layoutRoots]);
 
   const allEdges = getAllEdges(state);
 
@@ -76,10 +85,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root) => traverse(root, 0));
 
     return nodeItems;
-  }, [state]);
+  }, [layoutRoots]);
 
   // a parent's children sit on their own rows, but an earlier child's subtree
   // pushes later siblings several rows down - leaving the parent's column empty
@@ -144,7 +153,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       }
       node.edges.forEach((e) => edgeTargets(e).forEach(traverse));
     };
-    traverse(state);
+    layoutRoots.forEach(traverse);
 
     return {
       extendEdgeIds: extend,
@@ -153,7 +162,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       valueRailCells: valueRails,
       nodeChildStubs: childStubs,
     };
-  }, [state, nodeItems]);
+  }, [layoutRoots, nodeItems]);
   const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
@@ -180,6 +189,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
             queryStateValidity.problems.some(
               (problem) => problem.source === valueRailEdge.id && !problem.warning,
             );
+
+          // the SE edge of a start node is not drawn, so its problems go to the start node
+          const hiddenEdgeId = hasStartNodes && wi === 0 ? associated?.edge.id : undefined;
 
           const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
@@ -270,12 +282,13 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 <QueryGridNode
                   node={thisCellNode}
                   sourceClasses={associated && getEdgeSourceClasses(state, associated.edge.id)}
-                  isRoot={wi === 0}
+                  isRoot={wi === 0 && !hasStartNodes}
                   dispatch={dispatch}
                   edge={associated?.edge}
                   isValueNode={associated?.isValue}
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === thisCellNode.id,
+                    (problem) =>
+                      problem.source === thisCellNode.id || problem.source === hiddenEdgeId,
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
