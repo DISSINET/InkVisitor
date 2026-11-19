@@ -37,21 +37,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     [state, hasStartNodes],
   );
 
-  // a start node added by the user is scrolled into view, as a narrow box may show it
-  // below the fold; a loaded query remounts this box, so its start nodes count as seen
-  const boxRef = useRef<HTMLDivElement>(null);
-  const startNodeIdsKey = hasStartNodes ? state.edges.map((edge) => edge.node.id).join() : "";
-  const seenStartNodeIds = useRef(new Set(startNodeIdsKey.split(",")));
-  useEffect(() => {
-    const ids = startNodeIdsKey.split(",");
-    const added = ids.filter((id) => id && !seenStartNodeIds.current.has(id)).at(-1);
-    seenStartNodeIds.current = new Set(ids);
-    if (added) {
-      boxRef.current
-        ?.querySelector(`[data-node-id="${added}"]`)
-        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
-    }
-  }, [startNodeIdsKey]);
 
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 0;
@@ -115,6 +100,23 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
 
   // nodes are pushed row by row, so the last one is on the last row
   const rowCount = (nodeItems.at(-1)?.gridY ?? -1) + 1;
+
+  // a node added by the user is scrolled into view, across and down, as a small box may show
+  // it out of sight; a loaded query remounts this box, so its nodes count as seen
+  const boxRef = useRef<HTMLDivElement>(null);
+  const nodeIdsKey = nodeItems.map((node) => node.id).join();
+  const seenNodeIds = useRef(new Set(nodeIdsKey.split(",")));
+  useEffect(() => {
+    const ids = nodeIdsKey.split(",");
+    // adding the first start node also moves the root into a new one, ahead of the added one
+    const added = ids.filter((id) => !seenNodeIds.current.has(id)).at(-1);
+    seenNodeIds.current = new Set(ids);
+    if (added) {
+      boxRef.current
+        ?.querySelector(`[data-node-id="${added}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    }
+  }, [nodeIdsKey]);
 
   // a parent's children sit on their own rows, but an earlier child's subtree
   // pushes later siblings several rows down - leaving the parent's column empty

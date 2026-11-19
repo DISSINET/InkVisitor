@@ -119,10 +119,8 @@ export const StyledSearchRows = styled.div<{ $scrollbarWidth: number; $scrollbar
   left: 0;
   /* centred on the query tree, beside its vertical scrollbar */
   right: ${({ $scrollbarWidth }) => $scrollbarWidth}px;
-  /* on the query tree's horizontal scrollbar, which sits above the resize handle's gap;
-     with no scrollbar the card keeps clear of the handle by itself */
-  bottom: max(
-    ${({ theme }) => theme.space[4]},
+  /* on the query tree's horizontal scrollbar, or in its place, above the resize handle's gap */
+  bottom: calc(
     ${({ theme }) => theme.space[2]} + ${({ $scrollbarHeight }) => $scrollbarHeight}px
   );
   /* above the grid cells of the query tree */
