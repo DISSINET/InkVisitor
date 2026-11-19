@@ -253,6 +253,13 @@ export const Suggester: React.FC<Suggester> = ({
   );
 
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  // the list stays open while the input holds focus or the pointer is over it
+  const closeList = () => {
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
+    setIsHovered(false);
+  };
   const inputRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
@@ -446,8 +453,10 @@ export const Suggester: React.FC<Suggester> = ({
               territoryParentId={territoryParentId}
               disableButtons={disableButtons}
               disableTemplateInstantiation={disableTemplateInstantiation}
+              // a pick empties the input, which can list the pre-suggestions or
+              // the priority rows again, so a click that picks a row closes the list
               onPick={(entity, instantiate) => {
-                setIsHovered(false);
+                closeList();
                 onPick(entity, instantiate);
               }}
             />
@@ -511,9 +520,7 @@ export const Suggester: React.FC<Suggester> = ({
   // an input scrolled out of view closes its list; clicking the input reopens it
   useEffect(() => {
     if (!isListHidden) return;
-    const focused = document.activeElement;
-    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
-    setIsHovered(false);
+    closeList();
   }, [isListHidden]);
 
   const theme = useTheme();

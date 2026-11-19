@@ -6,6 +6,7 @@ import { DReferences, DStatementActants, DStatementActions } from "constructors"
 import React, { useState } from "react";
 import { FaClone } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
+import { toast } from "react-toastify";
 import { StyledSectionButtonsBorder } from "./StatementEditorSectionButtonsStyles";
 import { MdDeleteSweep } from "react-icons/md";
 import { IcoPlus } from "Theme/icons";
@@ -36,31 +37,47 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
 
   const handleCopyFromStatement = (
     selectedStatement: IResponseStatement | IStatement | false,
-    section: "actions" | "actants" | "references",
-    replaceSection: boolean,
+    source: string,
   ) => {
-    if (selectedStatement) {
-      switch (section) {
-        case "actions":
-          const newActions = replaceSection
-            ? [...DStatementActions(selectedStatement.data.actions)]
-            : [...statement.data.actions, ...DStatementActions(selectedStatement.data.actions)];
-          handleDataAttributeChange({ actions: newActions }, true);
-          return;
-        case "actants":
-          const newActants = replaceSection
-            ? [...DStatementActants(selectedStatement.data.actants)]
-            : [...statement.data.actants, ...DStatementActants(selectedStatement.data.actants)];
-          handleDataAttributeChange({ actants: newActants }, true);
-          return;
-        case "references":
-          const newReferences = replaceSection
-            ? [...DReferences(selectedStatement.references)]
-            : [...statement.references, ...DReferences(selectedStatement.references)];
-          handleAttributeChange({ references: newReferences }, true);
-          return;
-      }
+    if (!selectedStatement) {
+      return;
     }
+    const copied =
+      section === "references"
+        ? selectedStatement.references
+        : selectedStatement.data[section];
+    if (!copied?.length) {
+      toast.info(
+        `The ${source} has no ${section} to ${replaceSection ? "replace with" : "append"}`,
+      );
+      return;
+    }
+    switch (section) {
+      case "actions":
+        const newActions = replaceSection
+          ? [...DStatementActions(selectedStatement.data.actions)]
+          : [...statement.data.actions, ...DStatementActions(selectedStatement.data.actions)];
+        handleDataAttributeChange({ actions: newActions }, true);
+        break;
+      case "actants":
+        const newActants = replaceSection
+          ? [...DStatementActants(selectedStatement.data.actants)]
+          : [...statement.data.actants, ...DStatementActants(selectedStatement.data.actants)];
+        handleDataAttributeChange({ actants: newActants }, true);
+        break;
+      case "references":
+        const newReferences = replaceSection
+          ? [...DReferences(selectedStatement.references)]
+          : [...statement.references, ...DReferences(selectedStatement.references)];
+        handleAttributeChange({ references: newReferences }, true);
+        break;
+    }
+    const count = `${copied.length} ${copied.length === 1 ? section.slice(0, -1) : section}`;
+    toast.success(
+      replaceSection
+        ? `${section[0].toUpperCase()}${section.slice(1)} replaced with ${count} from the ${source}`
+        : `${count} appended from the ${source}`,
+    );
   };
 
   const hasEntities = () => {
@@ -120,13 +137,13 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
           shape={editorWidthTooNarrow ? "square" : undefined}
-          onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
+          onClick={() => handleCopyFromStatement(previousStatement, "previous statement")}
         />
       </ButtonGroup>
       <EntitySuggester
         categoryTypes={[EntityEnums.Class.Statement]}
         onPicked={(entity: IEntity) =>
-          handleCopyFromStatement(entity as IStatement, section, replaceSection)
+          handleCopyFromStatement(entity as IStatement, "picked statement")
         }
         excludedActantIds={[statement.id]}
         disableCreate
