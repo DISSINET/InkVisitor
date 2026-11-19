@@ -104,3 +104,19 @@ describe("AnchorsNode.buildAnchorsTree with self-closing tags", () => {
     expect(tree[0].content).toEqual("text  more");
   });
 });
+
+describe("AnchorsNode.buildAnchorsTree with tags of missing entities", () => {
+  test("a closing tag of a missing entity does not close the enclosing anchor", () => {
+    const content = "<wrap>a <gone>b</gone> c <e1>d</e1> e</wrap>";
+    const entityIds = entityIdsFromContent(content);
+    entityIds[EntityEnums.Class.Concept] = entityIds[EntityEnums.Class.Concept].filter(
+      (id) => id !== "gone"
+    );
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds);
+
+    expect(tree.map((node) => node.anchor)).toEqual(["wrap"]);
+    expect(tree[0].children.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].content).toEqual("a b c d e");
+    expect(tree[0].indexEnd).toEqual(content.length);
+  });
+});

@@ -53,6 +53,18 @@ export class AnchorsNode implements IAnchorsNode {
     const rootNodes: AnchorsNode[] = []; // List of root nodes
     const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
 
+    // Only tags of entities found in the database are anchors. A tag of a missing
+    // entity is skipped on both ends, so its closing tag cannot close an enclosing
+    // anchor.
+    const classByTag = new Map<string, EntityEnums.Class>();
+    for (const classType of Object.keys(entityIds) as EntityEnums.Class[]) {
+      for (const id of entityIds[classType]) {
+        if (!classByTag.has(id)) {
+          classByTag.set(id, classType);
+        }
+      }
+    }
+
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -74,13 +86,7 @@ export class AnchorsNode implements IAnchorsNode {
 
       if (!isClosingTag && !isSelfClosing) {
         // Open tag: Create a new node for the tag
-        let anchorClass: EntityEnums.Class | undefined;
-        for (const classType of Object.keys(entityIds)) {
-          if (entityIds[classType as EntityEnums.Class].includes(tag)) {
-            anchorClass = classType as EntityEnums.Class;
-            break;
-          }
-        }
+        const anchorClass = classByTag.get(tag);
 
         if (anchorClass) {
           const newNode = new AnchorsNode(tag, "", [], anchorClass);
@@ -94,7 +100,7 @@ export class AnchorsNode implements IAnchorsNode {
           // Push the new node onto the stack (start processing its children)
           nodeStack.push(newNode);
         }
-      } else if (isClosingTag) {
+      } else if (isClosingTag && classByTag.has(tag)) {
         // Close tag: Pop the node off the stack
         const closedNode = nodeStack.pop();
 
