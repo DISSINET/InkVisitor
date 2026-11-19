@@ -83,6 +83,9 @@ const theme = {
     query2: "#4C5DAE",
     // text on a query2 fill, the same in both themes as white reads on either blue
     query2Text: "#fff",
+    // a control in use on a query2 fill: darker than the fill, with query2Text on it, the
+    // same in both themes
+    queryActive: "#324185",
     query3: "#324185",
     query4: "#1A2332",
     queryInvalid: "#EF4444",

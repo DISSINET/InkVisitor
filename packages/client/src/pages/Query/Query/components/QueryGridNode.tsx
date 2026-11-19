@@ -363,6 +363,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               count={countNodeFilters(node.params)}
               tooltipLabel="filters for the entities of this node"
               width="32rem"
+              onBlueFill={isStartNode}
+              // beside the button, the panel takes the window's height
+              placement="right"
               onClear={() =>
                 dispatch({ type: QueryActionType.clearNodeFilters, payload: { nodeId: node.id } })
               }
@@ -494,7 +497,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               {isRoot === false &&
                 (dataEntity !== undefined ? (
                   <EntityTag
-                    tagMaxWidth={200}
+                    fullWidth
                     entity={dataEntity}
                     onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
                     unlinkButton={{
@@ -750,8 +753,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             />
           </div>
         )}
-        {/* the first start node stands where the root stood, which has nothing to remove it */}
-        {edge && !(isStartNode && node.gridY === 0) && (
+        {edge && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}
