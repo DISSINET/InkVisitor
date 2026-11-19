@@ -1,5 +1,5 @@
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { IDocument, IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
@@ -7,6 +7,7 @@ import { nodeLabel } from "../../../../common/searchLabel";
 import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
 import { TABLE } from "../tables";
+import { anchoredUnder } from "./anchored";
 import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
@@ -1921,6 +1922,58 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
 }
 
 /**
+ * EAT: ("anchored under T"). Emits the ENTITIES ANCHORED inside the span of
+ * the target Territory's anchor: every anchor nested in it, at any depth, in
+ * every document that anchors the territory. The statements under the
+ * territory play no part, so an entity anchored in the text and used in no
+ * statement matches. An unconstrained target reads the span of every
+ * territory, which loads the anchors tree of every document.
+ *
+ * ReQL cannot walk a tree of unknown depth, so prepare() loads the trees of
+ * the documents that anchor a target (DocumentEntityIds index) and
+ * anchoredUnder walks them; run() intersects the ids found with the incoming
+ * stream q, keeping the subset invariant that positive matching and negation
+ * rely on.
+ */
+export class EdgeAnchoredUnderTerritory extends SearchEdge {
+  private anchoredIds: string[] = [];
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["EAT:"];
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    const targetIds = this.targetIds();
+    if (targetIds && !targetIds.length) {
+      this.anchoredIds = [];
+      return;
+    }
+    const table = r.table(TABLE.documents);
+    const trees = await (
+      targetIds
+        ? // the index returns a document once per target it anchors, and a territory sits in one
+          // document with its subTs, so the document ids are deduplicated ahead of reading the trees
+          (
+            table.getAll(r.args(targetIds), { index: DbEnums.Indexes.DocumentEntityIds })("id").distinct() as unknown as RDatum
+          ).do(function (ids: RDatum) {
+            return table.getAll(r.args(ids)).pluck("anchors").coerceTo("array");
+          })
+        : table.pluck("anchors")
+    ).run(db, QUERY_RUN_OPTIONS);
+    this.anchoredIds = anchoredUnder(
+      (trees as Pick<IDocument, "anchors">[]).map((doc) => doc.anchors),
+      targetIds
+    );
+  }
+
+  run(q: RStream): RStream {
+    return intersectIdsWithStream(q, r.expr(this.anchoredIds) as unknown as RStream);
+  }
+}
+
+/**
  * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
  * target Statement S in ANY position - actions + action props, actants +
  * their classifications / identifications / props, statement-level props
@@ -2318,6 +2371,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeTerritoryHasParent(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
+    case Query.EdgeType["EAT:"]:
+      return new EdgeAnchoredUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
     case Query.EdgeType["IS:S"]:

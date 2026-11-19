@@ -1130,3 +1130,85 @@ describe("explore: edges and node params of 1.6.1", () => {
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R")])).toEqual(["r-1"]);
   });
 });
+
+describe("explore: EAT:, the entities anchored under a territory", () => {
+  const anchor = (id: string, cls: EntityEnums.Class, children: Row[] = []): Row => ({
+    anchor: id,
+    class: cls,
+    content: "",
+    children,
+    indexStart: 0,
+    indexEnd: 0,
+  });
+  const E = { entityClasses: [C.Concept, C.Location, C.Person, C.Resource, C.Statement, C.Territory] };
+
+  beforeAll(async () => {
+    await storage.entities.insert(conn, [
+      entity("t-leaf", C.Territory, ["Leaf territory"], { data: { parent: { territoryId: "t-child", order: 9 } } }),
+      entity("t-bare", C.Territory, ["Unanchored territory"], { data: { parent: { territoryId: "t-root", order: 9 } } }),
+    ]);
+    // <c-4/> <t-root> <p-2/> <t-child> <l-1/> <s-2><c-1/></s-2> </t-child> </t-root>
+    await storage.documents.insert(conn, {
+      id: "d-2",
+      title: "Book two",
+      content: "",
+      entityIds: { T: ["t-root", "t-child"], P: ["p-2"], L: ["l-1"], S: ["s-2"], C: ["c-4", "c-1"] },
+      anchors: [
+        anchor("c-4", C.Concept),
+        anchor("t-root", C.Territory, [
+          anchor("p-2", C.Person),
+          anchor("t-child", C.Territory, [anchor("l-1", C.Location), anchor("s-2", C.Statement, [anchor("c-1", C.Concept)])]),
+        ]),
+      ],
+    });
+    // <t-child> <p-1/> </t-child> <t-leaf> <r-2/> </t-leaf>
+    await storage.documents.insert(conn, {
+      id: "d-3",
+      title: "Appendix",
+      content: "",
+      entityIds: { T: ["t-child", "t-leaf"], P: ["p-1"], R: ["r-2"] },
+      anchors: [anchor("t-child", C.Territory, [anchor("p-1", C.Person)]), anchor("t-leaf", C.Territory, [anchor("r-2", C.Resource)])],
+    });
+  });
+
+  it("emits every entity anchored inside the territory's span, at any depth", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-root" })])).toEqual(["c-1", "l-1", "p-2", "s-2", "t-child"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("EAT:", { entityId: "t-root" })])).toEqual(["p-2"]);
+  });
+
+  it("reads the span of the territory in every document that anchors it", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-child" })])).toEqual(["c-1", "l-1", "p-1", "s-2"]);
+  });
+
+  it("a territory anchored nowhere spans nothing", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-bare" })])).toEqual([]);
+  });
+
+  it("the SUB toggle adds the spans of the subTs, wherever they are anchored", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-root", includeSubordinates: true })])).toEqual([
+      "c-1",
+      "l-1",
+      "p-1",
+      "p-2",
+      "r-2",
+      "s-2",
+      "t-child",
+    ]);
+  });
+
+  it("without a target reads the span of every territory", async () => {
+    expect(await explore(E, [edge("EAT:")])).toEqual(["c-1", "l-1", "p-1", "p-2", "r-2", "s-2", "t-child"]);
+  });
+
+  it("an unpinned target narrows to the territories passing its filters and conditions", async () => {
+    expect(await explore(E, [edge("EAT:", { label: "Leaf territory" })])).toEqual(["r-2"]);
+    expect(await explore(E, [edge("EAT:", node({}, [edge("I_CT:", { entityId: "t-child" })]))])).toEqual(["r-2"]);
+    expect(await explore(E, [edge("EAT:", { label: "no such territory" })])).toEqual([]);
+  });
+
+  it("a negative edge keeps the entities anchored outside the span or nowhere", async () => {
+    expect(
+      await explore({ entityClasses: [C.Resource] }, [edge("EAT:", { entityId: "t-leaf" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["r-1"]);
+  });
+});

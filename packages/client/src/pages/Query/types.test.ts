@@ -196,6 +196,34 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
   });
 });
 
+describe("query builder offers the 'anchored under T' edge (EAT:)", () => {
+  it("any source node (e.g. Person, Statement, Territory) can select EAT:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Statement,
+      EntityEnums.Class.Territory,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(Query.EdgeType["EAT:"]);
+    }
+  });
+
+  it("source may be any entity; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Territory])),
+      ).valid,
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Person])),
+      ).valid,
+    ).toBe(false);
+  });
+});
+
 describe("the 'S under T' edge covers the whole subtree via the SUB toggle", () => {
   it("SUT: is offered and takes the Territory target", () => {
     expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))).toContain(

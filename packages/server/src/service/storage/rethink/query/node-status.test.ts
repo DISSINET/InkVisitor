@@ -270,6 +270,7 @@ describe("entityStatuses node param (real ReQL)", () => {
       [Query.EdgeType["HR:V"], []],
       [Query.EdgeType["SUT:"], []],
       [Query.EdgeType["EUT:"], []],
+      [Query.EdgeType["EAT:"], []],
       [Query.EdgeType["IS:"], []],
       // any-class targets keep every discouraged entity
       [Query.EdgeType["HP:V"], [A_BAD, C_BAD]],
