@@ -25,20 +25,35 @@ import {
 // space kept between the panel and the window edges
 const CLIPPING_INSET = 8;
 
-interface FilterPopover {
-  /** button text; the count of applied filters is appended to it */
-  label: string;
+interface FilterPopoverBase {
   /** panel heading */
   title: string;
   count: number;
-  tooltipLabel?: string;
   /** shows a "clear all" control beside the button and in the panel header while `count` is above zero */
   onClear?: () => void;
   placement?: Placement;
   width?: string;
-  buttonSize?: ButtonSize;
   children: ReactNode;
 }
+
+/** opened by the filter button */
+interface FilterPopoverWithButton extends FilterPopoverBase {
+  /** button text; the count of applied filters is appended to it */
+  label: string;
+  tooltipLabel?: string;
+  buttonSize?: ButtonSize;
+  trigger?: never;
+}
+
+/** opened by a control the caller renders in place of the filter button and its clear icon */
+interface FilterPopoverWithTrigger extends FilterPopoverBase {
+  trigger: (toggle: () => void) => ReactNode;
+  label?: never;
+  tooltipLabel?: never;
+  buttonSize?: never;
+}
+
+type FilterPopover = FilterPopoverWithButton | FilterPopoverWithTrigger;
 
 /**
  * A filter button with its panel attached. The panel closes on the button, its
@@ -47,18 +62,10 @@ interface FilterPopover {
  * It is not a key layer (see layerStack): Enter inside the panel must still run
  * the search, and the page shortcut stays silent while any layer is open.
  */
-export const FilterPopover: React.FC<FilterPopover> = ({
-  label,
-  title,
-  count,
-  tooltipLabel,
-  onClear,
-  placement = "bottom-start",
-  width = "30rem",
-  buttonSize = ButtonSize.Medium,
-  children,
-}) => {
+export const FilterPopover: React.FC<FilterPopover> = (props) => {
+  const { title, count, onClear, placement = "bottom-start", width = "30rem", children } = props;
   const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen((open) => !open);
 
   const { refs, floatingStyles } = useFloating({
     open: isOpen,
@@ -116,26 +123,36 @@ export const FilterPopover: React.FC<FilterPopover> = ({
 
   return (
     <>
-      <StyledFilterPopoverTrigger ref={refs.setReference}>
-        <Button
-          size={buttonSize}
-          icon={<IcoFilter size={14} />}
-          label={count > 0 ? `${label} · ${count}` : label}
-          color="primary"
-          inverted={count === 0 && !isOpen}
-          tooltipLabel={tooltipLabel}
-          onClick={() => setIsOpen((open) => !open)}
-        />
-        {onClear && count > 0 && (
-          <IconButton
-            size={buttonSize}
-            icon={<IcoClose size={14} />}
-            color="primary"
-            noBorder
-            noBackground
-            tooltipLabel="clear all"
-            onClick={onClear}
-          />
+      <StyledFilterPopoverTrigger ref={refs.setReference} $fluid={!!props.trigger}>
+        {props.trigger ? (
+          props.trigger(toggle)
+        ) : (
+          <>
+            {/* filled like the query builder's pickers and framed in its blue;
+                filled with the blue while filters are set or the panel is open */}
+            <Button
+              size={props.buttonSize ?? ButtonSize.Medium}
+              icon={<IcoFilter size={14} />}
+              label={count > 0 ? `${props.label} · ${count}` : props.label}
+              color={count > 0 || isOpen ? "query2" : "white"}
+              textColor={count > 0 || isOpen ? "query2Text" : "black"}
+              borderColor="query2"
+              textRegular
+              tooltipLabel={props.tooltipLabel}
+              onClick={toggle}
+            />
+            {onClear && count > 0 && (
+              <IconButton
+                size={props.buttonSize ?? ButtonSize.Medium}
+                icon={<IcoClose size={14} />}
+                color="black"
+                noBorder
+                noBackground
+                tooltipLabel="clear all"
+                onClick={onClear}
+              />
+            )}
+          </>
         )}
       </StyledFilterPopoverTrigger>
 

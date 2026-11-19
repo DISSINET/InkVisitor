@@ -1820,7 +1820,7 @@ export const TextAnnotator = ({
                   top: xmlMarkupAnchorHover.y + 12,
                   zIndex: ANNOTATOR_OVERLAY_Z.anchorHoverPreview,
                   pointerEvents: "auto",
-                  maxWidth: 340,
+                  maxWidth: 500,
                   borderRadius: 4,
                   backgroundColor: theme.color.white,
                   boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
@@ -1850,7 +1850,7 @@ export const TextAnnotator = ({
                   entityId={xmlMarkupAnchorHover.entityId}
                   disableTooltip={false}
                   disableDoubleClick={false}
-                  tagMaxWidth={150}
+                  fullWidth
                 />
               </div>
             </FloatingPortal>

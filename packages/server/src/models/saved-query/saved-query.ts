@@ -108,7 +108,9 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       return (
         typeof e.type === "string" &&
         typeof e.logic === "string" &&
-        SavedQuery.walkQueryNode(e.node, depth + 1, budget)
+        SavedQuery.walkQueryNode(e.node, depth + 1, budget) &&
+        // the value node of an HP: / SP: edge sits at the same depth as its node
+        (e.valueNode === undefined || SavedQuery.walkQueryNode(e.valueNode, depth + 1, budget))
       );
     });
   }

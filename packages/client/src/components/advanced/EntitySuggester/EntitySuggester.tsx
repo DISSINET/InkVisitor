@@ -239,10 +239,9 @@ const EntitySuggesterFull: React.FC<
   }, [categoryTypes]);
 
   // Seed the class selection on mount and whenever the allowed classes change
-  // (an edge switch or a root-class change). It deliberately does NOT depend on
-  // initCategory: picking the wildcard clears the node's entityClasses, which
-  // flips initCategory back to a concrete class, and re-seeding on that would
-  // overwrite the wildcard the user just chose.
+  // (an edge switch or a root-class change). initCategory is only the seed: the
+  // suggester owns the selection afterwards, so a later initCategory leaves the
+  // class the user picked in place.
   useEffect(() => {
     const seed =
       initCategory ??
