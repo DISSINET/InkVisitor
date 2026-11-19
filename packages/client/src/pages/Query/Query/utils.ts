@@ -83,13 +83,34 @@ export const isNodeNarrowed = (node: Query.INode): boolean => {
 };
 
 /**
+ * A start node nothing narrows would match every entity, and the Or that joins
+ * the start nodes would pass all of them, so the search leaves it out. A
+ * negative one takes its entities away, so it stays.
+ */
+export const isIgnoredStartNode = (edge: Query.IEdge): boolean =>
+  edge.type === Query.EdgeType.SE &&
+  edge.logic !== Query.EdgeLogic.Negative &&
+  !isNodeNarrowed(edge.node);
+
+/**
+ * The query the search runs: without the start nodes it ignores. Only a root of
+ * start nodes alone (Query.areStartNodesValid) has them left out; the server
+ * refuses any other shape whole.
+ */
+export const withoutIgnoredStartNodes = (query: Query.INode): Query.INode =>
+  Query.hasStartNodes(query) && Query.areStartNodesValid(query)
+    ? { ...query, edges: query.edges.filter((edge) => !isIgnoredStartNode(edge)) }
+    : query;
+
+/**
  * A query request is "empty" when nothing constrains the search: no explore
- * filters and a root node nothing narrows. Such a request would scan the whole
+ * filters and a root node nothing narrows, once the start nodes the search
+ * ignores are left out. Such a request would scan the whole
  * database, so the explorer skips it instead of firing it automatically (e.g.
  * on page load with the default root node).
  */
 export const isQueryRequestEmpty = (query: Query.INode, explore: Explore.IExplore): boolean =>
-  explore.filters.length === 0 && !isNodeNarrowed(query);
+  explore.filters.length === 0 && !isNodeNarrowed(withoutIgnoredStartNodes(query));
 
 /** the params the node filters panel sets, cleared together and dropped when an entity is pinned */
 export const NODE_FILTER_KEYS = [

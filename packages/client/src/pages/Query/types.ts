@@ -1,5 +1,5 @@
 import { Query } from "@inkvisitor/shared/types";
-import { isNodeNarrowed } from "./Query/utils";
+import { isIgnoredStartNode } from "./Query/utils";
 
 export type INodeItem = Query.INode & {
   gridX: number;
@@ -31,29 +31,20 @@ export const PINNED_START_NODE_CONDITION_WARNING = pinnedConditionWarning(
 );
 
 export const START_NODE_WARNING =
-  "Pick a class or add a condition: the query does not run while a start node matches " +
-  "every entity";
+  "The search ignores this start node, as it matches every entity. Pick a class or add a " +
+  "condition to use it.";
 
 /**
  * The warnings of a query: conditions nested under a pinned node that EQ / SUB
  * do not widen test that one entity, so they keep or drop all the matches of
- * the edge above rather than filtering a set. While the request is skipped as
- * empty (isQueryRequestEmpty), each start node that nothing narrows is pointed
- * at, as one such start node is enough to skip it.
+ * the edge above rather than filtering a set. Each start node the search
+ * ignores (withoutIgnoredStartNodes) is pointed at.
  */
-export const queryWarnings = (
-  root: Query.INode,
-  isRequestEmpty = false,
-): QueryValidityProblem[] => {
+export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
   const warnings: QueryValidityProblem[] = [];
-  if (isRequestEmpty) {
+  if (Query.areStartNodesValid(root)) {
     root.edges
-      .filter(
-        (edge) =>
-          edge.type === Query.EdgeType.SE &&
-          edge.logic !== Query.EdgeLogic.Negative &&
-          !isNodeNarrowed(edge.node),
-      )
+      .filter(isIgnoredStartNode)
       .forEach((edge) =>
         warnings.push({ source: edge.id, text: START_NODE_WARNING, warning: true }),
       );

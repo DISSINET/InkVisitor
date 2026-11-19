@@ -178,10 +178,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     // });
 
     return {
-      problems: [...problems, ...queryWarnings(queryState, isRequestEmpty)],
+      problems: [...problems, ...queryWarnings(queryState)],
       isValid,
     };
-  }, [queryState, isRequestEmpty]);
+  }, [queryState]);
 
   // Explorer view mode (Table / Stats) toggle, surfaced as Box header buttons.
   // Preserve the inactive view's config so toggling does not lose columns / stats.

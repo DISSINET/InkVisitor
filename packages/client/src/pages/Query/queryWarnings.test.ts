@@ -74,29 +74,19 @@ describe("queryWarnings on start nodes", () => {
   );
   const notOpen = { ...edge("not-open", Query.EdgeType.SE, node({})), logic: Query.EdgeLogic.Negative };
 
-  it("warns on each start node nothing narrows while the request is skipped", () => {
-    const warnings = queryWarnings(startNodes(narrowed, open, openWithEdge, notOpen), true);
+  it("warns on each start node the search ignores", () => {
+    const warnings = queryWarnings(startNodes(narrowed, open, openWithEdge, notOpen));
     expect(warnings).toEqual([{ source: "open", text: START_NODE_WARNING, warning: true }]);
   });
 
-  it("does not warn while the request runs", () => {
-    expect(queryWarnings(startNodes(narrowed, open), false)).toEqual([]);
-    expect(queryWarnings(startNodes(narrowed, open))).toEqual([]);
+  it("warns while the other start nodes still run the search", () => {
+    const root = startNodes(narrowed, open);
+    expect(isQueryRequestEmpty(root, exploreStateInitial)).toBe(false);
+    expect(queryWarnings(root).map((warning) => warning.source)).toEqual(["open"]);
   });
 
-  it("does not take an edge of another type beside the start nodes for one", () => {
+  it("points at no start node of a root the server refuses whole", () => {
     const plain = edge("plain", Query.EdgeType["HP:V"], node({}));
-    expect(queryWarnings(startNodes(open, plain), true).map((warning) => warning.source)).toEqual([
-      "open",
-    ]);
-  });
-
-  it("warns as the request the explorer reads off the query is skipped", () => {
-    const warned = (root: Query.INode) =>
-      queryWarnings(root, isQueryRequestEmpty(root, exploreStateInitial)).map(
-        (warning) => warning.source,
-      );
-    expect(warned(startNodes(narrowed, open))).toEqual(["open"]);
-    expect(warned(startNodes(narrowed, openWithEdge))).toEqual([]);
+    expect(queryWarnings(startNodes(open, plain))).toEqual([]);
   });
 });

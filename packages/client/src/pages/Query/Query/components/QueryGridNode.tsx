@@ -714,6 +714,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               )}
             </StyledNodeExpansionToggles>
           )}
+          {warning && (
+            <IconWithTooltip
+              icon={<IcoWarning size={16} />}
+              color="warning"
+              tooltipText={warning.text}
+              tooltipPosition="top"
+            />
+          )}
         </StyledGraphNode>
 
         <div>
@@ -742,7 +750,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             />
           </div>
         )}
-        {edge && (
+        {/* the first start node stands where the root stood, which has nothing to remove it */}
+        {edge && !(isStartNode && node.gridY === 0) && (
           <div>
             <Button
               icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}
@@ -761,14 +770,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               }}
             />
           </div>
-        )}
-        {warning && (
-          <IconWithTooltip
-            icon={<IcoWarning size={16} />}
-            color="warning"
-            tooltipText={warning.text}
-            tooltipPosition="top"
-          />
         )}
       </StyledNodeMainRow>
     </StyledNodeContainer>

@@ -11,6 +11,7 @@ import {
   queryDepth,
   QUERY_NAME_MAX_LENGTH,
   suggestQueryName,
+  withoutIgnoredStartNodes,
 } from "./utils";
 
 const makeRoot = (params: Query.INodeParams = {}): Query.INode => ({
@@ -104,16 +105,30 @@ describe("isQueryRequestEmpty", () => {
     edges,
   });
 
-  it("is empty when a start node has nothing to narrow it", () => {
-    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+  it("is empty when no start node has anything to narrow it", () => {
     expect(isQueryRequestEmpty(startNodesRoot(startNode({})), makeExplore())).toBe(true);
     expect(
       isQueryRequestEmpty(startNodesRoot(startNode({ entityClasses: classesAll })), makeExplore()),
     ).toBe(true);
-    expect(isQueryRequestEmpty(startNodesRoot(concepts, startNode({})), makeExplore())).toBe(true);
     expect(
-      isQueryRequestEmpty(startNodesRoot(concepts, startNode({}, [startNode({})])), makeExplore()),
+      isQueryRequestEmpty(startNodesRoot(startNode({}), startNode({})), makeExplore()),
     ).toBe(true);
+  });
+
+  it("sends only the start nodes the search does not ignore", () => {
+    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+    const open = startNode({});
+    const notOpen = { ...startNode({}), logic: Query.EdgeLogic.Negative };
+    const sent = withoutIgnoredStartNodes(startNodesRoot(concepts, open, notOpen));
+    expect(sent.edges).toEqual([concepts, notOpen]);
+    // the server refuses a root of start nodes beside other edges whole
+    const mixed = startNodesRoot(open, makeEdge());
+    expect(withoutIgnoredStartNodes(mixed)).toBe(mixed);
+  });
+
+  it("is not empty when one start node is narrowed beside ones the search ignores", () => {
+    const concepts = startNode({ entityClasses: [EntityEnums.Class.Concept] });
+    expect(isQueryRequestEmpty(startNodesRoot(concepts, startNode({})), makeExplore())).toBe(false);
   });
 
   it("is not empty when every start node is narrowed", () => {
