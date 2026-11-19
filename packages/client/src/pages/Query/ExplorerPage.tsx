@@ -1008,12 +1008,19 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                         filters={exploreState.filters}
                         dispatch={exploreStateDispatch}
                       />
+                      {/* beside the button, the popovers take the window's height, which
+                          neither the builder above nor the Explorer below has */}
+                      <SearchFiltersPopover
+                        filters={exploreState.filters}
+                        dispatch={exploreStateDispatch}
+                        placement="right"
+                      />
                       <FilterPopover
                         label="UUIDs"
                         title="Entity UUIDs"
                         count={uuidFilterCount}
                         tooltipLabel="keep only the entities with these UUIDs"
-                        placement="top-start"
+                        placement="right"
                         onClear={() => {
                           exploreStateDispatch({
                             type: ExploreActionType.setUuidsFilter,
@@ -1028,11 +1035,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                           clearSignal={uuidsClearSignal}
                         />
                       </FilterPopover>
-                      <SearchFiltersPopover
-                        filters={exploreState.filters}
-                        dispatch={exploreStateDispatch}
-                        placement="top-start"
-                      />
                     </StyledSearchRow>
                     <StyledSearchRow data-run-on-enter="true">
                       {!compactHeader && (

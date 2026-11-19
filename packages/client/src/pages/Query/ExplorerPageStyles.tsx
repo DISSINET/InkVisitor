@@ -136,7 +136,7 @@ export const StyledSearchRows = styled.div<{ $scrollbarWidth: number; $scrollbar
   margin: 0 auto;
   /* the query tree shows faintly through the card, blurred so its labels do not read
      behind the card's own */
-  background-color: color-mix(in srgb, ${({ theme }) => theme.color["gray"][100]} 90%, transparent);
+  background-color: color-mix(in srgb, ${({ theme }) => theme.color["gray"][100]} 75%, transparent);
   backdrop-filter: blur(4px);
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   transition: background-color 0.2s ease;
