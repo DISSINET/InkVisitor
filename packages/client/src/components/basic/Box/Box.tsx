@@ -39,6 +39,14 @@ interface Box {
   onHeaderClick?: () => void;
   disableHeaderClick?: boolean;
   disableScroll?: boolean;
+  /**
+   * The header floats over the content, which scrolls on behind it: transparent
+   * but for a blurred backing under the label and the controls. The content
+   * keeps the header's height free above what it shows first.
+   */
+  floatingHeader?: boolean;
+  /** px the floating header keeps clear on the right, for a scrollbar of the content */
+  floatingHeaderInsetRight?: number;
 }
 
 export const Box: React.FC<Box> = ({
@@ -56,6 +64,8 @@ export const Box: React.FC<Box> = ({
   onHeaderClick,
   disableHeaderClick = false,
   disableScroll = false,
+  floatingHeader = false,
+  floatingHeaderInsetRight = 0,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(!isExpanded);
@@ -89,6 +99,8 @@ export const Box: React.FC<Box> = ({
         $color={color}
         $noFrame={noFrame}
         $hasHeaderClick={onHeaderClick !== undefined && !disableHeaderClick && isExpanded}
+        $floating={floatingHeader && isExpanded}
+        $floatingInsetRight={floatingHeaderInsetRight}
         onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
         {!hideContent && isExpanded && (

@@ -943,6 +943,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               heightVarKey="queryBuilder"
               label="Query Builder"
               disableScroll
+              floatingHeader
+              floatingHeaderInsetRight={queryScrollbars.width}
               disableHeaderClick={!explorerBoxMaximized}
               onHeaderClick={handleMaximizeExplorerBox}
               buttons={[

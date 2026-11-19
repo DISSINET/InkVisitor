@@ -1,3 +1,4 @@
+import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import styled from "styled-components";
 import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
 
@@ -95,6 +96,8 @@ export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
   flex: 1;
   min-height: 0;
   overflow: auto;
+  /* the Query Builder header floats over the top of the tree */
+  padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
   /* the resize handle straddles the box edge and covers this gap, so the horizontal
      scrollbar sits clear of it */
   margin-bottom: ${({ theme }) => theme.space[2]};
@@ -104,7 +107,9 @@ export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
     ${({ theme }) => theme.space[3]} + ${({ $searchRowsHeight }) => $searchRowsHeight}px +
       ${({ theme }) => theme.space[4]}
   );
-  /* a node scrolled into view stops above the search rows, not behind them */
+  /* a node scrolled into view stops below the header and above the search rows, not
+     behind them */
+  scroll-padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
   scroll-padding-bottom: calc(
     ${({ $searchRowsHeight }) => $searchRowsHeight}px + ${({ theme }) => theme.space[2]}
   );
