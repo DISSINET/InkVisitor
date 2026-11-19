@@ -20,7 +20,7 @@ const row = (id: string, label: string): EntitySuggestion => ({
     labels: [label],
     status: EntityEnums.Status.Approved,
   } as IEntity,
-  icons: [],
+  icons: {},
 });
 
 let view: Rendered | null = null;

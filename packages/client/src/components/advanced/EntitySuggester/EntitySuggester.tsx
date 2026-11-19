@@ -347,15 +347,18 @@ const EntitySuggesterFull: React.FC<
         )
         .filter((s) => categoryTypes.includes(s.class))
         .map((entity: IEntity) => {
-          const icons: React.ReactNode[] = [];
-
-          if (territoryActantIds?.includes(entity.id)) {
-            icons.push(<IcoHome key={entity.id} size={12} />);
-          }
-
           return {
             entity: entity,
-            icons: icons,
+            icons: territoryActantIds?.includes(entity.id)
+              ? {
+                  home: (
+                    <IconWithTooltip
+                      icon={<IcoHome size={12} />}
+                      tooltipLabel="Used in this territory"
+                    />
+                  ),
+                }
+              : {},
           };
         })
     );
@@ -568,22 +571,24 @@ const EntitySuggesterFull: React.FC<
     .map((suggestion) => ({
       ...suggestion,
       icons: prioritySuggestions
-        ? [
-            <IconWithTooltip
-              key="priority"
-              icon={<IcoHome size={12} />}
-              tooltipLabel="Used in the statements nearby"
-            />,
-          ]
+        ? {
+            home: (
+              <IconWithTooltip
+                icon={<IcoHome size={12} />}
+                tooltipLabel="Used in the statements nearby"
+              />
+            ),
+          }
         : // the home icon of an entity used in the territory stays beside it
-          [
+          {
             ...suggestion.icons,
-            <IconWithTooltip
-              key="priority"
-              icon={<IcoAnchor size={12} />}
-              tooltipLabel="Anchored in the text nearby"
-            />,
-          ],
+            anchor: (
+              <IconWithTooltip
+                icon={<IcoAnchor size={12} />}
+                tooltipLabel="Anchored in the text nearby"
+              />
+            ),
+          },
     }));
 
   const preRows =

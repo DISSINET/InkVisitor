@@ -6,8 +6,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useListedSuggestions } from "./useListedSuggestions";
 
 // the icon tells a priority row from the search hit of the same entity
-const home = (id: string): EntitySuggestion => ({ entity: { id } as IEntity, icons: ["home"] });
-const hit = (id: string): EntitySuggestion => ({ entity: { id } as IEntity, icons: [] });
+const home = (id: string): EntitySuggestion => ({
+  entity: { id } as IEntity,
+  icons: { home: "home" },
+});
+const hit = (id: string): EntitySuggestion => ({ entity: { id } as IEntity, icons: {} });
 
 const Probe = ({
   priority,
@@ -29,7 +32,7 @@ const Probe = ({
   return (
     <ol data-priority-count={listedPriorityCount}>
       {listedSuggestions.map((s) => (
-        <li key={s.entity.id}>{`${s.entity.id}${s.icons?.length ? " home" : ""}`}</li>
+        <li key={s.entity.id}>{`${s.entity.id}${s.icons?.home ? " home" : ""}`}</li>
       ))}
     </ol>
   );
