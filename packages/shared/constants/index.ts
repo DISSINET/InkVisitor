@@ -21,6 +21,13 @@ export const MAX_SAVED_QUERY_DEPTH = 6;
 export const MAX_SAVED_QUERY_NODES = 1000;
 
 /**
+ * How many nearby entities a suggester lists above the search hits. A statement
+ * response carries this many anchored entities per entity class, so a suggester
+ * narrowed to any one class can still fill its list.
+ */
+export const NEARBY_SUGGESTIONS_LIMIT = 10;
+
+/**
  * Apostrophes, quotation marks and the characters typed in their place (primes,
  * accents, fullwidth forms). Label search treats all of them as one character,
  * single and double alike.

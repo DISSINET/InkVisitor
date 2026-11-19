@@ -19,6 +19,7 @@ import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
 import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 import { useSearchParams } from "hooks";
+import { DETAIL_TAB_ENTITIES_KEY } from "hooks/react-query";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
@@ -63,6 +64,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      // the Editor's "Statement Anchors", the statement list Text column and
+      // the Detail tab of a statement without a label render anchors derived
+      // server-side from the document content
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["territory", "statement-list"] });
+      queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
     },
   });
 

@@ -69,6 +69,9 @@ enum QueryActionType {
   removeEdge,
   updateEdgeType,
   updateEdgeLogic,
+  updateEdgePropPair,
+  updateEdgeValueNode,
+  updateEdgeValueLogic,
   updateNodeType,
   updateNodeClass,
   clearNodeFilters,
@@ -97,6 +100,18 @@ type QueryAction =
     }
   | {
       type: QueryActionType.updateEdgeLogic;
+      payload: { edgeId: string; newLogic: Query.EdgeLogic };
+    }
+  | {
+      type: QueryActionType.updateEdgePropPair;
+      payload: { edgeId: string; propPair: Query.IPropPair | undefined };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueNode;
+      payload: { edgeId: string; hasValueNode: boolean };
+    }
+  | {
+      type: QueryActionType.updateEdgeValueLogic;
       payload: { edgeId: string; newLogic: Query.EdgeLogic };
     }
   | {
@@ -175,6 +190,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         return updatedStateUpdate;
       }
       const sourceClassesBeforeSwitch = sourceClassesByEdge(updatedStateUpdate);
+      // the propPair pins one half of the prop, so it survives only a switch to
+      // an edge that pins the same half
+      if (Query.PropPairEdges[edgeToUpdate.type] !== Query.PropPairEdges[newType]) {
+        delete edgeToUpdate.params?.propPair;
+      }
       edgeToUpdate.type = newType;
 
       // the child node's params are edge-type specific. On a type switch, drop
@@ -206,6 +226,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       if (!newTargetParams.entityId) {
         edgeToUpdate.node.params.entityId = undefined;
       }
+      // the value node is optional on HP: / SP: and kept across a switch between them
+      if (!Query.TupleValueEdgeTypes[newType]) {
+        delete edgeToUpdate.valueNode;
+        delete edgeToUpdate.valueLogic;
+      }
       reseedRelationTargetClasses(updatedStateUpdate, sourceClassesBeforeSwitch);
       return updatedStateUpdate;
 
@@ -223,6 +248,38 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       }
       edgeToUpdateLogic.logic = newLogic;
       return updatedStateLogic;
+
+    case QueryActionType.updateEdgePropPair:
+      return updateEdgePropPair(state, action.payload.edgeId, action.payload.propPair);
+
+    case QueryActionType.updateEdgeValueNode: {
+      const updatedStateValue = { ...state };
+      const edgeWithValue = getAllEdges(updatedStateValue).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValue || !Query.TupleValueEdgeTypes[edgeWithValue.type]) {
+        return updatedStateValue;
+      }
+      if (action.payload.hasValueNode) {
+        edgeWithValue.valueNode ??= newValueNode();
+      } else {
+        delete edgeWithValue.valueNode;
+        delete edgeWithValue.valueLogic;
+      }
+      return updatedStateValue;
+    }
+
+    case QueryActionType.updateEdgeValueLogic: {
+      const updatedStateValueLogic = { ...state };
+      const edgeWithValueLogic = getAllEdges(updatedStateValueLogic).find(
+        (edge) => edge.id === action.payload.edgeId,
+      );
+      if (!edgeWithValueLogic?.valueNode) {
+        return updatedStateValueLogic;
+      }
+      edgeWithValueLogic.valueLogic = action.payload.newLogic;
+      return updatedStateValueLogic;
+    }
 
     case QueryActionType.updateNodeType:
       return updateNodeType(state, action.payload.nodeId, action.payload.newType);
@@ -258,6 +315,26 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     default:
       return state;
   }
+};
+
+const updateEdgePropPair = (
+  state: Query.INode,
+  edgeId: string,
+  propPair: Query.IPropPair | undefined,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const edgeToUpdate = getAllEdges(updatedState).find((edge) => edge.id === edgeId);
+  if (!edgeToUpdate) {
+    return updatedState;
+  }
+  if (propPair) {
+    edgeToUpdate.params = { ...edgeToUpdate.params, propPair };
+  } else {
+    delete edgeToUpdate.params?.propPair;
+  }
+
+  return updatedState;
 };
 
 const updateNodeClass = (
@@ -432,26 +509,26 @@ const updateNodeType = (
   return updatedState;
 };
 
+const newNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
+  type: Query.NodeType.E,
+  id: uuidv4(),
+  // EQ and SUB start on for every node added in the builder; they widen a
+  // picked entity only, so they stay inert until one is picked
+  params: { entityClasses, label: "", includeEquivalents: true, includeSubordinates: true },
+  operator: Query.NodeOperator.And,
+  edges: [],
+});
+
+/** The value node of an HP: / SP: edge, with no class, so left untouched it matches any value */
+const newValueNode = (): Query.INode => newNode([]);
+
 const addNode = (state: Query.INode, parentId: string): Query.INode => {
   const newEdge: Query.IEdge = {
-    type: Query.EdgeType["EP:T"],
+    type: Query.EdgeType["HP:"],
     id: uuidv4(),
     params: {},
     logic: Query.EdgeLogic.Positive,
-    node: {
-      type: Query.NodeType.E,
-      id: uuidv4(),
-      // EQ and SUB start on for every node added in the builder; they widen a
-      // picked entity only, so they stay inert until one is picked
-      params: {
-        entityClasses: [],
-        label: "",
-        includeEquivalents: true,
-        includeSubordinates: true,
-      },
-      operator: Query.NodeOperator.And,
-      edges: [],
-    },
+    node: newNode([]),
   };
 
   // Recursively clone the node tree, adding the new edge to the parent node
@@ -469,6 +546,7 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
       edges: node.edges.map((edge) => ({
         ...edge,
         node: cloneNode(edge.node),
+        ...(edge.valueNode && { valueNode: cloneNode(edge.valueNode) }),
       })),
     };
   };

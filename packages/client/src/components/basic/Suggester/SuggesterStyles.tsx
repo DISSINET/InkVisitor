@@ -167,12 +167,18 @@ export const StyledContextNote = styled.div`
 interface StyledSuggestionRow {
   $twoIcons: boolean;
   $isSelected: boolean;
-  $hasTrailingIcons: boolean;
+  $iconColumns: number;
 }
+// the icon block is padded by space[3] towards the tag and space[2] towards the
+// list edge, which the trailing column adds to its icon columns as space[5]
+const SUGGESTION_ICON_COLUMN_WIDTH = "1.75rem";
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
   grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto
-    ${({ theme, $hasTrailingIcons }) => ($hasTrailingIcons ? "3rem" : theme.space[2])};
+    ${({ theme, $iconColumns }) =>
+      $iconColumns
+        ? `calc(${$iconColumns} * ${SUGGESTION_ICON_COLUMN_WIDTH} + ${theme.space[5]})`
+        : theme.space[2]};
   align-items: center;
   background-color: ${({ theme, $isSelected }) =>
     $isSelected ? theme.color["suggestionSelected"] : "transparent"};
@@ -186,12 +192,18 @@ export const StyledSuggestionLineTag = styled.div<Column>`
   align-items: center;
   height: 100%;
 `;
-export const StyledSuggestionLineIcons = styled.div<Column>`
+export const StyledSuggestionLineIcons = styled.div<{ $columns: number }>`
   display: grid;
+  grid-template-columns: repeat(${({ $columns }) => $columns}, ${SUGGESTION_ICON_COLUMN_WIDTH});
+  padding: 0 ${({ theme }) => theme.space[2]} 0 ${({ theme }) => theme.space[3]};
   height: 100%;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   color: ${({ theme }) => theme.color["black"]};
+`;
+export const StyledSuggestionLineIcon = styled.div`
+  display: flex;
+  align-items: center;
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;

@@ -263,6 +263,36 @@ describe("Saved queries", function () {
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
+    const postTree = (agent: AuthAgent, name: string, query: any) =>
+      agent.post(`${apiPath}/saved-queries`).send({
+        name,
+        shared: false,
+        data: { query, includeEquivalents: false, includeSubordinates: false },
+      });
+    const propRoot = (valueNode: any): any => ({
+      ...leafNode(),
+      edges: [{ type: "HP:", logic: "positive", node: leafNode(), valueNode }],
+    });
+
+    it("accepts a query tree with a value node", async () => {
+      const res = await postTree(agentA, "value node", propRoot(leafNode()))
+        .expect("Content-Type", /json/)
+        .expect(200);
+      expect(res.body.result).toBeTruthy();
+    });
+
+    it("rejects a malformed value node", async () => {
+      await postTree(agentA, "bad value node", propRoot({}))
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
+
+    it("rejects a value node nested past the depth bound", async () => {
+      await postTree(agentA, "deep value node", propRoot(nestedQuery(MAX_SAVED_QUERY_DEPTH)))
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
+
     it("stores the table columns with their names and order", async () => {
       const columns = [
         { id: "c2", name: "status_col", type: "EST", editable: true, params: {} },

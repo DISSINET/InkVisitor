@@ -18,6 +18,7 @@ import {
 } from "@inkvisitor/shared/enums";
 import {
   IConcept,
+  IDocumentMeta,
   IEntity,
   IProp,
   IReference,
@@ -48,11 +49,18 @@ import {
   soeIdsForValidation,
 } from "./validation-expansion";
 
+/**
+ * Whether an entity update may set the field. `entityAllowedFields` lists
+ * read-only fields too, marked false, so being listed is not enough.
+ */
+const isWritableField = (key: string): boolean =>
+  entityAllowedFields[key as keyof IEntity] === true;
+
 /** `data` without the fields an entity update may not set. */
 function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
   const allowed: Partial<IEntity> = { ...data };
   Object.keys(allowed).forEach(
-    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+    (key) => !isWritableField(key) && delete allowed[key as keyof IEntity]
   );
   return allowed;
 }
@@ -157,7 +165,7 @@ export default class Entity implements IEntity, IDbModel {
     // replace AND remove unwanted fields in passed object
     Object.keys(updateData).forEach(
       (key) =>
-        !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
+        !isWritableField(key) && delete updateData[key as keyof IEntity]
     );
 
     const result = await storage.entities.update(db as Conn, this.id, updateData);
@@ -735,19 +743,29 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
+   * The documents the entity is anchored in, without their content. Neither
+   * storage orders them, so they are sorted by title for a stable order (the
+   * statement editor pages through the anchors).
+   */
+  async findAnchoringDocuments(conn: Conn): Promise<IDocumentMeta[]> {
+    return (await Document.findByEntityId(conn, this.id)).sort(
+      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
+    );
+  }
+
+  /**
    * returns data for usedInDocuments(IResponseUsedInDocument[]) field
    * @param conn
+   * @param docs the entity's anchoring documents, when the caller holds them already
    * @returns
    */
   async findUsedInDocuments(
-    conn: Conn
+    conn: Conn,
+    docs?: IDocumentMeta[]
   ): Promise<IResponseUsedInDocument[]> {
-    // neither storage orders the documents, and the per-document lookups below
-    // finish in any order, so the result is sorted by title for a stable order
-    // (the statement editor pages through it)
-    const docs = (await Document.findByEntityId(conn, this.id)).sort(
-      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
-    );
+    docs = docs || (await this.findAnchoringDocuments(conn));
+    // the per-document lookups below finish in any order, the result keeps the
+    // order of the documents
     const perDocument = await Promise.all(
       docs.map(async (docData) => {
         const out: IResponseUsedInDocument[] = [];
