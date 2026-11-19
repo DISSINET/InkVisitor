@@ -74,21 +74,31 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     return undefined;
   };
 
-  const nodeItems = useMemo<INodeItem[]>(() => {
+  const { nodeItems, gutterRows } = useMemo(() => {
     const nodeItems: INodeItem[] = [];
+    const gutterRows: number[] = [];
+    let row = 0;
 
     const traverse = (node: Query.INode, depth: number) => {
-      nodeItems.push({ ...node, gridX: depth, gridY: nodeItems.length });
+      nodeItems.push({ ...node, gridX: depth, gridY: row++ });
 
       node.edges.forEach((edge) => {
         edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
-    layoutRoots.forEach((root) => traverse(root, 0));
+    layoutRoots.forEach((root, index) => {
+      if (index > 0) {
+        gutterRows.push(row++);
+      }
+      traverse(root, 0);
+    });
 
-    return nodeItems;
+    return { nodeItems, gutterRows };
   }, [layoutRoots]);
+
+  // nodes are pushed row by row, so the last one is on the last row
+  const rowCount = (nodeItems.at(-1)?.gridY ?? -1) + 1;
 
   // a parent's children sit on their own rows, but an earlier child's subtree
   // pushes later siblings several rows down - leaving the parent's column empty
@@ -166,9 +176,11 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
-    <StyledQueryBox $gridWeight={gridWeight} $nodeItems={nodeItems}>
+    <StyledQueryBox $gridWeight={gridWeight} $rowCount={rowCount} $gutterRows={gutterRows}>
       {[...Array(gridWeight + 1).keys()].map((wi) => {
-        return [...Array(nodeItems.length).keys()].map((hi) => {
+        // a gutter row holds no node and no line
+        const rows = [...Array(rowCount).keys()].filter((hi) => !gutterRows.includes(hi));
+        return rows.map((hi) => {
           const nextCellNode = nodeItems.find((node) => node.gridX === wi + 1 && node.gridY === hi);
           const thisCellNode = nodeItems.find((node) => node.gridX === wi && node.gridY === hi);
           const associated = incomingEdge(thisCellNode?.id);
