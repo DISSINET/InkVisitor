@@ -636,6 +636,31 @@ describe("queryReducer addStartNode", () => {
   });
 });
 
+describe("queryReducer updateNodeClass on the root and start nodes", () => {
+  const every = [EntityEnums.Extension.Any, ...classesAll] as EntityEnums.Class[];
+  const changeClass = (state: Query.INode, nodeId: string, classes: EntityEnums.Class[]) =>
+    queryReducer(state, {
+      type: QueryActionType.updateNodeClass,
+      payload: { nodeId, newEntityClasses: classes },
+    });
+
+  it("stores every class picked on the root or a start node as any class", () => {
+    expect(changeClass(classNode("root", []), "root", every).params.entityClasses).toEqual([]);
+    const state = classNode("root", [], [
+      makeEdge("se0", Query.EdgeType.SE, classNode("s0", [])),
+      makeEdge("se1", Query.EdgeType.SE, classNode("s1", [])),
+    ]);
+    expect(changeClass(state, "s1", every).edges[1].node.params.entityClasses).toEqual([]);
+  });
+
+  it("keeps every class picked on a node further down", () => {
+    const state = classNode("root", [], [
+      makeEdge("e1", Query.EdgeType["EP:T"], classNode("n1", [])),
+    ]);
+    expect(changeClass(state, "n1", every).edges[0].node.params.entityClasses).toEqual(every);
+  });
+});
+
 describe("queryReducer removeEdge of a start node", () => {
   const remove = (state: Query.INode, edgeId: string) =>
     queryReducer(state, { type: QueryActionType.removeEdge, payload: { edgeId } });

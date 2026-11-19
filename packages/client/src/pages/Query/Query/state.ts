@@ -19,10 +19,10 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: classesAll,
+          entityClasses: [],
         }
       : {
-          entityClasses: classesAll,
+          entityClasses: [],
         },
   operator: Query.NodeOperator.And,
   edges:
@@ -346,6 +346,16 @@ const updateEdgePropPair = (
   return updatedState;
 };
 
+/**
+ * A list of every class matches what an empty list matches on the root and on a
+ * start node, and the empty one reads "all classes" in their class picker rather
+ * than a chip per class.
+ */
+const anyClassIfEvery = (
+  entityClasses: EntityEnums.Class[] | undefined,
+): EntityEnums.Class[] | undefined =>
+  classesAll.every((entityClass) => entityClasses?.includes(entityClass)) ? [] : entityClasses;
+
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
@@ -358,7 +368,14 @@ const updateNodeClass = (
     return updatedState;
   }
   const sourceClassesBefore = sourceClassesByEdge(updatedState);
-  nodeToUpdate.params.entityClasses = newEntityClasses;
+  const isRootOrStartNode =
+    nodeToUpdate === updatedState ||
+    updatedState.edges.some(
+      (edge) => edge.type === Query.EdgeType.SE && edge.node === nodeToUpdate,
+    );
+  nodeToUpdate.params.entityClasses = isRootOrStartNode
+    ? anyClassIfEvery(newEntityClasses)
+    : newEntityClasses;
   reseedRelationTargetClasses(updatedState, sourceClassesBefore);
 
   return updatedState;
@@ -595,11 +612,7 @@ const addStartNode = (state: Query.INode): Query.INode => {
     };
   }
   const { includeEquivalents, includeSubordinates, ...params } = state.params;
-  // a list of every class matches what an empty list matches, and the empty
-  // one reads "all classes", as the start node beside it does
-  if (classesAll.every((entityClass) => params.entityClasses?.includes(entityClass))) {
-    params.entityClasses = [];
-  }
+  params.entityClasses = anyClassIfEvery(params.entityClasses);
   return {
     ...state,
     params: { entityClasses: [], includeEquivalents, includeSubordinates },

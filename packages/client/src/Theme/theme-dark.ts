@@ -48,6 +48,7 @@ const darkTheme = {
     white: "#060c26",
     grey: "#6b6b6b",
     greyer: "#b5b5b5",
+    separatorActive: "#718096", // gray 400, the slate of the dark greys
     mutedText: "#a0aec0", // gray 500
     text: "#c7c7c7",
     primary: "#f6f6ff",
