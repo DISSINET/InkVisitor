@@ -615,10 +615,12 @@ export default Router()
         existing.removeAnchors(
           typeof entityIds === "object" ? entityIds : [entityIds]
         );
+        await existing.preprocess(request.db.connection);
 
         const result = await existing.update(request.db.connection, {
           content: existing.content,
           entityIds: existing.entityIds,
+          anchors: existing.anchors,
         });
 
         return {
@@ -672,6 +674,7 @@ export default Router()
         const result = await existing.update(request.db.connection, {
           content: existing.content,
           entityIds: existing.entityIds,
+          anchors: existing.anchors,
         });
 
         return {
