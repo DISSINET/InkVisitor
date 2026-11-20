@@ -53,6 +53,17 @@ export class AnchorsNode implements IAnchorsNode {
     const rootNodes: AnchorsNode[] = []; // List of root nodes
     const nodeStack: AnchorsNode[] = []; // Stack to keep track of the current node
 
+    // an id listed under several classes takes the first one
+    const classOf = new Map<string, EntityEnums.Class>();
+    for (const classType of Object.keys(entityIds) as EntityEnums.Class[]) {
+      for (const id of entityIds[classType] || []) {
+        if (!classOf.has(id)) {
+          classOf.set(id, classType);
+        }
+      }
+    }
+    const unclosed = AnchorsNode.findUnclosedOpeningTags(content, classOf);
+
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -74,13 +85,7 @@ export class AnchorsNode implements IAnchorsNode {
 
       if (!isClosingTag && !isSelfClosing) {
         // Open tag: Create a new node for the tag
-        let anchorClass: EntityEnums.Class | undefined;
-        for (const classType of Object.keys(entityIds)) {
-          if (entityIds[classType as EntityEnums.Class].includes(tag)) {
-            anchorClass = classType as EntityEnums.Class;
-            break;
-          }
-        }
+        const anchorClass = classOf.get(tag);
 
         if (anchorClass) {
           const newNode = new AnchorsNode(tag, "", [], anchorClass);
@@ -91,8 +96,13 @@ export class AnchorsNode implements IAnchorsNode {
             // Root level node
             rootNodes.push(newNode);
           }
-          // Push the new node onto the stack (start processing its children)
-          nodeStack.push(newNode);
+          // An anchor whose opening tag never closes spans no text: it stays a
+          // leaf with indexEnd -1, and what follows belongs to the anchors
+          // around it. Every other anchor goes on the stack to collect its
+          // children and text.
+          if (!unclosed.has(match.index)) {
+            nodeStack.push(newNode);
+          }
         }
       } else if (isClosingTag) {
         // A closing tag ends the nearest open anchor of its name and nothing
@@ -129,6 +139,38 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return rootNodes;
+  }
+
+  /**
+   * Positions of the anchor opening tags that no closing tag ends, paired the
+   * way buildAnchorsTree pairs them: a closing tag ends the nearest open anchor
+   * of its name. Self-closing tags and tags of ids missing from `classOf` open
+   * nothing.
+   */
+  private static findUnclosedOpeningTags(
+    content: string,
+    classOf: Map<string, EntityEnums.Class>
+  ): Set<number> {
+    const anyTagPattern = createAnyTagRegex();
+    const open: { tag: string; at: number }[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = anyTagPattern.exec(content)) !== null) {
+      const tag = match[1].split(/\s+/)[0];
+      if (content[match.index + 1] === "/") {
+        let openAt = open.length - 1;
+        while (openAt >= 0 && open[openAt].tag !== tag) {
+          openAt--;
+        }
+        if (openAt !== -1) {
+          open.splice(openAt, 1);
+        }
+      } else if (!match[0].endsWith("/>") && classOf.has(tag)) {
+        open.push({ tag, at: match.index });
+      }
+    }
+
+    return new Set(open.map((tag) => tag.at));
   }
 
   /**

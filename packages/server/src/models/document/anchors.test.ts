@@ -144,6 +144,69 @@ describe("AnchorsNode.buildAnchorsTree with paired tags that are not anchors", (
   });
 });
 
+describe("AnchorsNode.buildAnchorsTree with an opening tag that never closes", () => {
+  const entityIds = (ids: string[]) => ({
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Concept]: ids,
+  });
+
+  test("the anchor is a leaf that holds no anchors and no text", () => {
+    const content = 'x <e1 elvl="1">aa <e2>bb</e2> cc <e3>dd</e3> tail';
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1", "e2", "e3"]);
+    expect(tree[0].indexStart).toEqual(content.indexOf("<e1"));
+    expect(tree[0].indexEnd).toEqual(-1);
+    expect(tree[0].content).toEqual("");
+    expect(tree[0].children).toEqual([]);
+    expect(tree[1].content).toEqual("bb");
+    expect(tree[2].content).toEqual("dd");
+  });
+
+  test("the anchor around it keeps its whole text", () => {
+    const content = "<e1>aa <e2>bb</e1> cc";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].content).toEqual("aa bb");
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    expect(
+      tree[0].children.map((node) => [node.anchor, node.indexEnd, node.content])
+    ).toEqual([["e2", -1, ""]]);
+  });
+
+  test("crossing anchors around it keep their pairing and their text", () => {
+    const content = "<e1>a <e2>b <e3> c</e1> d</e2>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    const crossing = tree[0].children[0];
+    expect(crossing.anchor).toEqual("e2");
+    expect(crossing.indexEnd).toEqual(content.length);
+    expect(crossing.content).toEqual("b  c d");
+    expect(crossing.children.map((node) => [node.anchor, node.indexEnd])).toEqual([["e3", -1]]);
+  });
+
+  test("two anchors of one entity stay in the order of their opening tags", () => {
+    const tree = AnchorsNode.buildAnchorsTree("<e1> a <e1>one</e1>", entityIds(["e1"]));
+
+    expect(tree.map((node) => [node.indexEnd === -1, node.content])).toEqual([
+      [true, ""],
+      [false, "one"],
+    ]);
+  });
+
+  test("an unclosed tag that is no entity builds no node", () => {
+    const content = "<hi> <e1>one</e1>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1"]));
+
+    expect(tree.map((node) => [node.anchor, node.content, node.indexEnd])).toEqual([
+      ["e1", "one", content.length],
+    ]);
+  });
+});
+
 describe("AnchorsNode.collectAnchoredNearby", () => {
   const entityIds = {
     ...entityIdsFromContent(""),
