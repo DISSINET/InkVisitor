@@ -42,6 +42,24 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - New mood: accusation (#3388)
 - The reference and delete batch actions in the Statement list confirm with a toast, and rows no longer flicker at the scroller edge
 
+## Geocoding (#3323)
+
+- The accuracy of a coordinate is saved as a subproperty of the coordinate, not as a second property beside it
+- The gazetteers behind a coordinate are named as subproperties of it too (the "source of knowledge" Concept, one per gazetteer, valued with the gazetteer's Resource), so that a licence asking for credit has it on the coordinate itself
+- A Location's location type follows the subclass and synonym tree of the Concept assigned to the type: what is classified "city" shows as a settlement, and so does "civitas", unless a subclass has a location type of its own. Inferred types are drawn paler, say where they come from on hover and cannot be removed from the page
+- A Location can have several location types. Choosing one adds it, the list row and the panel head tick and untick them, and a Location without a coordinate can be given one
+- The settings table counts the Locations that read as each location type, shows how many of them are only inferred, and warns where a Concept has more subclasses than can be followed
+- A church with a tower is added to the location type marks
+- "kind of place" is called "location type" and "engine type" is called "gazetteer location type" throughout; the gazetteers' type of a suggestion is said in words on its card
+- The gazetteer hover card is shown in the settings only, not beside the suggestions; its "cannot do" line is "limitations"
+- The notes in the global geocoding settings are shorter and in plain words, the role rows say what they hold, and the gazetteer location type column explains what each type covers
+- The query context's labels and sliders line up with the top of their row
+- A search no longer slows the page down while it runs: the seconds counter re-rendered the whole page, and any window open over it, four times a second
+- Each gazetteer in the settings and in My preferences shows, under its name, what it covers (time, geography, topic), how long it usually takes ("local", "quick", "moderate", "slow", and "often fails" where it does) and how many records it holds. The engine measures the time itself, so a source shows none until it has been asked a few times
+- A new Location can be made from the Geocoding page with the `+` beside the search field. It opens the Explorer's create dialog for Locations, then the list is widened to every Location and the new one is selected
+- The Geocoding page can have nothing selected: a bar above the Locations always says which Location is selected, or that nothing is, and has a clear button; the strip under the map has a "deselect" button too
+- With no Location selected, a click on the map, a drawn point, line or polygon, or a typed coordinate starts a new Location: the same two questions (accuracy, location type) with the coordinate shown, then the create dialog for the label, then the coordinate is written on the new Location. A `+` under the drawing tool on the map opens the same dialog without a coordinate
+
 ## Other improvements and fixes
 
 - Label search treats quote marks and apostrophes as interchangeable, finds Czech accented letters from plain ones (`temer` finds `Teměř`) and reads typed regex characters literally (#3302)
@@ -70,6 +88,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - Explorer columns are read once per page instead of once per row (100 rows, 6 columns: 362 database statements to 6) (#3412)
 - Tooltip anchors are grouped on the server (a Territory tooltip went from 379 KB to 10 KB); created / updated at filters, Territory validation ties and tooltip relations load in fewer queries (#3361, #3354, #3348)
 - New `GET /entities/:entityId/used-relations`, open to every logged-in user
+- New `GET /entities/classified-under`, the entities classified under given Concepts or under a subclass or synonym of one, open to every logged-in user (#3323)
 - CONTEXT.md glossary of the research team's vocabulary (#3287)
 
 ## PostgreSQL (Technical)
@@ -94,3 +113,8 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - PostgreSQL backups run only once the `backup-pg.sh` cron line from the database README is added on each host (#3397)
 - A server start whose schema sync waits more than 10 s for a lock (e.g. behind a running `pg_dump`) fails with the lock error; a restart retries it (#3405)
 - A blank `APIURL` at client build falls back to the app origin; behind a proxy serving the container under a sub-path, set `APIURL` with the sub-path
+- Geocoding (#3323): `nestGeocodingAccuracyJob` moves the accuracy of existing Locations under their coordinate. It lists the Locations it will not touch, and a second run finds nothing to move. On a database that still holds coordinates as `geo:x` and `geo:y`, run `migrateGeocodingGeometryJob` first.
+- Geocoding (#3323): assign the "epistemic source" Concept in Global geocoding (owner), under "concept for the source of knowledge"; until it is assigned the gazetteers are recorded as references only. Then run `addGeocodingSourcesJob` to name the gazetteers of Locations geocoded before, from their references. It credits a gazetteer only when the Value holding its record id was created within five minutes of the Value holding the coordinate, so a reference added by hand later is not credited.
+- Geocoding (#3323): both jobs write a Location only if it has not changed since the job read it, and refuse a database where one Concept serves two of the coordinate roles. They run on RethinkDB only: on an instance switching to PostgreSQL, assign the Concept and run both before `migrate`.
+- Geocoding (#3323): Explorer queries and validation rules that expect the accuracy as a first-level property no longer find it once it is nested, and have to be rewritten.
+- Geocoding (#3323): a location type covers its Concept and everything below it, so assign a narrow Concept ("settlement", not "area" or "place"): a broad one takes in every Location classified under anything beneath it. The settings table shows how many are inferred.
