@@ -12,7 +12,7 @@ import {
   IWarning,
   Relation,
 } from "@inkvisitor/shared/types";
-import { IAnchorsNode } from "@inkvisitor/shared/types/document";
+import { IAnchorsNode, isOrphanedAnchor } from "@inkvisitor/shared/types/document";
 import React from "react";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { FaUserEdit } from "react-icons/fa";
@@ -441,10 +441,11 @@ export const computeDifferences = <T extends Record<string, any>>(
   return differences;
 };
 
-// collect all anchors that has class Statememnt
+// collect all anchors that has class Statememnt, but none whose opening tag
+// never closes
 export const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
   return anchors.reduce((acc: any[], anchor) => {
-    if (anchor.class === EntityEnums.Class.Statement) {
+    if (anchor.class === EntityEnums.Class.Statement && !isOrphanedAnchor(anchor)) {
       acc.push(anchor);
     }
     if (anchor.children) {
@@ -454,10 +455,11 @@ export const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[]
   }, []);
 };
 
-// collect all anchors that have class Territory
+// collect all anchors that have class Territory, but none whose opening tag
+// never closes
 export const collectTerritoryAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
   return anchors.reduce((acc: IAnchorsNode[], anchor) => {
-    if (anchor.class === EntityEnums.Class.Territory) {
+    if (anchor.class === EntityEnums.Class.Territory && !isOrphanedAnchor(anchor)) {
       acc.push(anchor);
     }
     if (anchor.children) {
