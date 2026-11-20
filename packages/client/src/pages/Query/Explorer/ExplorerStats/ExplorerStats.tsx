@@ -73,8 +73,8 @@ interface ExplorerStatsProps {
   values: Record<string, Record<string, number>> | undefined;
   /** Size of the whole filtered result the stats relate to. */
   total: number | undefined;
-  /** Server cap on how many entities the stats are actually computed over. */
-  statsEntityLimit: number | undefined;
+  /** Server cap on how many entities the stats are actually computed over, null when it has none. */
+  statsEntityLimit: number | null | undefined;
   /** True when no search criteria are set, so no query is fired. */
   isRequestEmpty: boolean;
   /** True when criteria are set but the search has not been run yet. */
