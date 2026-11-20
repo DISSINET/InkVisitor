@@ -1,5 +1,6 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+import { IcoNodeTree } from "Theme/icons";
 import { StyledLabel } from "components/basic/Checkbox/CheckboxStyles";
 import {
   StyledControl,
@@ -30,6 +31,17 @@ export const StyledNodeMainRow = styled.div`
     width: ${({ theme }) => theme.space[8]};
     height: 1px;
   }
+`;
+
+// sized as the icons of the node's other buttons
+export const StyledStartNodeIcon = styled(IcoNodeTree)`
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  padding: ${({ theme }) => theme.space[1]};
+`;
+
+// a node row wider than its cell would squeeze the AND / OR switch beside it
+export const StyledParallelOperatorSlot = styled.div`
+  flex-shrink: 0;
 `;
 
 export const StyledParallelOperator = styled.div`
@@ -190,7 +202,7 @@ export const StyledEdgeControlsLayer = styled.div`
   z-index: 1;
 `;
 
-export const StyledEdgeBox = styled.div<{ $color: string }>`
+const edgeBox = css<{ $color: string }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -199,6 +211,10 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   padding: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[3]};
+`;
+
+export const StyledEdgeBox = styled.div<{ $color: string }>`
+  ${edgeBox}
   margin-top: 1.4rem;
 `;
 
@@ -219,11 +235,15 @@ export const StyledEdgeNotToggle = styled.div<{ $active: boolean }>`
 // the "with value" box is shorter than an edge's own box, so it is centred on the connector
 // line (half the row height) rather than offset by the edge box's top margin
 export const StyledEdgeValueControlsLayer = styled(StyledEdgeControlsLayer)`
-  height: ${QUERY_GRID_HEIGHT}px;
+  position: absolute;
+  top: ${QUERY_GRID_HEIGHT / 2}px;
+  left: 0;
+  height: auto;
+  transform: translateY(-50%);
 `;
 
-export const StyledEdgeValueBox = styled(StyledEdgeBox)`
-  margin-top: 0;
+export const StyledEdgeValueBox = styled.div<{ $color: string }>`
+  ${edgeBox}
 `;
 
 // the "with value" label leading from the edge's spine to the value node of an HP: / SP: edge
@@ -259,7 +279,9 @@ export const StyledExpansionToggleGroup = styled.div`
 `;
 
 // the count beside a checked EQ / SUB toggle; opens the expansion popover
-export const StyledExpansionCountButton = styled.button`
+// black on the light node and page backgrounds; a start node takes query2Text, as the
+// other labels on its background do
+export const StyledExpansionCountButton = styled.button<{ $color?: "black" | "query2Text" }>`
   border: none;
   background: none;
   padding: 0;
@@ -271,7 +293,7 @@ export const StyledExpansionCountButton = styled.button`
   line-height: inherit;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme, $color = "black" }) => theme.color[$color]};
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;

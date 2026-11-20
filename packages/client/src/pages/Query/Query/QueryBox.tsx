@@ -1,5 +1,5 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useTheme } from "styled-components";
 import { INodeItem, QueryValidity } from "../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../constants";
@@ -28,6 +28,16 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
+  // the start nodes sit in the root's column, each drawn as a root; the root
+  // holds no other edge (Query.areStartNodesValid), so it and its SE edges are
+  // not drawn
+  const hasStartNodes = Query.hasStartNodes(state);
+  const layoutRoots = useMemo<Query.INode[]>(
+    () => (hasStartNodes ? state.edges.map((edge) => edge.node) : [state]),
+    [state, hasStartNodes],
+  );
+
+
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 0;
 
@@ -39,10 +49,10 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root) => traverse(root, 0));
 
     return maxNodeDepth;
-  }, [state]);
+  }, [layoutRoots]);
 
   const allEdges = getAllEdges(state);
 
@@ -65,21 +75,48 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     return undefined;
   };
 
-  const nodeItems = useMemo<INodeItem[]>(() => {
+  const { nodeItems, gutterRows } = useMemo(() => {
     const nodeItems: INodeItem[] = [];
+    const gutterRows: number[] = [];
+    let row = 0;
 
     const traverse = (node: Query.INode, depth: number) => {
-      nodeItems.push({ ...node, gridX: depth, gridY: nodeItems.length });
+      nodeItems.push({ ...node, gridX: depth, gridY: row++ });
 
       node.edges.forEach((edge) => {
         edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root, index) => {
+      if (index > 0) {
+        gutterRows.push(row++);
+      }
+      traverse(root, 0);
+    });
 
-    return nodeItems;
-  }, [state]);
+    return { nodeItems, gutterRows };
+  }, [layoutRoots]);
+
+  // nodes are pushed row by row, so the last one is on the last row
+  const rowCount = (nodeItems.at(-1)?.gridY ?? -1) + 1;
+
+  // a node added by the user is scrolled into view, across and down, as a small box may show
+  // it out of sight; a loaded query remounts this box, so its nodes count as seen
+  const boxRef = useRef<HTMLDivElement>(null);
+  const nodeIdsKey = nodeItems.map((node) => node.id).join();
+  const seenNodeIds = useRef(new Set(nodeIdsKey.split(",")));
+  useEffect(() => {
+    const ids = nodeIdsKey.split(",");
+    // adding the first start node also moves the root into a new one, ahead of the added one
+    const added = ids.filter((id) => !seenNodeIds.current.has(id)).at(-1);
+    seenNodeIds.current = new Set(ids);
+    if (added) {
+      boxRef.current
+        ?.querySelector(`[data-node-id="${added}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    }
+  }, [nodeIdsKey]);
 
   // a parent's children sit on their own rows, but an earlier child's subtree
   // pushes later siblings several rows down - leaving the parent's column empty
@@ -144,7 +181,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       }
       node.edges.forEach((e) => edgeTargets(e).forEach(traverse));
     };
-    traverse(state);
+    layoutRoots.forEach(traverse);
 
     return {
       extendEdgeIds: extend,
@@ -153,13 +190,20 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       valueRailCells: valueRails,
       nodeChildStubs: childStubs,
     };
-  }, [state, nodeItems]);
+  }, [layoutRoots, nodeItems]);
   const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
-    <StyledQueryBox $gridWeight={gridWeight} $nodeItems={nodeItems}>
+    <StyledQueryBox
+      ref={boxRef}
+      $gridWeight={gridWeight}
+      $rowCount={rowCount}
+      $gutterRows={gutterRows}
+    >
       {[...Array(gridWeight + 1).keys()].map((wi) => {
-        return [...Array(nodeItems.length).keys()].map((hi) => {
+        // a gutter row holds no node and no line
+        const rows = [...Array(rowCount).keys()].filter((hi) => !gutterRows.includes(hi));
+        return rows.map((hi) => {
           const nextCellNode = nodeItems.find((node) => node.gridX === wi + 1 && node.gridY === hi);
           const thisCellNode = nodeItems.find((node) => node.gridX === wi && node.gridY === hi);
           const associated = incomingEdge(thisCellNode?.id);
@@ -181,6 +225,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               (problem) => problem.source === valueRailEdge.id && !problem.warning,
             );
 
+          // the SE edge of a start node is not drawn, so its problems go to the start node
+          const hiddenEdgeId = hasStartNodes && wi === 0 ? associated?.edge.id : undefined;
+
           const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
 
@@ -190,6 +237,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               $column={wi + 1}
               $row={hi + 1}
               $hasNode={!!thisCellNode}
+              data-node-id={thisCellNode?.id}
             >
               {showRail && (
                 <svg
@@ -270,12 +318,13 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 <QueryGridNode
                   node={thisCellNode}
                   sourceClasses={associated && getEdgeSourceClasses(state, associated.edge.id)}
-                  isRoot={wi === 0}
+                  isRoot={wi === 0 && !hasStartNodes}
                   dispatch={dispatch}
                   edge={associated?.edge}
                   isValueNode={associated?.isValue}
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === thisCellNode.id,
+                    (problem) =>
+                      problem.source === thisCellNode.id || problem.source === hiddenEdgeId,
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
@@ -284,7 +333,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 <QueryGridEdge
                   node={nextCellNode}
                   rootNode={state}
-                  isRootEdge={wi === 0}
                   dispatch={dispatch}
                   edge={nextCellAssociated.edge}
                   isValueConnector={nextCellAssociated.isValue}

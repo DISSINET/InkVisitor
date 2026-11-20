@@ -1,3 +1,4 @@
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { describe, expect, it } from "vitest";
@@ -503,6 +504,216 @@ describe("queryReducer removeEdge", () => {
     ]);
     const next = queryReducer(state, { type: QueryActionType.removeEdge, payload: { edgeId: "e1" } });
     expect(next.edges.map((e) => e.id)).toEqual(["e3"]);
+  });
+});
+
+describe("queryReducer addStartNode", () => {
+  const addStartNode = (state: Query.INode) =>
+    queryReducer(state, { type: QueryActionType.addStartNode });
+
+  it("moves the root's classes, edges and operator into the first of two start nodes", () => {
+    const state: Query.INode = {
+      ...classNode("root", [EntityEnums.Class.Person], [
+        makeEdge("e1", Query.EdgeType["R:SOE"], classNode("n1", [EntityEnums.Class.Group])),
+        makeEdge("e2", Query.EdgeType["EP:T"], makeNode("n2")),
+      ]),
+      operator: Query.NodeOperator.Or,
+    };
+    const next = addStartNode(state);
+
+    expect(next.id).toBe("root");
+    expect(next.params.entityClasses).toEqual([]);
+    expect(next.operator).toBe(Query.NodeOperator.Or);
+    expect(next.edges.map((edge) => edge.type)).toEqual([Query.EdgeType.SE, Query.EdgeType.SE]);
+
+    const [first, second] = next.edges.map((edge) => edge.node);
+    expect(first.id).not.toBe("root");
+    expect(first.params.entityClasses).toEqual([EntityEnums.Class.Person]);
+    expect(first.operator).toBe(Query.NodeOperator.Or);
+    expect(first.edges.map((edge) => edge.id)).toEqual(["e1", "e2"]);
+    expect(second.params.entityClasses).toEqual([]);
+    expect(second.edges).toEqual([]);
+    expect(new Set([next.edges[0].id, next.edges[1].id, first.id, second.id]).size).toBe(4);
+  });
+
+  it("stores a root that lists every class as a start node of any class", () => {
+    const next = addStartNode(classNode("root", classesAll));
+
+    expect(next.edges[0].node.params.entityClasses).toEqual([]);
+  });
+
+  it("keeps the result expansion toggles on the root", () => {
+    const state: Query.INode = {
+      ...makeNode("root"),
+      params: { entityClasses: [], includeEquivalents: true, includeSubordinates: false },
+    };
+    const next = addStartNode(state);
+    expect(next.params).toEqual({
+      entityClasses: [],
+      includeEquivalents: true,
+      includeSubordinates: false,
+    });
+    expect(next.edges[0].node.params).toEqual({ entityClasses: [] });
+  });
+
+  it("keeps every stored class of the relation targets, whose source classes stay the same", () => {
+    // n2 holds a class its any-class source never reaches, which a re-seed would move
+    const state = classNode("root", [], [
+      makeEdge("e1", Query.EdgeType["R:SYN"], classNode("n1", [EntityEnums.Class.Action], [
+        makeEdge("e2", Query.EdgeType["R:SYN"], classNode("n2", [EntityEnums.Class.Concept])),
+      ])),
+      makeEdge("e3", Query.EdgeType["R:SOE"], classNode("n3", [EntityEnums.Class.Group])),
+    ]);
+    const next = addStartNode(state);
+    const moved = next.edges[0].node;
+    expect(moved.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Action]);
+    expect(moved.edges[0].node.edges[0].node.params.entityClasses).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+    expect(moved.edges[1].node.params.entityClasses).toEqual([EntityEnums.Class.Group]);
+  });
+
+  it("appends one empty start node to a root that has start nodes", () => {
+    const wrapped = addStartNode(classNode("root", [EntityEnums.Class.Person]));
+    const next = addStartNode(wrapped);
+    expect(next.operator).toBe(Query.NodeOperator.Or);
+    expect(next.params.entityClasses).toEqual([]);
+    expect(next.edges.map((edge) => edge.type)).toEqual([
+      Query.EdgeType.SE,
+      Query.EdgeType.SE,
+      Query.EdgeType.SE,
+    ]);
+    expect(next.edges.slice(0, 2)).toEqual(wrapped.edges);
+    expect(next.edges[2].node.params.entityClasses).toEqual([]);
+    expect(next.edges[2].node.edges).toEqual([]);
+  });
+
+  it("joins the start nodes of a loaded root by Or", () => {
+    const loaded = classNode("root", [], [
+      makeEdge("se1", Query.EdgeType.SE, classNode("s1", [EntityEnums.Class.Person])),
+    ]);
+    expect(loaded.operator).toBe(Query.NodeOperator.And);
+    const next = addStartNode(loaded);
+    expect(next.operator).toBe(Query.NodeOperator.Or);
+    expect(next.edges.map((edge) => edge.type)).toEqual([Query.EdgeType.SE, Query.EdgeType.SE]);
+  });
+
+  it("moves a pinned entity and a node filter into the first start node", () => {
+    const state: Query.INode = {
+      ...makeNode("root"),
+      params: { entityId: "e-1", entityClasses: [], label: "star" },
+    };
+    const next = addStartNode(state);
+    expect(next.params).toEqual({ entityClasses: [] });
+    expect(next.edges[0].node.params).toEqual({ entityId: "e-1", entityClasses: [], label: "star" });
+  });
+
+  it("leaves the state it is given as it was", () => {
+    const deepFreeze = <T>(value: T): T => {
+      Object.values(value as object).forEach(
+        (child) => child && typeof child === "object" && deepFreeze(child),
+      );
+      return Object.freeze(value);
+    };
+    const plain: Query.INode = {
+      ...classNode("root", [...classesAll], [
+        makeEdge("e1", Query.EdgeType["R:SOE"], classNode("n1", [EntityEnums.Class.Group])),
+      ]),
+      params: { entityClasses: [...classesAll], label: "star", includeEquivalents: true },
+    };
+    const withStartNodes = addStartNode(classNode("root", [EntityEnums.Class.Person]));
+    for (const state of [plain, withStartNodes]) {
+      const before = structuredClone(state);
+      addStartNode(deepFreeze(state));
+      expect(state).toEqual(before);
+    }
+  });
+
+  it("reads every class the class dropdown stores, its wildcard first, as any class", () => {
+    const picked = [EntityEnums.Extension.Any, ...classesAll] as EntityEnums.Class[];
+    const next = addStartNode(classNode("root", picked));
+    expect(next.edges[0].node.params.entityClasses).toEqual([]);
+  });
+});
+
+describe("queryReducer updateNodeClass on the root and start nodes", () => {
+  const every = [EntityEnums.Extension.Any, ...classesAll] as EntityEnums.Class[];
+  const changeClass = (state: Query.INode, nodeId: string, classes: EntityEnums.Class[]) =>
+    queryReducer(state, {
+      type: QueryActionType.updateNodeClass,
+      payload: { nodeId, newEntityClasses: classes },
+    });
+
+  it("stores every class picked on the root or a start node as any class", () => {
+    expect(changeClass(classNode("root", []), "root", every).params.entityClasses).toEqual([]);
+    const state = classNode("root", [], [
+      makeEdge("se0", Query.EdgeType.SE, classNode("s0", [])),
+      makeEdge("se1", Query.EdgeType.SE, classNode("s1", [])),
+    ]);
+    expect(changeClass(state, "s1", every).edges[1].node.params.entityClasses).toEqual([]);
+  });
+
+  it("keeps every class picked on a node further down", () => {
+    const state = classNode("root", [], [
+      makeEdge("e1", Query.EdgeType["EP:T"], classNode("n1", [])),
+    ]);
+    expect(changeClass(state, "n1", every).edges[0].node.params.entityClasses).toEqual(every);
+  });
+});
+
+describe("queryReducer removeEdge of a start node", () => {
+  const remove = (state: Query.INode, edgeId: string) =>
+    queryReducer(state, { type: QueryActionType.removeEdge, payload: { edgeId } });
+  const withStartNodes = (...nodes: Query.INode[]): Query.INode => ({
+    ...classNode("root", [], nodes.map((node, i) => makeEdge(`se${i}`, Query.EdgeType.SE, node))),
+    operator: Query.NodeOperator.Or,
+  });
+  const filtered = (id: string): Query.INode => ({ ...makeNode(id), params: { label: "star" } });
+
+  it("puts the start node left alone back in the root's place", () => {
+    const original: Query.INode = {
+      ...classNode("root", [EntityEnums.Class.Person], [
+        makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1")),
+      ]),
+      params: { entityClasses: [EntityEnums.Class.Person], includeEquivalents: true },
+    };
+    const wrapped = queryReducer(original, { type: QueryActionType.addStartNode });
+    expect(remove(wrapped, wrapped.edges[1].id)).toEqual(original);
+  });
+
+  it("keeps the other start nodes while two or more are left", () => {
+    const next = remove(withStartNodes(makeNode("s0"), makeNode("s1"), makeNode("s2")), "se1");
+    expect(next.id).toBe("root");
+    expect(next.operator).toBe(Query.NodeOperator.Or);
+    expect(next.edges.map((edge) => edge.id)).toEqual(["se0", "se2"]);
+  });
+
+  it("keeps a lone start node that holds what the root cannot show", () => {
+    const pinned = { ...makeNode("s0"), params: { entityId: "c-1" } };
+    expect(remove(withStartNodes(filtered("s0"), makeNode("s1")), "se1").edges[0].id).toBe("se0");
+    expect(remove(withStartNodes(pinned, makeNode("s1")), "se1").edges[0].id).toBe("se0");
+
+    const negated = withStartNodes(makeNode("s0"), makeNode("s1"));
+    negated.edges[0].logic = Query.EdgeLogic.Negative;
+    expect(remove(negated, "se1").edges[0].id).toBe("se0");
+
+    const rootClasses = withStartNodes(makeNode("s0"), makeNode("s1"));
+    rootClasses.params.entityClasses = [EntityEnums.Class.Concept];
+    expect(remove(rootClasses, "se1").edges[0].id).toBe("se0");
+  });
+
+  it("sets the root back to And once the last start node is removed", () => {
+    const next = remove(remove(withStartNodes(filtered("s0"), makeNode("s1")), "se1"), "se0");
+    expect(next.edges).toEqual([]);
+    expect(next.operator).toBe(Query.NodeOperator.And);
+  });
+
+  it("leaves the operator of a node without start nodes alone", () => {
+    const state: Query.INode = {
+      ...makeNode("root", [makeEdge("e1", Query.EdgeType["EP:T"], makeNode("n1"))]),
+      operator: Query.NodeOperator.Or,
+    };
+    expect(remove(state, "e1").operator).toBe(Query.NodeOperator.Or);
   });
 });
 

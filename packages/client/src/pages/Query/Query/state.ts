@@ -1,7 +1,13 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
-import { NODE_FILTER_KEYS, getAllEdges, getAllNodes, getEdgeSourceNode } from "./utils";
+import {
+  NODE_FILTER_KEYS,
+  countNodeFilters,
+  getAllEdges,
+  getAllNodes,
+  getEdgeSourceNode,
+} from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { deepCopy } from "utils/utils";
 import { getEdgeSourceClasses, getRelationConstrainedCategoryTypes } from "../utils";
@@ -13,10 +19,10 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: classesAll,
+          entityClasses: [],
         }
       : {
-          entityClasses: classesAll,
+          entityClasses: [],
         },
   operator: Query.NodeOperator.And,
   edges:
@@ -65,6 +71,7 @@ const queryStateInitial: Query.INode = {
 
 enum QueryActionType {
   addNode,
+  addStartNode,
   removeEdge,
   updateEdgeType,
   updateEdgeLogic,
@@ -85,6 +92,9 @@ type QueryAction =
   | {
       type: QueryActionType.addNode;
       payload: { parentId: string };
+    }
+  | {
+      type: QueryActionType.addStartNode;
     }
   | {
       type: QueryActionType.removeEdge;
@@ -152,6 +162,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.addNode:
       return addNode(state, action.payload.parentId);
 
+    case QueryActionType.addStartNode:
+      return addStartNode(state);
+
     case QueryActionType.removeEdge:
       const edgeToRemove = action.payload.edgeId;
       const updatedStateRemove = { ...state };
@@ -165,6 +178,13 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         return updatedStateRemove;
       }
       parentNode2.edges = parentNode2.edges.filter((e) => e.id !== edgeToRemove);
+      if (edge.type === Query.EdgeType.SE) {
+        // start nodes are joined by Or alone; a root that holds none has And, as a new query has
+        if (!Query.hasStartNodes(parentNode2)) {
+          parentNode2.operator = Query.NodeOperator.And;
+        }
+        return liftLoneStartNode(updatedStateRemove);
+      }
 
       return updatedStateRemove;
 
@@ -326,6 +346,16 @@ const updateEdgePropPair = (
   return updatedState;
 };
 
+/**
+ * A list of every class matches what an empty list matches on the root and on a
+ * start node, and the empty one reads "all classes" in their class picker rather
+ * than a chip per class.
+ */
+const anyClassIfEvery = (
+  entityClasses: EntityEnums.Class[] | undefined,
+): EntityEnums.Class[] | undefined =>
+  classesAll.every((entityClass) => entityClasses?.includes(entityClass)) ? [] : entityClasses;
+
 const updateNodeClass = (
   state: Query.INode,
   nodeId: string,
@@ -338,7 +368,14 @@ const updateNodeClass = (
     return updatedState;
   }
   const sourceClassesBefore = sourceClassesByEdge(updatedState);
-  nodeToUpdate.params.entityClasses = newEntityClasses;
+  const isRootOrStartNode =
+    nodeToUpdate === updatedState ||
+    updatedState.edges.some(
+      (edge) => edge.type === Query.EdgeType.SE && edge.node === nodeToUpdate,
+    );
+  nodeToUpdate.params.entityClasses = isRootOrStartNode
+    ? anyClassIfEvery(newEntityClasses)
+    : newEntityClasses;
   reseedRelationTargetClasses(updatedState, sourceClassesBefore);
 
   return updatedState;
@@ -541,6 +578,71 @@ const addNode = (state: Query.INode, parentId: string): Query.INode => {
   };
 
   return cloneNode(state);
+};
+
+/**
+ * Start nodes are the root's only edges, joined by Or (Query.areStartNodesValid).
+ * A root without them becomes the first start node - its classes, filters,
+ * operator and edges, which keep their ids - so the query still finds what it
+ * found, and an empty start node joins it. The relation targets keep their
+ * classes, as each one's source node holds the classes it held. The result
+ * expansion toggles stay on the root, which carries them when the query is
+ * sent (buildQueryWithResultExpansion).
+ */
+const addStartNode = (state: Query.INode): Query.INode => {
+  const startNodeEdge = (node: Query.INode): Query.IEdge => ({
+    type: Query.EdgeType.SE,
+    id: uuidv4(),
+    params: {},
+    logic: Query.EdgeLogic.Positive,
+    node,
+  });
+  const emptyStartNode = startNodeEdge({
+    type: Query.NodeType.E,
+    id: uuidv4(),
+    params: { entityClasses: [] },
+    operator: Query.NodeOperator.And,
+    edges: [],
+  });
+  if (Query.hasStartNodes(state)) {
+    return {
+      ...state,
+      operator: Query.NodeOperator.Or,
+      edges: [...state.edges, emptyStartNode],
+    };
+  }
+  const { includeEquivalents, includeSubordinates, ...params } = state.params;
+  params.entityClasses = anyClassIfEvery(params.entityClasses);
+  return {
+    ...state,
+    params: { entityClasses: [], includeEquivalents, includeSubordinates },
+    operator: Query.NodeOperator.Or,
+    edges: [startNodeEdge({ ...state, id: uuidv4(), params }), emptyStartNode],
+  };
+};
+
+/**
+ * A root left with one start node takes that node's place, as addStartNode
+ * made it from the root, while the root can show all the node holds: the root
+ * offers no node filters or entity, and has no NOT. A root with classes of its
+ * own narrows every start node, so it keeps them.
+ */
+const liftLoneStartNode = (root: Query.INode): Query.INode => {
+  if (root.edges.length !== 1) {
+    return root;
+  }
+  const [{ type, logic, node }] = root.edges;
+  if (
+    type !== Query.EdgeType.SE ||
+    logic === Query.EdgeLogic.Negative ||
+    root.params.entityClasses?.length ||
+    node.params.entityId ||
+    countNodeFilters(node.params) > 0
+  ) {
+    return root;
+  }
+  const { includeEquivalents, includeSubordinates } = root.params;
+  return { ...node, id: root.id, params: { ...node.params, includeEquivalents, includeSubordinates } };
 };
 
 const queryDiff = (state1: Query.INode, state2: Query.INode) => {

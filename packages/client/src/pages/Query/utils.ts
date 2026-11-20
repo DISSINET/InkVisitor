@@ -267,6 +267,32 @@ export const findValidEdgeTypesForSourceNode = (
   return validEdges;
 };
 
+/**
+ * The edge types an edge can take. The root and each start node stand for the
+ * entity itself, so their classes narrow the types; the classes of a node
+ * deeper down do not.
+ */
+export const findValidEdgeTypesForEdge = (root: Query.INode, edgeId: string): Query.EdgeType[] => {
+  const source = getEdgeSourceNode(root, edgeId) ?? root;
+  const isStartNode = root.edges.some(
+    (edge) => edge.type === Query.EdgeType.SE && edge.node === source,
+  );
+  return findValidEdgeTypesForSourceNode(source, source === root || isStartNode);
+};
+
+/**
+ * The class an edge target's entity picker opens on. An empty stored list is
+ * any class, which the picker seeds by itself, as its wildcard, when it gets no
+ * class and offers more than one. A picker offering one class or none needs a
+ * class to render at all.
+ */
+export const entityPickerInitCategory = (
+  storedClasses: EntityEnums.Class[] | undefined,
+  offeredClasses: EntityEnums.Class[],
+): EntityEnums.Class | undefined =>
+  storedClasses?.[0] ??
+  (offeredClasses.length > 1 ? undefined : (offeredClasses[0] ?? EntityEnums.Class.Concept));
+
 export interface IEdgeTypeOption {
   value: Query.EdgeType;
   label: string;
