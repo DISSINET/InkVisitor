@@ -768,7 +768,6 @@ export default class Entity implements IEntity, IDbModel {
     // order of the documents
     const perDocument = await Promise.all(
       docs.map(async (docData) => {
-        const out: IResponseUsedInDocument[] = [];
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
         const resources = await storage.entities.resourcesByDocumentId(conn, docData.id);
@@ -784,28 +783,15 @@ export default class Entity implements IEntity, IDbModel {
           updatedAt: docData.updatedAt,
         };
 
-        // traverse the tree, search for anchor that === this.id
-        const traverse = (nodes: AnchorsNode[], parentT?: string) => {
-          for (const node of nodes) {
-            if (node.anchor === this.id) {
-              out.push({
-                document,
-                anchorText: node.getShortContent(),
-                resourceId: resource?.id || "",
-                parentTerritoryId: parentT || "",
-                anchorIndex: out.length,
-              });
-            }
-
-            traverse(
-              node.children,
-              node.class === EntityEnums.Class.Territory ? node.anchor : parentT
-            );
-          }
-        };
-
-        traverse(doc.anchors);
-        return out;
+        return AnchorsNode.pairedAnchorsOf(doc.anchors, this.id).map(
+          ({ node, anchorIndex, parentTerritoryId }): IResponseUsedInDocument => ({
+            document,
+            anchorText: node.getShortContent(),
+            resourceId: resource?.id || "",
+            parentTerritoryId,
+            anchorIndex,
+          })
+        );
       })
     );
 

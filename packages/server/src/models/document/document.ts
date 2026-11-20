@@ -1,6 +1,7 @@
 import { IDbModel } from "@models/common";
 import { Conn, WriteResult, storage } from "@service/storage";
 import { IDocument, IDocumentMeta } from "@inkvisitor/shared/types";
+import { isOrphanedAnchor } from "@inkvisitor/shared/types/document";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
@@ -441,8 +442,10 @@ export default class Document implements IDocument, IDbModel {
       const doc = new Document(docData);
       const traverse = (nodes: AnchorsNode[]) => {
         for (const node of nodes) {
-          // trimmed: every client surface trims anchor texts
-          const text = idSet.has(node.anchor) ? node.getShortContent().trim() : "";
+          // trimmed: every client surface trims anchor texts; an anchor whose
+          // opening tag never closes spans no text
+          const text =
+            idSet.has(node.anchor) && !isOrphanedAnchor(node) ? node.getShortContent().trim() : "";
           if (text) {
             if (!texts[node.anchor]) {
               texts[node.anchor] = new Set();

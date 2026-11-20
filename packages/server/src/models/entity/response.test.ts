@@ -665,6 +665,35 @@ describe("models/entity/response", function () {
     });
   });
 
+  describe("ResponseEntityDetail.findUsedInDocuments with an anchor whose opening tag never closes", function () {
+    let db: Db;
+    const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+    const entity = new Entity({ id: tagSafeId() });
+    const doc = new Document({
+      id: Math.random().toString(),
+      title: "orphan",
+      content: `<${entity.id}> lone <${entity.id}>paired</${entity.id}>`,
+    });
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await entity.save(db.connection);
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    it("lists the paired anchor only, at the index of its opening tag", async () => {
+      const rows = await new ResponseEntityDetail(entity).findUsedInDocuments(db.connection);
+
+      expect(rows.map((row) => [row.anchorText, row.anchorIndex])).toEqual([["paired", 1]]);
+    });
+  });
+
   describe("ResponseEntityDetail.populateEntitiesMap anchor stamping", function () {
     let db: Db;
     // Document tag names exclude ".", so keep anchored statement ids dot-free.

@@ -233,6 +233,81 @@ describe("a stored anchors tree loaded into a Document", () => {
   });
 });
 
+describe("AnchorsNode.pairedAnchorsOf", () => {
+  const entityIds = {
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Territory]: ["t1", "t2"],
+    [EntityEnums.Class.Concept]: ["e1"],
+  };
+  const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
+  const rows = (content: string) =>
+    AnchorsNode.pairedAnchorsOf(tree(content), "e1").map((row) => [
+      row.anchorIndex,
+      row.node.content,
+      row.parentTerritoryId,
+    ]);
+
+  test("leaves out an anchor whose opening tag never closes and still counts it", () => {
+    expect(rows("<e1> a <e1>one</e1> b <e1>two</e1>")).toEqual([
+      [1, "one", ""],
+      [2, "two", ""],
+    ]);
+  });
+
+  test("an orphaned territory anchor is nobody's parent T", () => {
+    expect(rows("<t1>x <e1>one</e1></t1> <t2> y <e1>two</e1>")).toEqual([
+      [0, "one", "t1"],
+      [1, "two", ""],
+    ]);
+  });
+
+  test("does not count a self-closing tag", () => {
+    expect(rows('<e1 n="2"/> <e1> a <e1>one</e1>')).toEqual([[1, "one", ""]]);
+  });
+
+  test("reads a stored tree whose orphan still holds anchors", () => {
+    const concept = EntityEnums.Class.Concept;
+    const stale = [
+      {
+        anchor: "e1", class: concept, content: "junk", indexStart: 0, indexEnd: -1,
+        children: [
+          { anchor: "e1", class: concept, content: "one", indexStart: 5, indexEnd: 16, children: [] },
+        ],
+      },
+    ] as IAnchorsNode[];
+    const loaded = new Document({ anchors: stale }).anchors;
+
+    expect(
+      AnchorsNode.pairedAnchorsOf(loaded, "e1").map((row) => [row.anchorIndex, row.node.content])
+    ).toEqual([[1, "one"]]);
+  });
+
+  test("an orphaned territory anchor of a stored tree is not the parent T of what it holds", () => {
+    const stale = [
+      {
+        anchor: "t1", class: EntityEnums.Class.Territory, content: "junk", indexStart: 0, indexEnd: -1,
+        children: [
+          { anchor: "e1", class: EntityEnums.Class.Concept, content: "one", indexStart: 5, indexEnd: 16, children: [] },
+        ],
+      },
+    ] as IAnchorsNode[];
+    const loaded = new Document({ anchors: stale }).anchors;
+
+    expect(
+      AnchorsNode.pairedAnchorsOf(loaded, "e1").map((row) => row.parentTerritoryId)
+    ).toEqual([""]);
+  });
+
+  test("its anchorIndex is the index Document.removeAnchor takes", () => {
+    const content = '<e1 n="2"/> <e1> a <e1>one</e1> b <e1>two</e1>';
+    const [first] = AnchorsNode.pairedAnchorsOf(tree(content), "e1");
+    const document = new Document({ content });
+    document.removeAnchor("e1", first.anchorIndex);
+
+    expect(document.content).toEqual('<e1 n="2"/> <e1> a one b <e1>two</e1>');
+  });
+});
+
 describe("AnchorsNode.collectAnchoredNearby", () => {
   const entityIds = {
     ...entityIdsFromContent(""),
@@ -244,6 +319,14 @@ describe("AnchorsNode.collectAnchoredNearby", () => {
   const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
   const nearby = (trees: IAnchorsNode[][], entityId = "s1") =>
     AnchorsNode.collectAnchoredNearby(trees, entityId).map((node) => node.id);
+
+  test("ignores an anchor whose opening tag never closes", () => {
+    expect(nearby([tree("<t1><s1>one</s1> <p1> a <p2>b</p2></t1>")])).toEqual(["p2"]);
+  });
+
+  test("lists nothing for a statement whose only anchor never closes", () => {
+    expect(nearby([tree("<t1><s1> a <p1>b</p1></t1>")])).toEqual([]);
+  });
 
   test("lists the statement's span first, then each territory anchor around it, nearest anchors first", () => {
     // s1 sits in the subT t2, which sits in t1

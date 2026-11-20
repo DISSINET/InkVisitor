@@ -1,5 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IAnchorsNode } from "@inkvisitor/shared/types/document";
+import { IAnchorsNode, isOrphanedAnchor } from "@inkvisitor/shared/types/document";
 import { IDocumentAuditAnchorChanges, IAnchorUpdate } from "@inkvisitor/shared/types";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { createAnyTagRegex, createOpeningTagRegex } from "@common/regex";
@@ -184,6 +184,39 @@ export class AnchorsNode implements IAnchorsNode {
   }
 
   /**
+   * The anchors of `entityId` in text order, each with the nearest territory
+   * anchor around it. `anchorIndex` counts every opening tag of the entity,
+   * the way Document.removeAnchor and Document.findAnchorWithIndex count
+   * them, so an anchor whose opening tag never closes takes an index but is
+   * left out, and it is no parent territory of the anchors a stored tree
+   * holds under it.
+   */
+  static pairedAnchorsOf(
+    nodes: AnchorsNode[],
+    entityId: string
+  ): { node: AnchorsNode; anchorIndex: number; parentTerritoryId: string }[] {
+    const out: { node: AnchorsNode; anchorIndex: number; parentTerritoryId: string }[] = [];
+    let anchorIndex = 0;
+    const walk = (list: AnchorsNode[], parentTerritoryId: string) => {
+      for (const node of list) {
+        const orphaned = isOrphanedAnchor(node);
+        if (node.anchor === entityId) {
+          if (!orphaned) {
+            out.push({ node, anchorIndex, parentTerritoryId });
+          }
+          anchorIndex++;
+        }
+        walk(
+          node.children,
+          node.class === EntityEnums.Class.Territory && !orphaned ? node.anchor : parentTerritoryId
+        );
+      }
+    };
+    walk(nodes, "");
+    return out;
+  }
+
+  /**
    * The entities anchored around the anchors of `entityId`, closest context
    * first: inside the entity's own spans in text order, then inside the
    * innermost territory around a span (every anchor of that territory), then
@@ -196,12 +229,18 @@ export class AnchorsNode implements IAnchorsNode {
     trees: IAnchorsNode[][],
     entityId: string
   ): { id: string; class: EntityEnums.Class }[] {
-    // a tree in text order; `end` is the position after the last descendant
+    // a tree in text order; `end` is the position after the last descendant.
+    // An anchor whose opening tag never closes spans nothing, so it is left
+    // out and what a stored tree holds under it moves up to its parent.
     type Flat = { node: IAnchorsNode; parent: number; end: number }[];
     const flats = trees.map((tree) => {
       const flat: Flat = [];
       const flatten = (nodes: IAnchorsNode[], parent: number) => {
         for (const node of nodes) {
+          if (isOrphanedAnchor(node)) {
+            flatten(node.children || [], parent);
+            continue;
+          }
           const at = flat.push({ node, parent, end: 0 }) - 1;
           flatten(node.children || [], at);
           flat[at].end = flat.length;
