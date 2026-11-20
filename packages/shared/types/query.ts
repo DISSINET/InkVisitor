@@ -17,23 +17,75 @@ export namespace Query {
     params: IEdgeParams;
     logic: EdgeLogic;
     node: INode;
+    // HP: and SP: only: the value half of the prop, matched like a target of the
+    // edge type TupleValueEdgeTypes names; `node` is the type half, and both halves
+    // hold on the same prop
+    valueNode?: INode;
+    // with valueNode: Negative keeps the props of the type whose value the value node does
+    // not match, an empty value included; an empty value node then keeps props with no value.
+    // `logic` still negates the whole edge
+    valueLogic?: EdgeLogic;
   }
 
   export interface INodeParams {
     entityClasses?: EntityEnums.Class[];
     entityStatuses?: EntityEnums.Status[];
     entityLanguages?: EntityEnums.Language[];
+    // read from the entity's data: logicalType on actant classes, pos on
+    // concepts and actions; an entity without the field matches neither
+    entityLogicalTypes?: EntityEnums.LogicalType[];
+    entityPartsOfSpeech?: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
     label?: string;
+    // the date and user filters read the entity's audits, as the Explorer's
+    // created at / updated at / created by / updated by / edited by filters do;
+    // the dates are ISO strings, both ends inclusive
+    createdAfter?: string;
+    createdBefore?: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    // OR semantics - edited (created or updated) by any of the listed users
+    editedBy?: string[];
+    // OR semantics - shares a statement with any of the listed entities, as
+    // the Explorer's co-occurrence filter
+    coOccurrence?: string[];
     entityId?: string;
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;
   }
-  export interface IEdgeParams {}
+  export interface IEdgeParams {
+    // prop edges (PropPairEdges) only: the other half of the matched prop, so
+    // a prop matches only when its type and its value both hold
+    propPair?: IPropPair;
+  }
+
+  export interface IPropPair {
+    entityId: string;
+    includeEquivalents?: boolean;
+    includeSubordinates?: boolean;
+  }
+
+  /**
+   * The prop edges whose propPair pins the other half of the same prop, by the
+   * half it pins: the type for the value edges, the value for the type edges.
+   */
+  export const PropPairEdges: Partial<Record<EdgeType, "type" | "value">> = {
+    "HP:V": "type",
+    "I_HP:V": "type",
+    "SP:V": "type",
+    "I_SP:V": "type",
+    "EP:T": "value",
+    "I_EP:T": "value",
+    "SP:T": "value",
+    "I_SP:T": "value",
+  };
 
   export enum NodeType {
     E = "Entity",
   }
   export enum EdgeType {
+    "HP:" = "HP:",
     "HP:V" = "HP:V",
     "I_HP:V" = "I_HP:V",
     "EP:T" = "EP:T",
@@ -53,6 +105,7 @@ export namespace Query {
     "SUT:" = "SUT:",
     "I_SUT:" = "I_SUT:",
     "EUT:" = "EUT:",
+    "EAT:" = "EAT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
     "HR:R" = "HR:R",
@@ -64,6 +117,7 @@ export namespace Query {
     "I_CT:D" = "I_CT:D",
     "CT:G" = "CT:G",
     "I_CT:G" = "I_CT:G",
+    "SP:" = "SP:",
     "SP:T" = "SP:T",
     "I_SP:T" = "I_SP:T",
     "SP:V" = "SP:V",
@@ -102,7 +156,17 @@ export namespace Query {
     "I_R:A2S" = "I_R:A2S",
     "R:REL" = "R:REL",
     "I_R:REL" = "I_R:REL",
+    "SE" = "SE",
   }
+
+  /**
+   * The edges with a type node and a value node, by the edge type whose target the
+   * value node is picked and matched as.
+   */
+  export const TupleValueEdgeTypes: Partial<Record<EdgeType, EdgeType>> = {
+    "HP:": EdgeType["HP:V"],
+    "SP:": EdgeType["SP:V"],
+  };
 
   export enum NodeOperator {
     And = "and",
@@ -152,6 +216,10 @@ export namespace Query {
   ];
 
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
+    // the type node; the value node takes the HP:V target params
+    "HP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "HP:V": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
@@ -219,6 +287,9 @@ export namespace Query {
     "EUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
+    "EAT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "SUT:D": {},
     "I_SUT:D": {},
     "HR:R": {
@@ -243,6 +314,10 @@ export namespace Query {
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
+    // the type node; the value node takes the SP:V target params
+    "SP:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "SP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -424,9 +499,20 @@ export namespace Query {
       entityId: { allowedClasses: [] },
     },
     "I_R:REL": {},
+    SE: {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
   };
 
   export const EdgeTypeNodeRules: Record<EdgeType, [EdgeRule, EdgeRule]> = {
+    "HP:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+    ],
     "HP:V": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: {} },
@@ -590,6 +676,13 @@ export namespace Query {
         params: { entityClass: [EntityEnums.Class.Territory] },
       },
     ],
+    "EAT:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
     "HR:R": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       {
@@ -669,6 +762,16 @@ export namespace Query {
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "SP:": [
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
     ],
     "SP:T": [
@@ -1005,8 +1108,13 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
+    SE: [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+    ],
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
+    "HP:": "has property",
     "HP:V": "has property: value",
     "I_HP:V": "is property: value",
     "EP:T": "has property: type",
@@ -1026,6 +1134,7 @@ export namespace Query {
     "SUT:": "S under T",
     "I_SUT:": "T has S",
     "EUT:": "used in statements under T",
+    "EAT:": "anchored under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "HR:R": "has reference: resource",
@@ -1037,6 +1146,7 @@ export namespace Query {
     "I_CT:D": "T has parent T: direct parent",
     "CT:G": "T has child T: any",
     "I_CT:G": "T has parent T: any",
+    "SP:": "has S prop",
     "SP:T": "has S prop: type",
     "I_SP:T": "is S prop: type",
     "SP:V": "has S prop: value",
@@ -1075,6 +1185,7 @@ export namespace Query {
     "I_R:A2S": "has relation: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
+    SE: "is",
   };
 
   /**
@@ -1084,6 +1195,7 @@ export namespace Query {
    * direction is known.
    */
   export const EdgeTypeDescriptions: Record<EdgeType, string> = {
+    "HP:": "Finds entities with an own prop whose type is the type node and whose value is the value node",
     "HP:V": "Finds entities whose own props have the target as a value",
     "I_HP:V": "Finds the prop values in the target entity's own props",
     "EP:T": "Finds entities whose own props have the target as a type",
@@ -1104,6 +1216,7 @@ export namespace Query {
     "SUT:": "Finds statements directly under the target territory (with SUB: anywhere below it)",
     "I_SUT:": "Finds the territory that directly holds the target statement",
     "EUT:": "Finds entities used in statements directly under the target territory",
+    "EAT:": "Finds entities anchored in the full text anywhere inside the target territory's span (with SUB: also inside the spans of its subTs anchored elsewhere)",
     "SUT:D": "Finds statements directly under the target territory",
     "I_SUT:D": "Finds the territory that directly holds the target statement",
     "HR:R": "Finds entities whose references point to the target resource",
@@ -1115,6 +1228,8 @@ export namespace Query {
     "I_CT:D": "Finds territories directly below the target territory",
     "CT:G": "Finds territories that have the target territory anywhere below them",
     "I_CT:G": "Finds territories anywhere below the target territory",
+    "SP:":
+      "Finds statements with an action or actant prop whose type is the type node and whose value is the value node",
     "SP:T": "Finds statements with an action or actant prop whose type is the target",
     "I_SP:T": "Finds actants that carry a prop in a statement whose type is the target",
     "SP:V": "Finds statements with an action or actant prop whose value is the target",
@@ -1153,6 +1268,37 @@ export namespace Query {
     "I_R:A2S": "Finds entities used as the actant2 semantics of the target action",
     "R:REL": "Finds entities related to the target",
     "I_R:REL": "Finds entities related to the target",
+    SE: "Finds the entities the target describes: the target is the entity itself",
+  };
+
+  /** the edges of a node of a request body, which can hold anything in their place */
+  const edgesOf = (node: INode | undefined): IEdge[] =>
+    Array.isArray(node?.edges) ? node.edges : [];
+
+  /**
+   * Whether the query has start nodes. An SE edge of the root describes the
+   * root's entity itself, so its target node starts the query from the
+   * entities it finds, with conditions of its own.
+   */
+  export const hasStartNodes = (root: INode): boolean =>
+    edgesOf(root).some((edge) => edge.type === EdgeType.SE);
+
+  /**
+   * Start nodes are alternatives - a result is an entity any of them finds -
+   * so they are the root's only edges and its operator is Or. Any node can be
+   * sent as the root of a query of its own, so no node below the root has an
+   * SE edge.
+   */
+  export const areStartNodesValid = (root: INode): boolean => {
+    const noneBelow = (node: INode): boolean =>
+      edgesOf(node).every((edge) => !hasStartNodes(edge.node) && noneBelow(edge.node));
+    if (!noneBelow(root)) {
+      return false;
+    }
+    return (
+      !hasStartNodes(root) ||
+      (root.operator === NodeOperator.Or && edgesOf(root).every((edge) => edge.type === EdgeType.SE))
+    );
   };
 
   export enum EdgeProblemSource {
@@ -1214,6 +1360,8 @@ export namespace Explore {
     UUIDs = "uuids",
     Status = "status",
     Language = "language",
+    LogicalType = "logical type",
+    PartOfSpeech = "part of speech",
     CreatedAt = "created at",
     UpdatedAt = "updated at",
     CreatedBy = "created by",
@@ -1228,6 +1376,8 @@ export namespace Explore {
     | IExploreUuidsFilter
     | IExploreStatusFilter
     | IExploreLanguageFilter
+    | IExploreLogicalTypeFilter
+    | IExplorePartOfSpeechFilter
     | IExploreCreatedAtFilter
     | IExploreUpdatedAtFilter
     | IExploreCreatedByFilter
@@ -1252,14 +1402,62 @@ export namespace Explore {
     // listed entities; the listed entities themselves are never matched
     entityIds: string[];
   }
+  // OR semantics for the status, language, logical type and part of speech
+  // filters - matches an entity with any of the listed values
   interface IExploreStatusFilter {
     type: SearchOption.Status;
-    status: EntityEnums.Status;
+    statuses?: EntityEnums.Status[];
+    // the single value of a filter saved before it took a list
+    status?: EntityEnums.Status;
   }
   interface IExploreLanguageFilter {
     type: SearchOption.Language;
-    language: EntityEnums.Language;
+    languages?: EntityEnums.Language[];
+    // the single value of a filter saved before it took a list
+    language?: EntityEnums.Language;
   }
+  interface IExploreLogicalTypeFilter {
+    type: SearchOption.LogicalType;
+    logicalTypes: EntityEnums.LogicalType[];
+  }
+  interface IExplorePartOfSpeechFilter {
+    type: SearchOption.PartOfSpeech;
+    partsOfSpeech: (EntityEnums.ConceptPartOfSpeech | EntityEnums.ActionPartOfSpeech)[];
+  }
+
+  export type IExploreAttributeParams = Pick<
+    Query.INodeParams,
+    "entityStatuses" | "entityLanguages" | "entityLogicalTypes" | "entityPartsOfSpeech"
+  >;
+
+  /**
+   * The status, language, logical type and part of speech filters as the node params
+   * that test the same entity fields; a filter that is missing or empty leaves its param out
+   */
+  export const attributeFilterParams = (
+    filters: IExploreSearchFilter[]
+  ): IExploreAttributeParams => {
+    const params: IExploreAttributeParams = {};
+    for (const filter of filters) {
+      if (filter.type === SearchOption.Status) {
+        params.entityStatuses =
+          filter.statuses ?? (filter.status ? [filter.status] : undefined);
+      } else if (filter.type === SearchOption.Language) {
+        params.entityLanguages =
+          filter.languages ?? (filter.language !== undefined ? [filter.language] : undefined);
+      } else if (filter.type === SearchOption.LogicalType) {
+        params.entityLogicalTypes = filter.logicalTypes;
+      } else if (filter.type === SearchOption.PartOfSpeech) {
+        params.entityPartsOfSpeech = filter.partsOfSpeech;
+      }
+    }
+    (Object.keys(params) as (keyof IExploreAttributeParams)[]).forEach((key) => {
+      if (!params[key]?.length) {
+        delete params[key];
+      }
+    });
+    return params;
+  };
   interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
     createdAfter?: string;

@@ -7,7 +7,9 @@ import {
   buildEdgeTypeOptionGroups,
   buildStableSignature,
   computeWindowUpdate,
+  entityPickerInitCategory,
   getRelationAllowedClasses,
+  getEdgeSourceClasses,
   getRelationConstrainedCategoryTypes,
   getSuperclassAllowedClasses,
   getSuperordinateEntityAllowedClasses,
@@ -399,10 +401,86 @@ describe("getRelationAllowedClasses", () => {
     ).toEqual([]);
   });
 
+  it("stays open when only some of the source classes are disabled", () => {
+    const fromPerson = getRelationAllowedClasses(RelationEnums.Type.Identification, [
+      EntityEnums.Class.Person,
+    ]);
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Identification, [
+        EntityEnums.Class.Person,
+        EntityEnums.Class.Action,
+      ]),
+    ).toEqual(fromPerson);
+    expect(getRelationAllowedClasses(RelationEnums.Type.Identification, classesAll)).toEqual(
+      fromPerson,
+    );
+    expect(getRelationAllowedClasses(RelationEnums.Type.Identification, [])).toEqual(fromPerson);
+  });
+
   it("allows every class for a relation with neither pattern nor disabled classes", () => {
     expect(
       getRelationAllowedClasses(RelationEnums.Type.Related, [EntityEnums.Class.Territory]),
     ).toEqual(classesAll);
+  });
+});
+
+describe("getEdgeSourceClasses", () => {
+  const tree = (sourceParams: Query.INodeParams): Query.INode => ({
+    id: "root",
+    type: Query.NodeType.E,
+    params: { entityClasses: [EntityEnums.Class.Person] },
+    operator: Query.NodeOperator.And,
+    edges: [
+      {
+        id: "e0",
+        type: Query.EdgeType["EP:T"],
+        params: {},
+        logic: Query.EdgeLogic.Positive,
+        node: {
+          id: "n0",
+          type: Query.NodeType.E,
+          params: sourceParams,
+          operator: Query.NodeOperator.And,
+          edges: [
+            {
+              id: "e1",
+              type: Query.EdgeType["R:SCL"],
+              params: {},
+              logic: Query.EdgeLogic.Positive,
+              node: {
+                id: "n1",
+                type: Query.NodeType.E,
+                params: {},
+                operator: Query.NodeOperator.And,
+                edges: [],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  it("is the root's classes for an edge of the root", () => {
+    expect(getEdgeSourceClasses(tree({}), "e0")).toEqual([EntityEnums.Class.Person]);
+  });
+
+  it("bounds a picked entity by its own edge, whatever class is stored beside it", () => {
+    expect(
+      getEdgeSourceClasses(
+        tree({ entityId: "picked", entityClasses: [EntityEnums.Class.Action] }),
+        "e1",
+      ),
+    ).toEqual([EntityEnums.Class.Concept]);
+  });
+
+  it("is any class for a picked entity that also stands for its equivalents or subordinates", () => {
+    expect(
+      getEdgeSourceClasses(tree({ entityId: "picked", includeEquivalents: true }), "e1"),
+    ).toEqual([]);
+    expect(
+      getEdgeSourceClasses(tree({ entityId: "picked", includeSubordinates: true }), "e1"),
+    ).toEqual([]);
   });
 });
 
@@ -426,12 +504,35 @@ describe("getRelationConstrainedCategoryTypes", () => {
   });
 });
 
+describe("entityPickerInitCategory", () => {
+  const { Action, Concept, Group } = EntityEnums.Class;
+
+  it("opens on the stored class", () => {
+    expect(entityPickerInitCategory([Group], [Action, Concept])).toBe(Group);
+  });
+
+  it("leaves an empty stored list to the picker's wildcard when it offers several classes", () => {
+    expect(entityPickerInitCategory([], [Action, Concept])).toBeUndefined();
+    expect(entityPickerInitCategory(undefined, classesAll)).toBeUndefined();
+  });
+
+  it("names a class for a picker that offers one class or none", () => {
+    expect(entityPickerInitCategory([], [Action])).toBe(Action);
+    expect(entityPickerInitCategory([], [])).toBe(Concept);
+  });
+});
+
 describe("buildEdgeTypeOptionGroups", () => {
   const T = Query.EdgeType;
 
   it("groups types in the fixed group order and drops empty groups", () => {
     const groups = buildEdgeTypeOptionGroups([T["R:SYN"], T["IS:"], T["EP:T"]], []);
     expect(groups.map((g) => g.label)).toEqual(["Property", "Relation", "Position in statement"]);
+  });
+
+  it("lists the edges reading what lies under a territory in one Territory group", () => {
+    const groups = buildEdgeTypeOptionGroups([T["SUT:"], T["EUT:"], T["EAT:"]], []);
+    expect(groups.map((g) => g.label)).toEqual(["Territory"]);
   });
 
   it("puts the any variant first, then sorts alphabetically by menu label", () => {

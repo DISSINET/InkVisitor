@@ -330,6 +330,19 @@ interface TagInSegment {
   segment: Segment;
 }
 
+interface TagPair {
+  opening: TagInSegment;
+  closing: TagInSegment;
+}
+
+/** One tag name's paired anchors and its tag counts, unpaired tags included. */
+interface AnchorIndexEntry {
+  /** `order` is the opening tag's place in document order. */
+  pairs: Array<TagPair & { order: number }>;
+  opening: number;
+  closing: number;
+}
+
 /**
  * Text provides more abstract control over the provided raw text.
  *
@@ -365,6 +378,12 @@ class Text {
    * {@link lineXOrigin} — for placing everything drawn on that line.
    */
   paragraphIndent: number = 0;
+  /**
+   * Every tag name's pairs and counts, built on first use by
+   * {@link getAnchorIndex}. Every edit ends in {@link calculateLines}, which
+   * drops it, so it never outlives the segments it was built from.
+   */
+  private anchorIndex: Map<string, AnchorIndexEntry> | null = null;
 
   /**
    * Creates a new Text instance from raw text content.
@@ -696,6 +715,7 @@ class Text {
     }
 
     this.segments = segments;
+    this.anchorIndex = null;
   }
 
   /**
@@ -720,6 +740,7 @@ class Text {
    */
   calculateLines(): void {
     const time1 = performance.now();
+    this.anchorIndex = null;
 
     // Width basis for wrapping. Monospace: 1 code unit = 1 unit,
     // budget = charsAtLine (byte-identical to the legacy loop). Proportional:
@@ -1840,6 +1861,7 @@ class Text {
     this.segments = this.segments
       .slice(0, index)
       .concat(this.segments.slice(index + 1));
+    this.anchorIndex = null;
   }
 
   /**
@@ -1973,50 +1995,82 @@ class Text {
    * Self-closing tags are neither.
    */
   countTags(tag: string): { opening: number; closing: number } {
-    let opening = 0;
-    let closing = 0;
-    for (const segment of this.segments) {
-      for (const openingTag of segment.openingTags) {
-        if (openingTag.getTagName() === tag && !openingTag.selfClosing) {
-          opening++;
-        }
-      }
-      for (const closingTag of segment.closingTags) {
-        if (closingTag.getTagName() === tag) {
-          closing++;
-        }
-      }
-    }
-    return { opening, closing };
+    const entry = this.getAnchorIndex().get(tag);
+    return { opening: entry?.opening ?? 0, closing: entry?.closing ?? 0 };
   }
 
   /**
-   * Pairs the tags of one name in document order: a closing tag closes the
-   * latest still-open tag of its name before it, as in validateAnchors.
-   * Orphaned and self-closing tags are left out. Pairs are ordered by their
-   * opening tag, so a nested anchor follows the one around it.
+   * Pairs the tags of every name in one pass over the document. A closing tag
+   * closes the latest still-open tag of its name before it, as in
+   * validateAnchors. Orphaned and self-closing tags are left out of the pairs.
+   * Pairs are ordered by their opening tag, so a nested anchor follows the one
+   * around it.
+   *
+   * The highlight pass asks for the anchors of every entity in view on each
+   * frame, and an entity can hold hundreds of anchors, so the result is kept
+   * until the next edit.
    */
-  private pairTags(tag: string): Array<{ opening: TagInSegment; closing: TagInSegment }> {
-    const pairs: Array<{ opening: TagInSegment; closing: TagInSegment; order: number }> = [];
-    const open: Array<TagInSegment & { order: number }> = [];
+  private getAnchorIndex(): Map<string, AnchorIndexEntry> {
+    if (this.anchorIndex) {
+      return this.anchorIndex;
+    }
+    const index = new Map<string, AnchorIndexEntry>();
+    const open = new Map<string, Array<TagInSegment & { order: number }>>();
     let order = 0;
     for (const segment of this.segments) {
       const tags = [
-        ...segment.openingTags.filter((t) => t.getTagName() === tag && !t.selfClosing),
-        ...segment.closingTags.filter((t) => t.getTagName() === tag),
+        ...segment.openingTags.filter((t) => !t.selfClosing),
+        ...segment.closingTags,
       ].sort((a, b) => a.position - b.position);
       for (const t of tags) {
+        const name = t.getTagName();
+        let entry = index.get(name);
+        if (!entry) {
+          entry = { pairs: [], opening: 0, closing: 0 };
+          index.set(name, entry);
+        }
+        let stack = open.get(name);
+        if (!stack) {
+          stack = [];
+          open.set(name, stack);
+        }
         if (!t.closing) {
-          open.push({ tag: t, segment, order: order++ });
+          entry.opening++;
+          stack.push({ tag: t, segment, order: order++ });
           continue;
         }
-        const opening = open.pop();
+        entry.closing++;
+        const opening = stack.pop();
         if (opening) {
-          pairs.push({ opening, closing: { tag: t, segment }, order: opening.order });
+          entry.pairs.push({ opening, closing: { tag: t, segment }, order: opening.order });
         }
       }
     }
-    return pairs.sort((a, b) => a.order - b.order);
+    for (const entry of index.values()) {
+      entry.pairs.sort((a, b) => a.order - b.order);
+    }
+    this.anchorIndex = index;
+    return index;
+  }
+
+  private pairTags(tag: string): TagPair[] {
+    return this.getAnchorIndex().get(tag)?.pairs ?? [];
+  }
+
+  /**
+   * Start and end coordinates of the paired anchors of one name, in the order
+   * of getTagPosition's index. With a line range, only the anchors whose
+   * paragraphs reach into [fromLine, toLine] are returned.
+   */
+  getTagPositions(tag: string, fromLine?: number, toLine?: number): IAbsCoordinates[][] {
+    const pairs = this.pairTags(tag).filter(
+      (pair) =>
+        (toLine === undefined || pair.opening.segment.lineStart <= toLine) &&
+        (fromLine === undefined ||
+          Math.max(pair.closing.segment.lineEndExclusive, pair.closing.segment.lineStart + 1) >
+            fromLine)
+    );
+    return pairs.map((pair) => this.pairCoordinates(pair));
   }
 
   /**
@@ -2048,7 +2102,7 @@ class Text {
     return pair ? this.pairCoordinates(pair) : [];
   }
 
-  private pairCoordinates(pair: { opening: TagInSegment; closing: TagInSegment }): IAbsCoordinates[] {
+  private pairCoordinates(pair: TagPair): IAbsCoordinates[] {
     // Calculate the parsed positions of the opening and closing tags
     const start = pair.opening.segment.findTagParsedPosition(pair.opening.tag);
     const end = pair.closing.segment.findTagParsedPosition(pair.closing.tag);

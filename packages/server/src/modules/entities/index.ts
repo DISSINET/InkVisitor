@@ -3,6 +3,7 @@ import { mergeDeep } from "@common/functions";
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { ResponseEntityRelations } from "@models/entity/response-relations";
 import { ResponseSearch } from "@models/entity/response-search";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { getEntityClass, getRelationClass } from "@models/factory";
@@ -33,6 +34,7 @@ import {
   AuditScope,
   EXPANSION_RESPONSE_MAX,
   CLASSIFIED_UNDER_MAX_CONCEPTS,
+  IResponseEntityRelations,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -54,10 +56,8 @@ import Document from "@models/document/document";
 import Territory from "@models/territory/territory";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
-import {
-  EventType,
-  EXPLORE_STATS_ENTITY_LIMIT,
-} from "@inkvisitor/shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
+import { storage } from "@service/storage";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -806,6 +806,45 @@ export default Router()
   )
   /**
    * @openapi
+   * /entities/{entityId}/used-relations:
+   *   get:
+   *     description: Returns the entity with its relations and the entities they point to - the relations part of the detail
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseEntityRelations object for entity entry
+   */
+  .get(
+    "/:entityId/used-relations",
+    asyncRouteHandler<IResponseEntityRelations>(async (request: IRequest<{ entityId: string }>) => {
+      const entityId = request.params.entityId;
+
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
+      }
+
+      const entityData = await findEntityById(request.db, entityId);
+      if (!entityData) {
+        throw new EntityDoesNotExist(`entity ${entityId} was not found`, entityId);
+      }
+
+      const response = new ResponseEntityRelations(getEntityClass({ ...entityData }));
+
+      await response.prepare(request);
+
+      return response;
+    })
+  )
+  /**
+   * @openapi
    * /entities/{entityId}/relations:
    *   get:
    *     description: Retrieves relations linked to the entity, optionally filtered by relation type. By default (forward=true) only forward relations are returned - for asymmetrical relations those where the entity is the subject (entityIds[0]). Pass forward=false to return relations in both directions.
@@ -1039,7 +1078,7 @@ export default Router()
           total: entityIds.length,
           expansion: querySearch.expansionCounts,
           stats,
-          statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
+          statsEntityLimit: storage.audits.entityIdsLimit,
         };
       }
 
@@ -1080,14 +1119,22 @@ export default Router()
 
       const results = await querySearch.getResults(request.db.connection, rowIndices);
 
+      const exportColumns =
+        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
+
       // create csv text
       const tsvBodyRows = results
         .map((result) => {
           const rEntity = result.entity;
           const rowColValues: string[] = [parseColumnValue(rEntity)];
 
-          Object.values(result.columnData).forEach((columnValue) => {
-            if (columnValue instanceof Array) {
+          // columnData has no key for an empty Created by or Parent Territory cell, so the row
+          // follows the header columns to keep every cell under its own header
+          exportColumns.forEach((column) => {
+            const columnValue = result.columnData[column.id];
+            if (columnValue === undefined) {
+              rowColValues.push("");
+            } else if (columnValue instanceof Array) {
               rowColValues.push(
                 columnValue.map((columnValuePart) => parseColumnValue(columnValuePart)).join(",")
               );
@@ -1099,8 +1146,6 @@ export default Router()
         })
         .join("\n");
 
-      const exportColumns =
-        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
       const tsvHeader =
         "result\t" + exportColumns.map((c) => c.name).join("\t");
 

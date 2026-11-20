@@ -13,7 +13,7 @@ export const StyledPanelSeparator = styled.div<StyledPanelSeparator>`
   position: absolute;
   background-color: ${({ theme }) => theme.color["success"]};
   background-color: ${({ $show, theme }) =>
-    $show ? theme.color["success"] : theme.color["gray"][500]};
+    $show ? theme.color["separatorActive"] : theme.color["gray"][500]};
   z-index: 30;
 
   opacity: ${({ $show }) => ($show ? 1 : 0.4)};

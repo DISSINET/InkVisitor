@@ -26,6 +26,13 @@ test("writeJsonArray writes one document per line and keeps TIME wire objects", 
   assert.deepEqual(JSON.parse(text), docs);
 });
 
+test("writeJsonArray takes rows already in memory", async () => {
+  const file = tmpFile();
+  const docs = [{ id: "a" }, { id: "b" }];
+  assert.equal(await writeJsonArray(docs, file), 2);
+  assert.deepEqual(JSON.parse(fs.readFileSync(file, "utf8")), docs);
+});
+
 test("writeJsonArray writes an empty array for a table without rows", async () => {
   const file = tmpFile();
   assert.equal(await writeJsonArray(rows([]), file), 0);

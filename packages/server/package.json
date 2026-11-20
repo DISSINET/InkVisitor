@@ -1,8 +1,8 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "engines": {
-    "node": "^22.13.1",
+    "node": "^22.23.4",
     "pnpm": "^11.1.2"
   },
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "jest --runInBand",
     "test:unit": "jest --selectProjects unit",
     "test:integration": "jest --selectProjects integration --runInBand",
-    "test:contract:pg": "DB_ADAPTER=postgres jest --selectProjects integration --runInBand src/service/storage/contract.test.ts src/service/storage/query.contract.test.ts src/service/storage/postgres/schema.test.ts src/test/harness.smoke.test.ts",
+    "test:contract:pg": "DB_ADAPTER=postgres jest --selectProjects integration --runInBand src/service/storage/contract.test.ts src/service/storage/query.contract.test.ts src/service/storage/postgres/schema.test.ts src/service/storage/postgres/conn.test.ts src/test/harness.smoke.test.ts",
     "test:pg": "DB_ADAPTER=postgres jest --runInBand",
     "start": "ENV_FILE=development nodemon",
     "dev": "ENV_FILE=development nodemon",
@@ -19,6 +19,7 @@
     "start:dist": "node -r module-alias/register ./dist/server/src",
     "hashpassword": "ENV_FILE=test ts-node -r ./src/register-paths.ts ./src/scripts/hashpassword.ts",
     "pg:check": "ENV_FILE=${ENV_FILE:-development} ts-node -r ./src/register-paths.ts ./src/scripts/pg-check.ts",
+    "rebuild-anchors": "ENV_FILE=${ENV_FILE:-development} ts-node -r ./src/register-paths.ts ./src/scripts/rebuild-document-anchors.ts",
     "replay": "ts-node -r ./src/register-paths.ts ./src/replay/run.ts",
     "smoke:server": "ts-node -r ./src/register-paths.ts ./src/scripts/smoke-server.ts"
   },

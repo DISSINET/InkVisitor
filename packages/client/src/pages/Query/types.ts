@@ -1,4 +1,5 @@
 import { Query } from "@inkvisitor/shared/types";
+import { isIgnoredStartNode } from "./Query/utils";
 
 export type INodeItem = Query.INode & {
   gridX: number;
@@ -12,15 +13,84 @@ export type QueryValidity = {
 export type QueryValidityProblem = {
   source: string;
   text: string;
+  // a warning points at a likely mistake but leaves the query valid
+  warning?: boolean;
+};
+
+const pinnedConditionWarning = (outcome: string) =>
+  "This condition checks only the entity selected in the node above. If that entity " +
+  `meets it, nothing changes; if not, ${outcome}. To filter several ` +
+  "entities, turn on EQ or SUB in the node above, or remove its entity and choose a " +
+  "class instead.";
+
+export const PINNED_CONDITION_WARNING = pinnedConditionWarning("the query finds nothing");
+
+// the other start nodes still add their entities to the result
+export const PINNED_START_NODE_CONDITION_WARNING = pinnedConditionWarning(
+  "this start node finds nothing",
+);
+
+export const START_NODE_WARNING =
+  "The search ignores this start node, as it matches every entity. Pick a class or add a " +
+  "condition to use it.";
+
+/**
+ * The warnings of a query: conditions nested under a pinned node that EQ / SUB
+ * do not widen test that one entity, so they keep or drop all the matches of
+ * the edge above rather than filtering a set. Each start node the search
+ * ignores (withoutIgnoredStartNodes) is pointed at.
+ */
+export const queryWarnings = (root: Query.INode): QueryValidityProblem[] => {
+  const warnings: QueryValidityProblem[] = [];
+  if (Query.areStartNodesValid(root)) {
+    root.edges
+      .filter(isIgnoredStartNode)
+      .forEach((edge) =>
+        warnings.push({ source: edge.id, text: START_NODE_WARNING, warning: true }),
+      );
+  }
+  const visit = (node: Query.INode, incoming?: Query.EdgeType) => {
+    const { entityId, includeEquivalents, includeSubordinates } = node.params;
+    // on the territory-tree edges SUB is ignored or read as depth, never adding subordinates
+    const widened =
+      includeEquivalents === true ||
+      (includeSubordinates === true &&
+        !!incoming &&
+        !edgeTypesWithoutSubordinates.includes(incoming) &&
+        !edgeTypesWithSubtreeDepth.includes(incoming));
+    for (const edge of node.edges) {
+      if (incoming && entityId && !widened) {
+        warnings.push({
+          source: edge.id,
+          text:
+            incoming === Query.EdgeType.SE
+              ? PINNED_START_NODE_CONDITION_WARNING
+              : PINNED_CONDITION_WARNING,
+          warning: true,
+        });
+      }
+      visit(edge.node, edge.type);
+      if (edge.valueNode) {
+        visit(edge.valueNode, Query.TupleValueEdgeTypes[edge.type]);
+      }
+    }
+  };
+  visit(root);
+  return warnings;
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [
+  // HP: matches the type and the value of the same prop (server: EdgeHasProp in edge.ts)
+  Query.EdgeType["HP:"],
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
   // inverse entity-prop edges: match the prop types / values found in the
   // target entity's own props (server: runInversePropEdge in edge.ts)
   Query.EdgeType["I_EP:T"],
   Query.EdgeType["I_HP:V"],
+  // SP: matches the type and the value of the same in-statement prop (server:
+  // EdgeStatementHasProp in edge.ts)
+  Query.EdgeType["SP:"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
   // statement actant-field edges: match a Statement that has some actant
@@ -105,6 +175,11 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
+  // EAT: match any entity ANCHORED in the full text inside the span of the
+  // target Territory's anchor, at any depth, subTs anchored inside it included;
+  // the SUB toggle adds the spans of its subTs anchored elsewhere (server:
+  // EdgeAnchoredUnderTerritory in edge.ts)
+  Query.EdgeType["EAT:"],
   // IS: (XIsInS) match any entity USED in the target Statement in ANY position
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)
@@ -133,7 +208,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
  * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
  * direct-vs-any distinction to begin with (a statement sits under exactly one
- * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off.
+ * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off. "SE" makes
+ * its target a start node of the query, which is not a condition to pick
+ * among the others.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -150,6 +227,19 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["SUT:D"],
   Query.EdgeType["I_SUT:D"],
   Query.EdgeType["I_CT:D"],
+  Query.EdgeType.SE,
+];
+
+/**
+ * Implemented edge types offered only on an edge that already has them, as in a saved
+ * query: "EP:T" / "HP:V" are HP: with its value or its type left empty, "SP:T" / "SP:V" the
+ * same for SP:.
+ */
+export const edgeTypesRetired: Query.EdgeType[] = [
+  Query.EdgeType["EP:T"],
+  Query.EdgeType["HP:V"],
+  Query.EdgeType["SP:T"],
+  Query.EdgeType["SP:V"],
 ];
 
 /**

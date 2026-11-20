@@ -292,31 +292,36 @@ export default class Document implements IDocument, IDbModel {
   }
 
   removeAnchor(entityId: string, index: number) {
-    const openingTagRegex = createSpecificOpeningTagRegex(entityId);
-    const closingTagRegexInstance = new RegExp(`</${entityId}>`, "g");
-    
+    const tagRegex = new RegExp(
+      `${createSpecificOpeningTagRegex(entityId).source}|</${entityId}>`,
+      "g"
+    );
+
     let match;
-    let count = 0;
     const positions: { start: number; end: number; openingTagLength: number }[] = [];
+    // anchors of the entity open at the current tag, innermost last
+    const open: number[] = [];
 
-    // Find all opening tags in the content
-    while ((match = openingTagRegex.exec(this.content)) !== null) {
-      positions.push({ 
-        start: match.index, 
-        end: -1, 
-        openingTagLength: match[0].length 
-      });
-    }
-
-    // Find corresponding closing tags
-    while ((match = closingTagRegexInstance.exec(this.content)) !== null) {
-      // Find the matching opening tag (the one without an end position)
-      for (let i = positions.length - 1; i >= 0; i--) {
-        if (positions[i].end === -1) {
-          positions[i].end = match.index + match[0].length;
-          count++;
-          break;
+    // The entity's tags are walked in document order, so a closing tag ends
+    // the nearest anchor still open before it. `positions` keeps the order of
+    // the opening tags, which is the order anchorIndex counts in.
+    while ((match = tagRegex.exec(this.content)) !== null) {
+      // <id n="2"/> spans no text, so it is not an anchor
+      if (match[0].endsWith("/>")) {
+        continue;
+      }
+      if (match[0].startsWith("</")) {
+        const closed = open.pop();
+        if (closed !== undefined) {
+          positions[closed].end = match.index + match[0].length;
         }
+      } else {
+        open.push(positions.length);
+        positions.push({
+          start: match.index,
+          end: -1,
+          openingTagLength: match[0].length,
+        });
       }
     }
 
@@ -410,28 +415,35 @@ export default class Document implements IDocument, IDbModel {
    * per-entity round-trip. Ids that are not anchored are absent from the result.
    * @param db
    * @param entityIds
-   * @returns map of entity id -> anchor contents (in document order)
+   * @returns map of entity id -> distinct anchor contents (in document order)
    */
   static async getAnchorTextsForEntities(
     db: Conn,
     entityIds: string[]
   ): Promise<Record<string, string[]>> {
-    const out: Record<string, string[]> = {};
     if (!entityIds.length) {
-      return out;
+      return {};
     }
 
+    // a Set per entity: the same text anchored many times is listed once
+    const texts: Record<string, Set<string>> = {};
     const idSet = new Set(entityIds);
-    const docs = await Document.findByEntityIds(db, entityIds);
+    // same document order as Entity.findUsedInDocuments, so the texts line up
+    // with the statement editor's anchor list
+    const docs = (await Document.findByEntityIds(db, entityIds)).sort(
+      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
+    );
     for (const docData of docs) {
       const doc = new Document(docData);
       const traverse = (nodes: AnchorsNode[]) => {
         for (const node of nodes) {
-          if (idSet.has(node.anchor)) {
-            if (!out[node.anchor]) {
-              out[node.anchor] = [];
+          // trimmed: every client surface trims anchor texts
+          const text = idSet.has(node.anchor) ? node.getShortContent().trim() : "";
+          if (text) {
+            if (!texts[node.anchor]) {
+              texts[node.anchor] = new Set();
             }
-            out[node.anchor].push(node.getShortContent());
+            texts[node.anchor].add(text);
           }
           traverse(node.children);
         }
@@ -439,6 +451,10 @@ export default class Document implements IDocument, IDbModel {
       traverse(doc.anchors);
     }
 
+    const out: Record<string, string[]> = {};
+    for (const [id, set] of Object.entries(texts)) {
+      out[id] = [...set];
+    }
     return out;
   }
 
@@ -452,15 +468,69 @@ export default class Document implements IDocument, IDbModel {
     return entries && entries.length ? entries : [];
   }
 
+  /**
+   * Builds the anchors tree and entity ids of every document again from its
+   * content and stores them where they differ. A stored tree is only rebuilt
+   * when the document is saved, so one written by an older parser keeps its
+   * shape until then. Content and updatedAt are left as they are.
+   */
+  static async rebuildAnchors(
+    conn: Conn,
+    options?: { dryRun?: boolean }
+  ): Promise<{ checked: number; rebuilt: number }> {
+    // key order and the order of ids within a class differ between storages
+    const shape = (doc: Pick<IDocument, "anchors" | "entityIds">): string => {
+      const nodes = (list: IDocument["anchors"]): unknown[] =>
+        (list || []).map((node) => [
+          node.anchor,
+          node.class,
+          node.indexStart,
+          node.indexEnd,
+          node.content,
+          nodes(node.children),
+        ]);
+      const ids = Document.normalizeEntityIds(doc.entityIds);
+      return JSON.stringify([
+        nodes(doc.anchors),
+        Object.keys(ids)
+          .sort()
+          .map((key) => [key, [...ids[key as EntityEnums.Class]].sort()]),
+      ]);
+    };
+
+    const docs = await Document.getAll(conn);
+    let rebuilt = 0;
+    for (const raw of docs) {
+      const doc = new Document(raw);
+      await doc.preprocess(conn);
+      if (shape(raw) === shape(doc)) {
+        continue;
+      }
+      rebuilt++;
+      if (!options?.dryRun) {
+        await storage.documents.update(conn, doc.id, {
+          entityIds: doc.entityIds,
+          anchors: doc.anchors,
+        });
+      }
+    }
+    return { checked: docs.length, rebuilt };
+  }
+
   static async backfillEntityIds(conn: Conn): Promise<number> {
+    const isEmpty = (entityIds: unknown) =>
+      Object.values(Document.normalizeEntityIds(entityIds)).every((arr) => arr.length === 0);
     const docs = await Document.getAll(conn);
     let count = 0;
     for (const raw of docs) {
       const doc = new Document(raw);
-      const normalized = Document.normalizeEntityIds(doc.entityIds);
-      const isEmpty = Object.values(normalized).every((arr) => arr.length === 0);
-      if (isEmpty && doc.content) {
+      if (isEmpty(doc.entityIds) && doc.content) {
         await doc.preprocess(conn);
+        // runs on every server start; a document with no anchor resolving to
+        // an existing entity still has empty entityIds, so there is nothing to store
+        if (isEmpty(doc.entityIds)) {
+          continue;
+        }
         await doc.update(conn, {
           entityIds: doc.entityIds,
           anchors: doc.anchors,

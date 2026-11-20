@@ -6,8 +6,9 @@ import { Conn } from "@service/storage";
 
 /**
  * Translates Explorer row filters into a RequestSearch for reuse by the existing
- * SearchQuery backend. Label, UUIDs and RootValidity are intentionally NOT mapped
- * here - they are handled by their own Explorer filter steps.
+ * SearchQuery backend. Label, UUIDs, RootValidity, status, language, logical type
+ * and part of speech are intentionally NOT mapped here - they are handled by their
+ * own Explorer filter steps.
  * Returns null when no translatable filter carries a value.
  */
 export const exploreFiltersToRequestSearch = (
@@ -18,14 +19,6 @@ export const exploreFiltersToRequestSearch = (
 
   for (const filter of filters) {
     switch (filter.type) {
-      case Explore.SearchOption.Status:
-        data.status = filter.status;
-        hasAny = true;
-        break;
-      case Explore.SearchOption.Language:
-        data.language = filter.language;
-        hasAny = true;
-        break;
       case Explore.SearchOption.CreatedAt:
         if (filter.createdAfter) {
           data.createdAfter = new Date(filter.createdAfter);
@@ -64,7 +57,7 @@ export const exploreFiltersToRequestSearch = (
           hasAny = true;
         }
         break;
-      // Label, UUIDs, RootValidity handled by dedicated Explorer filter steps.
+      // the other filter types are handled by dedicated Explorer filter steps
     }
   }
 
@@ -73,7 +66,7 @@ export const exploreFiltersToRequestSearch = (
 
 /**
  * Narrows candidate entity ids by the Explorer filters that map onto the existing
- * search backend (status, language, created/updated dates, created/updated/edited by).
+ * search backend (created/updated dates, created/updated/edited by).
  * Returns the input ids unchanged when no such filter is present.
  * Order of the input ids is preserved.
  */

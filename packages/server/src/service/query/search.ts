@@ -9,11 +9,6 @@ import { Conn, ExplorePlan, storage } from "@service/storage";
 import { Results } from ".";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import Entity from "@models/entity/entity";
-import {
-  getCachedBaseIds,
-  queryCacheKey,
-  setCachedBaseIds,
-} from "./query-base-cache";
 import { getRowIdsFilter } from "./explore-ids-filter";
 import {
   getEquivalentEntityIds,
@@ -22,7 +17,6 @@ import {
 import { aggregateAuditStats } from "@models/stats/aggregate";
 import { getNodeExpansionIds } from "./node-expansion";
 import treeCache from "@service/treeCache";
-import { EXPLORE_STATS_ENTITY_LIMIT } from "@inkvisitor/shared/types/stats";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -31,7 +25,6 @@ export default class QuerySearch {
   root: ExplorePlan;
   explore: Explore.IExplore;
   results: Results<IEntity> | null;
-  private readonly queryForCache: Query.INode;
   private resultsExpanded = false;
   // ids APPENDED by expandFilteredResults (#2969), by provenance - used to
   // stamp isEquivalent/isSubordinate on the response entities. Direct matches
@@ -52,7 +45,6 @@ export default class QuerySearch {
   }
 
   constructor(query: Query.INode, explore: Explore.IExplore) {
-    this.queryForCache = query;
     this.root = storage.explore.plan(query, {
       expand: getNodeExpansionIds,
       subordinates: getSubordinateEntityIds,
@@ -77,6 +69,9 @@ export default class QuerySearch {
     if (!this.root.type) {
       throw new BadParams();
     }
+    if (!Query.areStartNodesValid(query)) {
+      throw new SearchEdgeTypesInvalid("Start nodes must be the only conditions of the root, joined by OR");
+    }
   }
 
   /**
@@ -88,25 +83,12 @@ export default class QuerySearch {
       throw new SearchEdgeTypesInvalid();
     }
 
-    const cacheKey = queryCacheKey(this.queryForCache);
-    const cachedIds = getCachedBaseIds(cacheKey);
-    if (cachedIds) {
-      this.results = new Results<IEntity>();
-      this.results.items = [...cachedIds];
-      return this.results.items;
-    }
-
+    // the RAW unexpanded query matches: the explore filters and the root-level
+    // expansion (#2969) are applied per request in expandFilteredResults(),
+    // via getResults()/getStats()
     this.results = new Results<IEntity>();
     this.results.items = await this.root.run(db);
-    const ids = this.results.items;
-
-    // The cache holds the RAW unexpanded query matches: the explore filters
-    // vary per request and the root-level expansion (#2969) depends on the
-    // filtered set, so both are applied per request in
-    // expandFilteredResults() - the cache-hit path above goes through the
-    // exact same step via getResults()/getStats().
-    setCachedBaseIds(cacheKey, ids);
-    return ids;
+    return this.results.items;
   }
 
   /**
@@ -232,12 +214,7 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(
-            db,
-            entity,
-            columns,
-            columnsContext
-          ),
+          columnData: this.results!.columns(entity, columns, columnsContext),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)
@@ -259,9 +236,9 @@ export default class QuerySearch {
    * result, not a single page). Only meaningful when the view mode is Stats;
    * returns {} otherwise. Must be called after run().
    *
-   * The entity list is capped at EXPLORE_STATS_ENTITY_LIMIT before it reaches
-   * the audit query: an unbounded id list flooded the db connection pool. The
-   * caller compares the full result `total` against the limit to warn the user.
+   * The entity list is cut to the storage's `entityIdsLimit`, when it has one,
+   * before it reaches the audit query. The caller compares the full result
+   * `total` against the limit to warn the user.
    */
   async getStats(
     db: Conn
@@ -275,10 +252,9 @@ export default class QuerySearch {
 
     await this.results.applyExploreFilters(db, this.explore);
     await this.expandFilteredResults(db);
-    const entityIds = (this.results.items ?? []).slice(
-      0,
-      EXPLORE_STATS_ENTITY_LIMIT
-    );
+    const items = this.results.items ?? [];
+    const limit = storage.audits.entityIdsLimit;
+    const entityIds = limit === null ? items : items.slice(0, limit);
 
     return aggregateAuditStats(db, this.explore.view.stats, { entityIds });
   }

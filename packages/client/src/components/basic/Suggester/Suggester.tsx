@@ -34,7 +34,9 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledContextNote,
   StyledEmptyCategory,
+  StyledPasteRow,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledRightContentDivider,
@@ -44,7 +46,8 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
-import { IcoMinus, IcoPlusBold } from "Theme/icons";
+import { useListedSuggestions } from "./useListedSuggestions";
+import { IcoClipboard, IcoMinus, IcoPlusBold } from "Theme/icons";
 
 // suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
 // even when the input itself is narrow; the list floats in a portal, so it is
@@ -54,9 +57,16 @@ const SUGGESTION_LIST_MIN_WIDTH = 320;
 // px; the type bar is all that separates the class box from the input
 const TYPE_BAR_WIDTH = 5;
 
+// set by the size middleware on the floating list to the room left in the
+// boundary; the rows inside cap their height with it
+const AVAILABLE_HEIGHT_VAR = "--suggester-available-height";
+
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
+  // listed above the search hits, which leave out the entities listed here; the
+  // list grows by their rows, so the search hits keep their usual height
+  prioritySuggestions?: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
@@ -74,6 +84,12 @@ interface Suggester {
   isFetching?: boolean;
 
   preSuggestions?: EntitySuggestion[];
+  // A right click into the empty input opens this list in place of the
+  // pre-suggestions; undefined while it loads. onContextOpen tells the parent
+  // to load it, and without it the browser's own menu opens.
+  contextSuggestions?: EntitySuggestion[];
+  contextEmptyNote?: string;
+  onContextOpen?: () => void;
 
   // events
   onType: (newType: string) => void;
@@ -112,9 +128,44 @@ interface Suggester {
   onFocusChange?: (isFocused: boolean) => void;
 }
 
+const PASTE_PREVIEW_LENGTH = 30;
+
+/** clipboard text as one line, the way the input holds it */
+const singleLine = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+/** the paste row's label, quoting the start of the clipboard text when it is known */
+const pasteLabel = (preview?: string): string => {
+  if (!preview) {
+    return "paste";
+  }
+  const shown =
+    preview.length > PASTE_PREVIEW_LENGTH ? `${preview.slice(0, PASTE_PREVIEW_LENGTH)}…` : preview;
+  return `paste "${shown}"`;
+};
+
+/**
+ * The clipboard text without prompting, which only Chromium allows once the
+ * page holds the clipboard-read permission; undefined wherever reading it would
+ * ask the user (Firefox and Safari always do)
+ */
+const previewClipboard = async (): Promise<string | undefined> => {
+  try {
+    const permission = await navigator.permissions.query({
+      name: "clipboard-read" as PermissionName,
+    });
+    if (permission.state !== "granted") {
+      return undefined;
+    }
+    return singleLine(await navigator.clipboard.readText());
+  } catch {
+    return undefined;
+  }
+};
+
 export const Suggester: React.FC<Suggester> = ({
   marginTop = false,
   suggestions = [],
+  prioritySuggestions = [],
   placeholder = "",
   typed,
   category,
@@ -127,6 +178,9 @@ export const Suggester: React.FC<Suggester> = ({
   disableButtons = false,
 
   preSuggestions,
+  contextSuggestions,
+  contextEmptyNote = "nothing to list",
+  onContextOpen,
 
   // events
   onType,
@@ -161,9 +215,28 @@ export const Suggester: React.FC<Suggester> = ({
   onFocusChange,
 }) => {
   const [selected, setSelected] = useState(-1);
+  const [isContextOpen, setIsContextOpen] = useState(false);
+  const contextListed = isContextOpen && typed.length === 0;
+  // the clipboard text when the browser already lets the page read it, "" for
+  // an empty clipboard, undefined when it can only be read on a click
+  const [clipboardPreview, setClipboardPreview] = useState<string | undefined>(undefined);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const { listedSuggestions, listedPriorityCount } = useListedSuggestions(
+    prioritySuggestions,
+    suggestions,
+    isFocused || isHovered,
+    `${category} ${typed}`
+  );
+
+  // the input blurs on the mousedown that picks a row, so the right-click list
+  // waits for the whole list to close, focus and hover gone
+  useEffect(() => {
+    if (!isFocused && !isHovered) {
+      setIsContextOpen(false);
+    }
+  }, [isFocused, isHovered]);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
@@ -171,12 +244,22 @@ export const Suggester: React.FC<Suggester> = ({
   useKeypress(
     "Escape",
     () => {
-      if (!showCreateModal && isFocused) onCancel();
+      if (!showCreateModal && isFocused) {
+        setIsContextOpen(false);
+        onCancel();
+      }
     },
     [showCreateModal, isFocused],
   );
 
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  // the list stays open while the input holds focus or the pointer is over it
+  const closeList = () => {
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
+    setIsHovered(false);
+  };
   const inputRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
@@ -197,6 +280,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
+    setIsContextOpen(false);
     onType(newType);
   };
 
@@ -258,6 +342,19 @@ export const Suggester: React.FC<Suggester> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalDroppedItem]);
 
+  // the paste row stands in for the browser menu the right click replaces
+  const handlePaste = async () => {
+    try {
+      const text = singleLine(await navigator.clipboard.readText());
+      if (text) {
+        onTypeFn(text);
+      }
+    } catch {
+      toast.info("The browser did not allow reading the clipboard, paste with Ctrl+V");
+    }
+    textInputRef.current?.focus();
+  };
+
   const handleEnterPress = () => {
     // Statements are created without a label, so allow triggering create with an
     // empty input; other classes still require at least one character.
@@ -279,8 +376,14 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      if (!disableEnter) {
-        const entity = suggestions[selected].entity;
+      // the list on screen, the one the arrow keys walk
+      const listed = contextListed
+        ? (contextSuggestions ?? [])
+        : listedSuggestions.length || typed.length > 0
+          ? listedSuggestions
+          : (preSuggestions ?? []);
+      const entity = listed[selected]?.entity;
+      if (!disableEnter && entity) {
         if (entity.status !== EntityEnums.Status.Discouraged) {
           if (!entity.isTemplate) {
             onPick(entity);
@@ -327,7 +430,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[], extraRows = 0) => {
     const rowHeight = 25;
 
     return (
@@ -335,7 +438,10 @@ export const Suggester: React.FC<Suggester> = ({
         rowProps={{ items: suggestions }}
         rowCount={suggestions.length}
         rowHeight={rowHeight}
-        style={{ maxHeight: "20rem" }}
+        // until the size middleware first measures, the rows take their full height
+        style={{
+          maxHeight: `min(calc(20rem + ${extraRows * rowHeight}px), var(${AVAILABLE_HEIGHT_VAR}, 100vh))`,
+        }}
         overscanCount={scrollOverscanCount}
         rowComponent={(props) => {
           return (
@@ -347,8 +453,10 @@ export const Suggester: React.FC<Suggester> = ({
               territoryParentId={territoryParentId}
               disableButtons={disableButtons}
               disableTemplateInstantiation={disableTemplateInstantiation}
+              // a pick empties the input, which can list the pre-suggestions or
+              // the priority rows again, so a click that picks a row closes the list
               onPick={(entity, instantiate) => {
-                setIsHovered(false);
+                closeList();
                 onPick(entity, instantiate);
               }}
             />
@@ -368,15 +476,22 @@ export const Suggester: React.FC<Suggester> = ({
     whileElementsMounted: autoUpdate,
     // near the right edge flip first tries bottom-end, aligning the list to the
     // input's right edge; shift slides it into view when neither alignment
-    // fits, and size caps it to the boundary width
+    // fits, and size caps it to the room left in the boundary: #page-content,
+    // which clips the list portaled into it, or the window on a page without one
     middleware: [
       offset(1),
       flip({ padding: 10 }),
       shift({ padding: 10 }),
       size({
         padding: 10,
-        apply({ availableWidth, elements }) {
+        apply({ availableWidth, availableHeight, elements }) {
           elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
+          // only the rows scroll, so the cap goes to them; on the floating list
+          // it would cut them off
+          elements.floating.style.setProperty(
+            AVAILABLE_HEIGHT_VAR,
+            `${Math.max(0, availableHeight)}px`
+          );
         },
       }),
       // how far the list starts left of the input, after flip and shift
@@ -405,9 +520,7 @@ export const Suggester: React.FC<Suggester> = ({
   // an input scrolled out of view closes its list; clicking the input reopens it
   useEffect(() => {
     if (!isListHidden) return;
-    const focused = document.activeElement;
-    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
-    setIsHovered(false);
+    closeList();
   }, [isListHidden]);
 
   const theme = useTheme();
@@ -525,7 +638,19 @@ export const Suggester: React.FC<Suggester> = ({
             style={{
               width: "100%",
             }}
-            {...getReferenceProps()}
+            {...getReferenceProps({
+              onContextMenu: (event) => {
+                // with text in the input the browser's menu stays, for copy and paste
+                if (!onContextOpen || disabled || typed.length > 0) return;
+                event.preventDefault();
+                setSelected(-1);
+                setIsContextOpen(true);
+                onContextOpen();
+                textInputRef.current?.focus();
+                setClipboardPreview(undefined);
+                previewClipboard().then(setClipboardPreview);
+              },
+            })}
           >
             <Input
               inputRef={textInputRef}
@@ -608,17 +733,48 @@ export const Suggester: React.FC<Suggester> = ({
                 ...floatingStyles,
               }}
             >
-              {suggestions.length || (isFetching && isFocused) ? (
+              {!contextListed && (listedSuggestions.length || (isFetching && isFocused)) ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
-                    {renderEntitySuggestions(suggestions)}
+                    {renderEntitySuggestions(listedSuggestions, listedPriorityCount)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
                   {/* the arrow keys belong to the class menu while it is open */}
                   {!isCategoryMenuOpen && (
                     <SuggesterKeyPress
                       onArrowDown={() => {
-                        if (selected < suggestions.length - 1) setSelected(selected + 1);
+                        if (selected < listedSuggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
+                </>
+              ) : null}
+
+              {/* RIGHT-CLICK LIST */}
+              {contextListed ? (
+                <>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
+                    {clipboardPreview !== "" && (
+                      <StyledPasteRow type="button" onClick={handlePaste}>
+                        <IcoClipboard size={12} />
+                        {pasteLabel(clipboardPreview)}
+                      </StyledPasteRow>
+                    )}
+                    {contextSuggestions?.length ? (
+                      renderEntitySuggestions(contextSuggestions)
+                    ) : contextSuggestions ? (
+                      <StyledContextNote>{contextEmptyNote}</StyledContextNote>
+                    ) : null}
+                    <Loader size={30} show={!contextSuggestions} />
+                  </StyledRelativePosition>
+                  {!isCategoryMenuOpen && contextSuggestions && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < contextSuggestions.length - 1) setSelected(selected + 1);
                       }}
                       onArrowUp={() => {
                         if (selected > -1) setSelected(selected - 1);
@@ -630,7 +786,10 @@ export const Suggester: React.FC<Suggester> = ({
               ) : null}
 
               {/* PRE-SUGGESTIONS */}
-              {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
+              {!contextListed &&
+              preSuggestions &&
+              preSuggestions.length > 0 &&
+              typed.length === 0 ? (
                 <>
                   <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(preSuggestions)}

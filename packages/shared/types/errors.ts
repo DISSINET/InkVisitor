@@ -303,9 +303,11 @@ class StatementInvalidMove extends CustomError {
  * InternalServerError will be thrown when some unexpected error occurs
  */
 class InternalServerError extends CustomError {
+  public static readonly TYPE = "InternalServerError";
   public static code = 500;
-  public static title = "Internal server error";
-  public static message = "An unknown error occured";
+  public static title = "Something went wrong on the server";
+  public static message =
+    "Please try again. If the problem persists, send the details to the project owner.";
   loggable = true;
 }
 
@@ -520,8 +522,9 @@ class InvalidEmailError extends CustomError {
  */
 class UnknownError extends CustomError {
   public static code = 500;
-  public static title = "Unknown error";
-  public static message = "Mysterious";
+  public static title = "Something went wrong";
+  public static message =
+    "Please try again. If the problem persists, send the details to the project owner.";
 }
 
 class NetworkError extends CustomError {
@@ -530,6 +533,24 @@ class NetworkError extends CustomError {
   public static title = "Connection to server lost";
   public static message =
     "Please check your network connection. If the issue persists, please try again later or contact the project owner.";
+}
+
+// a proxy in front of the API answered in its place, typically while the server
+// restarts or is overloaded
+class ServerUnavailableError extends CustomError {
+  public static readonly TYPE = "ServerUnavailableError";
+  public static code = 503;
+  public static title = "Server unavailable";
+  public static message = "The server is not responding right now. Please try again shortly.";
+}
+
+// a bug in the client code, so neither the network nor the server is at fault
+class ClientError extends CustomError {
+  public static readonly TYPE = "ClientError";
+  public static code = 500;
+  public static title = "Something went wrong";
+  public static message =
+    "Please reload the page and try again. If the problem persists, send the details to the project owner.";
 }
 
 class TimeoutError extends CustomError {
@@ -591,6 +612,8 @@ const allErrors: Record<string, any> = {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  ServerUnavailableError,
+  ClientError,
   TimeoutError,
   HtmlResponseError,
   RequestTooLargeError,
@@ -609,6 +632,10 @@ export interface IErrorSignature {
   message: string; // additional message in readable form
 }
 
+export function isKnownErrorCode(code: string): boolean {
+  return Object.prototype.hasOwnProperty.call(allErrors, code);
+}
+
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
   const ErrorClass = allErrors[errSig.error];
   if (ErrorClass) {
@@ -617,7 +644,7 @@ export function getErrorByCode(errSig: IErrorSignature): CustomError {
     errorInstance.title = ErrorClass.title; // Set the title from the class
     return errorInstance;
   }
-  return new UnknownError(errSig.message || "Unknown error occurred");
+  return new UnknownError(errSig.message || UnknownError.message);
 }
 
 export {
@@ -654,6 +681,8 @@ export {
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
+  ServerUnavailableError,
+  ClientError,
   TimeoutError,
   HtmlResponseError,
   RequestTooLargeError,

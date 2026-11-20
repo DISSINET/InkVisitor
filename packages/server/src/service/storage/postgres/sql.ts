@@ -11,8 +11,20 @@ export const ident = (name: string): string => `"${name.replace(/"/g, '""')}"`;
  * from every string value before serializing.
  */
 export function encode(value: unknown): string {
-  // oxlint-disable-next-line no-control-regex
-  return JSON.stringify(value, (_key, v) => (typeof v === "string" ? v.replace(/\u0000/g, "") : v));
+  return JSON.stringify(value, (_key, v) => (typeof v === "string" ? withoutNul(v) : v));
+}
+
+/**
+ * `value` with U+0000 dropped from a string, or from each string of an array.
+ * PostgreSQL rejects the code point in text as in jsonb, so a query parameter
+ * loses it the same way a stored document does.
+ */
+export function withoutNul(value: unknown): unknown {
+  if (typeof value === "string") {
+    // oxlint-disable-next-line no-control-regex
+    return value.replace(/\u0000/g, "");
+  }
+  return Array.isArray(value) ? value.map(withoutNul) : value;
 }
 
 const DATE_FIELDS: Record<string, string[]> = {

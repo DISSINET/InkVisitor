@@ -1,11 +1,10 @@
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Query } from "@inkvisitor/shared/types/query";
-import { nodeLabel } from "../../../../common/searchLabel";
 import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
 import { unwrap } from "../conn";
-import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
 import SearchEdge, { getEdgeInstance } from "./edge";
+import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchNode implements Query.INode, ExplorePlan {
@@ -43,7 +42,8 @@ export default class SearchNode implements Query.INode, ExplorePlan {
 
   /**
    * Builds the base entity stream for this node from its own params
-   * (entityClasses / entityStatuses / entityLanguages / entityId / label). Nested child-node params are NOT
+   * (entityClasses / entityStatuses / entityLanguages / entityLogicalTypes / entityPartsOfSpeech /
+   * entityId / label). Nested child-node params are NOT
    * applied here - they describe the target of the parent edge and are
    * consumed by that edge, not used to filter the entity stream.
    */
@@ -55,26 +55,10 @@ export default class SearchNode implements Query.INode, ExplorePlan {
         return r.expr(classes).contains(row("class"));
       });
     }
-    if (this.params.entityStatuses?.length) {
-      const statuses = this.params.entityStatuses;
-      q = q.filter(function (row: RDatum) {
-        return r.expr(statuses).contains(row("status"));
-      });
-    }
-    if (this.params.entityLanguages?.length) {
-      const languages = this.params.entityLanguages;
-      q = q.filter(function (row: RDatum) {
-        return r.expr(languages).contains(row("language"));
-      });
-    }
     if (this.params.entityId) {
       q = q.filter({ id: this.params.entityId });
     }
-    const label = nodeLabel(this.params.label);
-    if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
-    }
-    return q;
+    return withinEntityFilters(q, this.params);
   }
 
   /**
@@ -88,21 +72,16 @@ export default class SearchNode implements Query.INode, ExplorePlan {
    */
   async run(conn: Conn): Promise<string[]> {
     const db = unwrap(conn);
-    const baseStream = this.baseStream();
+    const filtered = await auditAndCoOccurrenceIds(db, this.params);
+    return this.match(db, withinIds(this.baseStream(), filtered));
+  }
 
-    let ids: string[];
+  /** ids of the entities in `stream` meeting this node's edges */
+  async match(db: Connection, stream: RStream): Promise<string[]> {
     if (!this.edges.length) {
-      ids = await baseStream.getField("id").distinct().run(db, QUERY_RUN_OPTIONS);
-    } else {
-      ids = await this.evaluateEdges(
-        db,
-        baseStream,
-        this.edges,
-        this.operator
-      );
+      return stream.getField("id").distinct().run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
     }
-
-    return ids;
+    return this.evaluateEdges(db, stream, this.edges, this.operator);
   }
 
   /**
@@ -122,18 +101,14 @@ export default class SearchNode implements Query.INode, ExplorePlan {
    * - a Negative edge before any positive has seeded the set, or an OR node
    * that contains a negative edge. AND negations are taken against the running
    * accumulator, so the common (positive-seeded) case never fetches it.
-   *
-   * @param baseIdsKnown optional precomputed base ids (the caller already
-   * materialised the stream's ids, e.g. nested edges reusing the parent match)
    */
   private async evaluateEdges(
     db: Connection,
     baseStream: RStream,
     edges: SearchEdge[],
-    operator: Query.NodeOperator,
-    baseIdsKnown?: string[]
+    operator: Query.NodeOperator
   ): Promise<string[]> {
-    let baseIdsCache: string[] | null = baseIdsKnown ?? null;
+    let baseIdsCache: string[] | null = null;
     const getBaseIds = async (): Promise<string[]> => {
       if (baseIdsCache === null) {
         baseIdsCache = (await baseStream
@@ -167,7 +142,8 @@ export default class SearchNode implements Query.INode, ExplorePlan {
           }
         }
       }
-      return Array.from(acc);
+      // the union comes edge by edge; sorted, it has the order of every other id list here
+      return Array.from(acc).sort();
     }
 
     // AND: narrowing pipeline. `acc === null` means "universe" (no edge applied
@@ -200,11 +176,9 @@ export default class SearchNode implements Query.INode, ExplorePlan {
   }
 
   /**
-   * Resolves the ids (subset of baseStream) that satisfy a single edge,
-   * including any conditions nested under the edge's target node. The edge's
-   * own condition is matched first; if the target node has its own edges, they
-   * are evaluated recursively over just the matched entities, so nested
-   * constraints further narrow (or widen, via OR) the result.
+   * Resolves the ids (subset of baseStream) that satisfy a single edge. The
+   * conditions nested under the edge's target node narrow the target's own
+   * entities, which prepare() resolves before the edge matches against them.
    */
   private async resolveEdgeMatch(
     db: Connection,
@@ -212,24 +186,7 @@ export default class SearchNode implements Query.INode, ExplorePlan {
     edge: SearchEdge
   ): Promise<string[]> {
     await edge.prepare(db);
-    const directIds = await edge.run(baseStream).distinct().run(db, QUERY_RUN_OPTIONS);
-
-    const childNode = edge.node;
-    if (!childNode.edges.length || directIds.length === 0) {
-      return directIds;
-    }
-
-    // restrict the recursion to entities that matched this edge, then apply the
-    // child node's own edges (the child node params themselves were already
-    // consumed by this edge, so they are not re-applied as a filter)
-    const childStream = r.table(TABLE.entities).getAll(r.args(directIds));
-    return childNode.evaluateEdges(
-      db,
-      childStream,
-      childNode.edges,
-      childNode.operator,
-      directIds
-    );
+    return edge.run(baseStream).distinct().run(db, QUERY_RUN_OPTIONS);
   }
 
   // TODO: checking only edge validity

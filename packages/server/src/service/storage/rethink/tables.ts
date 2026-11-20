@@ -310,7 +310,7 @@ function timeBucketFor(timeUnit: TimeUnit): (doc: RDatum) => RDatum {
   }
 }
 
-const byScopeAndModel = (scope: AuditScope, modelId: string) =>
+const byScopeAndModel = (scope: AuditScope, modelId: string | RDatum) =>
   r.table(TABLE.audits).getAll([scope, modelId], { index: DbEnums.Indexes.AuditScopeModelId });
 
 /**
@@ -347,6 +347,9 @@ async function edgePerEntityInRange(
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
+  // countByBucket tests every audit against the whole id list, so its cost is audits x ids
+  entityIdsLimit: 500,
+
   async firstFor(conn, scope, modelId) {
     const result = await byScopeAndModel(scope, modelId)
       .orderBy(r.asc("date"))
@@ -361,6 +364,18 @@ export const audits: AuditStore = {
       .limit(1)
       .run(unwrap(conn));
     return result && result.length ? result[0] : null;
+  },
+
+  async firstForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    return r
+      .expr(modelIds)
+      .concatMap(function (modelId: RDatum) {
+        return byScopeAndModel(scope, modelId).orderBy(r.asc("date")).limit(1);
+      })
+      .run(unwrap(conn));
   },
 
   lastNFor(conn, scope, modelId, n) {

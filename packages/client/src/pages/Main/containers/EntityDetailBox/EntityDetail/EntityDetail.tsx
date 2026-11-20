@@ -3,7 +3,6 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import {
   DropdownItem,
   IEntity,
-  IProp,
   IReference,
   IResponseDetail,
   Relation,
@@ -20,7 +19,7 @@ import {
   JSONExplorer,
   RelationAuditTable,
 } from "components/advanced";
-import { CMetaProp, DProps } from "constructors";
+import { DProps } from "constructors";
 import {
   EntityWritesContext,
   useEntityEditing,
@@ -32,7 +31,6 @@ import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
-import { DraggedPropRowCategory } from "types";
 import {
   ENTITY_DETAIL_SCROLL_CONTAINER_ID,
   handleDeleteEntityError,
@@ -43,11 +41,11 @@ import { openRestoredEntity } from "utils/openRestoredEntity";
 import { getStoredUserRole } from "utils/userStorage";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailExpandIcon } from "./EntityDetailExpandIcon/EntityDetailExpandIcon";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailMetaProps } from "./EntityDetailMetaProps/EntityDetailMetaProps";
 import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
@@ -60,7 +58,6 @@ import {
   StyledDetailScroller,
   StyledDetailWarnings,
   StyledDetailWrapper,
-  StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
 } from "./EntityDetailStyles";
@@ -73,6 +70,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { useRelationMutations } from "./useRelationMutations";
 import { useStoredEntityWrites } from "./useStoredEntityWrites";
 
 const allowedEntityChangeClasses = [
@@ -324,119 +322,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     setIsCleaningEntityPrompt(false);
   };
 
-  // Props handling
-
-  // adding only second or third level
-  // function adding the first level prop is in the button
-  const addMetaProp = (originId: string) => {
-    if (entity !== undefined) {
-      const newProp = CMetaProp();
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        if (prop1.id === originId) {
-          newProps[pi1].children = [...newProps[pi1].children, newProp];
-        }
-
-        // 3rd level
-        newProps[pi1].children.forEach((prop2, pi2) => {
-          if (prop2.id == originId) {
-            newProps[pi1].children[pi2].children = [
-              ...newProps[pi1].children[pi2].children,
-              newProp,
-            ];
-          }
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const updateProp = (propId: string, changes: Partial<IProp>) => {
-    if (entity !== undefined) {
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        // 1st level
-        if (prop1.id === propId) {
-          newProps[pi1] = { ...newProps[pi1], ...changes };
-        }
-
-        // 2nd level
-        prop1.children.forEach((prop2, pi2) => {
-          if (prop2.id === propId) {
-            newProps[pi1].children[pi2] = {
-              ...newProps[pi1].children[pi2],
-              ...changes,
-            };
-          }
-
-          // 3rd level
-          prop1.children[pi2].children.forEach((prop3, pi3) => {
-            if (prop3.id === propId) {
-              newProps[pi1].children[pi2].children[pi3] = {
-                ...newProps[pi1].children[pi2].children[pi3],
-                ...changes,
-              };
-            }
-          });
-        });
-      });
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const removeProp = (propId: string) => {
-    if (entity !== undefined) {
-      const newProps = [...entity.props].filter((prop, pi) => prop.id !== propId);
-
-      // 2nd level
-      newProps.forEach((prop1, pi1) => {
-        newProps[pi1].children = prop1.children.filter((child) => child.id !== propId);
-
-        // 3rd level
-        newProps[pi1].children.forEach((prop2, pi2) => {
-          newProps[pi1].children[pi2].children = newProps[pi1].children[pi2].children.filter(
-            (child) => child.id !== propId,
-          );
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const changeOrder = (propId: string, props: IProp[], oldIndex: number, newIndex: number) => {
-    for (let prop of props) {
-      if (prop.id === propId) {
-        props.splice(newIndex, 0, props.splice(oldIndex, 1)[0]);
-        return props;
-      }
-      for (let prop1 of prop.children) {
-        if (prop1.id === propId) {
-          prop.children.splice(newIndex, 0, prop.children.splice(oldIndex, 1)[0]);
-          return props;
-        }
-        for (let prop2 of prop1.children) {
-          if (prop2.id === propId) {
-            prop1.children.splice(newIndex, 0, prop1.children.splice(oldIndex, 1)[0]);
-            return props;
-          }
-        }
-      }
-    }
-    return props;
-  };
-
-  const movePropToIndex = (propId: string, oldIndex: number, newIndex: number) => {
-    if (entity !== undefined) {
-      const newProps = [...entity.props];
-      changeOrder(propId, newProps, oldIndex, newIndex);
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
   useEffect(() => {
     if (error && (error as any).error === "EntityDoesNotExist") {
       removeDetailId(detailId);
@@ -494,16 +379,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }
   };
 
-  const relationCreateMutation = useMutation({
-    mutationFn: (newRelation: Relation.IRelation) => writes.createRelation(newRelation),
-  });
-  const relationUpdateMutation = useMutation({
-    mutationFn: (relationObject: { relationId: string; changes: Partial<Relation.IRelation> }) =>
-      writes.updateRelation(relationObject.relationId, relationObject.changes),
-  });
-  const relationDeleteMutation = useMutation({
-    mutationFn: (relationId: string) => writes.deleteRelation(relationId),
-  });
+  const { relationCreateMutation, relationUpdateMutation, relationDeleteMutation } =
+    useRelationMutations(writes);
 
   const isInsideTemplate = entity?.isTemplate || false;
 
@@ -754,42 +631,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
                 {isSectionExpanded(EntityDetailSection.Metaproperties) && (
                   <StyledDetailSectionContent>
-                    <StyledPropGroupWrap>
-                      <PropGroup
-                        boxEntity={entity}
-                        originId={entity.id}
-                        entities={entity.entities}
-                        props={entity.props}
-                        updateProp={updateProp}
-                        removeProp={removeProp}
-                        addProp={addMetaProp}
-                        addPropWithEntityId={(variables: {
-                          typeEntityId?: string;
-                          valueEntityId?: string;
-                        }) => {
-                          const newProp = CMetaProp(variables);
-                          updateEntityMutation.mutate({
-                            props: [...entity.props, newProp],
-                          });
-                        }}
-                        userCanEdit={canEditEntity}
-                        movePropToIndex={(propId, oldIndex, newIndex) => {
-                          movePropToIndex(propId, oldIndex, newIndex);
-                        }}
-                        category={DraggedPropRowCategory.META_PROP}
-                        // disabledAttributes={
-                        //   {
-                        //     statement: ["moodvariant", "mood", "bundleOperator"],
-                        //     type: ["logic", "virtuality", "partitivity"],
-                        //     value: ["logic", "virtuality", "partitivity"],
-                        //   } as PropAttributeFilter
-                        // }
-                        isInsideTemplate={isInsideTemplate}
-                        territoryParentId={getTerritoryId(entity)}
-                        lowIdent
-                        alwaysShowCreateModal
-                      />
-                    </StyledPropGroupWrap>
+                    <EntityDetailMetaProps
+                      entity={entity}
+                      onPropsChange={(props) => updateEntityMutation.mutate({ props })}
+                      userCanEdit={canEditEntity}
+                      territoryParentId={getTerritoryId(entity)}
+                    />
                   </StyledDetailSectionContent>
                 )}
               </StyledDetailSection>

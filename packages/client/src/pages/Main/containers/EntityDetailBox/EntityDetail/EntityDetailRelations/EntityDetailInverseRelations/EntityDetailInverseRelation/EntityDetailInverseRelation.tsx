@@ -1,7 +1,7 @@
 import {
   IEntity,
-  IResponseDetail,
-  Relation
+  IResponseEntityRelations,
+  Relation,
 } from "@inkvisitor/shared/types";
 import { LetterIcon } from "components";
 import { CopyUuidsButton, EntityTag, PaginationControls } from "components/advanced";
@@ -15,7 +15,7 @@ import {
 } from "./EntityDetailInverseRelationStyles";
 
 interface EntityDetailInverseRelation {
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   relationRule: Relation.RelationRule;
   relationType: string;
   relations?: Relation.IRelation[];
@@ -89,7 +89,7 @@ export const EntityDetailInverseRelation: React.FC<
 
           return (
             <StyledTagWrapper key={key}>
-              <EntityTag entity={relationEntity}  />
+              <EntityTag entity={relationEntity} fullWidth />
             </StyledTagWrapper>
           );
         })}

@@ -17,6 +17,7 @@ import { useSavedQueriesQuery } from "./useSavedQueriesQuery";
 import { useStatementQuery } from "./useStatementQuery";
 import { useTemplatesQuery } from "./useTemplatesQuery";
 import { useTreeQuery } from "./useTreeQuery";
+import { useUsedRelationsQuery } from "./useUsedRelationsQuery";
 import { useUserByIdQuery, useUserQuery } from "./useUserQuery";
 import { useUsersGetMoreQuery } from "./useUsersGetMoreQuery";
 import { useUsersSimplifiedQuery } from "./useUsersSimplifiedQuery";
@@ -39,6 +40,7 @@ export {
   useStatementQuery,
   useTemplatesQuery,
   useTreeQuery,
+  useUsedRelationsQuery,
   useUserByIdQuery,
   useUserQuery,
   useUsersGetMoreQuery,

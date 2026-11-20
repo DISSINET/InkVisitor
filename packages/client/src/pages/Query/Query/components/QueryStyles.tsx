@@ -1,5 +1,7 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+import { IcoNodeTree } from "Theme/icons";
+import { StyledLabel } from "components/basic/Checkbox/CheckboxStyles";
 import {
   StyledControl,
   StyledSingleValue,
@@ -29,6 +31,17 @@ export const StyledNodeMainRow = styled.div`
     width: ${({ theme }) => theme.space[8]};
     height: 1px;
   }
+`;
+
+// sized as the icons of the node's other buttons
+export const StyledStartNodeIcon = styled(IcoNodeTree)`
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  padding: ${({ theme }) => theme.space[1]};
+`;
+
+// a node row wider than its cell would squeeze the AND / OR switch beside it
+export const StyledParallelOperatorSlot = styled.div`
+  flex-shrink: 0;
 `;
 
 export const StyledParallelOperator = styled.div`
@@ -73,6 +86,84 @@ export const StyledNodeExpansionToggles = styled.div`
   }
 `;
 
+// the edge type picker with the prop pick hanging below it
+export const StyledEdgeTypeCell = styled.div`
+  position: relative;
+`;
+
+// a prop edge's "of type" / "with value" pick: a tab hanging from the edge
+// box's bottom border, under the edge type it qualifies, so the box keeps its
+// width within the grid cell. It is filled like the edge type picker and framed
+// in the box's colour. The top offset is the box's bottom padding, which sits
+// between the picker and the border.
+export const StyledEdgePropPairSlot = styled.div<{ $color: string }>`
+  position: absolute;
+  top: calc(100% + ${({ theme }) => theme.space[1]});
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  // a full-width tab ends a little short of the edge type picker, where the
+  // box's bottom border starts to round into its corner
+  max-width: calc(100% - ${({ theme }) => theme.borderRadius["sm"]});
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  line-height: 1.2;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 2px solid ${({ $color }) => $color};
+  border-top: none;
+  border-radius: 0 0 ${({ theme }) => theme.borderRadius["sm"]}
+    ${({ theme }) => theme.borderRadius["sm"]};
+  white-space: nowrap;
+`;
+
+export const StyledPropPairTabLabel = styled.button`
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  line-height: inherit;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+// the EQ / SUB checkboxes in the tab, labelled as under a node
+export const StyledPropPairTabToggles = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-left: ${({ theme }) => theme.space[2]};
+
+  label {
+    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+    font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+    color: ${({ theme }) => theme.color["black"]};
+  }
+`;
+
+export const StyledPropPairTabClear = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
 export const StyledNodeTypeSelect = styled.div`
   ${StyledControl} {
     background-color: transparent;
@@ -111,7 +202,7 @@ export const StyledEdgeControlsLayer = styled.div`
   z-index: 1;
 `;
 
-export const StyledEdgeBox = styled.div<{ $color: string }>`
+const edgeBox = css<{ $color: string }>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -120,7 +211,48 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   padding: ${({ theme }) => theme.space[1]};
   padding-left: ${({ theme }) => theme.space[3]};
+`;
+
+export const StyledEdgeBox = styled.div<{ $color: string }>`
+  ${edgeBox}
   margin-top: 1.4rem;
+`;
+
+// the label of an unticked NOT is faded so the box reads as its edge type alone, not as
+// "NOT <type>"; the box itself stays full so the toggle does not read as disabled
+export const StyledEdgeNotToggle = styled.div<{ $active: boolean }>`
+  ${StyledLabel} {
+    opacity: ${({ $active }) => ($active ? 1 : 0.55)};
+    font-weight: ${({ theme, $active }) =>
+      $active ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+    transition: opacity 0.15s ease;
+  }
+  &:hover ${StyledLabel} {
+    opacity: 1;
+  }
+`;
+
+// the "with value" box is shorter than an edge's own box, so it is centred on the connector
+// line (half the row height) rather than offset by the edge box's top margin
+export const StyledEdgeValueControlsLayer = styled(StyledEdgeControlsLayer)`
+  position: absolute;
+  top: ${QUERY_GRID_HEIGHT / 2}px;
+  left: 0;
+  height: auto;
+  transform: translateY(-50%);
+`;
+
+export const StyledEdgeValueBox = styled.div<{ $color: string }>`
+  ${edgeBox}
+`;
+
+// the "with value" label leading from the edge's spine to the value node of an HP: / SP: edge
+export const StyledEdgeValueLabel = styled.span`
+  padding-right: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["query2Text"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
 `;
 
 export const StyledTooltipList = styled.ul`
@@ -147,7 +279,9 @@ export const StyledExpansionToggleGroup = styled.div`
 `;
 
 // the count beside a checked EQ / SUB toggle; opens the expansion popover
-export const StyledExpansionCountButton = styled.button`
+// black on the light node and page backgrounds; a start node takes query2Text, as the
+// other labels on its background do
+export const StyledExpansionCountButton = styled.button<{ $color?: "black" | "query2Text" }>`
   border: none;
   background: none;
   padding: 0;
@@ -159,7 +293,7 @@ export const StyledExpansionCountButton = styled.button`
   line-height: inherit;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme, $color = "black" }) => theme.color[$color]};
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;

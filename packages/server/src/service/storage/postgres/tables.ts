@@ -570,6 +570,9 @@ async function edgePerEntityInRange(conn: Conn, outranks: string, after?: Date, 
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
+  // countByBucket reads the audits at most once, whatever the length of the id list
+  entityIdsLimit: null,
+
   async firstFor(conn, scope, modelId) {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(
@@ -583,6 +586,21 @@ export const audits: AuditStore = {
     return firstDoc<IAudit>(
       TABLE.audits,
       await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date DESC, id LIMIT 1`, where.params)
+    );
+  },
+
+  async firstForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    // the ordering of firstFor: date, then id
+    return docs<IAudit>(
+      TABLE.audits,
+      await q(
+        conn,
+        `SELECT DISTINCT ON (model_id) doc FROM audits WHERE audit_scope = $1 AND model_id = ANY($2::text[]) ORDER BY model_id, date, id`,
+        [scope, modelIds]
+      )
     );
   },
 

@@ -2,6 +2,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { getAllEdges, getEdgeSourceNode } from "./Query/utils";
 
 /**
  * The relation a `has relation:` / `is related to:` query edge walks, and which
@@ -60,16 +61,16 @@ export const RELATION_EDGE_BINDINGS: Partial<Record<Query.EdgeType, IRelationEdg
 
 /**
  * Classes the other end of `relationType` can hold, given the classes picked on
- * the query's root node. An empty `rootEntityClasses` is the wildcard - every
- * class the rule permits on the root side is still in play, so every class it
+ * the edge's source node. An empty `sourceEntityClasses` is the wildcard - every
+ * class the rule permits on the source side is still in play, so every class it
  * permits opposite them is allowed.
  *
- * An empty result means the relation cannot start from the root classes at all;
- * callers use that to disable the target picker.
+ * An empty result means the relation cannot start from any of the source
+ * classes; callers use that to disable the target picker.
  */
 export const getRelationAllowedClasses = (
   relationType: RelationEnums.Type,
-  rootEntityClasses: EntityEnums.Class[] | undefined,
+  sourceEntityClasses: EntityEnums.Class[] | undefined,
   isInverse = false,
   allEntityClasses: EntityEnums.Class[] = classesAll,
 ): EntityEnums.Class[] => {
@@ -78,9 +79,9 @@ export const getRelationAllowedClasses = (
     return [];
   }
   const { allowedEntitiesPattern, cloudType, disabledEntities } = rule;
-  const rootClasses = rootEntityClasses ?? [];
-  const matchesRoot = (cls: EntityEnums.Class) =>
-    rootClasses.length === 0 || rootClasses.includes(cls);
+  const sourceClasses = sourceEntityClasses ?? [];
+  const matchesSource = (cls: EntityEnums.Class) =>
+    sourceClasses.length === 0 || sourceClasses.includes(cls);
 
   if (allowedEntitiesPattern.length > 0) {
     const allowed = new Set<EntityEnums.Class>();
@@ -89,17 +90,17 @@ export const getRelationAllowedClasses = (
     // share its own class - the pattern rows here are single-class
     if (cloudType) {
       for (const [cls] of allowedEntitiesPattern) {
-        if (matchesRoot(cls)) {
+        if (matchesSource(cls)) {
           allowed.add(cls);
         }
       }
       return [...allowed];
     }
 
-    const rootIndex = isInverse ? 1 : 0;
+    const sourceIndex = isInverse ? 1 : 0;
     const targetIndex = isInverse ? 0 : 1;
     for (const pattern of allowedEntitiesPattern) {
-      if (matchesRoot(pattern[rootIndex])) {
+      if (matchesSource(pattern[sourceIndex])) {
         allowed.add(pattern[targetIndex]);
       }
     }
@@ -109,7 +110,10 @@ export const getRelationAllowedClasses = (
   // an empty pattern permits every class pair, minus the ones the rule disables
   // on both ends (Identification: any class but Action and Concept)
   if (disabledEntities?.length) {
-    if (rootClasses.some((cls) => disabledEntities.includes(cls))) {
+    if (
+      sourceClasses.length > 0 &&
+      sourceClasses.every((cls) => disabledEntities.includes(cls))
+    ) {
       return [];
     }
     return allEntityClasses.filter((cls) => !disabledEntities.includes(cls));
@@ -137,13 +141,45 @@ export const getSuperordinateEntityAllowedClasses = (
  */
 export const getRelationConstrainedCategoryTypes = (
   edgeType: Query.EdgeType | undefined,
-  rootEntityClasses: EntityEnums.Class[] | undefined,
+  sourceEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] | null => {
   const binding = edgeType ? RELATION_EDGE_BINDINGS[edgeType] : undefined;
   if (!binding) {
     return null;
   }
-  return getRelationAllowedClasses(binding.relationType, rootEntityClasses, binding.inverse);
+  return getRelationAllowedClasses(binding.relationType, sourceEntityClasses, binding.inverse);
+};
+
+/**
+ * Classes the source node of the edge can hold, empty for any class. Its own
+ * classes tell when they are set. A node with a picked entity or an any-class
+ * filter stores none that describe it - the classes beside a picked entity are
+ * the seed of its edge type - so it is bound by what its own incoming edge lets
+ * it hold. With EQ or SUB on, a picked entity also stands for its equivalents
+ * and subordinates, which can be of any class.
+ */
+export const getEdgeSourceClasses = (root: Query.INode, edgeId: string): EntityEnums.Class[] => {
+  const source = getEdgeSourceNode(root, edgeId);
+  if (!source) {
+    return [];
+  }
+  const { entityId, entityClasses, includeEquivalents, includeSubordinates } = source.params;
+  if (entityId === undefined && entityClasses?.length) {
+    return entityClasses;
+  }
+  if (entityId !== undefined && (includeEquivalents || includeSubordinates)) {
+    return [];
+  }
+  const incoming = getAllEdges(root).find((edge) => edge.node === source);
+  if (!incoming) {
+    return [];
+  }
+  const targetParams = Query.EdgeTypeTargetNodeParams[incoming.type] ?? {};
+  return (
+    getRelationConstrainedCategoryTypes(incoming.type, getEdgeSourceClasses(root, incoming.id)) ??
+    targetParams.entityId?.allowedClasses ??
+    []
+  );
 };
 
 export interface IRelationSuggesterConfig {
@@ -231,6 +267,32 @@ export const findValidEdgeTypesForSourceNode = (
   return validEdges;
 };
 
+/**
+ * The edge types an edge can take. The root and each start node stand for the
+ * entity itself, so their classes narrow the types; the classes of a node
+ * deeper down do not.
+ */
+export const findValidEdgeTypesForEdge = (root: Query.INode, edgeId: string): Query.EdgeType[] => {
+  const source = getEdgeSourceNode(root, edgeId) ?? root;
+  const isStartNode = root.edges.some(
+    (edge) => edge.type === Query.EdgeType.SE && edge.node === source,
+  );
+  return findValidEdgeTypesForSourceNode(source, source === root || isStartNode);
+};
+
+/**
+ * The class an edge target's entity picker opens on. An empty stored list is
+ * any class, which the picker seeds by itself, as its wildcard, when it gets no
+ * class and offers more than one. A picker offering one class or none needs a
+ * class to render at all.
+ */
+export const entityPickerInitCategory = (
+  storedClasses: EntityEnums.Class[] | undefined,
+  offeredClasses: EntityEnums.Class[],
+): EntityEnums.Class | undefined =>
+  storedClasses?.[0] ??
+  (offeredClasses.length > 1 ? undefined : (offeredClasses[0] ?? EntityEnums.Class.Concept));
+
 export interface IEdgeTypeOption {
   value: Query.EdgeType;
   label: string;
@@ -259,7 +321,7 @@ const EDGE_TYPE_GROUPS: IEdgeTypeGroupDefinition[] = [
   { label: "Relation", families: ["R"], labelPrefixes: ["has relation: ", "has: "] },
   { label: "Position in statement", families: ["IS"], labelPrefixes: ["is in S: "] },
   { label: "Statement property", families: ["SP", "SI", "SC"], labelPrefixes: [] },
-  { label: "Territory", families: ["SUT", "EUT"], labelPrefixes: [] },
+  { label: "Territory", families: ["SUT", "EUT", "EAT"], labelPrefixes: [] },
   { label: "Territory hierarchy", families: ["CT"], labelPrefixes: [] },
 ];
 
@@ -358,6 +420,10 @@ export const findValidEdgeTypesForTargetNode = (node: Query.INode): Query.EdgeTy
 export const isEdgeValid = (sourceNode: Query.INode, edge: Query.IEdge): Query.EdgeValidity => {
   const targetNode = edge.node;
   const edgeRule = Query.EdgeTypeNodeRules[edge.type];
+  // a saved query can hold an edge type from a newer build, which the server judges
+  if (!edgeRule) {
+    return { valid: true, problems: [] };
+  }
   const [ruleFrom, ruleTo] = edgeRule;
 
   const sourceValid = isNodeValid(sourceNode, ruleFrom);

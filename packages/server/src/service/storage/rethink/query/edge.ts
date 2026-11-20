@@ -6,8 +6,9 @@ import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { nodeLabel } from "../../../../common/searchLabel";
 import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
-import { searchWordByWord } from "../search";
 import { TABLE } from "../tables";
+import { AnchorSpot, anchoredUnder } from "./anchored";
+import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
 
@@ -64,6 +65,9 @@ export default class SearchEdge implements Query.IEdge {
    */
   protected expandsPinnedSubordinates = true;
 
+  /** the propPair entity with its EQ / SUB expansion, resolved in prepare(); null without a propPair */
+  protected propPairIds: string[] | null = null;
+
   /**
    * Classes the edge's target can hold - the target picker's classes from
    * EdgeTypeTargetNodeParams - used to narrow the status lookup through the
@@ -81,50 +85,95 @@ export default class SearchEdge implements Query.IEdge {
    * prepare() must call super.prepare() so the target expansion stays resolved.
    */
   async prepare(db: Connection): Promise<void> {
-    const entityId = this.node.params.entityId;
+    const params = this.node.params;
+    const entityId = params.entityId;
+    this.propPairIds = await this.resolvePropPair(db);
     // the node filters narrow an empty target only: a pinned entity is the
     // target itself, whatever its status, and the query builder offers no
     // node filters while one is pinned
-    const filters: TargetFilters = {
-      statuses: this.node.params.entityStatuses ?? [],
-      languages: this.node.params.entityLanguages ?? [],
-      label: nodeLabel(this.node.params.label),
-    };
-
     if (!entityId) {
       // resolving the constraints into an id set here is what makes them
       // apply to every edge type: each run() already matches against
       // targetIds(), so no edge needs to know about them. The edges that check
-      // statuses per candidate have no such check for a language or label, so
-      // either takes the statuses into the id set with it.
+      // statuses per candidate have no such check for a language, label,
+      // logical type or part of speech, so any of them takes the statuses
+      // into the id set with it. The conditions nested under the target node
+      // always go through the set, as only the node evaluator can test them.
+      const filteredIds = await auditAndCoOccurrenceIds(db, params);
       const constrained =
-        !!filters.label ||
-        filters.languages.length > 0 ||
-        (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun);
-      this.targetEntityIds = constrained ? await this.constrainedTargetIds(db, filters) : null;
+        filteredIds !== null ||
+        this.node.edges.length > 0 ||
+        !!nodeLabel(params.label) ||
+        !!params.entityLanguages?.length ||
+        !!params.entityLogicalTypes?.length ||
+        !!params.entityPartsOfSpeech?.length ||
+        (!!params.entityStatuses?.length && !this.checksUnpinnedTargetStatusInRun);
+      this.targetEntityIds = constrained
+        ? await this.constrainedTargetIds(db, filteredIds)
+        : null;
       return;
     }
 
     // both toggles off -> single-id set, no expansion queries issued.
     // The same resolver backs the /entities/:id/expansion route, so what the
     // query builder displays is the set this edge matches against.
-    const expansion = await this.resolve().expand(wrap(db), entityId, {
+    const expanded = await this.expandedIds(db, entityId, {
       equivalents: this.node.params.includeEquivalents === true,
       subordinates:
         this.expandsPinnedSubordinates && this.node.params.includeSubordinates === true,
     });
-    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
+    // the nested conditions keep the expanded targets that meet them
+    this.targetEntityIds = this.node.edges.length
+      ? await this.node.match(db, r.table(TABLE.entities).getAll(r.args(expanded)))
+      : expanded;
+  }
+
+  /** `entityId` with the equivalents and subordinates the toggles ask for */
+  private async expandedIds(
+    db: Connection,
+    entityId: string,
+    toggles: { equivalents: boolean; subordinates: boolean }
+  ): Promise<string[]> {
+    const expansion = await this.resolve().expand(wrap(db), entityId, toggles);
+    return [entityId, ...expansion.equivalents, ...expansion.subordinates];
+  }
+
+  private async resolvePropPair(db: Connection): Promise<string[] | null> {
+    const pair = this.params.propPair;
+    if (!pair?.entityId || !Query.PropPairEdges[this.type]) {
+      return null;
+    }
+    return this.expandedIds(db, pair.entityId, {
+      equivalents: pair.includeEquivalents === true,
+      subordinates: pair.includeSubordinates === true,
+    });
   }
 
   /**
-   * Ids of entities passing `filters` (an empty list passes any), narrowed by
-   * the target node's classes, else by the classes the edge's target can hold.
+   * Keeps the props holding a propPair entity on the half the propPair pins;
+   * every prop passes without a propPair.
+   */
+  protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
+    const kind = Query.PropPairEdges[this.type];
+    const ids = this.propPairIds;
+    if (!kind || !ids) {
+      return () => r.expr(true);
+    }
+    return (prop: RDatum) => r.expr(ids).contains(prop(kind)("entityId").default(""));
+  }
+
+  /**
+   * Ids of entities passing the target node's status, language, logical type,
+   * part of speech and label filters (an empty list passes any), within
+   * `filteredIds` (the date, user and co-occurrence filters, null for none) and
+   * meeting the conditions nested under the target node, narrowed by the target node's
+   * classes, else by the classes the edge's target can hold.
    * None of the filters has an index, so without a class this is a full scan
    * of the entity table.
    */
   private async constrainedTargetIds(
     db: Connection,
-    { statuses, languages, label }: TargetFilters
+    filteredIds: string[] | null
   ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
@@ -132,14 +181,8 @@ export default class SearchEdge implements Query.IEdge {
       ? r.table(TABLE.entities).getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : r.table(TABLE.entities);
 
-    let q = statuses.length ? filterStreamByStatus(base, statuses) : base;
-    if (languages.length) {
-      q = q.filter((row: RDatum) => r.expr(languages).contains(row("language")));
-    }
-    if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
-    }
-    return q.getField("id").distinct().run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
+    const q = withinEntityFilters(base, this.node.params);
+    return this.node.match(db, withinIds(q, filteredIds));
   }
 
   /**
@@ -149,7 +192,7 @@ export default class SearchEdge implements Query.IEdge {
    * treats as "matches nothing". Falls back to the raw params.entityId when
    * prepare() has not run, so a bare run() keeps the single-id semantics.
    */
-  protected targetIds(): string[] | null {
+  targetIds(): string[] | null {
     if (this.targetEntityIds) {
       return this.targetEntityIds;
     }
@@ -160,23 +203,6 @@ export default class SearchEdge implements Query.IEdge {
   run(q: RStream): RStream {
     throw new Error("base SearchEdge does not implement run method");
   }
-}
-
-/**
- * Narrows a stream of entities to those carrying one of `statuses` and emits
- * their distinct ids.
- */
-/** an unpinned target node's filters; prepareLabel's parts for the label */
-type TargetFilters = {
-  statuses: EntityEnums.Status[];
-  languages: EntityEnums.Language[];
-  label: [string, string, string] | undefined;
-};
-
-function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStream {
-  return q.filter(function (e: RDatum<IEntity>) {
-    return r.expr(statuses).contains(e("status"));
-  });
 }
 
 /**
@@ -629,6 +655,9 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
    */
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
+    // a pinned target is matched against the whole relation, so a target that
+    // is the entity itself matches; a resolved set only against the partners
+    const pinned = !!this.node.params.entityId;
     const targetClasses = this.node.params.entityClasses ?? [];
     const targetStatuses = this.unpinnedTargetStatuses();
 
@@ -642,7 +671,10 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
           })
           .filter(function (relation: RDatum<RelationTypes.IRelation>) {
             if (targetIds) {
-              return relation("entityIds").setIntersection(r.expr(targetIds)).isEmpty().not();
+              const members = pinned
+                ? relation("entityIds")
+                : relationPartners(relation, entity("id"), true);
+              return members.setIntersection(r.expr(targetIds)).isEmpty().not();
             }
             if (targetClasses.length || targetStatuses.length) {
               // relation types differ in whether an entity may be its own
@@ -941,11 +973,13 @@ export class EdgeHasPropType extends SearchEdge {
 
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
+    const inPair = this.propPairFilter();
     return q
       .filter(function (e: RDatum<IEntity>) {
         // some of the e.[props].type.entityId is entity.id; a prop never
         // filled in keeps entityId "" and has no type
         return e("props")
+          .filter(inPair)
           .filter(function (prop) {
             const typeId = prop("type")("entityId").default("");
             if (targetIds) {
@@ -973,15 +1007,17 @@ export class EdgeHasPropValue extends SearchEdge {
     const targetIds = this.targetIds();
     // an empty target with a class picked matches a value of that class
     const targetClasses = this.node.params.entityClasses ?? [];
+    const inPair = this.propPairFilter();
     return q
       .filter(function (e: RDatum<IEntity>) {
         // some of the e.[props].value.entityId is entity.id; a prop never
         // filled in keeps entityId "" and has no value
         const valueId = (prop: RDatum) => prop("value")("entityId").default("");
         if (!targetIds && targetClasses.length) {
-          return hasIdOfClasses(e("props").map(valueId), targetClasses);
+          return hasIdOfClasses(e("props").filter(inPair).map(valueId), targetClasses);
         }
         return e("props")
+          .filter(inPair)
           .filter(function (prop) {
             if (targetIds) {
               return r.expr(targetIds).contains(valueId(prop));
@@ -999,19 +1035,80 @@ export class EdgeHasPropValue extends SearchEdge {
 }
 
 /**
+ * HP: matches a prop by both halves: its type is a target of `node`, as on
+ * EP:T, and its value is a target of `valueNode`, resolved as the target of an
+ * HP:V edge.
+ */
+export class EdgeHasProp extends EdgeHasPropType {
+  private valueSide: EdgeHasPropValue | null;
+  private valueNegated: boolean;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["HP:"];
+    this.valueSide = data.valueNode ? new EdgeHasPropValue({ node: data.valueNode }) : null;
+    this.valueNegated = data.valueLogic === Query.EdgeLogic.Negative;
+  }
+
+  setResolvers(resolvers: ExploreResolvers): void {
+    super.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    await this.valueSide?.prepare(db);
+  }
+
+  protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
+    return valueNodeFilter(this.valueSide, this.valueNegated);
+  }
+}
+
+/**
+ * keeps the props whose value the value node of HP: / SP: allows: its id set, else its
+ * classes; every prop without a value node. Negated, it keeps the props it does not allow,
+ * an empty value included, and with no constraint of its own the props with no value
+ */
+function valueNodeFilter(
+  valueSide: SearchEdge | null,
+  negated: boolean
+): (prop: RDatum) => RValue<boolean> {
+  if (!valueSide) {
+    return () => r.expr(true);
+  }
+  const ids = valueSide.targetIds();
+  const classes = valueSide.node.params.entityClasses ?? [];
+  const valueId = (prop: RDatum) => prop("value")("entityId").default("");
+  const allows = ids
+    ? (prop: RDatum) => r.expr(ids).contains(valueId(prop))
+    : classes.length
+      ? (prop: RDatum) => hasIdOfClasses(r.expr([valueId(prop)]), classes)
+      : null;
+  if (!negated) {
+    return allows ?? (() => r.expr(true));
+  }
+  return allows
+    ? (prop: RDatum) => allows(prop).not()
+    : (prop: RDatum) => valueId(prop).eq("");
+}
+
+/**
  * Inverse entity-prop edges (I_EP:T / I_HP:V). Where EP:T / HP:V match the
  * entity whose own props (entity detail, top level) use the target as a type
  * or value, these emit the prop types / values found in the target entities'
  * own props. An unconstrained target reads the props of every entity of the
  * target node's classes (any class when none is picked). Intersected back
  * with q, keeping the subset invariant positive matching and negation both
- * rely on. An unset type/value is an empty entityId and is skipped.
+ * rely on. An unset type/value is an empty entityId and is skipped. Only the
+ * props passing `inPair` count.
  */
 function runInversePropEdge(
   q: RStream,
   entityIds: string[] | null,
   entityClasses: EntityEnums.Class[],
-  kind: "type" | "value"
+  kind: "type" | "value",
+  inPair: (prop: RDatum) => RValue<boolean>
 ): RStream {
   const entities: RStream | null =
     entityIds === null
@@ -1027,6 +1124,7 @@ function runInversePropEdge(
           .concatMap(function (e: RDatum<IEntity>) {
             return e("props")
               .default([])
+              .filter(inPair)
               .map(function (prop: RDatum) {
                 return prop(kind)("entityId").default("");
               });
@@ -1049,7 +1147,8 @@ export class EdgeIsPropType extends SearchEdge {
       q,
       this.targetIds(),
       this.node.params.entityClasses ?? [],
-      "type"
+      "type",
+      this.propPairFilter()
     );
   }
 }
@@ -1065,7 +1164,8 @@ export class EdgeIsPropValue extends SearchEdge {
       q,
       this.targetIds(),
       this.node.params.entityClasses ?? [],
-      "value"
+      "value",
+      this.propPairFilter()
     );
   }
 }
@@ -1073,27 +1173,29 @@ export class EdgeIsPropValue extends SearchEdge {
 /**
  * Collects entityId of prop[kind] across an in-statement props array, recursing
  * into children to lvl3 - mirrors the StatementDataProps index definition.
- * Legacy props may lack the entityId or children, and a prop added in the
- * editor but never filled keeps entityId ""; neither yields an id. Callers run
- * this inside concatMap, where a missing field would abort the whole query.
+ * Only the props passing `inPair` count. Legacy props may lack the entityId or
+ * children, and a prop added in the editor but never filled keeps entityId "";
+ * neither yields an id. Callers run this inside concatMap, where a missing
+ * field would abort the whole query.
  */
-function collectStatementPropIds(propsExpr: RDatum, kind: "type" | "value"): RDatum {
-  const propId = (prop: RDatum) => prop(kind)("entityId").default("");
+function collectStatementPropIds(
+  propsExpr: RDatum,
+  kind: "type" | "value",
+  inPair: (prop: RDatum) => RValue<boolean> = () => r.expr(true)
+): RDatum {
   return propsExpr
     .concatMap(function (ch1: RDatum) {
-      return r.expr([propId(ch1)]).add(
+      return r.expr([ch1]).add(
         ch1("children")
           .default([])
           .concatMap(function (ch2: RDatum) {
-            return r.expr([propId(ch2)]).add(
-              ch2("children")
-                .default([])
-                .concatMap(function (ch3: RDatum) {
-                  return [propId(ch3)];
-                }) as RValue
-            );
+            return r.expr([ch2]).add(ch2("children").default([]) as RValue);
           }) as RValue
       );
+    })
+    .filter(inPair)
+    .map(function (prop: RDatum) {
+      return prop(kind)("entityId").default("");
     })
     .filter(function (id: RDatum) {
       return id.ne("");
@@ -1105,12 +1207,14 @@ function collectStatementPropIds(propsExpr: RDatum, kind: "type" | "value"): RDa
  * statements and matches those whose data.actions[].props or
  * data.actants[].props (incl. children) reference the target by `kind`.
  * Maps to the statement's own id, preserving the subset invariant negation needs.
+ * Only the props passing `inPair` count.
  */
 function runStatementPropEdge(
   q: RStream,
   targetIds: string[] | null,
   targetClasses: EntityEnums.Class[],
-  kind: "type" | "value"
+  kind: "type" | "value",
+  inPair: (prop: RDatum) => RValue<boolean>
 ): RStream {
   return q
     .filter(function (e: RDatum<IEntity>) {
@@ -1121,13 +1225,15 @@ function runStatementPropEdge(
         e("data")("actions").concatMap(function (a: RDatum) {
           return a("props");
         }),
-        kind
+        kind,
+        inPair
       ).add(
         collectStatementPropIds(
           e("data")("actants").concatMap(function (a: RDatum) {
             return a("props");
           }),
-          kind
+          kind,
+          inPair
         ) as RValue
       );
       if (targetIds) {
@@ -1150,7 +1256,7 @@ export class EdgeStatementHasPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runStatementPropEdge(q, this.targetIds(), [], "type");
+    return runStatementPropEdge(q, this.targetIds(), [], "type", this.propPairFilter());
   }
 }
 
@@ -1165,8 +1271,41 @@ export class EdgeStatementHasPropValue extends SearchEdge {
       q,
       this.targetIds(),
       this.node.params.entityClasses ?? [],
-      "value"
+      "value",
+      this.propPairFilter()
     );
+  }
+}
+
+/**
+ * SP: matches an in-statement prop by both halves: its type is a target of `node`, as on
+ * SP:T, and its value is a target of `valueNode`, resolved as the target of an SP:V edge.
+ */
+export class EdgeStatementHasProp extends EdgeStatementHasPropType {
+  private valueSide: EdgeStatementHasPropValue | null;
+  private valueNegated: boolean;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SP:"];
+    this.valueSide = data.valueNode
+      ? new EdgeStatementHasPropValue({ node: data.valueNode })
+      : null;
+    this.valueNegated = data.valueLogic === Query.EdgeLogic.Negative;
+  }
+
+  setResolvers(resolvers: ExploreResolvers): void {
+    super.setResolvers(resolvers);
+    this.valueSide?.setResolvers(resolvers);
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    await this.valueSide?.prepare(db);
+  }
+
+  protected propPairFilter(): (prop: RDatum) => RValue<boolean> {
+    return valueNodeFilter(this.valueSide, this.valueNegated);
   }
 }
 
@@ -1303,13 +1442,14 @@ function runInverseStatementPropEdge(
   q: RStream,
   targetIds: string[] | null,
   targetClasses: EntityEnums.Class[],
-  kind: "type" | "value"
+  kind: "type" | "value",
+  inPair: (prop: RDatum) => RValue<boolean>
 ): RStream {
   return emitMatchingActants(
     q,
     candidateStatements(targetIds, DbEnums.Indexes.StatementDataProps),
     function (a: RDatum) {
-      const ids = collectStatementPropIds(a("props"), kind);
+      const ids = collectStatementPropIds(a("props"), kind, inPair);
       if (targetIds) {
         return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
       }
@@ -1350,7 +1490,7 @@ export class EdgeIsStatementPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runInverseStatementPropEdge(q, this.targetIds(), [], "type");
+    return runInverseStatementPropEdge(q, this.targetIds(), [], "type", this.propPairFilter());
   }
 }
 
@@ -1365,7 +1505,8 @@ export class EdgeIsStatementPropValue extends SearchEdge {
       q,
       this.targetIds(),
       this.node.params.entityClasses ?? [],
-      "value"
+      "value",
+      this.propPairFilter()
     );
   }
 }
@@ -1781,6 +1922,94 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
 }
 
 /**
+ * The deepest anchors tree a document row can hold: RethinkDB stores 20
+ * nested levels, and a tree nested 10 deep needs more than that.
+ */
+const ANCHORS_TREE_DEPTH = 10;
+
+/**
+ * The longest target list looked up through the DocumentEntityIds index. The
+ * index reads the whole document row, text and tree, once per target the
+ * document anchors, all of them at a time, and a territory shares its
+ * document with its subTs: hundreds of targets would hold hundreds of copies
+ * of one large row in memory. A longer list reads every document once.
+ */
+const INDEXED_ANCHOR_TARGETS_LIMIT = 10;
+
+/**
+ * [anchor, class, indexStart, indexEnd] of every node of an anchors tree (an
+ * AnchorSpot each). The tree is flattened in the database, so the text every
+ * node repeats in `content` stays there.
+ */
+function anchorSpots(nodes: RDatum, depth = ANCHORS_TREE_DEPTH): RDatum {
+  if (depth === 0) {
+    return r.expr([]);
+  }
+  return nodes.concatMap(function (node: RDatum) {
+    return r
+      .expr([
+        [
+          node("anchor").default(null),
+          node("class").default(null),
+          node("indexStart").default(null),
+          node("indexEnd").default(null),
+        ],
+      ])
+      .add(anchorSpots(node("children").default([]), depth - 1));
+  }) as unknown as RDatum;
+}
+
+/**
+ * EAT: ("anchored under T"). Emits the ENTITIES ANCHORED inside the span of
+ * the target Territory's anchor: every anchor whose opening tag lies in it,
+ * at any depth, in every document that anchors the territory. The statements
+ * under the territory play no part, so an entity anchored in the text and
+ * used in no statement matches. An unconstrained target reads the span of
+ * every territory.
+ *
+ * ReQL cannot walk a tree of unknown depth to the end of a span, so prepare()
+ * loads the anchors of the documents that anchor a target and anchoredUnder
+ * picks the ones inside a span; run() intersects the ids found with the
+ * incoming stream q, keeping the subset invariant that positive matching and
+ * negation rely on.
+ */
+export class EdgeAnchoredUnderTerritory extends SearchEdge {
+  private anchoredIds: string[] = [];
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["EAT:"];
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    const targetIds = this.targetIds();
+    if (targetIds && !targetIds.length) {
+      this.anchoredIds = [];
+      return;
+    }
+    const table = r.table(TABLE.documents);
+    const spotsOf = function (doc: RDatum) {
+      return anchorSpots(doc("anchors").default([]));
+    };
+    const documents = await (
+      targetIds && targetIds.length <= INDEXED_ANCHOR_TARGETS_LIMIT
+        ? (
+            table.getAll(r.args(targetIds), { index: DbEnums.Indexes.DocumentEntityIds })("id").distinct() as unknown as RDatum
+          ).do(function (ids: RDatum) {
+            return table.getAll(r.args(ids)).map(spotsOf).coerceTo("array");
+          })
+        : table.map(spotsOf)
+    ).run(db, QUERY_RUN_OPTIONS);
+    this.anchoredIds = anchoredUnder(documents as AnchorSpot[][], targetIds);
+  }
+
+  run(q: RStream): RStream {
+    return intersectIdsWithStream(q, r.expr(this.anchoredIds) as unknown as RStream);
+  }
+}
+
+/**
  * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
  * target Statement S in ANY position - actions + action props, actants +
  * their classifications / identifications / props, statement-level props
@@ -2062,6 +2291,38 @@ export class EdgeHasReferenceValue extends SearchEdge {
   }
 }
 
+/**
+ * SE ("is"): the entity is the target node itself. It matches the entities of
+ * q among the target ids - a pinned entity with its expansion, or the entities
+ * passing the node's filters and nested conditions - else those of the node's
+ * classes, else every entity of q.
+ */
+export class EdgeIsEntity extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType.SE;
+  }
+
+  run(q: RStream): RStream {
+    const targetIds = this.targetIds();
+    if (targetIds !== null) {
+      return intersectIdsWithStream(
+        q,
+        targetIds.length ? (r.expr(targetIds) as unknown as RStream) : null
+      );
+    }
+    const classes = this.node.params.entityClasses ?? [];
+    const matched = classes.length
+      ? q.filter(function (e: RDatum<IEntity>) {
+          return r.expr(classes).contains(e("class"));
+        })
+      : q;
+    return matched.map(function (e) {
+      return e("id");
+    });
+  }
+}
+
 export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreResolvers): SearchEdge {
   const edge = createEdge(data);
   if (resolvers) {
@@ -2072,6 +2333,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>, resolvers?: ExploreR
 
 function createEdge(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
+    case Query.EdgeType["HP:"]:
+      return new EdgeHasProp(data);
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:
@@ -2086,6 +2349,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsReferenceResource(data);
     case Query.EdgeType["HR:V"]:
       return new EdgeHasReferenceValue(data);
+    case Query.EdgeType["SP:"]:
+      return new EdgeStatementHasProp(data);
     case Query.EdgeType["SP:T"]:
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:
@@ -2142,6 +2407,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeTerritoryHasParent(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
+    case Query.EdgeType["EAT:"]:
+      return new EdgeAnchoredUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
     case Query.EdgeType["IS:S"]:
@@ -2154,6 +2421,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsInStatementAsPseudoActant(data);
     case Query.EdgeType["IS:A"]:
       return new EdgeIsInStatementAsAction(data);
+    case Query.EdgeType.SE:
+      return new EdgeIsEntity(data);
     default: {
       const orderedRelation = data.type ? ORDERED_RELATION_EDGES[data.type] : undefined;
       if (orderedRelation) {

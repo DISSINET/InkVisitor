@@ -1,155 +1,26 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IResponseDetail, Relation } from "@inkvisitor/shared/types";
-import ReactFlow, {
-  Background,
-  Controls,
-  Edge,
-  MarkerType,
-  Node,
-  Position,
-  ReactFlowInstance,
-} from "reactflow";
+import { IEntity, IResponseEntityRelations, Relation } from "@inkvisitor/shared/types";
+import ReactFlow, { Background, Controls, ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { StyledEntityDetailRelationGraph } from "../EntityDetailRelationTypeBlockStyles";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "styled-components";
+import {
+  StyledEntityDetailRelationGraph,
+  StyledGraphResizeHandle,
+} from "../EntityDetailRelationTypeBlockStyles";
 
 import { edgeTypes } from "./EntityDetailGraphEdge";
+import { convertToGraph } from "./EntityDetailGraphLayout";
 import { nodeTypes } from "./EntityDetailGraphNode";
 
-interface Graph {
-  nodes: Node[];
-  edges: Edge[];
-  maxHeight: number;
-}
-
-const convertToGraph = (
-  entity: IResponseDetail,
-  relations: Relation.IConnection<Relation.IRelation>[],
-  entities: any,
-  nodeW: number,
-  nodeH: number
-): Graph => {
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
-
-  const levelNodes: Record<string, number> = {};
-  const addNode = (entityId: string, level: number) => {
-    if (!nodes.map((n) => n.id).includes(entityId)) {
-      const sLevel = String(level);
-      if (!Object.keys(levelNodes).includes(sLevel)) {
-        levelNodes[sLevel] = 0;
-      }
-      levelNodes[sLevel] += 1;
-
-      const entity = entities[entityId];
-
-      nodes.push({
-        id: entityId,
-        type: "entityNode",
-        data: { entity: entity, level: level },
-        position: { x: level * nodeW, y: 0 },
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-        dragHandle: ".custom-drag-handle",
-      });
-    }
-  };
-  const addEdge = (
-    sourceId: string,
-    targetId: string,
-    branch: Relation.IConnection<Relation.IRelation, Relation.IRelation>
-  ) => {
-    if (!edges.find((e) => e.source === sourceId && e.target === targetId)) {
-      edges.push({
-        id: String(edges.length),
-        type: "relationship",
-        markerEnd: { type: MarkerType.ArrowClosed },
-        data: {
-          certainty:
-            (
-              branch as Relation.IConnection<
-                Relation.IIdentification,
-                Relation.IIdentification
-              >
-            ).certainty ?? undefined,
-          relationType: branch.type,
-        },
-        style: {
-          strokeWidth: 1,
-          stroke: "black",
-        },
-        source: sourceId,
-        target: targetId,
-      });
-    }
-  };
-
-  addNode(entity.id, 0);
-
-  const getNodesFromSubtree = (
-    sourceId: string,
-    relationNode: Relation.IConnection<Relation.IRelation, Relation.IRelation>,
-    level: number
-  ) => {
-    relationNode.subtrees &&
-      relationNode.subtrees.forEach((branch: any) => {
-        const [sourceEntityId, targetEntityId] =
-          sourceId === branch.entityIds[0]
-            ? branch.entityIds
-            : [branch.entityIds[1], branch.entityIds[0]];
-
-        addNode(targetEntityId, level);
-        addEdge(sourceEntityId, targetEntityId, branch);
-
-        getNodesFromSubtree(targetEntityId, branch, level + 1);
-      });
-  };
-
-  relations.forEach((relation) => {
-    const [sourceEntityId, targetEntityId] =
-      entity.id === relation.entityIds[0]
-        ? relation.entityIds
-        : [relation.entityIds[1], relation.entityIds[0]];
-
-    addNode(targetEntityId, 1);
-    addEdge(sourceEntityId, targetEntityId, relation);
-
-    getNodesFromSubtree(targetEntityId, relation, 2);
-  });
-
-  const maxOnLevel = Math.max(...Object.values(levelNodes));
-
-  const processedLevels: Record<string, number> = {};
-  const nodesWithY: Node[] = nodes.map((node) => {
-    const nodeLevel = node.data.level;
-    const nodeSLevel = String(nodeLevel);
-
-    if (!Object.keys(processedLevels).includes(nodeSLevel)) {
-      processedLevels[nodeSLevel] = 0;
-    }
-    processedLevels[nodeSLevel] += 1;
-
-    const p = processedLevels[nodeSLevel];
-    const a = levelNodes[nodeSLevel];
-
-    const newY = (p - (a + 1) / 2) * nodeH;
-
-    return {
-      ...node,
-      ...{
-        position: { y: newY, x: node.position.x },
-      },
-    };
-  });
-
-  return { nodes: nodesWithY, edges, maxHeight: (maxOnLevel + 1) * nodeH };
-};
+const MIN_HEIGHT = 120;
+const DEFAULT_MAX_HEIGHT = 400;
 
 interface EntityDetailRelationGraph {
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
-  entity: IResponseDetail;
+  entity: IResponseEntityRelations;
   entities: Record<string, IEntity>;
   relations: Relation.IConnection<Relation.IRelation>[];
 }
@@ -161,18 +32,49 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   entities,
   relations,
 }) => {
+  const theme = useTheme();
   const nodeW = 200;
-  const nodeH = 50;
-
-  const [height, setHeight] = useState<number>(0);
+  // leaves room between stacked nodes for an edge with its label and arrowheads
+  const nodeH = 90;
 
   const { nodes, edges, maxHeight } = useMemo(() => {
-    return convertToGraph(entity, relations, entities, nodeW, nodeH);
-  }, [entity, relations]);
+    return convertToGraph(entity, relations, entities, nodeW, nodeH, relationRule.asymmetrical);
+  }, [entity, relations, relationRule]);
 
+  // the graph opens at its content height up to a cap, so a large tree never
+  // starts taller than the viewport; a dragged height belongs to the entity it
+  // was dragged on, since the graph stays mounted when the detail switches entity
+  const [dragged, setDragged] = useState<{ entityId: string; height: number } | null>(null);
+  const height =
+    dragged?.entityId === entity.id ? dragged.height : Math.min(maxHeight, DEFAULT_MAX_HEIGHT);
+
+  const flowInstance = useRef<ReactFlowInstance | null>(null);
   useEffect(() => {
-    setHeight(maxHeight);
-  }, [maxHeight]);
+    flowInstance.current?.fitView();
+  }, [height]);
+  // the graph instance stays mounted when the detail switches to another
+  // entity; new nodes are measured only after they render, hence the delay
+  useEffect(() => {
+    const timer = setTimeout(() => flowInstance.current?.fitView(), 100);
+    return () => clearTimeout(timer);
+  }, [nodes]);
+
+  const dragStart = useRef<{ clientY: number; height: number } | null>(null);
+  const onResizeStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    // pointer capture keeps the moves coming while the pointer is off the edge
+    e.currentTarget.setPointerCapture(e.pointerId);
+    // keeps the drag from selecting the text around the graph
+    e.preventDefault();
+    dragStart.current = { clientY: e.clientY, height };
+  };
+  const onResizeMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStart.current) return;
+    const requested = dragStart.current.height + e.clientY - dragStart.current.clientY;
+    setDragged({ entityId: entity.id, height: Math.max(MIN_HEIGHT, requested) });
+  };
+  const onResizeEnd = () => {
+    dragStart.current = null;
+  };
 
   return (
     <StyledEntityDetailRelationGraph height={height}>
@@ -199,7 +101,6 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        style={{ backgroundColor: "white" }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesDraggable={false}
@@ -207,16 +108,27 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
         nodesFocusable={false}
         edgesFocusable={false}
         onInit={(reactFlowInstance: ReactFlowInstance) => {
+          flowInstance.current = reactFlowInstance;
           setTimeout(() => {
             reactFlowInstance.fitView();
           }, 100);
         }}
+        // the graph sits in the scrolling detail panel, so a plain wheel scrolls
+        // the panel; ctrl + wheel and pinch still zoom
+        zoomOnScroll={false}
+        preventScrolling={false}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
         {/* <MiniMap /> */}
-        <Controls showInteractive={false} showZoom={false} />
-        <Background />
+        <Controls showInteractive={false} />
+        <Background color={theme.color["gray"][500]} />
       </ReactFlow>
+      <StyledGraphResizeHandle
+        onPointerDown={onResizeStart}
+        onPointerMove={onResizeMove}
+        onPointerUp={onResizeEnd}
+        onLostPointerCapture={onResizeEnd}
+      />
     </StyledEntityDetailRelationGraph>
   );
 };

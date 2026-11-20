@@ -149,6 +149,8 @@ export interface AuditCountParams {
 export interface AuditStore extends TableStore<IAudit> {
   firstFor(conn: Conn, scope: AuditScope, modelId: string): Promise<IAudit | null>;
   lastFor(conn: Conn, scope: AuditScope, modelId: string): Promise<IAudit | null>;
+  /** the first audit (as firstFor orders them) of each listed model that has one, in no promised order */
+  firstForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
   lastNFor(conn: Conn, scope: AuditScope, modelId: string, n: number): Promise<IAudit[]>;
   relationAuditsForEntity(conn: Conn, entityId: string, n: number): Promise<IAudit[]>;
   earliestDate(conn: Conn): Promise<Date | null>;
@@ -162,6 +164,8 @@ export interface AuditStore extends TableStore<IAudit> {
   page(conn: Conn, filter: { skip: number; take: number; from: Date }): Promise<IAudit[]>;
   /** event counts per time bucket and group key; group[0] is the bucket */
   countByBucket(conn: Conn, params: AuditCountParams): Promise<{ group: string[]; reduction: number }[]>;
+  /** the longest `entityIds` list countByBucket is given; null when a list of any length is served */
+  readonly entityIdsLimit: number | null;
 }
 
 export interface UserStore extends TableStore<IUser> {
@@ -222,8 +226,14 @@ export interface SessionStore {
   get(conn: Conn, sid: string): Promise<SessionRow | null>;
   /** inserts or overwrites */
   set(conn: Conn, row: SessionRow): Promise<void>;
+  /**
+   * overwrites a row that still exists; a missing row stays missing, so a
+   * request in flight cannot bring back a session that was ended meanwhile
+   */
+  touch(conn: Conn, row: SessionRow): Promise<void>;
   delete(conn: Conn, sid: string): Promise<void>;
-  deleteByUser(conn: Conn, userId: string): Promise<void>;
+  /** deletes every session of the user, except exceptSid when given */
+  deleteByUser(conn: Conn, userId: string, exceptSid?: string): Promise<void>;
   /** @returns number of removed rows */
   deleteExpired(conn: Conn, now: number): Promise<number>;
 }
@@ -290,5 +300,7 @@ export interface Storage {
 
   explore: {
     plan(query: Query.INode, resolvers: ExploreResolvers): ExplorePlan;
+    /** the ids among `ids` whose entities pass the node filters in `params`, in no set order */
+    filterIds(conn: Conn, ids: string[], params: Query.INodeParams): Promise<string[]>;
   };
 }

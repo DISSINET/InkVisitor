@@ -10,13 +10,23 @@ interface StyledEntityValue {
   color?: FlatThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
+  position: relative;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 5px;
-  border-left-style: solid;
-  border-left-width: 4px;
-  border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
+  padding: 4px 5px 4px 7px;
+  /* the class colour; the inset from the row's top and bottom keeps the bars
+     of adjacent options apart */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 4px;
+    border-radius: 2px;
+    background-color: ${({ theme, color }) => (color ? theme.color[color] : "transparent")};
+  }
 `;
 /* entity single values sit one step further from the edge than plain ones;
    the wildcard "*" keeps the tight default */
@@ -45,6 +55,9 @@ export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
   border-left-width: 4px;
   border-left-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
+  /* the chip's 2px radius minus its 1px border, so the bar follows the
+     chip's rounded corners */
+  border-radius: 1px 0 0 1px;
   color: ${({ theme }) => theme.color["black"]};
   font-weight: bold;
   font-size: 1.2rem;
@@ -56,12 +69,15 @@ export const StyledOptionRow = styled.div`
   height: 3rem;
   padding: 2px 2px 2px 0;
 `;
-/* the class bar fills the row height, so the row padding leaves a gap
-   between neighbouring bars */
+/* shorter than the other menus' 3rem rows, so the hover background stays
+   near square */
 export const StyledEntitySingleOptionRow = styled.div`
   display: grid;
-  min-height: 3rem;
-  padding: 2px 2px 2px 0;
+  min-height: 2.7rem;
+  padding: 1px 2px 1px 1px;
+  ${StyledEntityValue} {
+    padding-left: 9px;
+  }
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;

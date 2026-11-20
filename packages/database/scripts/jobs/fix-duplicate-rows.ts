@@ -1,6 +1,7 @@
 import { Connection, r } from "rethinkdb-ts";
 import { IJob } from ".";
 import { confirm } from "../import/prompts";
+import { KEEP_FIRST } from "../migrate/duplicates";
 
 /**
  * Removes what the PostgreSQL constraints refuse, so a migration from this
@@ -17,21 +18,21 @@ import { confirm } from "../import/prompts";
  * constraint covers an array column, and restoring the entity may be the
  * better fix. Every row is printed first and written after a confirmation.
  */
-interface Relation {
+type Relation = {
   id: string;
   type: string;
   entityIds: string[];
   order?: number | string;
-}
+};
 
-interface Permission {
+type Permission = {
   id: string;
   controller: string;
   method: string;
   route: string;
   roles?: string[];
   public?: boolean;
-}
+};
 
 const groupBy = <T>(rows: T[], key: (row: T) => string): T[][] => {
   const groups = new Map<string, T[]>();
@@ -42,13 +43,6 @@ const groupBy = <T>(rows: T[], key: (row: T) => string): T[][] => {
   return [...groups.values()].filter((group) => group.length > 1);
 };
 
-const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : 1);
-
-const relationOrder = (rel: Relation): number => (typeof rel.order === "number" ? rel.order : Infinity);
-
-const permissionRank = (row: Permission): number =>
-  (row.public ? 1000 : 0) + ((row.roles ?? []).includes("*") ? 100 : 0) + (row.roles ?? []).length;
-
 const fixDuplicateRowsJob: IJob = async (db: Connection): Promise<void> => {
   const relations: Relation[] = await r.table("relations").run(db);
   const permissions: Permission[] = await r.table("acl_permissions").run(db);
@@ -56,13 +50,13 @@ const fixDuplicateRowsJob: IJob = async (db: Connection): Promise<void> => {
   const documentIds = new Set<string>(await r.table("documents")("id").coerceTo("array").run(db));
 
   const relationDrops = groupBy(relations, (rel) => `${rel.type}|${rel.entityIds.join(",")}`).flatMap((group) => {
-    const [keep, ...rest] = [...group].sort((a, b) => relationOrder(a) - relationOrder(b) || byId(a, b));
+    const [keep, ...rest] = [...group].sort(KEEP_FIRST.relations);
     console.log(`relation ${keep.type} ${keep.entityIds.join(" -> ")}: keeping ${keep.id}, deleting ${rest.map((rel) => rel.id).join(", ")}`);
     return rest.map((rel) => rel.id);
   });
 
   const permissionDrops = groupBy(permissions, (row) => `${row.controller}|${row.method}|${row.route}`).flatMap((group) => {
-    const [keep, ...rest] = [...group].sort((a, b) => permissionRank(b) - permissionRank(a) || byId(a, b));
+    const [keep, ...rest] = [...group].sort(KEEP_FIRST.acl_permissions);
     console.log(
       `acl ${keep.controller} ${keep.method} "${keep.route}": keeping ${keep.id} ${JSON.stringify(keep.roles)}${keep.public ? " public" : ""}, ` +
         `deleting ${rest.map((row) => `${row.id} ${JSON.stringify(row.roles)}`).join(", ")}`

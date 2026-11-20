@@ -370,6 +370,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 inputWidth="full"
                 autoFocus
                 disableButtons
+                // the field names a new entity, so the Editor's anchored rows stay out
+                prioritySuggestions={[]}
                 disableEnter
               />
             </ModalInputWrap>

@@ -1,4 +1,3 @@
-import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { ISavedQueryData, Query } from "@inkvisitor/shared/types";
 
@@ -69,7 +68,7 @@ export const EXAMPLE_QUERIES: IExampleQuery[] = [
       query: {
         id: "root",
         type: Query.NodeType.E,
-        params: { entityClasses: classesAll },
+        params: { entityClasses: [] },
         operator: Query.NodeOperator.And,
         edges: [
           {

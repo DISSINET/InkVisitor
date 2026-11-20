@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import { INodeItem } from "../types";
-import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_START_NODE_GUTTER } from "../constants";
 
 interface StyledQueryBoxProps {
   $gridWeight: number;
-  $nodeItems: INodeItem[];
+  $rowCount: number;
+  $gutterRows: number[];
 }
 
 export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
@@ -23,5 +23,26 @@ export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
     ${({ $gridWeight }) => $gridWeight + 1},
     ${QUERY_GRID_WIDTH - 10}px
   );
-  grid-template-rows: repeat(${({ $nodeItems }) => $nodeItems.length}, ${QUERY_GRID_HEIGHT}px);
+  grid-template-rows: ${({ $rowCount, $gutterRows }) =>
+    [...Array($rowCount).keys()]
+      .map((row) => ($gutterRows.includes(row) ? QUERY_START_NODE_GUTTER : QUERY_GRID_HEIGHT))
+      .map((height) => `${height}px`)
+      .join(" ")};
+`;
+
+interface StyledGridCellProps {
+  $column: number;
+  $row: number;
+  $hasNode: boolean;
+}
+
+export const StyledGridCell = styled.div<StyledGridCellProps>`
+  position: relative;
+  // a node's row (suggester, filters, add and remove buttons) runs past its
+  // cell into the next column, whose cells come later and would cover it
+  z-index: ${({ $hasNode }) => ($hasNode ? 1 : "auto")};
+  grid-column: ${({ $column }) => $column};
+  grid-row: ${({ $row }) => $row};
+  width: ${QUERY_GRID_WIDTH}px;
+  height: ${QUERY_GRID_HEIGHT}px;
 `;

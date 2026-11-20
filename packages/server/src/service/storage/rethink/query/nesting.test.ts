@@ -46,20 +46,14 @@ const stream = (ids: string[]) => {
 // a fake edge whose run() behaves like a per-entity predicate: it returns the
 // intersection of its match universe with whatever id set the input stream
 // carries - exactly the "subset invariant" the real edges obey
-const makeEdge = (
-  universe: string[],
-  logic: Query.EdgeLogic = Positive,
-  childEdges: any[] = [],
-  childOperator: Query.NodeOperator = And
-) => {
+const makeEdge = (universe: string[], logic: Query.EdgeLogic = Positive) => {
   const set = new Set(universe);
   const run = jest.fn((q: any) => {
     const inputIds: string[] = q?._ids ?? [];
     const matched = inputIds.filter((id) => set.has(id));
     return { distinct: () => ({ run: async () => matched }) };
   });
-  const node = new SearchNode({ operator: childOperator });
-  (node as any).edges = childEdges;
+  const node = new SearchNode({});
   // no-op prepare mirrors the SearchEdge contract (the evaluator calls it
   // before run(); only the subtree-resolving edges do real work there)
   const prepare = jest.fn(async () => undefined);
@@ -79,7 +73,7 @@ const sorted = (a: string[]) => [...a].sort();
 
 const BASE = ["1", "2", "3", "4", "5", "6"];
 
-describe("evaluateEdges - AND/OR merge, negation, pipeline, recursion", () => {
+describe("evaluateEdges - AND/OR merge, negation, pipeline", () => {
   it("AND intersects positive edges and narrows each edge over the survivors", async () => {
     const a = makeEdge(["1", "2", "3", "4"], Positive);
     const b = makeEdge(["3", "4", "5", "6"], Positive);
@@ -139,18 +133,5 @@ describe("evaluateEdges - AND/OR merge, negation, pipeline, recursion", () => {
     const result = await evaluate(stream(BASE), [a, b], Or);
 
     expect(sorted(result)).toEqual(["1", "2", "4", "5", "6"]);
-  });
-
-  it("resolves nested edges recursively, scoped to the parent's matches", async () => {
-    // parent: EP(universe 1..4) with a nested NOT(universe {2})
-    const nestedNeg = makeEdge(["2"], Negative);
-    const parent = makeEdge(["1", "2", "3", "4"], Positive, [nestedNeg], And);
-
-    const result = await evaluate(stream(BASE), [parent], And);
-
-    // 1..4 (parent match) minus 2 (nested negation) = 1,3,4
-    expect(sorted(result)).toEqual(["1", "3", "4"]);
-    // the nested edge only ran over the parent's matched ids
-    expect(nestedNeg.run.mock.calls[0][0]._ids).toEqual(["1", "2", "3", "4"]);
   });
 });

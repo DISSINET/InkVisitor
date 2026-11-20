@@ -9,6 +9,7 @@ import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
+import { foldQuotes } from "@inkvisitor/shared/constants";
 import {
   DbEnums,
   EntityEnums,
@@ -17,6 +18,7 @@ import {
 } from "@inkvisitor/shared/enums";
 import {
   IConcept,
+  IDocumentMeta,
   IEntity,
   IProp,
   IReference,
@@ -47,11 +49,18 @@ import {
   soeIdsForValidation,
 } from "./validation-expansion";
 
+/**
+ * Whether an entity update may set the field. `entityAllowedFields` lists
+ * read-only fields too, marked false, so being listed is not enough.
+ */
+const isWritableField = (key: string): boolean =>
+  entityAllowedFields[key as keyof IEntity] === true;
+
 /** `data` without the fields an entity update may not set. */
 function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
   const allowed: Partial<IEntity> = { ...data };
   Object.keys(allowed).forEach(
-    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+    (key) => !isWritableField(key) && delete allowed[key as keyof IEntity]
   );
   return allowed;
 }
@@ -156,7 +165,7 @@ export default class Entity implements IEntity, IDbModel {
     // replace AND remove unwanted fields in passed object
     Object.keys(updateData).forEach(
       (key) =>
-        !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
+        !isWritableField(key) && delete updateData[key as keyof IEntity]
     );
 
     const result = await storage.entities.update(db as Conn, this.id, updateData);
@@ -543,6 +552,7 @@ export default class Entity implements IEntity, IDbModel {
         entitySOEs,
         entityLanguages,
         entityStatuses,
+        entityLabelContains,
         tieType,
         propType,
         allowedClasses,
@@ -596,12 +606,19 @@ export default class Entity implements IEntity, IDbModel {
           soeEs.map((e) => e.id)
         ).some((id) => acceptedSOEs.includes(id));
 
+      // quote marks fold to one char on both sides, as in the label search
+      const labelText = foldQuotes(entityLabelContains?.trim() ?? "").toLowerCase();
+      const labelCheck =
+        !labelText ||
+        this.labels.some((label) => foldQuotes(label).toLowerCase().includes(labelText));
+
       if (
         entityCheck &&
         classificationCheck &&
         languageCheck &&
         statusCheck &&
-        soeCheck
+        soeCheck &&
+        labelCheck
       ) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
@@ -726,38 +743,57 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
+   * The documents the entity is anchored in, without their content. Neither
+   * storage orders them, so they are sorted by title for a stable order (the
+   * statement editor pages through the anchors).
+   */
+  async findAnchoringDocuments(conn: Conn): Promise<IDocumentMeta[]> {
+    return (await Document.findByEntityId(conn, this.id)).sort(
+      (a, b) => (a.title ?? "").localeCompare(b.title ?? "") || a.id.localeCompare(b.id)
+    );
+  }
+
+  /**
    * returns data for usedInDocuments(IResponseUsedInDocument[]) field
    * @param conn
+   * @param docs the entity's anchoring documents, when the caller holds them already
    * @returns
    */
   async findUsedInDocuments(
-    conn: Conn
+    conn: Conn,
+    docs?: IDocumentMeta[]
   ): Promise<IResponseUsedInDocument[]> {
-    const out: IResponseUsedInDocument[] = [];
-    await Promise.all(
-      (
-        await Document.findByEntityId(conn, this.id)
-      ).map(async (docData) => {
+    docs = docs || (await this.findAnchoringDocuments(conn));
+    // the per-document lookups below finish in any order, the result keeps the
+    // order of the documents
+    const perDocument = await Promise.all(
+      docs.map(async (docData) => {
+        const out: IResponseUsedInDocument[] = [];
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
         const resources = await storage.entities.resourcesByDocumentId(conn, docData.id);
 
         const resource = resources.length > 0 ? resources[0] : null;
 
+        // one shared object for every anchor of this document; it leaves out
+        // the anchor tree, which can run to megabytes per document
+        const document: IResponseUsedInDocument["document"] = {
+          id: docData.id,
+          title: docData.title,
+          createdAt: docData.createdAt,
+          updatedAt: docData.updatedAt,
+        };
+
         // traverse the tree, search for anchor that === this.id
         const traverse = (nodes: AnchorsNode[], parentT?: string) => {
           for (const node of nodes) {
             if (node.anchor === this.id) {
-              // docData is already IDocumentMeta (content dropped at the
-              // findByEntityId query), so it can be used as the response
-              // document directly.
               out.push({
-                document: docData,
+                document,
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",
-                anchorIndex: out.filter((o) => o.document.id === docData.id)
-                  .length,
+                anchorIndex: out.length,
               });
             }
 
@@ -769,10 +805,11 @@ export default class Entity implements IEntity, IDbModel {
         };
 
         traverse(doc.anchors);
+        return out;
       })
     );
 
-    return out;
+    return ([] as IResponseUsedInDocument[]).concat(...perDocument);
   }
 
   async getEntities(db: Conn): Promise<IEntity[]> {

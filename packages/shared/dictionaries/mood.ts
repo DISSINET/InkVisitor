@@ -67,6 +67,11 @@ export const moodDict = [
     info: "",
   },
   {
+    value: EntityEnums.Mood.Accusation,
+    label: "accusation",
+    info: "",
+  },
+  {
     value: EntityEnums.Mood.Semblance,
     label: "semblance",
     info: "",

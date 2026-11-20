@@ -41,6 +41,9 @@ interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
   searchable?: boolean;
   // appearance
   width?: number | "full";
+  // the menu follows the control's width but never gets narrower than this,
+  // in the same tenths-of-rem unit as `width`
+  menuMinWidth?: number;
   placeholder?: string;
   /**
    * What the control is called, where nothing on screen names it.
@@ -88,6 +91,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   multi = false,
   searchable = true,
   width,
+  menuMinWidth,
   placeholder = "Select",
   ariaLabel,
   noOptionsMessage = "No option selected",
@@ -324,6 +328,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
         <FloatingPortal id="page-content">
           <StyledMenu
             ref={dd.refs.setFloating}
+            $minWidth={menuMinWidth}
             style={dd.floatingStyles}
             {...dd.getFloatingProps({
               // ancestor popovers dismiss on pointerdown; stop both phases so

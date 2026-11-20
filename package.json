@@ -1,10 +1,10 @@
 {
   "name": "inkvisitor-monorepo",
   "private": true,
-  "version": "1.6.4",
+  "version": "1.7.0",
   "packageManager": "pnpm@11.25.0",
   "engines": {
-    "node": "^22.13.1",
+    "node": "^22.23.4",
     "pnpm": "^11.1.2"
   },
   "scripts": {

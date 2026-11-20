@@ -95,17 +95,25 @@ export class AnchorsNode implements IAnchorsNode {
           nodeStack.push(newNode);
         }
       } else if (isClosingTag) {
-        // Close tag: Pop the node off the stack
-        const closedNode = nodeStack.pop();
-
-        // Set the end index when closing tag is found
-        if (closedNode) {
-          closedNode.indexEnd = match.index + match[0].length;
+        // A closing tag ends the nearest open anchor of its name and nothing
+        // else, the way the Annotator pairs tags: an anchor opened inside it and
+        // still open (crossing anchors) runs on to its own closing tag. The
+        // closing tag of anything that opened no node (markup of an imported
+        // document, an entity the database does not hold) closes nothing.
+        let openAt = nodeStack.length - 1;
+        while (openAt >= 0 && nodeStack[openAt].anchor !== tag) {
+          openAt--;
         }
+        if (openAt !== -1) {
+          const [closedNode] = nodeStack.splice(openAt, 1);
+          closedNode.indexEnd = match.index + match[0].length;
 
-        // If there's a parent node, merge the content of the closed node into its parent (remove tag, keep content)
-        if (closedNode && nodeStack.length > 0) {
-          nodeStack[nodeStack.length - 1].content += closedNode.content;
+          // merge the content of the closed node into the open node below it
+          // (remove tag, keep content); a crossed node's text from before the
+          // crossing reaches it only once that node closes
+          if (openAt > 0) {
+            nodeStack[openAt - 1].content += closedNode.content;
+          }
         }
       }
 
@@ -121,6 +129,111 @@ export class AnchorsNode implements IAnchorsNode {
     }
 
     return rootNodes;
+  }
+
+  /**
+   * The entities anchored around the anchors of `entityId`, closest context
+   * first: inside the entity's own spans in text order, then inside the
+   * innermost territory around a span (every anchor of that territory), then
+   * the territory around that, and so on. Within a territory, the fewer
+   * anchors lie between an anchor and the nearest span, the earlier it comes.
+   * Territory anchors and the entity itself are never listed, and an entity is
+   * listed once. `trees` holds one anchors tree per document.
+   */
+  static collectAnchoredNearby(
+    trees: IAnchorsNode[][],
+    entityId: string
+  ): { id: string; class: EntityEnums.Class }[] {
+    // a tree in text order; `end` is the position after the last descendant
+    type Flat = { node: IAnchorsNode; parent: number; end: number }[];
+    const flats = trees.map((tree) => {
+      const flat: Flat = [];
+      const flatten = (nodes: IAnchorsNode[], parent: number) => {
+        for (const node of nodes) {
+          const at = flat.push({ node, parent, end: 0 }) - 1;
+          flatten(node.children || [], at);
+          flat[at].end = flat.length;
+        }
+      };
+      flatten(tree, -1);
+      return flat;
+    });
+
+    // 1 for the innermost territory around one of the entity's spans, 2 for
+    // the territory around that one, and so on
+    const territoryLevels = new Map<string, number>();
+    for (const flat of flats) {
+      flat.forEach((own, at) => {
+        if (own.node.anchor !== entityId) {
+          return;
+        }
+        let level = 0;
+        for (let up = own.parent; up !== -1; up = flat[up].parent) {
+          if (flat[up].node.class === EntityEnums.Class.Territory) {
+            const id = flat[up].node.anchor;
+            territoryLevels.set(id, Math.min(++level, territoryLevels.get(id) ?? Infinity));
+          }
+        }
+      });
+    }
+
+    const candidates: { node: IAnchorsNode; level: number; distance: number }[] = [];
+    for (const flat of flats) {
+      // anchors between each position and the nearest span before it, then
+      // the nearest span after it
+      const spanEnds = new Set(
+        flat.filter((own) => own.node.anchor === entityId).map((own) => own.end)
+      );
+      const distances = flat.map(() => Infinity);
+      let lastSpanEnd = -Infinity;
+      for (let i = 0; i < flat.length; i++) {
+        if (spanEnds.has(i)) {
+          lastSpanEnd = i;
+        }
+        distances[i] = i - lastSpanEnd + 1;
+      }
+      let nextSpanAt = Infinity;
+      for (let i = flat.length - 1; i >= 0; i--) {
+        distances[i] = Math.min(distances[i], nextSpanAt - i);
+        if (flat[i].node.anchor === entityId) {
+          nextSpanAt = i;
+        }
+      }
+
+      // level 0 inside a span, else the lowest level of the territories around
+      const levels: number[] = [];
+      flat.forEach(({ node, parent }, i) => {
+        const up = flat[parent];
+        levels[i] =
+          parent === -1
+            ? Infinity
+            : up.node.anchor === entityId || levels[parent] === 0
+              ? 0
+              : Math.min(
+                  levels[parent],
+                  up.node.class === EntityEnums.Class.Territory
+                    ? (territoryLevels.get(up.node.anchor) ?? Infinity)
+                    : Infinity
+                );
+        if (
+          levels[i] !== Infinity &&
+          node.class !== EntityEnums.Class.Territory &&
+          node.anchor !== entityId
+        ) {
+          candidates.push({ node, level: levels[i], distance: levels[i] ? distances[i] : 0 });
+        }
+      });
+    }
+
+    // the sort is stable, so equal places keep document and text order
+    candidates.sort((a, b) => a.level - b.level || a.distance - b.distance);
+    const listed = new Map<string, EntityEnums.Class>();
+    for (const { node } of candidates) {
+      if (!listed.has(node.anchor)) {
+        listed.set(node.anchor, node.class);
+      }
+    }
+    return [...listed].map(([id, entityClass]) => ({ id, class: entityClass }));
   }
 
   /**

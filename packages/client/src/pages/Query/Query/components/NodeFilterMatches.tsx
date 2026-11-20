@@ -4,6 +4,7 @@ import api from "api";
 import { EntityTag } from "components/advanced";
 import React, { useRef, useState } from "react";
 
+import { NODE_FILTER_KEYS } from "../utils";
 import { NodePopover } from "./NodePopover";
 import {
   StyledExpansionCountButton,
@@ -18,19 +19,23 @@ interface NodeFilterMatches {
   node: Query.INode;
   edgeType: Query.EdgeType | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // the badge sits on a start node's darker background
+  isOnStartNode?: boolean;
 }
 
 /**
- * How many entities the filters of an empty node let through, and which. The
- * server narrows such a target to the same set: the node's classes, else the
- * classes the edge's target can hold, with its status, language and label.
+ * How many entities the filters and nested conditions of an empty node let
+ * through, and which. The server narrows such a target to the same set: the
+ * node's classes, else the classes the edge's target can hold, with its
+ * filters and the conditions under it.
  */
 export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   node,
   edgeType,
   onOpenEntityInDetail,
+  isOnStartNode = false,
 }) => {
-  const { entityClasses, entityStatuses, entityLanguages, label } = node.params;
+  const { entityClasses } = node.params;
   const classes = entityClasses?.length
     ? entityClasses
     : (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]?.entityId?.allowedClasses) || [];
@@ -39,31 +44,25 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   // filters are being edited: the request runs only while the node still
   // carries the filters that were asked for, and a combination asked for
   // before reads from the cache.
-  const filters = {
-    classes,
-    statuses: entityStatuses ?? [],
-    languages: entityLanguages ?? [],
-    label: label?.trim() ?? "",
+  const params: Query.INodeParams = {
+    entityClasses: classes,
+    ...Object.fromEntries(
+      NODE_FILTER_KEYS.filter((key) => node.params[key] !== undefined).map((key) => [
+        key,
+        node.params[key],
+      ]),
+    ),
+    label: node.params.label?.trim() || undefined,
   };
-  const filtersSignature = JSON.stringify(filters);
+  const { edges, operator } = node;
+  const filtersSignature = JSON.stringify({ params, edges, operator });
   const [requestedSignature, setRequestedSignature] = useState<string | null>(null);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["node-filter-matches", filters],
+    queryKey: ["node-filter-matches", params, edges, operator],
     queryFn: async () => {
       const res = await api.query({
-        query: {
-          id: "node-filter-matches",
-          type: node.type,
-          operator: Query.NodeOperator.And,
-          edges: [],
-          params: {
-            entityClasses: filters.classes,
-            entityStatuses: filters.statuses,
-            entityLanguages: filters.languages,
-            label: filters.label || undefined,
-          },
-        },
+        query: { id: "node-filter-matches", type: node.type, operator, edges, params },
         explore: {
           view: { mode: Explore.EViewMode.Table, columns: [] },
           filters: [],
@@ -89,6 +88,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
       <StyledExpansionCountButton
         ref={badgeRef}
         type="button"
+        $color={isOnStartNode ? "query2Text" : "black"}
         onClick={() => {
           setRequestedSignature(filtersSignature);
           setIsOpen((open) => !open);
@@ -110,7 +110,9 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
           )}
           {!isPending && data && data.total === 0 && (
             <StyledExpansionPopoverMessage>
-              no entity passes these filters
+              {edges.length
+                ? "no entity passes these filters and conditions"
+                : "no entity passes these filters"}
             </StyledExpansionPopoverMessage>
           )}
           {!isPending && shown.length > 0 && (
@@ -119,7 +121,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
                 <EntityTag
                   key={entity.id}
                   entity={entity}
-                  tagMaxWidth={160}
+                  fullWidth
                   onDoubleClick={() => onOpenEntityInDetail?.(entity.id)}
                 />
               ))}

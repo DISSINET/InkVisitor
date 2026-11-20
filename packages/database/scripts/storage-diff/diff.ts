@@ -30,6 +30,8 @@ export interface TableReport {
   /** -1 when the table is missing on that side */
   rethink: number;
   postgres: number;
+  /** rows only RethinkDB holds because the import left them out on purpose */
+  leftOut: number;
   missingInPg: number;
   extraInPg: number;
   differing: number;
@@ -39,7 +41,7 @@ export interface TableReport {
 
 /** a table absent in RethinkDB counts as empty, so an empty PostgreSQL table matches it */
 const rowsMatch = (t: TableReport): boolean =>
-  t.rethink === t.postgres || (t.rethink === -1 && t.postgres === 0);
+  t.rethink - t.leftOut === t.postgres || (t.rethink === -1 && t.postgres === 0);
 
 export function hasDifferences(reports: TableReport[]): boolean {
   return reports.some(
@@ -97,7 +99,8 @@ async function assertIndexesExist(client: Client): Promise<void> {
 async function diffIndexes(
   conn: Connection,
   client: Client,
-  table: string
+  table: string,
+  leftOut?: Set<string>
 ): Promise<IndexReport[]> {
   const reports: IndexReport[] = [];
   for (const rethinkIndex of RETHINK_TABLES[table]) {
@@ -134,7 +137,9 @@ async function diffIndexes(
           note(a.id, rethink, postgres);
         }
       },
-      leftOnly: (a) => note(a.id, normalizeKeys(a.keys, multi), "(row missing)"),
+      leftOnly: (a) => {
+        if (!leftOut?.has(a.id)) note(a.id, normalizeKeys(a.keys, multi), "(row missing)");
+      },
       rightOnly: (b) => note(b.id, "(row missing)", normalizeKeys(b.keys, multi)),
     });
     reports.push(report);
@@ -146,12 +151,14 @@ async function diffTable(
   conn: Connection,
   client: Client,
   table: string,
-  checkIndexes: boolean
+  checkIndexes: boolean,
+  leftOut?: Set<string>
 ): Promise<TableReport> {
   const report: TableReport = {
     table,
     rethink: 0,
     postgres: 0,
+    leftOut: 0,
     missingInPg: 0,
     extraInPg: 0,
     differing: 0,
@@ -172,6 +179,10 @@ async function diffTable(
     },
     leftOnly: (a) => {
       report.rethink++;
+      if (leftOut?.has(a.id)) {
+        report.leftOut++;
+        return;
+      }
       report.missingInPg++;
       if (report.examples.missing.length < EXAMPLES) {
         report.examples.missing.push(a.id);
@@ -186,16 +197,20 @@ async function diffTable(
     },
   });
   if (checkIndexes) {
-    report.indexes = await diffIndexes(conn, client, table);
+    report.indexes = await diffIndexes(conn, client, table, leftOut);
   }
   return report;
 }
 
-/** every table of the catalogue; a table missing in RethinkDB reports -1 rows there */
+/**
+ * Every table of the catalogue; a table missing in RethinkDB reports -1 rows
+ * there. `leftOut` names, per table, the ids the PostgreSQL side was loaded
+ * without on purpose: such a row is counted and is not a difference.
+ */
 export async function diffDatabases(
   conn: Connection,
   client: Client,
-  opts: { indexes: boolean }
+  opts: { indexes: boolean; leftOut?: Map<string, Set<string>> }
 ): Promise<TableReport[]> {
   await assertBytewiseOrdering(client);
   await assertIndexesExist(client);
@@ -208,6 +223,7 @@ export async function diffDatabases(
         table,
         rethink: -1,
         postgres: rows[0].n,
+        leftOut: 0,
         missingInPg: 0,
         extraInPg: 0,
         differing: 0,
@@ -216,7 +232,7 @@ export async function diffDatabases(
       });
       continue;
     }
-    reports.push(await diffTable(conn, client, table, opts.indexes));
+    reports.push(await diffTable(conn, client, table, opts.indexes, opts.leftOut?.get(table)));
   }
   return reports;
 }
@@ -227,6 +243,9 @@ export function printReports(reports: TableReport[]): void {
     const rethinkCount = t.rethink === -1 ? "absent" : `${t.rethink} rows`;
     const head = `${clean ? colors.green("ok  ") : colors.red("DIFF")} ${t.table}: rethinkdb ${rethinkCount}, postgres ${t.postgres} rows`;
     console.log(head);
+    if (t.leftOut) {
+      console.log(`      left out of the import: ${t.leftOut}`);
+    }
     if (t.missingInPg) {
       console.log(`      missing in postgres: ${t.missingInPg} (e.g. ${t.examples.missing.join(", ")})`);
     }

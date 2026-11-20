@@ -32,6 +32,7 @@ export const ValidationText: React.FC<ValidationText> = ({
     entitySOEs,
     entityLanguages,
     entityStatuses,
+    entityLabelContains,
     tieType,
     propType,
     allowedClasses,
@@ -177,6 +178,12 @@ export const ValidationText: React.FC<ValidationText> = ({
       )}
       {entityStatuses && entityStatuses.length > 0 && (
         <>{renderEntityStatusList(entityStatuses ?? [])}</>
+      )}
+      {entityLabelContains?.trim() && (
+        <>
+          {` with label or alternative label containing `}
+          <StyledSentenceEntity>{`"${entityLabelContains.trim()}"`}</StyledSentenceEntity>
+        </>
       )}
 
       {tieType === EProtocolTieType.Property && (

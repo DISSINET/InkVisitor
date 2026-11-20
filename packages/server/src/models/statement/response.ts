@@ -2,6 +2,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import {
   IAction,
   IConcept,
+  IDocumentMeta,
   IEntity,
   IResponseStatement,
   IStatement,
@@ -25,6 +26,8 @@ import { ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Conn } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
+import { AnchorsNode } from "@models/document/anchors";
+import { NEARBY_SUGGESTIONS_LIMIT } from "@inkvisitor/shared/constants";
 import { getEntityClass } from "@models/factory";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
@@ -33,12 +36,15 @@ import { ISetting } from "@inkvisitor/shared/types/settings";
 import { ValidationExpansionMap } from "../entity/validation-expansion";
 import { buildValidationExpansionMap } from "../entity/validation-expansion-load";
 
+const ANCHORED_NEARBY_BATCH = 100;
+
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
   usedInDocuments: IResponseUsedInDocument[];
   anchorTexts?: string[];
+  anchoredNearby?: IEntity[];
 
   constructor(entity: IStatement) {
     super(entity);
@@ -47,22 +53,79 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.usedInDocuments = [];
   }
 
-  async prepare(req: IRequest, settings?: ISetting[]) {
+  /**
+   * @param options.anchoredNearby fills `anchoredNearby`, which only the Editor
+   * reads; a territory response leaves it out, so its statements stay lean
+   */
+  async prepare(req: IRequest, settings?: ISetting[], options?: { anchoredNearby?: boolean }) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
-    this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
+    // the anchors tree of a document can run to megabytes, so the documents
+    // are read once for everything derived from them
+    const documents = await this.findAnchoringDocuments(req.db.connection);
+    const [usedInDocuments, anchoredNearby] = await Promise.all([
+      this.findUsedInDocuments(req.db.connection, documents),
+      options?.anchoredNearby ? this.findAnchoredNearby(req.db.connection, documents) : [],
+    ]);
+    this.usedInDocuments = usedInDocuments;
+    if (anchoredNearby.length) {
+      this.anchoredNearby = anchoredNearby;
+    }
     // Display-friendly mirror of the statement's own anchor spans (see
     // IResponseStatement.anchorTexts); derived from the already-loaded documents.
-    const anchorTexts = this.usedInDocuments
-      .map((d) => d.anchorText)
-      .filter((t) => t);
-    if (anchorTexts.length) {
-      this.anchorTexts = anchorTexts;
+    const anchorTexts = new Set(
+      this.usedInDocuments.map((d) => d.anchorText.trim()).filter((t) => t)
+    );
+    if (anchorTexts.size) {
+      this.anchorTexts = [...anchorTexts];
     }
 
     await this.prepareEntities(req.db.connection);
     if (!this.isTemplate) {
       this.warnings = await this.getWarnings(req, settings);
     }
+  }
+
+  /**
+   * The entities anchored around the statement in its documents, closest
+   * first (see AnchorsNode.collectAnchoredNearby) and those the statement
+   * already uses last, at most
+   * NEARBY_SUGGESTIONS_LIMIT of each class. Discouraged entities cannot be
+   * picked in a suggester, so they are left out before the cap. They are
+   * loaded a batch at a time, as a document can anchor thousands of entities
+   * and the first batch usually fills every class.
+   */
+  async findAnchoredNearby(conn: Conn, documents: IDocumentMeta[]): Promise<IEntity[]> {
+    // an entity the statement already uses is the least likely next pick
+    const used = new Set(this.getEntitiesIds());
+    const anchored = AnchorsNode.collectAnchoredNearby(
+      documents.map((document) => document.anchors || []),
+      this.id
+    );
+    const nearby = [
+      ...anchored.filter((node) => !used.has(node.id)),
+      ...anchored.filter((node) => used.has(node.id)),
+    ];
+    const picked: IEntity[] = [];
+    const perClass = new Map<EntityEnums.Class, number>();
+    const isFull = (entityClass: EntityEnums.Class) =>
+      (perClass.get(entityClass) || 0) >= NEARBY_SUGGESTIONS_LIMIT;
+
+    for (let i = 0; i < nearby.length; i += ANCHORED_NEARBY_BATCH) {
+      const ids = nearby
+        .slice(i, i + ANCHORED_NEARBY_BATCH)
+        .filter((node) => !isFull(node.class))
+        .map((node) => node.id);
+      if (!ids.length) {
+        continue;
+      }
+      for (const entity of await Entity.findEntitiesByIds(conn, ids)) {
+        if (entity.status !== EntityEnums.Status.Discouraged && !isFull(entity.class)) {
+          picked.push(entity);
+          perClass.set(entity.class, (perClass.get(entity.class) || 0) + 1);
+        }
+      }
+    }
+    return picked;
   }
 
   /**
@@ -121,8 +184,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     );
 
     // stamp document anchor spans onto statement entities so tags can show
-    // them as labels (response-only field, see IEntity.anchorTexts)
-    await Entity.applyAnchorTexts(db, this.entities);
+    // them as labels (response-only field, see IEntity.anchorTexts); the
+    // statements anchored nearby share the one document read
+    await Entity.applyAnchorTexts(db, [
+      ...Object.values(this.entities),
+      ...(this.anchoredNearby ?? []),
+    ]);
   }
 
   /**

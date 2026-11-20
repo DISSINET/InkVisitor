@@ -1,74 +1,35 @@
-import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IRequestSearch,
   IRequestSearchRootValidity,
 } from "@inkvisitor/shared/types/request-search";
-import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import { Input, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup, EntitySuggester } from "components/advanced";
+import { TypeBar } from "components";
+import Dropdown, { AttributeButtonGroup } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import { mergeTokensIntoIds, parseEntityIdsFromText } from "pages/Query/utils";
-import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
-import { IcoChevronDown, IcoCloseMd } from "Theme/icons";
-import { CoOccurrenceEntityList } from "./CoOccurrenceEntityList";
 import {
-  StyledCoOccurrenceBox,
-  StyledCoOccurrenceChevron,
-  StyledCoOccurrenceClear,
-  StyledCoOccurrenceSummary,
-  StyledCoOccurrenceToggle,
-  StyledDateRange,
-  StyledDateRangeField,
-  StyledDateRangeLabel,
+  logicalTypeFilterOptions,
+  partOfSpeechFilterOptions,
+  statusFilterOptions,
+} from "./attributeFilterOptions";
+import { CoOccurrencePicker } from "./CoOccurrencePicker";
+import { DateRangeFilter, parseDate } from "./DateRangeFilter";
+import { useUserFilterOptions } from "./useUserFilterOptions";
+import {
   StyledForm,
   StyledRow,
   StyledRowControl,
   StyledRowHeader,
 } from "./FloatingSearchFormStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { ExploreAction, ExploreActionType } from "../Explorer/state";
+import { AttributeFilter, ExploreAction, ExploreActionType } from "../Explorer/state";
 
-const defaultStatusOption = {
-  label: "any",
-  value: "" as EntityEnums.Status,
-};
-const statusOptions = [defaultStatusOption].concat(entityStatusDict);
-
-const languageFilterAny = "*";
-const defaultLanguageOption = {
-  label: "any",
-  value: languageFilterAny as EntityEnums.Language,
-};
 const defaultClassForTypeBar = "" as EntityEnums.Class;
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
   isRootInvalid: IRequestSearchRootValidity.Any,
-};
-
-const dateToDatetimeLocal = (date: Date): string => {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
-
-const datetimeLocalToDate = (value: string): Date | undefined => {
-  if (!value) {
-    return undefined;
-  }
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
-};
-
-const storedDateToDate = (value: string | undefined): Date | undefined => {
-  if (!value) {
-    return undefined;
-  }
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 };
 
 // The form is unmounted while the panel is minimised, so its local state has to
@@ -79,19 +40,13 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
 
   filters.forEach((filter) => {
     switch (filter.type) {
-      case Explore.SearchOption.Status:
-        searchData.status = filter.status;
-        break;
-      case Explore.SearchOption.Language:
-        searchData.language = filter.language;
-        break;
       case Explore.SearchOption.CreatedAt:
-        searchData.createdAfter = storedDateToDate(filter.createdAfter);
-        searchData.createdBefore = storedDateToDate(filter.createdBefore);
+        searchData.createdAfter = parseDate(filter.createdAfter);
+        searchData.createdBefore = parseDate(filter.createdBefore);
         break;
       case Explore.SearchOption.UpdatedAt:
-        searchData.updatedAfter = storedDateToDate(filter.updatedAfter);
-        searchData.updatedBefore = storedDateToDate(filter.updatedBefore);
+        searchData.updatedAfter = parseDate(filter.updatedAfter);
+        searchData.updatedBefore = parseDate(filter.updatedBefore);
         break;
       case Explore.SearchOption.CreatedBy:
         searchData.createdBy = filter.createdBy;
@@ -106,7 +61,8 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
         searchData.isRootInvalid = filter.rootValidity;
         break;
       default:
-        // label and UUID filters have their own controls outside this panel
+        // label and UUID filters have their own controls outside this panel, and
+        // the list filters are read straight from the applied filters
         break;
     }
   });
@@ -126,88 +82,18 @@ interface FloatingSearchFormProps {
 export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch, filters }) => {
   const [searchData, setSearchData] = useState<IRequestSearch>(() => filtersToSearchData(filters));
 
-  const { data: users } = useUsersSimplifiedQuery();
+  const userOptions = useUserFilterOptions();
 
   // the applied filter is the single source of truth for the picked entities:
   // the form is unmounted while the panel is minimised, so keeping them in
   // local state would lose them on reopen
   const coOccurrenceIds = filtersToCoOccurrenceIds(filters);
-  // the collapsed row shows a count only; the list below fetches the entities
-  // for the rows it actually renders
-  const [coOccurrenceExpanded, setCoOccurrenceExpanded] = useState(false);
 
-  const setCoOccurrenceIds = useCallback(
-    (entityIds: string[]) => {
-      dispatch({
-        type: ExploreActionType.setCoOccurrenceFilter,
-        payload: { entityIds },
-      });
-    },
-    [dispatch],
-  );
-
-  // a paste carrying complete uuids goes into the picked set instead of the
-  // suggester's input, which keeps handling text pasted to search by label
-  const handleCoOccurrencePaste = useCallback(
-    (event: React.ClipboardEvent) => {
-      const pasted = event.clipboardData.getData("text");
-      if (parseEntityIdsFromText(pasted).length === 0) {
-        return;
-      }
-      event.preventDefault();
-      setCoOccurrenceIds(mergeTokensIntoIds(coOccurrenceIds, pasted));
-    },
-    [coOccurrenceIds, setCoOccurrenceIds],
-  );
-
-  const removeCoOccurrenceId = useCallback(
-    (entityId: string) => {
-      setCoOccurrenceIds(coOccurrenceIds.filter((id) => id !== entityId));
-    },
-    [coOccurrenceIds, setCoOccurrenceIds],
-  );
+  const attributeParams = Explore.attributeFilterParams(filters);
+  const setAttributeFilter = (filter: AttributeFilter) =>
+    dispatch({ type: ExploreActionType.setAttributeFilter, payload: filter });
 
   const orderedLanguageDict = useOrderedLanguageDict();
-  const languageOptions: DropdownItem[] = useMemo(
-    () => [defaultLanguageOption].concat(orderedLanguageDict),
-    [orderedLanguageDict],
-  );
-
-  const statusOptionSelected: EntityEnums.Status = useMemo(() => {
-    if (!!searchData.status) {
-      return searchData.status || defaultStatusOption.value;
-    }
-    return defaultStatusOption.value;
-  }, [searchData.status]);
-
-  const languageOptionSelected = useMemo(() => {
-    if (searchData.language !== undefined) {
-      return searchData.language;
-    }
-    return defaultLanguageOption.value;
-  }, [searchData.language]);
-
-  const userOptions = useMemo(() => {
-    return [{ label: "any", value: "" }].concat(
-      users
-        ?.filter((user) => user?.id && user?.name)
-        .map((user) => ({
-          label: user.name,
-          value: user.id,
-        })) ?? [],
-    );
-  }, [users]);
-
-  const userMultiOptions = useMemo(() => {
-    return (
-      users
-        ?.filter((user) => user?.id && user?.name)
-        .map((user) => ({
-          label: user.name,
-          value: user.id,
-        })) ?? []
-    );
-  }, [users]);
 
   const handleChange = useCallback(
     (changes: {
@@ -231,25 +117,14 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.Status}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
-            placeholder=""
+          <Dropdown.Multi.Basic
+            placeholder="any"
             width="full"
-            options={statusOptions}
-            value={statusOptionSelected}
-            isClearable={!!searchData.status}
-            onChange={(selectedOption) => {
-              const status =
-                selectedOption === defaultStatusOption.value ? undefined : selectedOption;
-              handleChange({
-                status,
-              });
-              dispatch({
-                type: ExploreActionType.setStatusFilter,
-                payload: {
-                  status,
-                },
-              });
-            }}
+            options={statusFilterOptions}
+            value={attributeParams.entityStatuses ?? []}
+            onChange={(statuses) =>
+              setAttributeFilter({ type: Explore.SearchOption.Status, statuses })
+            }
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
         </StyledRowControl>
@@ -257,183 +132,90 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.Language}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
-            placeholder=""
+          <Dropdown.Multi.Basic
+            placeholder="any"
             width="full"
-            options={languageOptions}
-            value={languageOptionSelected}
-            isClearable={searchData.language !== undefined}
-            onChange={(selectedOption) => {
-              // clearing reports an empty string
-              const language =
-                !selectedOption || selectedOption === defaultLanguageOption.value
-                  ? undefined
-                  : selectedOption;
-              handleChange({
-                language,
-              });
-              dispatch({
-                type: ExploreActionType.setLanguageFilter,
-                payload: {
-                  language,
-                },
-              });
-            }}
+            options={orderedLanguageDict}
+            value={attributeParams.entityLanguages ?? []}
+            onChange={(languages) =>
+              setAttributeFilter({ type: Explore.SearchOption.Language, languages })
+            }
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
+        </StyledRowControl>
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>{Explore.SearchOption.LogicalType}</StyledRowHeader>
+        <StyledRowControl>
+          <Dropdown.Multi.Basic
+            placeholder="any"
+            width="full"
+            options={logicalTypeFilterOptions}
+            value={attributeParams.entityLogicalTypes ?? []}
+            onChange={(logicalTypes) =>
+              setAttributeFilter({ type: Explore.SearchOption.LogicalType, logicalTypes })
+            }
+          />
+        </StyledRowControl>
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>{Explore.SearchOption.PartOfSpeech}</StyledRowHeader>
+        <StyledRowControl>
+          <Dropdown.Multi.Basic
+            placeholder="any"
+            width="full"
+            options={partOfSpeechFilterOptions}
+            value={attributeParams.entityPartsOfSpeech ?? []}
+            onChange={(partsOfSpeech) =>
+              setAttributeFilter({ type: Explore.SearchOption.PartOfSpeech, partsOfSpeech })
+            }
+          />
         </StyledRowControl>
       </StyledRow>
 
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
         <StyledRowControl>
-          <StyledCoOccurrenceBox onPaste={handleCoOccurrencePaste}>
-            <EntitySuggester
-              categoryTypes={classesAll}
-              placeholder="pick or paste ids"
-              inputWidth="full"
-              disableCreate
-              excludedActantIds={coOccurrenceIds}
-              onSelected={(entityId: string) => {
-                if (!coOccurrenceIds.includes(entityId)) {
-                  setCoOccurrenceIds([...coOccurrenceIds, entityId]);
-                }
-              }}
-            />
-
-            {coOccurrenceIds.length > 0 && (
-              <StyledCoOccurrenceSummary>
-                <StyledCoOccurrenceToggle
-                  type="button"
-                  onClick={() => setCoOccurrenceExpanded(!coOccurrenceExpanded)}
-                >
-                  <StyledCoOccurrenceChevron $expanded={coOccurrenceExpanded}>
-                    <IcoChevronDown size={10} />
-                  </StyledCoOccurrenceChevron>
-                  {coOccurrenceIds.length}
-                  {coOccurrenceIds.length === 1 ? " entity" : " entities"}
-                </StyledCoOccurrenceToggle>
-                <StyledCoOccurrenceClear
-                  type="button"
-                  aria-label="Clear co-occurrence filter"
-                  onClick={() => setCoOccurrenceIds([])}
-                >
-                  <IcoCloseMd size={14} />
-                </StyledCoOccurrenceClear>
-              </StyledCoOccurrenceSummary>
-            )}
-
-            {coOccurrenceExpanded && coOccurrenceIds.length > 0 && (
-              <CoOccurrenceEntityList
-                entityIds={coOccurrenceIds}
-                onRemove={removeCoOccurrenceId}
-              />
-            )}
-          </StyledCoOccurrenceBox>
+          <CoOccurrencePicker
+            entityIds={coOccurrenceIds}
+            onChange={(entityIds) =>
+              dispatch({ type: ExploreActionType.setCoOccurrenceFilter, payload: { entityIds } })
+            }
+          />
         </StyledRowControl>
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>date created</StyledRowHeader>
         <StyledRowControl>
-          <StyledDateRange>
-            <StyledDateRangeField>
-              <StyledDateRangeLabel>after</StyledDateRangeLabel>
-              <Input
-                type="datetime-local"
-                width="full"
-                value={searchData.createdAfter ? dateToDatetimeLocal(searchData.createdAfter) : ""}
-                onChangeFn={(value) => {
-                  const createdAfter = datetimeLocalToDate(value);
-                  const createdBefore = searchData.createdBefore;
-                  handleChange({ createdAfter });
-                  dispatch({
-                    type: ExploreActionType.setCreatedAtFilter,
-                    payload: {
-                      createdAfter,
-                      createdBefore,
-                    },
-                  });
-                }}
-                clearable
-              />
-            </StyledDateRangeField>
-            <StyledDateRangeField>
-              <StyledDateRangeLabel>before</StyledDateRangeLabel>
-              <Input
-                type="datetime-local"
-                width="full"
-                value={
-                  searchData.createdBefore ? dateToDatetimeLocal(searchData.createdBefore) : ""
-                }
-                onChangeFn={(value) => {
-                  const createdBefore = datetimeLocalToDate(value);
-                  const createdAfter = searchData.createdAfter;
-                  handleChange({ createdBefore });
-                  dispatch({
-                    type: ExploreActionType.setCreatedAtFilter,
-                    payload: {
-                      createdAfter,
-                      createdBefore,
-                    },
-                  });
-                }}
-                clearable
-              />
-            </StyledDateRangeField>
-          </StyledDateRange>
+          <DateRangeFilter
+            after={searchData.createdAfter}
+            before={searchData.createdBefore}
+            onChange={(createdAfter, createdBefore) => {
+              handleChange({ createdAfter, createdBefore });
+              dispatch({
+                type: ExploreActionType.setCreatedAtFilter,
+                payload: { createdAfter, createdBefore },
+              });
+            }}
+          />
         </StyledRowControl>
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>date updated</StyledRowHeader>
         <StyledRowControl>
-          <StyledDateRange>
-            <StyledDateRangeField>
-              <StyledDateRangeLabel>after</StyledDateRangeLabel>
-              <Input
-                type="datetime-local"
-                width="full"
-                value={searchData.updatedAfter ? dateToDatetimeLocal(searchData.updatedAfter) : ""}
-                onChangeFn={(value) => {
-                  const updatedAfter = datetimeLocalToDate(value);
-                  const updatedBefore = searchData.updatedBefore;
-                  handleChange({ updatedAfter, updatedDate: undefined });
-                  dispatch({
-                    type: ExploreActionType.setUpdatedAtFilter,
-                    payload: {
-                      updatedAfter,
-                      updatedBefore,
-                    },
-                  });
-                }}
-                clearable
-              />
-            </StyledDateRangeField>
-            <StyledDateRangeField>
-              <StyledDateRangeLabel>before</StyledDateRangeLabel>
-              <Input
-                type="datetime-local"
-                width="full"
-                value={
-                  searchData.updatedBefore ? dateToDatetimeLocal(searchData.updatedBefore) : ""
-                }
-                onChangeFn={(value) => {
-                  const updatedBefore = datetimeLocalToDate(value);
-                  const updatedAfter = searchData.updatedAfter;
-                  handleChange({ updatedBefore, updatedDate: undefined });
-                  dispatch({
-                    type: ExploreActionType.setUpdatedAtFilter,
-                    payload: {
-                      updatedAfter,
-                      updatedBefore,
-                    },
-                  });
-                }}
-                clearable
-              />
-            </StyledDateRangeField>
-          </StyledDateRange>
+          <DateRangeFilter
+            after={searchData.updatedAfter}
+            before={searchData.updatedBefore}
+            onChange={(updatedAfter, updatedBefore) => {
+              handleChange({ updatedAfter, updatedBefore, updatedDate: undefined });
+              dispatch({
+                type: ExploreActionType.setUpdatedAtFilter,
+                payload: { updatedAfter, updatedBefore },
+              });
+            }}
+          />
         </StyledRowControl>
       </StyledRow>
 
@@ -442,7 +224,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
         <StyledRowControl>
           <Dropdown.Single.User
             width="full"
-            options={userOptions}
+            options={userOptions.single}
             value={searchData.createdBy ?? ""}
             isClearable={!!searchData.createdBy}
             onChange={(value) => {
@@ -463,7 +245,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
         <StyledRowControl>
           <Dropdown.Single.User
             width="full"
-            options={userOptions}
+            options={userOptions.single}
             value={searchData.updatedBy ?? ""}
             isClearable={!!searchData.updatedBy}
             onChange={(value) => {
@@ -486,7 +268,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             width="full"
             limitSelectedItems={2}
             placeholder="any"
-            options={userMultiOptions}
+            options={userOptions.multi}
             value={searchData.editedBy ?? []}
             onChange={(values) => {
               const editedBy = values.length > 0 ? values : undefined;

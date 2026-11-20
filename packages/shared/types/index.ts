@@ -34,6 +34,7 @@ import { IResponseAudit } from "./response-audit";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import {
   IResponseDetail,
+  IResponseEntityRelations,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
 } from "./response-detail";
@@ -127,6 +128,7 @@ export type {
   IResponseDetail,
   IResponseEntity,
   IResponseEntityExpansion,
+  IResponseEntityRelations,
   IResponseGeneric,
   IResponsePermission,
   IResponseQuery,

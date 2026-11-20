@@ -173,6 +173,7 @@ export namespace EntityEnums {
     Expectation = "15",
     Exhortation = "16",
     Advice = "17",
+    Accusation = "18",
   }
 
   export enum MoodVariant {

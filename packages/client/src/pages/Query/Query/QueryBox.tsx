@@ -1,13 +1,14 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useTheme } from "styled-components";
 import { INodeItem, QueryValidity } from "../types";
-import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../constants";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
-import { StyledQueryBox } from "./QueryBoxStyles";
+import { StyledGridCell, StyledQueryBox } from "./QueryBoxStyles";
 import { QueryAction } from "./state";
-import { getAllEdges, getAllNodes } from "./utils";
+import { edgeTargets, getAllEdges, valueNodeEdge } from "./utils";
+import { getEdgeSourceClasses } from "../utils";
 
 interface QueryBoxProps {
   state: Query.INode;
@@ -27,6 +28,16 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
+  // the start nodes sit in the root's column, each drawn as a root; the root
+  // holds no other edge (Query.areStartNodesValid), so it and its SE edges are
+  // not drawn
+  const hasStartNodes = Query.hasStartNodes(state);
+  const layoutRoots = useMemo<Query.INode[]>(
+    () => (hasStartNodes ? state.edges.map((edge) => edge.node) : [state]),
+    [state, hasStartNodes],
+  );
+
+
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 0;
 
@@ -34,45 +45,95 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       maxNodeDepth = Math.max(maxNodeDepth, depth);
 
       node.edges.forEach((edge) => {
-        traverse(edge.node, depth + 1);
+        edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root) => traverse(root, 0));
 
     return maxNodeDepth;
-  }, [state]);
+  }, [layoutRoots]);
 
   const allEdges = getAllEdges(state);
-  const allNodes = getAllNodes(state);
 
-  const nodeItems = useMemo<INodeItem[]>(() => {
+  // the edge leading to a node; the value node of an HP: / SP: edge gets that edge as an HP:V
+  // edge, with its connector in place of the edge's own controls
+  const incomingEdge = (
+    nodeId: string | undefined,
+  ): { edge: Query.IEdge; isValue: boolean } | undefined => {
+    if (!nodeId) {
+      return undefined;
+    }
+    for (const edge of allEdges) {
+      if (edge.node.id === nodeId) {
+        return { edge, isValue: false };
+      }
+      if (edge.valueNode?.id === nodeId) {
+        return { edge: valueNodeEdge({ ...edge, valueNode: edge.valueNode }), isValue: true };
+      }
+    }
+    return undefined;
+  };
+
+  const { nodeItems, gutterRows } = useMemo(() => {
     const nodeItems: INodeItem[] = [];
+    const gutterRows: number[] = [];
+    let row = 0;
 
     const traverse = (node: Query.INode, depth: number) => {
-      nodeItems.push({ ...node, gridX: depth, gridY: nodeItems.length });
+      nodeItems.push({ ...node, gridX: depth, gridY: row++ });
 
-      node.edges.forEach((edge, index) => {
-        traverse(edge.node, depth + 1);
+      node.edges.forEach((edge) => {
+        edgeTargets(edge).forEach((target) => traverse(target, depth + 1));
       });
     };
 
-    traverse(state, 0);
+    layoutRoots.forEach((root, index) => {
+      if (index > 0) {
+        gutterRows.push(row++);
+      }
+      traverse(root, 0);
+    });
 
-    return nodeItems;
-  }, [state]);
+    return { nodeItems, gutterRows };
+  }, [layoutRoots]);
+
+  // nodes are pushed row by row, so the last one is on the last row
+  const rowCount = (nodeItems.at(-1)?.gridY ?? -1) + 1;
+
+  // a node added by the user is scrolled into view, across and down, as a small box may show
+  // it out of sight; a loaded query remounts this box, so its nodes count as seen
+  const boxRef = useRef<HTMLDivElement>(null);
+  const nodeIdsKey = nodeItems.map((node) => node.id).join();
+  const seenNodeIds = useRef(new Set(nodeIdsKey.split(",")));
+  useEffect(() => {
+    const ids = nodeIdsKey.split(",");
+    // adding the first start node also moves the root into a new one, ahead of the added one
+    const added = ids.filter((id) => !seenNodeIds.current.has(id)).at(-1);
+    seenNodeIds.current = new Set(ids);
+    if (added) {
+      boxRef.current
+        ?.querySelector(`[data-node-id="${added}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    }
+  }, [nodeIdsKey]);
 
   // a parent's children sit on their own rows, but an earlier child's subtree
   // pushes later siblings several rows down - leaving the parent's column empty
   // on the rows in between. To keep the spine connected we (a) extend each
   // non-last sibling's vertical line full height and (b) draw a pass-through
   // vertical line in those empty "gap" rows.
-  const { extendEdgeIds, extendNegativeEdgeIds, railCells, nodeChildStubs } = useMemo(() => {
+  // The spine leads to each edge's node. The value node of an HP: / SP: edge hangs off a line
+  // of its own at QUERY_PROP_VALUE_X, run from that edge's row down to the value node's row,
+  // so the two halves of the prop read as one edge and the spine passes them by.
+  const spine = useMemo(() => {
     const idToItem = new Map(nodeItems.map((n) => [n.id, n]));
     const extend = new Set<string>();
     const extendNeg = new Set<string>();
-    // cellKey -> whether the segment feeds a negative sibling (paint it red)
+    // cellKey -> whether the segment feeds a negative sibling (paint it in the NOT colour)
     const rails = new Map<string, boolean>();
+    // cellKey -> the HP: / SP: edge whose value line passes the cell
+    const valueRails = new Map<string, Query.IEdge>();
     // nodeId -> whether the first child's edge is negative; a node's own row
     // never has anything drawn in its own column, so without this the spine
     // reads as broken between the node and the branch curve into its first child
@@ -84,11 +145,23 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       if (node.edges.length > 0) {
         childStubs.set(node.id, isNeg(node.edges[0]));
       }
-      if (node.edges.length > 1) {
-        const colEdge = idToItem.get(node.id)?.gridX ?? 0;
-        const children = node.edges
-          .map((e) => ({ edge: e, row: idToItem.get(e.node.id)?.gridY }))
-          .filter((ci): ci is { edge: Query.IEdge; row: number } => ci.row !== undefined);
+      const colEdge = idToItem.get(node.id)?.gridX ?? 0;
+      node.edges.forEach((e) => {
+        const typeRow = idToItem.get(e.node.id)?.gridY;
+        const valueRow = e.valueNode && idToItem.get(e.valueNode.id)?.gridY;
+        if (typeRow === undefined || valueRow === undefined) {
+          return;
+        }
+        for (let r = typeRow + 1; r < valueRow; r++) {
+          valueRails.set(`${colEdge}-${r}`, e);
+        }
+      });
+      const children = node.edges
+        .map((edge) => ({ edge, key: edge.node.id, row: idToItem.get(edge.node.id)?.gridY }))
+        .filter(
+          (ci): ci is { edge: Query.IEdge; key: string; row: number } => ci.row !== undefined,
+        );
+      if (children.length > 1) {
 
         // each spine segment between two consecutive siblings feeds the lower
         // (next) sibling, so it takes that sibling's colour
@@ -97,56 +170,74 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const next = children[i + 1];
           const nextNeg = isNeg(next.edge);
 
-          extend.add(cur.edge.id);
+          extend.add(cur.key);
           if (nextNeg) {
-            extendNeg.add(cur.edge.id);
+            extendNeg.add(cur.key);
           }
           for (let r = cur.row + 1; r < next.row; r++) {
             rails.set(`${colEdge}-${r}`, nextNeg);
           }
         }
       }
-      node.edges.forEach((e) => traverse(e.node));
+      node.edges.forEach((e) => edgeTargets(e).forEach(traverse));
     };
-    traverse(state);
+    layoutRoots.forEach(traverse);
 
     return {
       extendEdgeIds: extend,
       extendNegativeEdgeIds: extendNeg,
       railCells: rails,
+      valueRailCells: valueRails,
       nodeChildStubs: childStubs,
     };
-  }, [state, nodeItems]);
+  }, [layoutRoots, nodeItems]);
+  const { extendEdgeIds, extendNegativeEdgeIds, railCells, valueRailCells, nodeChildStubs } = spine;
 
   return (
-    <StyledQueryBox $gridWeight={gridWeight} $nodeItems={nodeItems}>
+    <StyledQueryBox
+      ref={boxRef}
+      $gridWeight={gridWeight}
+      $rowCount={rowCount}
+      $gutterRows={gutterRows}
+    >
       {[...Array(gridWeight + 1).keys()].map((wi) => {
-        return [...Array(nodeItems.length).keys()].map((hi) => {
+        // a gutter row holds no node and no line
+        const rows = [...Array(rowCount).keys()].filter((hi) => !gutterRows.includes(hi));
+        return rows.map((hi) => {
           const nextCellNode = nodeItems.find((node) => node.gridX === wi + 1 && node.gridY === hi);
           const thisCellNode = nodeItems.find((node) => node.gridX === wi && node.gridY === hi);
-          const associatedEdge =
-            thisCellNode && allEdges.find((edge) => edge.node.id === thisCellNode.id);
-
-          const nextCellAssociatedEdge =
-            nextCellNode && allEdges.find((edge) => edge.node.id === nextCellNode.id);
+          const associated = incomingEdge(thisCellNode?.id);
+          const nextCellAssociated = incomingEdge(nextCellNode?.id);
 
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
+          const valueRailEdge = valueRailCells.get(railKey);
+          // NOT on the edge or on its value alone both negate the value line
+          const valueRailNegative =
+            valueRailEdge?.logic === Query.EdgeLogic.Negative ||
+            valueRailEdge?.valueLogic === Query.EdgeLogic.Negative;
+          // the value line belongs to one edge, so it takes that edge's colour as its box does:
+          // the invalid colour over the grey of NOT
+          const valueRailInvalid =
+            !!valueRailEdge &&
+            queryStateValidity.problems.some(
+              (problem) => problem.source === valueRailEdge.id && !problem.warning,
+            );
+
+          // the SE edge of a start node is not drawn, so its problems go to the start node
+          const hiddenEdgeId = hasStartNodes && wi === 0 ? associated?.edge.id : undefined;
 
           const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
           const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
 
           return (
-            <div
+            <StyledGridCell
               key={`${wi}-${hi}`}
-              style={{
-                position: "relative",
-                gridColumn: wi + 1,
-                gridRow: hi + 1,
-                width: QUERY_GRID_WIDTH,
-                height: QUERY_GRID_HEIGHT,
-              }}
+              $column={wi + 1}
+              $row={hi + 1}
+              $hasNode={!!thisCellNode}
+              data-node-id={thisCellNode?.id}
             >
               {showRail && (
                 <svg
@@ -164,9 +255,38 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={20}
                     y1={0}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={railNegative ? theme.color.entityA : theme.color.query2}
+                    stroke={railNegative ? theme.color.queryNegative : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={railNegative ? "6 4" : undefined}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+              {valueRailEdge && (
+                <svg
+                  width={QUERY_GRID_WIDTH}
+                  height={QUERY_GRID_HEIGHT}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <line
+                    x1={QUERY_PROP_VALUE_X}
+                    x2={QUERY_PROP_VALUE_X}
+                    y1={0}
+                    y2={QUERY_GRID_HEIGHT}
+                    stroke={
+                      valueRailInvalid
+                        ? theme.color.queryInvalid
+                        : valueRailNegative
+                          ? theme.color.queryNegative
+                          : theme.color.query2
+                    }
+                    strokeWidth={3}
+                    strokeDasharray={valueRailNegative ? "6 4" : undefined}
                     strokeLinecap="round"
                   />
                 </svg>
@@ -187,7 +307,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={20}
                     y1={QUERY_GRID_HEIGHT - 8}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={childStubNegative ? theme.color.entityA : theme.color.query2}
+                    stroke={childStubNegative ? theme.color.queryNegative : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={childStubNegative ? "6 4" : undefined}
                     strokeLinecap="round"
@@ -197,31 +317,35 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               {thisCellNode && (
                 <QueryGridNode
                   node={thisCellNode}
-                  rootNode={state}
-                  isRoot={wi === 0}
+                  sourceClasses={associated && getEdgeSourceClasses(state, associated.edge.id)}
+                  isRoot={wi === 0 && !hasStartNodes}
                   dispatch={dispatch}
-                  edge={associatedEdge}
+                  edge={associated?.edge}
+                  isValueNode={associated?.isValue}
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === thisCellNode.id,
+                    (problem) =>
+                      problem.source === thisCellNode.id || problem.source === hiddenEdgeId,
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
-              {nextCellAssociatedEdge && (
+              {nextCellNode && nextCellAssociated && (
                 <QueryGridEdge
                   node={nextCellNode}
                   rootNode={state}
-                  isRootEdge={wi === 0}
                   dispatch={dispatch}
-                  edge={nextCellAssociatedEdge}
-                  extendVertical={extendEdgeIds.has(nextCellAssociatedEdge.id)}
-                  extendNegative={extendNegativeEdgeIds.has(nextCellAssociatedEdge.id)}
+                  edge={nextCellAssociated.edge}
+                  isValueConnector={nextCellAssociated.isValue}
+                  extendVertical={extendEdgeIds.has(nextCellNode.id)}
+                  extendNegative={extendNegativeEdgeIds.has(nextCellNode.id)}
+                  // a value connector carries its edge's id, so an invalid edge colours it too
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === nextCellAssociatedEdge.id,
+                    (problem) => problem.source === nextCellAssociated.edge.id,
                   )}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}
-            </div>
+            </StyledGridCell>
           );
         });
       })}

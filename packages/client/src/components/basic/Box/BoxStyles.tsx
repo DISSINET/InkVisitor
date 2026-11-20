@@ -1,7 +1,7 @@
 import { animated } from "@react-spring/web";
 import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { boxHeightVar } from "utils/layoutUtils";
 
 interface StyledBox {
@@ -27,6 +27,8 @@ interface StyledHead {
   $noFrame: boolean;
   $isExpanded: boolean;
   $hasHeaderClick: boolean;
+  $floating: boolean;
+  $floatingInsetRight: number;
 }
 export const StyledHead = styled.div<StyledHead>`
   display: flex;
@@ -63,6 +65,38 @@ export const StyledHead = styled.div<StyledHead>`
   border-width: ${({ theme, $noFrame, $isExpanded }) =>
     $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
+  ${({ $floating, $floatingInsetRight, theme }) =>
+    $floating &&
+    css`
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: ${$floatingInsetRight}px;
+      z-index: 3;
+      background-color: transparent;
+      padding: 0;
+      /* the content behind takes the pointer between the label and the controls */
+      pointer-events: none;
+      /* each backing runs the full header height and fills its corner of the box,
+         rounded only on the side that faces the content */
+      & > * {
+        pointer-events: auto;
+        align-self: stretch;
+        padding: 0 ${theme.space[2]};
+        border-radius: 0 0 ${theme.borderRadius["default"]} ${theme.borderRadius["default"]};
+        /* the page's own colour, so with nothing behind it the header reads as any other */
+        background-color: color-mix(in srgb, ${theme.color.pageBg} 75%, transparent);
+        backdrop-filter: blur(4px);
+      }
+      /* the label, which keeps its block box for the ellipsis */
+      & > :first-child {
+        border-bottom-left-radius: 0;
+        line-height: ${BOX_HEADER_HEIGHT / 10}rem;
+      }
+      & > :last-child {
+        border-bottom-right-radius: 0;
+      }
+    `}
 `;
 interface StyledLabel {
   $shrinkLabel: boolean;

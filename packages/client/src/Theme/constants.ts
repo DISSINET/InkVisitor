@@ -82,7 +82,13 @@ export const COLLAPSED_TABLE_WIDTH = 130;
 export const maxTabCount = 100;
 export const maxTooltipTreeForks = 2;
 export const maxTooltipMultiRelations = 5;
-export const maxTooltipAnchors = 8;
+export const maxTooltipAnchors = 5;
+// up to this many distinct anchor texts each one shows tooltipAnchorLines,
+// above it tooltipAnchorLinesCompact
+export const maxLongTooltipAnchors = 3;
+export const tooltipAnchorLines = 5;
+export const tooltipAnchorLinesCompact = 3;
+export const statementAnchorsPerPage = 5;
 
 export const tooltipLabelSeparator = " • ";
 

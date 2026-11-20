@@ -96,6 +96,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 <StyledTagWrap key={conceptId}>
                   <EntityTag
                     entity={entities[conceptId]}
+                    fullWidth
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
@@ -149,6 +150,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 <StyledTagWrap key={guidelineR}>
                   <EntityTag
                     entity={entities[guidelineR]}
+                    fullWidth
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
@@ -188,6 +190,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 <StyledTagWrap key={resourceId}>
                   <EntityTag
                     entity={entities[resourceId]}
+                    fullWidth
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
@@ -224,6 +227,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           <StyledTagWrap>
             <EntityTag
               entity={entities[startDate]}
+              fullWidth
               unlinkButton={
                 userCanEdit && {
                   onClick: () => updateProtocol({ startDate: "" }),
@@ -252,6 +256,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           <StyledTagWrap>
             <EntityTag
               entity={entities[endDate]}
+              fullWidth
               unlinkButton={
                 userCanEdit && {
                   onClick: () => updateProtocol({ endDate: "" }),
@@ -283,6 +288,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
                 <StyledTagWrap key={resourceId}>
                   <EntityTag
                     entity={entities[resourceId]}
+                    fullWidth
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>

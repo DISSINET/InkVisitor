@@ -47,6 +47,8 @@ const theme = {
     white: "#fff",
     grey: "#C4C4C4",
     greyer: "#4a5568",
+    // a panel separator while hovered or dragged: a grey apart from the blue of the query lines
+    separatorActive: "#4a5568", // gray 700
     // notes and field labels that must sit below body text in both themes;
     // greyer lands one step from the dark page's text color and stops reading
     // as secondary there
@@ -78,10 +80,18 @@ const theme = {
 
     /* query explorer colors */
     query1: "#E6F0FF",
-    query2: "#6174C2",
+    query2: "#4C5DAE",
+    // text on a query2 fill, the same in both themes as white reads on either blue
+    query2Text: "#fff",
+    // a control in use on a query2 fill: darker than the fill, with query2Text on it, the
+    // same in both themes
+    queryActive: "#324185",
     query3: "#324185",
     query4: "#1A2332",
     queryInvalid: "#EF4444",
+    // a negated ("NOT") edge, its lines and its node border; the same in both themes so the
+    // query2Text labels on it stay readable
+    queryNegative: "#64748B",
 
     iconButtonGroupColor: "#C4C4C4",
 
@@ -96,7 +106,7 @@ const theme = {
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
-    explorerHeader: "#6174C2",
+    explorerHeader: "#4C5DAE",
     headerTextColor: " #fff",
     // chrome on the header (borders, dividers) — present without competing with the text
     headerChromeColor: "rgba(255,255,255,0.6)",

@@ -38,7 +38,12 @@ export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
   // usedIn?: IStatement[];
   usedInDocuments: IResponseUsedInDocument[];
-  anchorTexts?: string[]; // content of each document anchor whose anchor === statement.id (empty/undefined when the statement is not anchored)
+  anchorTexts?: string[]; // distinct contents of the document anchors whose anchor === statement.id (empty/undefined when the statement is not anchored)
+  // entities anchored around the statement's own anchors, closest context first:
+  // inside the statement's span, then inside each territory anchor around it.
+  // Never territories or the statement itself, at most NEARBY_SUGGESTIONS_LIMIT
+  // per entity class; undefined when there are none.
+  anchoredNearby?: IEntity[];
   warnings: IWarning[];
   right?: UserEnums.RoleMode;
 }

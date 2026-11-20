@@ -181,8 +181,69 @@
     "status": 200,
     "contentType": "application/json",
     "body": {
-      "entities": [],
-      "entityIds": [],
+      "entities": [
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Person",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "definite",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": [
+              {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 2,
+                    "territoryId": "T0"
+                  }
+                },
+                "detail": "",
+                "id": "t1",
+                "labels": [
+                  "priest Minda and their stories"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ]
+          },
+          "entity": {
+            "class": "P",
+            "createdAt": "<datetime>",
+            "data": {
+              "logicalType": "1"
+            },
+            "detail": "",
+            "id": "p1",
+            "labels": [
+              "Minda, the priest"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        }
+      ],
+      "entityIds": [
+        "p1"
+      ],
       "expansion": {
         "equivalents": 0,
         "subordinates": 0
@@ -358,7 +419,7 @@
         },
         "type": "Entity"
       },
-      "total": 0
+      "total": 1
     }
   }
 }

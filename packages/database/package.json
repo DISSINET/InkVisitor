@@ -1,9 +1,9 @@
 {
   "name": "database",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "Package with gui-like app for manipulating rethinkdb",
   "engines": {
-    "node": "^22.13.1",
+    "node": "^22.23.4",
     "pnpm": "^11.1.2"
   },
   "scripts": {

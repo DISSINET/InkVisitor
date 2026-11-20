@@ -113,4 +113,17 @@ describe("getAnnotations ordering (issue #2051)", () => {
 
     expect(names(a, start, end)).toEqual(["L", "S", "T"]);
   });
+
+  test("an orphaned closing tag stands for the closest opening tag of its name before it", () => {
+    // segment 0: "<e1>a</e1>"
+    // segment 1: "<e1>b</e1> <e2>x</e2>"
+    // segment 2: "c</e1> d"   (</e1> has nothing open to close)
+    const a = mk("<e1>a</e1>\n<e1>b</e1> <e2>x</e2>\nc</e1> d");
+
+    const anchors = a.getAnnotations(posSeg(2, 0), posSeg(2, "c</e1> d".length));
+
+    expect(anchors.map((t) => [t.getTagName(), t.segmentIndex, t.position])).toEqual([
+      ["e1", 1, 0],
+    ]);
+  });
 });

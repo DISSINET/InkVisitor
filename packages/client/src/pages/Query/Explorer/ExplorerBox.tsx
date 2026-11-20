@@ -94,6 +94,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                     hasPartialSelection: controls.hasPartialSelection,
                     rowsTotal: controls.total,
                     onAllRowsSelect: controls.handleAllRowsSelect,
+                    onInvertSelection: controls.handleInvertSelection,
                     setRowLastClicked: controls.setRowLastClicked,
                     batchActionSelected: controls.batchActionSelected,
                     setBatchActionSelected: controls.setBatchActionSelected,

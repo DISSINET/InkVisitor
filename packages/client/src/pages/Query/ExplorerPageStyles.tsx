@@ -1,3 +1,4 @@
+import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import styled from "styled-components";
 import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
 
@@ -78,22 +79,77 @@ export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
   transform: rotate(270deg);
 `;
 
-// The query tree scrolls on its own above the search rows, which stay in place
+// the query tree and the search rows floating over its bottom
+export const StyledQueryBuilderArea = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+`;
+
+// The query tree scrolls on its own behind the search rows, which stay in place
 // at the bottom of the Query Builder box.
-export const StyledQueryScroller = styled.div`
+export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: auto;
+  /* the Query Builder header floats over the top of the tree */
+  padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
+  /* the resize handle straddles the box edge and covers this gap, so the horizontal
+     scrollbar sits clear of it */
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  /* room below the last node for its EQ / SUB badges, which hang over its bottom border,
+     and for the search rows, so the last node scrolls clear of them */
+  padding-bottom: calc(
+    ${({ theme }) => theme.space[3]} + ${({ $searchRowsHeight }) => $searchRowsHeight}px +
+      ${({ theme }) => theme.space[4]}
+  );
+  /* a node scrolled into view stops below the header and above the search rows, not
+     behind them */
+  scroll-padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
+  scroll-padding-bottom: calc(
+    ${({ $searchRowsHeight }) => $searchRowsHeight}px + ${({ theme }) => theme.space[2]}
+  );
 `;
 
-export const StyledSearchRows = styled.div`
-  flex-shrink: 0;
+// a card floating over the bottom of the Query Builder box, the query tree visible around
+// it, so the result rows read as part of the builder, not the top of the Explorer.
+// It is as wide as its rows and centred, so on a wide screen the search button stays next
+// to the filters
+export const StyledSearchRows = styled.div<{ $scrollbarWidth: number; $scrollbarHeight: number }>`
+  position: absolute;
+  left: 0;
+  /* centred on the query tree, beside its vertical scrollbar */
+  right: ${({ $scrollbarWidth }) => $scrollbarWidth}px;
+  /* on the query tree's horizontal scrollbar, or in its place, above the resize handle's gap */
+  bottom: calc(
+    ${({ theme }) => theme.space[2]} + ${({ $scrollbarHeight }) => $scrollbarHeight}px
+  );
+  /* above the grid cells of the query tree */
+  z-index: 2;
   display: flex;
-  flex-direction: column;
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
-  background-color: ${({ theme }) => theme.color["gray"][100]};
+  width: fit-content;
+  /* 100% is the whole box, the vertical scrollbar included */
+  max-width: calc(
+    100% - ${({ $scrollbarWidth }) => $scrollbarWidth}px - 2 * ${({ theme }) => theme.space[3]}
+  );
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  margin: 0 auto;
+  /* the query tree shows faintly through the card, blurred so its labels do not read
+     behind the card's own */
+  background-color: color-mix(in srgb, ${({ theme }) => theme.color["gray"][100]} 75%, transparent);
+  backdrop-filter: blur(4px);
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  transition: background-color 0.2s ease;
+  /* solid while the card is in use */
+  &:hover,
+  &:focus-within {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 
 export const StyledSearchRow = styled.div`
@@ -101,7 +157,15 @@ export const StyledSearchRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
-  & + & {
+  /* the divider starts at the row content, clear of the card's rounded border, and
+     ends as far from the search button: it reaches into the button cell's padding */
+  position: relative;
+  & + &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: ${({ theme }) => theme.space[3]};
+    right: calc(${({ theme }) => theme.space[3]} - ${({ theme }) => theme.space[4]});
     border-top: 1px dashed ${({ theme }) => theme.color["gray"][300]};
   }
 `;
@@ -116,6 +180,28 @@ export const StyledSearchRowCaption = styled.span`
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
 
-export const StyledSearchRowSpacer = styled.div`
+// the bottom padding sits on the rows only, so the search button centres on the whole card
+export const StyledSearchRowStack = styled.div`
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  min-width: 0;
+  padding-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+// the run button stacks its icon over its label, as the annotator warning actions do
+// the button fills the card's height with the same gap to every card edge
+export const StyledSearchRunCell = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  padding: ${({ theme }) => theme.space[4]};
+  && button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    min-width: 6.4rem;
+  }
+  && button span {
+    margin-left: 0;
+  }
 `;

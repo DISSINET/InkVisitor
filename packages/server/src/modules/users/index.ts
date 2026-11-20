@@ -719,6 +719,17 @@ export default Router()
         ) {
           throw new PermissionDeniedError("user role cannot be changed");
         }
+        const changesRole =
+          data.role !== undefined && data.role !== existingUser.role;
+
+        // territory rights decide what a user may edit, so only a manager sets
+        // them, also on their own account
+        if (
+          data.rights !== undefined &&
+          !editor.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])
+        ) {
+          throw new PermissionDeniedError("user rights cannot be changed");
+        }
 
         const changesAccess =
           !!data.password ||
@@ -735,7 +746,6 @@ export default Router()
 
         if (data.password) {
           data.password = hashPassword(data.password);
-          await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
         if (
@@ -772,10 +782,6 @@ export default Router()
           !(await User.hasOtherOwner(req.db.connection, existingUser.id))
         ) {
           throw new PermissionDeniedError("the last active owner cannot be deactivated");
-        }
-
-        if (data.active === false && existingUser.active) {
-          await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
         if (data.email) {
@@ -815,6 +821,18 @@ export default Router()
         });
 
         if (result.replaced || result.unchanged) {
+          // the client reads the role only at sign-in, so a role change ends
+          // every session of the user, the caller's own included
+          if (changesAccess || changesRole) {
+            const keepsOwnSession =
+              editor.id === existingUser.id && !changesRole && data.active !== false;
+            await invalidateUserSessions(
+              req.db.connection,
+              existingUser.id,
+              keepsOwnSession ? req.sessionID : undefined
+            );
+          }
+
           if (initialEmailChanged) {
             try {
               await mailer.sendTemplate(
@@ -1028,10 +1046,15 @@ export default Router()
           throw new InternalServerError(`cannot update user ${userId}`);
         }
 
-        // Password changed - drop all of this user's sessions so sessions tied
+        // Password changed - drop the user's other sessions so sessions tied
         // to the old password can't keep authenticating (matches PUT /:userId
-        // and PUT /password_reset).
-        await invalidateUserSessions(request.db.connection, user.id);
+        // and PUT /password_reset). A user resetting their own password stays
+        // signed in where they did it.
+        await invalidateUserSessions(
+          request.db.connection,
+          user.id,
+          user.id === requester.id ? request.sessionID : undefined
+        );
 
         console.log(`Password reset for ${user.email}`);
 

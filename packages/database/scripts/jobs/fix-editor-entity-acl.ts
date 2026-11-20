@@ -1,5 +1,7 @@
 import { Connection, r } from "rethinkdb-ts";
-import { IJob } from ".";
+import { Client } from "pg";
+import { v4 as uuid } from "uuid";
+import type { IJob, IPgJob } from ".";
 
 // Owner and Admin bypass the ACL table entirely (see middlewares/acl.ts), so
 // naming the editor alone still leaves them able to call these.
@@ -72,29 +74,29 @@ const REMOVED_ROUTES: Array<{
   },
 ];
 
-const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
+type Route = { controller: string; method: string; route: string };
+
+/** the row operations of the job, one implementation per database */
+export interface AclTable {
+  /** the rows of one route */
+  find(route: Route): Promise<{ id: string; roles?: string[] }[]>;
+  insert(row: Route & { roles: string[]; public: boolean }): Promise<void>;
+  setRoles(ids: string[], roles: string[]): Promise<void>;
+  /** @returns the number of rows deleted */
+  remove(route: Route): Promise<number>;
+}
+
+export async function fixEditorEntityAcl(acl: AclTable): Promise<void> {
   const targets = [
     ...ROUTES.map((r) => ({ ...r, roles: ROLES })),
     ...READ_ROUTES.map((r) => ({ ...r, roles: ["*"] })),
   ];
 
   for (const { controller, method, route, roles } of targets) {
-    const rows: any[] = await r
-      .table("acl_permissions")
-      .filter({ controller, method, route })
-      .run(db);
+    const rows = await acl.find({ controller, method, route });
 
     if (!rows.length) {
-      await r
-        .table("acl_permissions")
-        .insert({
-          controller,
-          method,
-          route,
-          roles,
-          public: false,
-        })
-        .run(db);
+      await acl.insert({ controller, method, route, roles, public: false });
       console.log(`Inserted acl_permissions row for ${controller} ${method} "${route}"`);
       continue;
     }
@@ -107,28 +109,70 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
       continue;
     }
 
-    await r
-      .table("acl_permissions")
-      .getAll(...stale.map((row) => row.id))
-      .update({ roles })
-      .run(db);
+    await acl.setRoles(
+      stale.map((row) => row.id),
+      roles
+    );
     console.log(
       `Updated ${stale.length} acl_permissions row(s) for ${controller} ${method} "${route}"`
     );
   }
 
   for (const { controller, method, route } of REMOVED_ROUTES) {
-    const result = await r
-      .table("acl_permissions")
-      .filter({ controller, method, route })
-      .delete()
-      .run(db);
-    if (result.deleted) {
+    const deleted = await acl.remove({ controller, method, route });
+    if (deleted) {
       console.log(
-        `Deleted ${result.deleted} acl_permissions row(s) for removed route ${controller} ${method} "${route}"`
+        `Deleted ${deleted} acl_permissions row(s) for removed route ${controller} ${method} "${route}"`
       );
     }
   }
+}
+
+const rethinkTable = (db: Connection): AclTable => ({
+  find: (route) => r.table("acl_permissions").filter(route).run(db),
+  insert: async (row) => {
+    await r.table("acl_permissions").insert(row).run(db);
+  },
+  setRoles: async (ids, roles) => {
+    await r
+      .table("acl_permissions")
+      .getAll(...ids)
+      .update({ roles })
+      .run(db);
+  },
+  remove: async (route) =>
+    (await r.table("acl_permissions").filter(route).delete().run(db)).deleted,
+});
+
+// the row is the jsonb `doc`; controller, method and route are generated
+// columns over it, and the `id` primary key is generated from doc.id, so a new
+// row brings its own id where RethinkDB generates one
+const pgTable = (db: Client): AclTable => {
+  const where = "controller = $1 AND method = $2 AND route = $3";
+  const key = ({ controller, method, route }: Route) => [controller, method, route];
+  return {
+    find: async (route) =>
+      (await db.query(`SELECT doc FROM acl_permissions WHERE ${where} ORDER BY id`, key(route))).rows.map(
+        (row) => row.doc
+      ),
+    insert: async (row) => {
+      await db.query("INSERT INTO acl_permissions (doc) VALUES ($1::jsonb)", [
+        JSON.stringify({ id: uuid(), ...row }),
+      ]);
+    },
+    setRoles: async (ids, roles) => {
+      await db.query(
+        "UPDATE acl_permissions SET doc = jsonb_set(doc, '{roles}', $2::jsonb) WHERE id = ANY($1::text[])",
+        [ids, JSON.stringify(roles)]
+      );
+    },
+    remove: async (route) =>
+      (await db.query(`DELETE FROM acl_permissions WHERE ${where}`, key(route))).rowCount ?? 0,
+  };
 };
+
+const fixEditorEntityAclJob: IJob = (db) => fixEditorEntityAcl(rethinkTable(db));
+
+export const fixEditorEntityAclPgJob: IPgJob = (db) => fixEditorEntityAcl(pgTable(db));
 
 export default fixEditorEntityAclJob;
