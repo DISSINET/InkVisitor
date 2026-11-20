@@ -229,7 +229,7 @@ The anchor of a territory around the text it covers. It declares that the docume
 **Span**:
 The stretch of text an anchor covers.
 
-**Broken anchor** (asymmetrical anchor):
+**Asymmetrical anchor** (broken anchor):
 An anchor tag missing its opening or its closing tag.
 _Avoid_: orphaned anchor ("orphaned" is kept for a child that lost its parent)
 
