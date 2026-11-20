@@ -229,6 +229,10 @@ The anchor of a territory around the text it covers. It declares that the docume
 **Span**:
 The stretch of text an anchor covers.
 
+**Broken anchor** (asymmetrical anchor):
+An anchor tag missing its opening or its closing tag.
+_Avoid_: orphaned anchor ("orphaned" is kept for a child that lost its parent)
+
 **Multianchor**:
 One entity anchored to several separate spans, displayed together.
 
@@ -262,6 +266,10 @@ The basic search for entities by label, UUID, entity type, and filters.
 
 **Explorer** (Query page):
 The query builder: a graph of nodes (entities or conditions) connected by edges (such as "used in statements under T" or "has relation"), with result columns and batch operations. Saved queries are private to their author unless an admin or owner shares them.
+
+**Selected entity**:
+The entity picked in an Explorer node's suggester.
+_Avoid_: pinned entity
 
 **Suggester**:
 The input that looks up entities by label or UUID and offers matches to pick or drop in.
