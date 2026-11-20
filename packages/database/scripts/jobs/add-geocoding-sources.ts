@@ -1,10 +1,9 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { rolesShareAConcept } from "@inkvisitor/shared/types/geocoding";
-import { Connection, r } from "rethinkdb-ts";
 import { v4 as uuidv4 } from "uuid";
-import { updatePropsIfUnchanged } from "./update-props-if-unchanged";
-
-const SETTINGS_KEY = "geocoding";
+import type { Client } from "pg";
+import type { Connection } from "rethinkdb-ts";
+import { GeocodingRows, pgGeocodingRows, rethinkGeocodingRows } from "./geocoding-rows";
 
 /**
  * How far apart the Value entity holding a gazetteer's record id and the Value
@@ -52,24 +51,19 @@ const sourceProp = (sourceType: string, resourceId: string) => ({
  * Value has no creation time, nothing is credited.
  */
 const gazetteersOfCurrentCoordinate = async (
-  db: Connection,
+  rows: GeocodingRows,
   location: any,
   geometryValueId: string | undefined,
-  gazetteers: Set<string>,
+  gazetteers: Set<string>
 ): Promise<string[]> => {
   const references: any[] = (location.references || []).filter(
-    (reference: any) => reference?.resource && gazetteers.has(reference.resource) && reference.value,
+    (reference: any) => reference?.resource && gazetteers.has(reference.resource) && reference.value
   );
   if (!geometryValueId || !references.length) {
     return [];
   }
   const ids = [...new Set<string>([geometryValueId, ...references.map((one) => one.value)])];
-  const found: any[] = await r.table("entities").getAll(...ids).pluck("id", "createdAt").run(db);
-  const createdAt = new Map<string, number>(
-    found
-      .filter((one) => one.createdAt)
-      .map((one): [string, number] => [one.id, new Date(one.createdAt).getTime()]),
-  );
+  const createdAt = await rows.createdAt(ids);
   const geometryAt = createdAt.get(geometryValueId);
   if (geometryAt === undefined) {
     return [];
@@ -95,11 +89,11 @@ const gazetteersOfCurrentCoordinate = async (
  * geometry prop or several, or its props changed since they were read.
  */
 export const nameSourcesOf = async (
-  db: Connection,
+  rows: GeocodingRows,
   location: any,
   geometryType: string,
   sourceType: string,
-  gazetteers: Set<string>,
+  gazetteers: Set<string>
 ): Promise<number | { left: string }> => {
   const props: any[] = location.props || [];
   const geometryProps = props.filter((prop) => prop.type?.entityId === geometryType);
@@ -111,23 +105,22 @@ export const nameSourcesOf = async (
   const named = new Set(
     children
       .filter((child) => child.type?.entityId === sourceType)
-      .map((child) => child.value?.entityId),
+      .map((child) => child.value?.entityId)
   );
   const missing = (
-    await gazetteersOfCurrentCoordinate(db, location, geometryProp.value?.entityId, gazetteers)
+    await gazetteersOfCurrentCoordinate(rows, location, geometryProp.value?.entityId, gazetteers)
   ).filter((resource) => !named.has(resource));
   if (!missing.length) {
     return 0;
   }
 
   const sources = missing.map((resource) => sourceProp(sourceType, resource));
-  const replaced = await updatePropsIfUnchanged(
-    db,
+  const replaced = await rows.replacePropsIfUnchanged(
     location.id,
     props,
     props.map((prop) =>
-      prop === geometryProp ? { ...geometryProp, children: [...children, ...sources] } : prop,
-    ),
+      prop === geometryProp ? { ...geometryProp, children: [...children, ...sources] } : prop
+    )
   );
   return replaced ? sources.length : { left: "its props changed while the job ran" };
 };
@@ -143,15 +136,14 @@ export const nameSourcesOf = async (
  * A Location that `nameSourcesOf` cannot update is left alone and listed. A
  * second run finds nothing to add.
  */
-const addGeocodingSourcesJob = async (db: Connection): Promise<void> => {
-  const settings: any = await r.table("settings").get(SETTINGS_KEY).run(db);
-  const roles = settings?.value?.roles;
+export const addGeocodingSources = async (rows: GeocodingRows): Promise<void> => {
+  const roles = await rows.roles();
   const geometryType: string | undefined = roles?.geometry || undefined;
   const sourceType: string | undefined = roles?.epistemicSource || undefined;
   const gazetteers = new Set<string>(Object.values(roles?.resources || {}));
   if (!geometryType || !sourceType || !gazetteers.size) {
     console.log(
-      "The geocoding settings do not name the geometry Concept, the epistemic source Concept and the gazetteer Resources — nothing to add.",
+      "The geocoding settings do not name the geometry Concept, the epistemic source Concept and the gazetteer Resources — nothing to add."
     );
     return;
   }
@@ -160,19 +152,9 @@ const addGeocodingSourcesJob = async (db: Connection): Promise<void> => {
     return;
   }
 
-  const locations: any[] = await r
-    .table("entities")
-    .filter((entity: any) =>
-      entity("class")
-        .eq("L")
-        .and(entity("references").default([]).count().gt(0))
-        .and(
-          entity("props")
-            .default([])
-            .contains((prop: any) => prop("type")("entityId").eq(geometryType)),
-        ),
-    )
-    .run(db);
+  const locations = (await rows.locationsWithProp(geometryType)).filter(
+    (location) => (location.references || []).length > 0
+  );
   console.log(`${locations.length} Location(s) have a geometry and references`);
 
   let updated = 0;
@@ -180,7 +162,7 @@ const addGeocodingSourcesJob = async (db: Connection): Promise<void> => {
   const left: string[] = [];
 
   for (const location of locations) {
-    const outcome = await nameSourcesOf(db, location, geometryType, sourceType, gazetteers);
+    const outcome = await nameSourcesOf(rows, location, geometryType, sourceType, gazetteers);
     if (typeof outcome === "number") {
       if (outcome) {
         updated++;
@@ -196,5 +178,11 @@ const addGeocodingSourcesJob = async (db: Connection): Promise<void> => {
     console.log(`${left.length} Location(s) were left untouched:\n  ${left.join("\n  ")}`);
   }
 };
+
+const addGeocodingSourcesJob = (db: Connection): Promise<void> =>
+  addGeocodingSources(rethinkGeocodingRows(db));
+
+export const addGeocodingSourcesPgJob = (db: Client): Promise<void> =>
+  addGeocodingSources(pgGeocodingRows(db));
 
 export default addGeocodingSourcesJob;

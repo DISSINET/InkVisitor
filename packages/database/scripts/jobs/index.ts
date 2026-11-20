@@ -17,8 +17,8 @@ import createSavedQueriesTableJob from "./create-saved-queries-table";
 import fixEditorEntityAclJob, { fixEditorEntityAclPgJob } from "./fix-editor-entity-acl";
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
-import nestGeocodingAccuracyJob from "./nest-geocoding-accuracy";
-import addGeocodingSourcesJob from "./add-geocoding-sources";
+import nestGeocodingAccuracyJob, { nestGeocodingAccuracyPgJob } from "./nest-geocoding-accuracy";
+import addGeocodingSourcesJob, { addGeocodingSourcesPgJob } from "./add-geocoding-sources";
 import fixDuplicateRowsJob from "./fix-duplicate-rows";
 
 export type IJob = (db: Connection) => Promise<void>;
@@ -32,6 +32,8 @@ export type IPgJob = (db: Client) => Promise<void>;
  */
 export const pgJobs: Record<string, IPgJob> = {
   fixEditorEntityAclJob: fixEditorEntityAclPgJob,
+  nestGeocodingAccuracyJob: nestGeocodingAccuracyPgJob,
+  addGeocodingSourcesJob: addGeocodingSourcesPgJob,
 };
 
 const alljobs: Record<string, IJob> = {

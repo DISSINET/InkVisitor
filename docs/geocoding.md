@@ -35,11 +35,13 @@ no geometry props yet, so `migrateGeocodingGeometryJob` runs first.
 What reads the accuracy as a first-level prop stops finding it once it is nested.
 The Explorer's "has prop" edges and the validation rules of the property kind look
 at first-level props only, so a saved query or a rule that expects the accuracy
-there no longer matches and has to be rewritten. The jobs are
-for RethinkDB; a PostgreSQL deployment is migrated after the job has run, or
-holds the earlier shape until each Location is saved by the page. The server keeps
-an entity for up to a minute, so a Location read straight after a job can still
-show the earlier shape.
+there no longer matches and has to be rewritten. Both jobs run on RethinkDB and on
+PostgreSQL, under the same name in the job menu of the interactive app: what they
+decide is written once, and each database has its own reads and the guarded write
+(`packages/database/scripts/jobs/geocoding-rows.ts`). `migrateGeocodingGeometryJob`
+is for RethinkDB only, so a database still on `geo:x` and `geo:y` runs it before
+`migrate`. The server keeps an entity for up to a minute, so a Location read
+straight after a job can still show the earlier shape.
 
 The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
