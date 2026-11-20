@@ -23,6 +23,7 @@ import { boxContentId, Button, Input, Message, MultiInput, Submit } from "compon
 import Dropdown, {
   AnchoredNearbyContext,
   ApplyTemplateModal,
+  AsymmetricalAnchorWarning,
   AuditTable,
   BreadcrumbItem,
   DocumentTitle,
@@ -766,7 +767,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <StyledEditorAnchorSectionAnchor
                     key={`${documentAnchor.document.id}-${documentAnchor.anchorIndex}`}
                   >
-                    <StyledAnchorText>{documentAnchor.anchorText}</StyledAnchorText>
+                    <StyledAnchorText>
+                      {documentAnchor.orphaned ? <AsymmetricalAnchorWarning /> : documentAnchor.anchorText}
+                    </StyledAnchorText>
                     <StyledAnchorMeta>
                       <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
                         {/* the explorer has no annotator to locate the anchor in */}

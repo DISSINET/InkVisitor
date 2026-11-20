@@ -7,6 +7,7 @@ import api from "api";
 import { Button, IconWithTooltip, Table } from "components";
 import {
   AbbreviatedTextWithTooltip,
+  AsymmetricalAnchorWarning,
   DocumentTitle,
   EntityTag,
 } from "components/advanced";
@@ -149,10 +150,14 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       {
         Header: "Anchor text",
         Cell: ({ row }: CellType) => {
-          const { anchorText, document } = row.original;
+          const { anchorText, document, orphaned } = row.original;
           return (
             <>
-              {anchorText ? (
+              {orphaned ? (
+                <StyledAnchorText>
+                  <AsymmetricalAnchorWarning />
+                </StyledAnchorText>
+              ) : anchorText ? (
                 <StyledAnchorText>
                   <Button
                     color="primary"
@@ -251,7 +256,12 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         id: "action btns",
         Header: "",
         Cell: ({ row }: CellType) => {
-          return (
+          // removing an anchor takes out its opening and its closing tag; an
+          // orphaned anchor has no closing tag, and its lone tag is unlinked
+          // in the Annotator's list of asymmetrical anchors
+          return row.original.orphaned ? (
+            <></>
+          ) : (
             <Button
               icon={<IcoTrash />}
               color="danger"
