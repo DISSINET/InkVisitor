@@ -20,6 +20,9 @@ export interface ImportIssue {
   message: string;
   // the draft the issue is about, once the drafts are open
   entityId?: string;
+  // the appended draft's stored entity or stored relations changed in the
+  // database since the drafts loaded them; see rebaseAppend
+  stale?: boolean;
 }
 
 /** A relation as written in the input, with where it was written. */

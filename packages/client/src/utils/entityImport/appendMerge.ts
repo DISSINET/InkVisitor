@@ -81,7 +81,7 @@ const SCALAR_FIELDS = ["detail", "language", "legacyId"] as const;
 export interface GivenFields {
   language?: boolean;
 }
-const SKIPPED_DATA_KEYS = ["parent", "validations", "documentId"];
+export const SKIPPED_DATA_KEYS = ["parent", "validations", "documentId"];
 
 const FIELD_LABELS: Record<string, string> = {
   "labels[0]": "main label",
@@ -265,7 +265,7 @@ const mergeReferences = (
 
 const display = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
 
-const conflictOf = (path: string, stored: unknown, imported: unknown): AppendConflict => ({
+export const conflictOf = (path: string, stored: unknown, imported: unknown): AppendConflict => ({
   path,
   label: FIELD_LABELS[path] ?? path,
   stored: display(stored),

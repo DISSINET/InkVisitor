@@ -32,6 +32,8 @@ const fakeServer = (options: {
       [...relations.values()].filter(
         (item) => item.type === type && item.entityIds.includes(entityId)
       ),
+    getRelations: async (entityId) =>
+      [...relations.values()].filter((item) => item.entityIds.includes(entityId)),
     createEntity: async (item) => {
       calls.push(`create entity ${item.id}`);
       if (item.id === options.failEntity) {
@@ -250,7 +252,43 @@ describe("writeImport", () => {
     );
 
     expect(outcome.status).toBe("conflict");
+    expect(outcome.status === "conflict" && outcome.errors).toMatchObject([
+      { entityId: "wolf", stale: true },
+    ]);
     expect(server.calls).toEqual([]);
+  });
+
+  it("stops before writing when a stored relation the drafts change was changed or removed meanwhile", async () => {
+    const stored = { ...entity("wolf"), updatedAt: "t1" } as unknown as IEntity;
+    const scl = relation("s1", RelationEnums.Type.Superclass, "wolf", "animal");
+    const ant = relation("s2", RelationEnums.Type.Antonym, "wolf", "hound");
+    const write = (relations: Relation.IRelation[]) => {
+      const server = fakeServer({ existing: [stored], relations });
+      const outcome = writeImport(
+        {
+          ...plan([stored], [], { wolf: { stored, conflicts: [], skipped: emptySkips() } }),
+          storedRelationChanges: {
+            updated: [{ before: scl, changes: { entityIds: ["wolf", "hound"] } }],
+            deleted: [ant],
+          },
+        },
+        server.api
+      );
+      return { server, outcome };
+    };
+
+    const changed = write([{ ...scl, entityIds: ["wolf", "hound"] }, ant]);
+    expect(await changed.outcome).toMatchObject({
+      status: "conflict",
+      errors: [{ entityId: "wolf", stale: true }],
+    });
+    expect(changed.server.calls).toEqual([]);
+
+    const removed = write([scl]);
+    expect(await removed.outcome).toMatchObject({ status: "conflict" });
+
+    const unchanged = write([scl, ant]);
+    expect(await unchanged.outcome).toMatchObject({ status: "created" });
   });
 
   it("undoes an append when a later write fails", async () => {

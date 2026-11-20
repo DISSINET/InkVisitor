@@ -412,6 +412,19 @@ export const StyledAppendWarning = styled.p`
   overflow-wrap: anywhere;
 `;
 
+// an appended draft whose stored entity changed, with the button to take it
+export const StyledAppendStale = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["danger"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+`;
+
 export const StyledAppendSoftWarning = styled.div`
   display: flex;
   flex-direction: column;

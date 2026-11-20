@@ -110,6 +110,7 @@ const Harness = () => {
       onAppendTo={async () => false}
       undoableAppendIds={[]}
       onUndoAppend={() => {}}
+      onRebase={() => {}}
       errors={[]}
       notes={[{ message: "a note" }]}
     />

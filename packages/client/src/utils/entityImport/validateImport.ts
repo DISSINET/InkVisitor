@@ -11,7 +11,7 @@ import {
   sameEntityBy,
 } from "./appendMerge";
 import { unlinkEntity } from "./draft";
-import { className, quote, setAtPath, unique } from "./helpers";
+import { className, quote, setAtPath, staleMessage, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { parseImportInput } from "./parse";
 import {
@@ -254,10 +254,13 @@ export const validateImport = async (
         );
       }
       if (isStale(known, stored)) {
-        report(
-          "id",
-          `${quote(stored.labels[0])} was changed in the database after the import was validated; go back to JSON and validate again`
-        );
+        errors.push({
+          entityIndex: item.index,
+          label: item.entity.labels[0],
+          path: "id",
+          message: staleMessage(quote(stored.labels[0])),
+          stale: true,
+        });
       }
       appends[stored.id] = { stored: known, conflicts: [], skipped: emptySkips() };
     } else if (context.allowAppend === false) {

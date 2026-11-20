@@ -10,6 +10,7 @@ import {
   ImportDraft,
   pairWarnings,
   sameEntityBy,
+  STALE_ACTION,
 } from "utils/entityImport";
 import {
   StyledAppendHeading,
@@ -18,6 +19,7 @@ import {
   StyledAppendRowLabel,
   StyledAppendSection,
   StyledAppendSoftWarning,
+  StyledAppendStale,
   StyledAppendTag,
   StyledAppendText,
   StyledAppendWarning,
@@ -30,6 +32,9 @@ import {
 
 const IMPORT_MARKS_HINT =
   "In Detail, a stripe on the left marks what the import adds; a dashed one, a stored relation changed here.";
+
+const STALE_HINT =
+  "Changed in the database since the drafts loaded it. The current version keeps what the import adds and the edits made here; a value changed on both sides becomes a conflict.";
 
 const STORED_RELATIONS_HINT =
   "Detail shows its stored relations too; unlinking or changing one is written on Import.";
@@ -49,6 +54,9 @@ interface EntityImportAppendPanel {
   onAppendTo: (storedId: string) => void;
   // given for a draft appended in the tabs
   onUndoAppend?: () => void;
+  // given while the stored entity or its stored relations changed in the
+  // database since the drafts loaded them
+  onRebase?: () => void;
 }
 
 /**
@@ -65,6 +73,7 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
   onConflictChoice,
   onAppendTo,
   onUndoAppend,
+  onRebase,
 }) => {
   const append = draft.appends?.[entity.id];
 
@@ -99,6 +108,12 @@ export const EntityImportAppendPanel: React.FC<EntityImportAppendPanel> = ({
           : undefined) ?? value;
     return (
       <StyledAppendPanel>
+        {onRebase && (
+          <StyledAppendStale>
+            {STALE_HINT}
+            <Button label={STALE_ACTION} inverted color="primary" onClick={onRebase} />
+          </StyledAppendStale>
+        )}
         {append.labelMismatch && (
           <StyledAppendWarning>
             {`The id belongs to "${append.stored.labels[0]}" in the database, and none of the imported labels matches it. Check that the id points at the entity you mean.`}

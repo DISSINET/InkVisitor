@@ -5,13 +5,14 @@ export {
   storedRelationsOf,
 } from "./apiAdapters";
 export { buildEntityJson } from "./entityJson";
-export { count, errorMessage, formatIssue } from "./helpers";
+export { count, errorMessage, formatIssue, STALE_ACTION } from "./helpers";
 export { maxImportEntities } from "./types";
 export type { ImportIssue, ImportPlan, ImportValidation, StoredRelationChanges } from "./types";
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
 export { describeSkips, pairWarnings, sameEntityBy } from "./appendMerge";
+export { rebaseAppend } from "./rebase";
 export type { AppendConflict, AppendInfo, AppendPairWarning } from "./appendMerge";
 export {
   addDraftEntity,

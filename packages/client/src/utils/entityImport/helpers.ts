@@ -5,6 +5,15 @@ import { ImportIssue } from "./types";
 export const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+/** Whether two values hold the same JSON, whatever the order of their keys. */
+export const sameJson = (a: unknown, b: unknown): boolean => {
+  const sorted = (_key: string, value: unknown) =>
+    isPlainObject(value)
+      ? Object.fromEntries(Object.entries(value).sort(([x], [y]) => x.localeCompare(y)))
+      : value;
+  return JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
+};
+
 export const isEnumValue = <T extends Record<string, string | number>>(
   enumObject: T,
   value: unknown
@@ -28,6 +37,13 @@ export const quote = (value: unknown): string => {
     ? `"${text.slice(0, MAX_QUOTED_LENGTH)}…"`
     : `"${text}"`;
 };
+
+// the panel beside an appended draft's Detail offers the button it names
+export const STALE_ACTION = "use the current database version";
+
+/** The error on an appended draft whose stored entity or relations changed. */
+export const staleMessage = (subject: string): string =>
+  `${subject} was changed in the database since the drafts loaded it; open the draft and ${STALE_ACTION}`;
 
 export const className = (entityClass: EntityEnums.Class): string =>
   entitiesDictKeys[entityClass]?.label ?? entityClass;

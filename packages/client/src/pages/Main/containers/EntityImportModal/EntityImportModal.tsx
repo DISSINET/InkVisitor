@@ -36,6 +36,7 @@ import {
   maxImportEntities,
   missingEntityIds,
   missingSynonymGroupIds,
+  rebaseAppend,
   replaceEntityId,
   replaceUndoEntityId,
   setAllConflictChoices,
@@ -388,6 +389,53 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     ]);
   };
 
+  // The appended draft moves onto its stored entity and stored relations as
+  // the database holds them now; what it can't keep is listed in the notes.
+  const handleRebase = async (entityId: string) => {
+    if (!draft) {
+      return;
+    }
+    const entityOf = (id: string) =>
+      draft.entities.find((entity) => entity.id === id) ?? draft.existing[id];
+    const labelOf = (id: string) => entityOf(id)?.labels[0] ?? id;
+    const label = labelOf(entityId);
+    const withoutStale = (issues: ImportIssue[]) =>
+      issues.filter((issue) => !(issue.stale && issue.entityId === entityId));
+    setIsValidating(true);
+    try {
+      const [[current], relations] = await Promise.all([
+        importDataSource.getEntities([entityId]),
+        storedRelationsOf(entityId),
+      ]);
+      if (!current) {
+        setDraftErrors((errors) => [
+          ...withoutStale(errors),
+          {
+            entityId,
+            label,
+            message: `"${label}" is no longer in the database; leave it out, or go back to JSON`,
+          },
+        ]);
+        return;
+      }
+      const rebased = rebaseAppend(draft, entityId, current, relations, labelOf);
+      setDraft(rebased.draft);
+      setDraftErrors(withoutStale);
+      setDraftNotes((notes) => [
+        ...notes,
+        { label, entityId, message: "moved onto its current database version" },
+        ...rebased.notes.map((message) => ({ label, entityId, message })),
+      ]);
+    } catch (error) {
+      setDraftErrors((errors) => [
+        ...errors,
+        { message: `The database version could not load: ${errorMessage(error)}` },
+      ]);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   // Import removes the stored relations the drafts unlinked, so it asks first
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const relationChanges = draft ? storedRelationChanges(draft) : { updated: [], deleted: [] };
@@ -555,6 +603,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onAppendTo={handleAppendTo}
               undoableAppendIds={Object.keys(appendRecords)}
               onUndoAppend={handleUndoAppend}
+              onRebase={handleRebase}
               errors={draftErrors}
               notes={draftNotes}
             />

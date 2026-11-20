@@ -48,6 +48,7 @@ export const searchCandidates = async (entity: IEntity): Promise<IEntity[]> => {
 
 export const importWriteApi: ImportWriteApi = {
   ...importDataSource,
+  getRelations: storedRelationsOf,
   createEntity: async (entity) => {
     await api.entityCreate(entity, quiet);
   },

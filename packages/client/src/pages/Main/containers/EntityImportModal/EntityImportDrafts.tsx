@@ -44,6 +44,8 @@ interface EntityImportDrafts {
   // the stored ids of the appends made in the tabs, which can be undone
   undoableAppendIds: string[];
   onUndoAppend: (storedId: string) => void;
+  // moves an appended draft onto its stored entity as the database holds it now
+  onRebase: (entityId: string) => void;
   errors: ImportIssue[];
   notes: ImportIssue[];
 }
@@ -61,6 +63,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   onAppendTo,
   undoableAppendIds,
   onUndoAppend,
+  onRebase,
   errors,
   notes,
 }) => {
@@ -276,6 +279,11 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               onUndoAppend={
                 undoableAppendIds.includes(selected.id)
                   ? () => onUndoAppend(selected.id)
+                  : undefined
+              }
+              onRebase={
+                errors.some((issue) => issue.stale && issue.entityId === selected.id)
+                  ? () => onRebase(selected.id)
                   : undefined
               }
             />

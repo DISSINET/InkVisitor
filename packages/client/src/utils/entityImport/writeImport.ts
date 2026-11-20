@@ -1,10 +1,12 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { appendChanges, isStale, storedFields } from "./appendMerge";
-import { errorMessage, quote, unique } from "./helpers";
+import { errorMessage, quote, sameJson, staleMessage, unique } from "./helpers";
 import { ImportDataSource, ImportIssue, ImportPlan } from "./types";
 
 export interface ImportWriteApi extends ImportDataSource {
+  // every stored relation of the entity, the ones pointing at it included
+  getRelations: (entityId: string) => Promise<Relation.IRelation[]>;
   createEntity: (entity: IEntity) => Promise<void>;
   updateEntity: (entityId: string, changes: Partial<IEntity>) => Promise<void>;
   createRelation: (relation: Relation.IRelation) => Promise<void>;
@@ -24,8 +26,8 @@ export type ImportWriteOutcome =
       updatedRelationCount: number;
       deletedRelationCount: number;
     }
-  // an input id was taken, or an appended entity changed, while the preview
-  // was open; nothing was written
+  // an input id was taken, or an appended entity or a stored relation the
+  // drafts change was saved, while the drafts were open; nothing was written
   | { status: "conflict"; errors: ImportIssue[] }
   | {
       status: "rolledBack";
@@ -60,26 +62,67 @@ export const writeImport = async (
   ]);
   const labelOf = (entityId: string) => quote(entityById.get(entityId)?.labels[0] ?? entityId);
 
+  const describeStored = (relation: Relation.IRelation) =>
+    `stored relation ${Relation.RelationRules[relation.type]!.label} ${relation.entityIds
+      .map(labelOf)
+      .join(", ")}`;
+  const plannedIssue = (entityId: string) => {
+    const planned = plan.entities.findIndex((candidate) => candidate.id === entityId);
+    return { entityIndex: planned + 1, label: plan.entities[planned]?.labels[0], entityId };
+  };
+
+  const { updated: toUpdate, deleted: toDelete } = plan.storedRelationChanges ?? {
+    updated: [],
+    deleted: [],
+  };
+
+  // Nothing is written when an id was taken, or an appended entity or a
+  // stored relation the drafts change was saved, since the drafts loaded it.
   const found = await api.getEntities(plan.entities.map((entity) => entity.id));
-  const conflicts = found.filter((entity) => {
-    const append = plan.appends[entity.id];
-    return !append || isStale(append.stored, entity);
+  const errors: ImportIssue[] = found
+    .filter((entity) => {
+      const append = plan.appends[entity.id];
+      return !append || isStale(append.stored, entity);
+    })
+    .map((entity) =>
+      plan.appends[entity.id]
+        ? {
+            ...plannedIssue(entity.id),
+            path: "id",
+            message: staleMessage(quote(entity.labels[0])),
+            stale: true,
+          }
+        : {
+            ...plannedIssue(entity.id),
+            path: "id",
+            message: `id ${quote(entity.id)} was created in the database while the drafts were open`,
+          }
+    );
+  // each stored relation is checked through the appended draft it belongs to
+  const touched = [...toUpdate.map(({ before }) => before), ...toDelete].flatMap((relation) => {
+    const ownerId = relation.entityIds.find((entityId) => entityId in plan.appends);
+    return ownerId ? [{ relation, ownerId }] : [];
   });
-  if (conflicts.length) {
-    return {
-      status: "conflict",
-      errors: conflicts.map((entity) => {
-        const planned = plan.entities.findIndex((candidate) => candidate.id === entity.id);
-        return {
-          entityIndex: planned + 1,
-          label: plan.entities[planned]?.labels[0],
-          path: "id",
-          message: plan.appends[entity.id]
-            ? `${quote(entity.labels[0])} was changed in the database while the preview was open; go back to JSON and validate again`
-            : `id ${quote(entity.id)} was created in the database while the preview was open`,
-        };
-      }),
-    };
+  const ownerIds = unique(touched.map(({ ownerId }) => ownerId));
+  const current = new Map(
+    (await Promise.all(ownerIds.map((entityId) => api.getRelations(entityId))))
+      .flat()
+      .map((relation) => [relation.id, relation])
+  );
+  const staleOwners = new Set(errors.map((issue) => issue.entityId));
+  for (const { relation, ownerId } of touched) {
+    const now = current.get(relation.id);
+    if ((!now || !sameJson(now, relation)) && !staleOwners.has(ownerId)) {
+      staleOwners.add(ownerId);
+      errors.push({
+        ...plannedIssue(ownerId),
+        message: staleMessage(describeStored(relation)),
+        stale: true,
+      });
+    }
+  }
+  if (errors.length) {
+    return { status: "conflict", errors };
   }
 
   const toCreate = plan.entities.filter((entity) => !plan.appends[entity.id]);
@@ -90,11 +133,6 @@ export const writeImport = async (
       changes: appendChanges(plan.appends[entity.id].stored, entity),
     }))
     .filter(({ changes }) => Object.keys(changes).length > 0);
-
-  const { updated: toUpdate, deleted: toDelete } = plan.storedRelationChanges ?? {
-    updated: [],
-    deleted: [],
-  };
   const total =
     toCreate.length + toAppend.length + toUpdate.length + toDelete.length + plan.relations.length;
   let done = 0;
@@ -135,10 +173,6 @@ export const writeImport = async (
 
   // a stored relation may be edited to point at an entity created above, and
   // an unlinked one makes room for a new relation of a type allowed only once
-  const describeStored = (relation: Relation.IRelation) =>
-    `stored relation ${Relation.RelationRules[relation.type]!.label} ${relation.entityIds
-      .map(labelOf)
-      .join(", ")}`;
   if (!failure) {
     for (const { before, changes } of toUpdate) {
       try {
