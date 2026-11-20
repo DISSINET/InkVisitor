@@ -490,8 +490,9 @@ itself nowhere. Each field carries its own label for the same reason.
 
 ## Making a Location from the page
 
-A `+` beside the Locations search opens the Explorer's own create dialog, limited
-to the Location class, with what is typed in the search as the label. It is absent
+A `+` beside the Locations search, and the same `+` in the map's column of
+buttons under the drawing tool, open the Explorer's own create dialog, limited to
+the Location class, with what is typed in the search as the label. Both are absent
 for a Viewer, who may not create entities.
 
 A new Location is used in no statement and starts Pending, so a territory filter
@@ -503,8 +504,49 @@ selected as. The page stops waiting when the reader selects another Location, an
 after twenty seconds, when it says the Location was created but the list has not
 shown it yet.
 
-Creating writes nothing of its own: no coordinate, no accuracy, no location type. A
-template chosen in the dialog may carry them, as in the Explorer.
+**From the map, with nothing selected.** A click on empty map, a shape drawn with
+the drawing tool and a coordinate typed under the map all start a Location when no
+Location is selected. They ask the same two questions as with a selection,
+accuracy and then location type, and both say where the coordinate is, under
+"new location". The answers are held, the dialog asks for the label, and the
+moment the Location exists the page writes the coordinate on it with its ordinary
+write, so the overwrite check, the roles check and the "recently geocoded" record
+all apply.
+
+- The draft is held in a ref and taken once, when the dialog reports the Location.
+  Dismissing the dialog withdraws it, even while the create request is still
+  running, and a Location made afterwards from the `+` never receives it.
+- The write is confirmed in advance, because the coordinate was placed on purpose
+  for this Location. A template chosen in the dialog may carry a coordinate of its
+  own; the one placed replaces it.
+- These entry points exist only where the project's coordinate roles are set, since
+  otherwise the write that follows the dialog would be refused after the Location
+  had been made. The plain `+` does not need them.
+- If the write fails after the Location was made, the failure is said once and the
+  Location stays, selected and without a coordinate. The shape tool closes with the
+  selection, so a drawn shape has to be drawn again.
+
+Creating from the list writes nothing of its own: no coordinate, no accuracy, no
+location type. A template chosen in the dialog may carry them, as in the Explorer.
+
+## Selecting nothing
+
+Nothing is a state the page can be in: it is where a new Location starts from, and
+it is where the page opens. A bar between the filters and the rows is always
+there and says which of the two it is. With a Location selected it is filled, has
+an accent edge, and names the Location with its tag and a clear button; with
+nothing selected it is a dashed outline that says "nothing selected" and what a
+click on the map would do (start a new Location where the page may make one, and
+otherwise to pick a row). The row's own highlight says which row, and the bar says
+it where the list has been scrolled away from the row. A selection the filters
+leave out of the list is still shown in the bar.
+
+The same choice is a "deselect" button in the strip under the map, for a reader who
+has folded the list away. Deselecting stops a search still running for the Location,
+which has nowhere to show its answer, and ends the wait for a Location just created.
+A click on a selected row does not deselect it, and neither does Escape: the arrow
+keys move the selection and Escape already closes the menus on the map, so either
+would take the selection away by accident.
 
 ## While a request runs
 

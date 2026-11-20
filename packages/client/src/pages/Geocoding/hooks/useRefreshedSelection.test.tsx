@@ -22,23 +22,42 @@ let selected: GeocodingLocation | undefined;
 let creating: CreatingLocation;
 let choose: (location: GeocodingLocation | undefined) => void;
 
-/** The two hooks in the order the page calls them. */
-const Probe = ({ all }: { all: GeocodingLocation[] }) => {
+/** The selection a page keeps, and the options it hands to `useCreateLocation`. */
+const useProbeSelection = (all: GeocodingLocation[]) => {
   const [current, setCurrent] = useState<GeocodingLocation | undefined>(undefined);
   selected = current;
   choose = setCurrent;
-  creating = useCreateLocation({
+  const createOptions = {
     all,
     selectedId: current?.entity.id,
     clearFilters: vi.fn(),
     refresh: vi.fn(),
     onSelect: setCurrent,
-  });
+  };
+  return { current, setCurrent, createOptions };
+};
+
+type Probe = React.FC<{ all: GeocodingLocation[] }>;
+
+const CreateFirst: Probe = ({ all }) => {
+  const { current, setCurrent, createOptions } = useProbeSelection(all);
+  creating = useCreateLocation(createOptions);
   useRefreshedSelection(all, current, setCurrent);
   return null;
 };
 
-describe("selection after the collection refetches", () => {
+const RefreshFirst: Probe = ({ all }) => {
+  const { current, setCurrent, createOptions } = useProbeSelection(all);
+  useRefreshedSelection(all, current, setCurrent);
+  creating = useCreateLocation(createOptions);
+  return null;
+};
+
+/** The two hooks, in either of the orders a page could call them in. */
+describe.each([
+  ["create hook first", CreateFirst],
+  ["refresh hook first", RefreshFirst],
+])("selection after the collection refetches, %s", (_order, Probe) => {
   it("takes the refreshed row of the Location that is selected", () => {
     const view = render(<Probe all={[row("a"), row("b")]} />);
     act(() => choose(row("a")));

@@ -11,11 +11,12 @@ import {
   serializeGeometry,
 } from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
+import { IconWithTooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppSelector } from "redux/hooks";
-import { IcoSelection } from "Theme/icons";
+import { IcoPlusBold, IcoSelection } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Position,
@@ -34,6 +35,7 @@ import {
   toMapZoom,
   pickerAnchorIn,
 } from "../../utils/map/mapView";
+import { StyledNewLocationToggle } from "../../components/map/MapControlsStyles";
 import { MapFooterControls } from "../../components/map/MapFooterControls";
 import { MapLayersPanel } from "../../components/map/MapLayersPanel";
 import { MapSearchBox } from "../../components/map/MapSearchBox";
@@ -64,7 +66,7 @@ import {
   StyledMarkCardAt,
   StyledMarkCardMeta,
 } from "./GeocodingMapStyles";
-import { MapPending, afterAccuracy, menuAnchorFor } from "../../utils/map/mapAssign";
+import { MapPending, afterAccuracy, menuAnchorFor, pendingNote } from "../../utils/map/mapAssign";
 import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
@@ -181,6 +183,17 @@ interface GeocodingMap {
    * two together are refused — belongs to whoever holds the context.
    */
   onRegionBox?: (box: GeocodingBbox | null) => void;
+  /**
+   * Whether, with nothing selected, a click, a drawn shape or a typed coordinate
+   * may start a new Location. The page decides: it needs the right to create one
+   * and a project whose coordinate roles are set, or the write that follows the
+   * dialog would be refused after the Location had been made.
+   */
+  canPlaceNew: boolean;
+  /** Opens the dialog for a new Location. Absent where the user may not make one. */
+  onNewLocation?: () => void;
+  /** Leaves nothing selected. */
+  onDeselect: () => void;
 }
 
 export const GeocodingMap: React.FC<GeocodingMap> = ({
@@ -201,6 +214,9 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   engineReachable,
   suggestions,
   onRegionBox,
+  canPlaceNew,
+  onNewLocation,
+  onDeselect,
 }) => {
   const placeTypes = usePlaceTypes();
   const viaLabel = useViaLabel();
@@ -450,6 +466,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     shapeOpenRef,
     shownSuggestions,
     selected,
+    canPlaceNew,
     onSelectLocation,
     onHoverSuggestion: onHoverSuggestionProp,
     setPending,
@@ -547,11 +564,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         <AccuracyPicker
           anchor={pickerAnchor(pending)}
           current={context.mapClickAccuracy}
-          note={
-            pending.suggestion
-              ? `${pending.suggestion.index + 1}. ${pending.suggestion.label}`
-              : `${pending.lat.toFixed(5)}, ${pending.lon.toFixed(5)}`
-          }
+          note={pendingNote(pending, !selected)}
           onChoose={(accuracy) => {
             const step = afterAccuracy(
               pending,
@@ -573,8 +586,13 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         <PlaceTypePicker
           anchor={pickerAnchor(pending)}
           held={selected?.typeEntries}
-          clearLabel="leave the location type as it is"
-          clearDescription="Only the coordinate is written."
+          note={pendingNote(pending, !selected)}
+          clearLabel={selected ? "leave the location type as it is" : "record no location type"}
+          clearDescription={
+            selected
+              ? "Only the coordinate is written."
+              : "The new Location is made with a coordinate and no location type."
+          }
           onChoose={(placeType) =>
             finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
@@ -642,7 +660,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           setDrawing(false);
           setShapeOpen((open) => !open);
         }}
-        disabled={!selected}
+        disabled={!selected && !canPlaceNew}
+        forNewLocation={!selected}
         draw={draw}
         stored={selected?.geometry ?? null}
         onSave={(geometry: GeoJsonGeometry) => {
@@ -660,6 +679,20 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         }}
       />
 
+      {onNewLocation ? (
+        <StyledNewLocationToggle
+          type="button"
+          aria-label="make a new location"
+          onClick={onNewLocation}
+        >
+          <IconWithTooltip
+            icon={<IcoPlusBold />}
+            tooltipText="new location"
+            tooltipPosition="left"
+          />
+        </StyledNewLocationToggle>
+      ) : null}
+
       <MapLayersPanel
         open={showLayers}
         onToggleOpen={() => setShowLayers((open) => !open)}
@@ -674,6 +707,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           sentence and the fields belong in the same strip */}
       <MapFooterControls
         selected={selected}
+        canPlaceNew={canPlaceNew}
+        onDeselect={onDeselect}
         manual={manual}
         onManualChange={setManual}
         onSubmit={(event) => {

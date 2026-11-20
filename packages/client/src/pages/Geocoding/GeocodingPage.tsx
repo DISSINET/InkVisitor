@@ -333,14 +333,6 @@ export const GeocodingPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
   };
 
-  const createLocation = useCreateLocation({
-    all: browse.all,
-    selectedId: selected?.entity.id,
-    clearFilters: browse.clearFilters,
-    refresh: refreshLocations,
-    onSelect: setSelected,
-  });
-
   /**
    * The next Location still wanting a coordinate, skipping the one being written.
    *
@@ -531,6 +523,35 @@ export const GeocodingPage: React.FC = () => {
     cancelOverwrite,
   } = useGeocodingWriter(roles, recordRecent);
 
+  const createLocation = useCreateLocation({
+    all: browse.all,
+    selectedId: selected?.entity.id,
+    clearFilters: browse.clearFilters,
+    refresh: refreshLocations,
+    onSelect: setSelected,
+    // the coordinate picked on the map for a Location that did not exist yet,
+    // written the moment the dialog has made it. Confirmed in advance: it was
+    // placed on purpose for this Location, and a template's own coordinate is
+    // what it replaces
+    onWriteDraft: (entity, draft) => {
+      if (!user?.options) {
+        return;
+      }
+      write(
+        {
+          location: entity,
+          roles,
+          geometry: draft.geometry,
+          accuracy: draft.accuracy,
+          placeType: draft.placeType,
+          current: null,
+          userOptions: user.options,
+        },
+        { confirmed: true },
+      );
+    },
+  });
+
   // a refused write says why. Without this the researcher cannot tell an accept
   // that worked from one the project's configuration silently rejected.
   useEffect(() => {
@@ -540,6 +561,18 @@ export const GeocodingPage: React.FC = () => {
     }
   }, [blocked, clearBlocked]);
   const suggest = useGeocodingSuggest();
+
+  /**
+   * Selects nothing. A search still running for the Location has nowhere to show
+   * its answer once it is deselected, so it is stopped and not left to spend the
+   * engine's time.
+   */
+  const deselect = () => {
+    if (suggest.isRunning) {
+      suggest.cancel();
+    }
+    setSelected(undefined);
+  };
   const {
     bulk,
     batch,
@@ -647,6 +680,9 @@ export const GeocodingPage: React.FC = () => {
   // the same rule as the menu entry that opens the modal
   const canEditSettings = user?.role === UserEnums.Role.Owner;
   const canCreateLocation = mayCreateLocation(user?.role);
+  // a coordinate can start a Location only where the write that follows the
+  // dialog can happen: the project's coordinate roles have to be set
+  const canPlaceNew = canCreateLocation && isConfigured && !!user?.options;
 
   return (
     <PlaceTypesProvider placeTypes={roles.placeTypes} viaLabels={browse.viaLabels}>
@@ -675,8 +711,11 @@ export const GeocodingPage: React.FC = () => {
         >
           <GeocodingList
             browse={browse}
+            selected={selected}
             selectedId={selected?.entity.id}
             onSelect={setSelected}
+            onDeselect={deselect}
+            canPlaceNew={canPlaceNew}
             onToggleType={toggleType}
             marked={marked}
             onMark={mark}
@@ -780,8 +819,19 @@ export const GeocodingPage: React.FC = () => {
             onHoverSuggestion={hoverOnMap}
             highlighted={highlighted}
             leader={leader}
+            canPlaceNew={canPlaceNew}
+            onNewLocation={canCreateLocation ? createLocation.open : undefined}
+            onDeselect={deselect}
             onAssign={(geometry, accuracy, placeType) => {
-              if (!selected || !user?.options) {
+              if (!user?.options) {
+                return;
+              }
+              if (!selected) {
+                // nothing to write on yet: the dialog makes the Location, and
+                // writes this once it exists
+                if (canPlaceNew) {
+                  createLocation.openWithDraft({ geometry, accuracy, placeType });
+                }
                 return;
               }
               writeAndAdvance({

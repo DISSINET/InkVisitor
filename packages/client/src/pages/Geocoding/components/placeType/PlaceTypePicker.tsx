@@ -201,6 +201,8 @@ interface PlaceTypePicker {
   clearLabel?: string;
   /** What choosing none does, said under its wording. */
   clearDescription?: string;
+  /** What the choice is about, said under the title: where the coordinate is that the location type goes with. */
+  note?: string;
   /** One click chooses one location type, which is added to the others, and the list closes. */
   onChoose?: (placeType: string | null) => void;
   /**
@@ -218,6 +220,7 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   suggested,
   clearLabel,
   clearDescription,
+  note,
   onChoose,
   onToggle,
   onClose,
@@ -270,6 +273,7 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
       <StyledPickerTitle>
         {toggling ? "location types of this place" : "add a location type"}
       </StyledPickerTitle>
+      {note ? <StyledPickerDescription>{note}</StyledPickerDescription> : null}
       {answering.length > 1 ? (
         <StyledPickerDescription>
           {answering.length} of your location types answer to &ldquo;{engineLabel}&rdquo;, the

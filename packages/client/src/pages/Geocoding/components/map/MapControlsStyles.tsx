@@ -178,6 +178,12 @@ export const StyledLayersToggle = styled(StyledMapToggle).attrs<{ $open: boolean
   $tone: $open ? "open" : "idle",
 }))<{ $open: boolean }>``;
 
+/** Starts a new Location, in the slot under the drawing tool. */
+export const StyledNewLocationToggle = styled(StyledMapToggle).attrs({
+  $slot: 3,
+  $tone: "idle",
+})``;
+
 export const StyledLayersPanel = styled.div`
   position: absolute;
   top: ${belowToggle};

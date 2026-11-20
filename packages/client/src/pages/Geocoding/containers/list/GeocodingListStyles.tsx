@@ -251,6 +251,45 @@ export const StyledMarkedBar = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+/**
+ * What is selected, or that nothing is.
+ *
+ * Always drawn, in two looks that cannot be mistaken for each other: a filled bar
+ * with an accent edge for a Location, a dashed outline for none. The row's own
+ * highlight says which row; this says it where the list may be scrolled away from
+ * it, and it is the one place that also says when there is nothing to say.
+ */
+export const StyledSelectionBar = styled.div<{ $has: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  min-height: 2.4rem;
+  margin: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[GUTTER]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  ${({ theme, $has }) =>
+    $has
+      ? `
+    background-color: ${theme.color["tableOpened"]};
+    border: 1px solid ${theme.color["primary"]};
+    border-left-width: 4px;
+    color: ${theme.color["primary"]};
+  `
+      : `
+    background-color: transparent;
+    border: 1px dashed ${theme.color["gray"][500]};
+    color: ${theme.color["greyer"]};
+  `}
+`;
+
+export const StyledSelectionLabel = styled.span`
+  flex: 0 0 auto;
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+`;
+
 /** What the action can actually reach, where that is not the whole set. */
 export const StyledMarkedReach = styled.span`
   color: ${({ theme }) => theme.color["greyer"]};

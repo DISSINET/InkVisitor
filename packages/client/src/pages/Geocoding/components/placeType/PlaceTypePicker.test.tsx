@@ -221,3 +221,16 @@ describe("PlaceTypePicker, for the keyboard and assistive technology", () => {
     expect(document.querySelector("[role=listbox]")?.contains(done)).toBe(false);
   });
 });
+
+describe("PlaceTypePicker, saying what the choice is about", () => {
+  it("shows the note under the title, which is where the coordinate it goes with is named", () => {
+    mount({ note: "new location · 48.31000, 14.92000", onChoose: vi.fn() });
+    expect(document.body.textContent).toContain("new location · 48.31000, 14.92000");
+  });
+
+  it("shows nothing extra when there is no note", () => {
+    mount({ onChoose: vi.fn() });
+    expect(document.body.textContent).not.toContain("new location");
+  });
+});
+

@@ -22,10 +22,16 @@ vi.mock("react-toastify", () => ({ toast: toasts }));
 const clearFilters = vi.fn();
 const refresh = vi.fn();
 const onSelect = vi.fn();
+const onWriteDraft = vi.fn();
+const draft = {
+  geometry: { type: "Point" as const, coordinates: [14.92, 48.31] as [number, number] },
+  accuracy: "approximate" as never,
+  placeType: "settlement",
+};
 
 let creating: CreatingLocation;
 const Probe = ({ all, selectedId }: { all: GeocodingLocation[]; selectedId?: string }) => {
-  creating = useCreateLocation({ all, selectedId, clearFilters, refresh, onSelect });
+  creating = useCreateLocation({ all, selectedId, clearFilters, refresh, onSelect, onWriteDraft });
   return null;
 };
 
@@ -35,6 +41,7 @@ describe("useCreateLocation", () => {
     clearFilters.mockReset();
     refresh.mockReset();
     onSelect.mockReset();
+    onWriteDraft.mockReset();
     toasts.info.mockReset();
   });
   afterEach(() => vi.useRealTimers());
@@ -119,6 +126,57 @@ describe("useCreateLocation", () => {
     const arrived = listed("new");
     view.update(<Probe all={[listed("old"), arrived]} selectedId="old" />);
     expect(onSelect).toHaveBeenCalledWith(arrived);
+    view.unmount();
+  });
+
+  it("writes the coordinate picked on the map once the Location exists, with the entity the dialog made", () => {
+    const view = render(<Probe all={[]} />);
+    act(() => creating.openWithDraft(draft));
+    expect(creating.creating).toBe(true);
+
+    const made = entity("new");
+    act(() => creating.created(made));
+    expect(onWriteDraft).toHaveBeenCalledTimes(1);
+    expect(onWriteDraft).toHaveBeenCalledWith(made, draft);
+    view.unmount();
+  });
+
+  it("writes a draft at most once, so a second Location never receives it", () => {
+    const view = render(<Probe all={[]} />);
+    act(() => creating.openWithDraft(draft));
+    act(() => creating.created(entity("first")));
+    act(() => creating.open());
+    act(() => creating.created(entity("second")));
+    expect(onWriteDraft).toHaveBeenCalledTimes(1);
+    expect(onWriteDraft.mock.calls[0][0].id).toBe("first");
+    view.unmount();
+  });
+
+  it("writes nothing when the dialog was dismissed before the create finished", () => {
+    const view = render(<Probe all={[]} />);
+    act(() => creating.openWithDraft(draft));
+    act(() => creating.close());
+    // the dialog's request was still running: its callback arrives after the dismissal
+    act(() => creating.created(entity("late")));
+    expect(onWriteDraft).not.toHaveBeenCalled();
+    view.unmount();
+  });
+
+  it("opens a plain dialog with no draft, even after a draft was abandoned", () => {
+    const view = render(<Probe all={[]} />);
+    act(() => creating.openWithDraft(draft));
+    act(() => creating.open());
+    act(() => creating.created(entity("plain")));
+    expect(onWriteDraft).not.toHaveBeenCalled();
+    view.unmount();
+  });
+
+  it("can be used as a click handler: the event it is given is never taken for a draft", () => {
+    const view = render(<Probe all={[]} />);
+    const asHandler = creating.open as unknown as (event: unknown) => void;
+    act(() => asHandler({ type: "click" }));
+    act(() => creating.created(entity("plain")));
+    expect(onWriteDraft).not.toHaveBeenCalled();
     view.unmount();
   });
 });

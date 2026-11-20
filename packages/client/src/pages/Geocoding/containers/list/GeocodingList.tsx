@@ -1,8 +1,8 @@
 import {
 } from "@inkvisitor/shared/types/geocoding";
 import { Button, Input, Loader } from "components";
-import Dropdown from "components/advanced";
-import { IcoListTree, IcoPlusBold, IcoSearch } from "Theme/icons";
+import Dropdown, { EntityTag } from "components/advanced";
+import { IcoClose, IcoListTree, IcoPlusBold, IcoSearch } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
 import {
@@ -18,6 +18,8 @@ import {
   StyledMarkedSpacer,
   StyledParked,
   StyledParkedHead,
+  StyledSelectionBar,
+  StyledSelectionLabel,
 } from "./GeocodingListStyles";
 import { GeocodingFilterChips } from "./GeocodingFilterChips";
 import { GeocodingListRow, GeocodingListRowProps, GroupHeading } from "./GeocodingListRow";
@@ -42,8 +44,14 @@ const HEADER_HEIGHT = HEADING_HEIGHT;
 
 interface GeocodingList {
   browse: UseGeocodingBrowse;
+  /** The selected Location, which may be one the filters leave out of the list. */
+  selected: GeocodingLocation | undefined;
   selectedId: string | undefined;
   onSelect: (location: GeocodingLocation) => void;
+  /** Leaves nothing selected. */
+  onDeselect: () => void;
+  /** With nothing selected, the map starts a new Location, which the bar says. */
+  canPlaceNew: boolean;
   /**
    * Adds or removes one location type of a Location, as its own Classification,
    * without touching its coordinate. Resolves to whether it was written.
@@ -106,8 +114,11 @@ interface GeocodingList {
 
 export const GeocodingList: React.FC<GeocodingList> = ({
   browse,
+  selected,
   selectedId,
   onSelect,
+  onDeselect,
+  canPlaceNew,
   onToggleType,
   onShowOnMap,
   onGeocode,
@@ -382,6 +393,36 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           onClearAll={browse.clearFilters}
         />
       </StyledFilters>
+
+      <StyledSelectionBar $has={!!selected} data-selection-bar aria-label="selection" aria-live="polite">
+        {selected ? (
+          <>
+            <StyledSelectionLabel>selected</StyledSelectionLabel>
+            <EntityTag
+              entity={selected.entity}
+              disableDrag
+              disableDoubleClick
+              disableCopyToClipboard
+            />
+            <StyledMarkedSpacer />
+            <Button
+              tooltipLabel="clear the selection, so that nothing is selected"
+              icon={<IcoClose />}
+              onClick={onDeselect}
+              noBackground
+              noBorder
+              inverted
+            />
+          </>
+        ) : (
+          <span>
+            nothing selected ·{" "}
+            {canPlaceNew
+              ? "pick a row, or click the map to start a new location"
+              : "pick a row to geocode it"}
+          </span>
+        )}
+      </StyledSelectionBar>
 
       {marked.size || batch ? (
         <StyledMarkedBar>
