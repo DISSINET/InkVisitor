@@ -84,7 +84,8 @@ export const StyledHead = styled.div<StyledHead>`
         align-self: stretch;
         padding: 0 ${theme.space[2]};
         border-radius: 0 0 ${theme.borderRadius["default"]} ${theme.borderRadius["default"]};
-        background-color: color-mix(in srgb, ${theme.color["gray"][100]} 75%, transparent);
+        /* the page's own colour, so with nothing behind it the header reads as any other */
+        background-color: color-mix(in srgb, ${theme.color.pageBg} 75%, transparent);
         backdrop-filter: blur(4px);
       }
       /* the label, which keeps its block box for the ellipsis */
