@@ -1,8 +1,9 @@
 import "ts-jest";
 import { createOpeningTagRegex } from "@common/regex";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IAnchorsNode } from "@inkvisitor/shared/types/document";
+import { IAnchorsNode, isOrphanedAnchor } from "@inkvisitor/shared/types/document";
 import { AnchorsNode } from "./anchors";
+import Document from "./document";
 
 const BASE_CONTENT = `<test>
 blahdddddsdsd
@@ -204,6 +205,31 @@ describe("AnchorsNode.buildAnchorsTree with an opening tag that never closes", (
     expect(tree.map((node) => [node.anchor, node.content, node.indexEnd])).toEqual([
       ["e1", "one", content.length],
     ]);
+  });
+});
+
+describe("a stored anchors tree loaded into a Document", () => {
+  const entityIds = {
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Concept]: ["e1", "e2", "e3"],
+  };
+
+  test("keeps the indexes of every node", () => {
+    const built = AnchorsNode.buildAnchorsTree("<e1>a <e2>b</e2></e1> <e3> c", entityIds);
+    const stored = JSON.parse(JSON.stringify(built)) as IAnchorsNode[];
+    const loaded = new Document({ anchors: stored }).anchors;
+
+    expect(JSON.parse(JSON.stringify(loaded))).toEqual(stored);
+    expect(isOrphanedAnchor(loaded[1])).toEqual(true);
+    expect(isOrphanedAnchor(loaded[0].children[0])).toEqual(false);
+  });
+
+  test("a stored node with no indexEnd is not an orphan", () => {
+    const legacy = [
+      { anchor: "e1", content: "a", class: EntityEnums.Class.Concept, children: [] },
+    ] as unknown as IAnchorsNode[];
+
+    expect(isOrphanedAnchor(new Document({ anchors: legacy }).anchors[0])).toEqual(false);
   });
 });
 

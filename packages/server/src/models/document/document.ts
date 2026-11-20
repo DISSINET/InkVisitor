@@ -26,7 +26,11 @@ export default class Document implements IDocument, IDbModel {
     this.title = data.title || "";
     this.content = data.content || "";
     this.entityIds = data.entityIds || {} as Record<EntityEnums.Class, string[]>;
-    this.anchors = data.anchors?.map((anchor) => new AnchorsNode(anchor.anchor, anchor.content, anchor.children, anchor.class)) || [];
+    this.anchors =
+      data.anchors?.map(
+        (anchor) =>
+          new AnchorsNode(anchor.anchor, anchor.content, anchor.children, anchor.class, anchor.indexStart, anchor.indexEnd)
+      ) || [];
 
     this.createdAt = data.createdAt || new Date();
     if (data.updatedAt !== undefined) {

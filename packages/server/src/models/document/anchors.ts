@@ -24,13 +24,23 @@ export class AnchorsNode implements IAnchorsNode {
   indexEnd: number;
   static MAX_CONTENT_LENGTH = 400;
 
-  constructor(anchor: string, content: string, children: IAnchorsNode[], anchorClass: EntityEnums.Class) {
+  constructor(
+    anchor: string,
+    content: string,
+    children: IAnchorsNode[],
+    anchorClass: EntityEnums.Class,
+    indexStart: number,
+    indexEnd: number
+  ) {
     this.anchor = anchor;
     this.content = content;
-    this.children = (children || []).map((child) => new AnchorsNode(child.anchor, child.content, child.children, child.class));
+    this.children = (children || []).map(
+      (child) =>
+        new AnchorsNode(child.anchor, child.content, child.children, child.class, child.indexStart, child.indexEnd)
+    );
     this.class = anchorClass;
-    this.indexStart = -1;
-    this.indexEnd = -1;
+    this.indexStart = indexStart;
+    this.indexEnd = indexEnd;
   }
 
   /**
@@ -88,8 +98,8 @@ export class AnchorsNode implements IAnchorsNode {
         const anchorClass = classOf.get(tag);
 
         if (anchorClass) {
-          const newNode = new AnchorsNode(tag, "", [], anchorClass);
-          newNode.indexStart = match.index; // Set the start index when opening tag is found
+          // indexEnd is set when the closing tag is found
+          const newNode = new AnchorsNode(tag, "", [], anchorClass, match.index, -1);
           if (nodeStack.length > 0) {
             nodeStack[nodeStack.length - 1].children.push(newNode);
           } else {
