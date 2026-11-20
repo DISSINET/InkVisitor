@@ -772,6 +772,37 @@ function statementUnderTerritory(e: SearchEdge, p: Params): string {
 const territoryHasStatement = (e: SearchEdge, p: Params): string =>
   `e.id IN (SELECT s.territory_id FROM ${ENTITIES} s WHERE ${isClass("s", S)} AND ${targetStatements(e, p)})`;
 
+// ---- anchors ----------------------------------------------------------------
+
+/**
+ * entities anchored inside the span of a target territory's anchor, at any depth, in every
+ * document that anchors it; without a target set: inside the span of any territory
+ * (EdgeAnchoredUnderTerritory).
+ * `.**` yields the arrays and scalars of the tree beside its nodes, which the strict filters drop.
+ * The tree nests an anchor under whatever was open where it starts, and an anchor crossing the end
+ * of a span carries the anchors after the span along, so a node below the territory counts only when
+ * it starts before the span ends; a territory tag that never closes (indexEnd -1) spans nothing.
+ * A long target list is matched against the spans alone, as in ownCandidates
+ */
+function anchoredUnderTerritory(e: SearchEdge, p: Params): string {
+  const targets = e.targetIds();
+  const spans = `jsonb_path_query(d.doc->'anchors', 'strict $.** ? (@.class == "${T}")', '{}', true)`;
+  const anchored =
+    `jsonb_path_query(span, 'strict $.children.** ? (exists(@.anchor) && @.indexStart < $end).anchor',` +
+    ` jsonb_build_object('end', span->'indexEnd'), true)`;
+  const where: string[] = [];
+  if (targets) {
+    if (targets.length <= INDEXED_TARGETS_LIMIT) {
+      where.push(p.index(TABLE.documents, DbEnums.Indexes.DocumentEntityIds, targets));
+    }
+    where.push(`span->>'anchor' = ${anyOf(p, targets)}`);
+  }
+  return (
+    `e.id IN (SELECT anchored #>> '{}' FROM ${ident(TABLE.documents)} d, ${spans} span, ${anchored} anchored` +
+    `${where.length ? ` WHERE ${where.join(" AND ")}` : ""})`
+  );
+}
+
 /** SQL over alias `e` for each edge type; a type missing here is unknown to the evaluator */
 export const PREDICATES: Record<string, Predicate> = {
   "R:": anyRelation,
@@ -813,6 +844,7 @@ export const PREDICATES: Record<string, Predicate> = {
     const targets = e.targetIds();
     return usedInStatements(targets ? p.index(TABLE.entities, DbEnums.Indexes.StatementTerritory, targets) : "TRUE");
   },
+  "EAT:": anchoredUnderTerritory,
   "CT:": (e, p) => territoryHasChild(e, p, "any"),
   "CT:D": (e, p) => territoryHasChild(e, p, "direct"),
   "I_CT:": territoryHasParent,

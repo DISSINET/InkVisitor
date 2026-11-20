@@ -104,6 +104,7 @@ const UNIT_TEST_PATHS = [
   "src/service/query/results.test.ts",
   "src/service/query/search-start-nodes.test.ts",
   "src/service/storage/rethink/query/superordinate-edge.test.ts",
+  "src/service/storage/rethink/query/anchored.test.ts",
   "src/service/ttlCache.test.ts",
 ];
 

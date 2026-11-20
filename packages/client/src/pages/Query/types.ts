@@ -148,6 +148,11 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
+  // EAT: match any entity ANCHORED in the full text inside the span of the
+  // target Territory's anchor, at any depth, subTs anchored inside it included;
+  // the SUB toggle adds the spans of its subTs anchored elsewhere (server:
+  // EdgeAnchoredUnderTerritory in edge.ts)
+  Query.EdgeType["EAT:"],
   // IS: (XIsInS) match any entity USED in the target Statement in ANY position
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)

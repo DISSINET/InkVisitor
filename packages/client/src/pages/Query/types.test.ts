@@ -1,7 +1,12 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesHidden, edgeTypesImplemented } from "./types";
+import {
+  edgeTypesHidden,
+  edgeTypesImplemented,
+  edgeTypesWithoutSubordinates,
+  edgeTypesWithSubtreeDepth,
+} from "./types";
 import {
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
@@ -193,6 +198,39 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
         edge(Query.EdgeType["EUT:"], pickedTerritory),
       ).valid,
     ).toBe(true);
+  });
+});
+
+describe("query builder offers the 'anchored under T' edge (EAT:)", () => {
+  it("any source node (e.g. Person, Statement, Territory) can select EAT:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Statement,
+      EntityEnums.Class.Territory,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(Query.EdgeType["EAT:"]);
+    }
+  });
+
+  it("source may be any entity; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Territory])),
+      ).valid,
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Person])),
+      ).valid,
+    ).toBe(false);
+  });
+
+  it("the SUB toggle widens the picked Territory to its subTs", () => {
+    expect(edgeTypesWithoutSubordinates).not.toContain(Query.EdgeType["EAT:"]);
+    expect(edgeTypesWithSubtreeDepth).not.toContain(Query.EdgeType["EAT:"]);
   });
 });
 
