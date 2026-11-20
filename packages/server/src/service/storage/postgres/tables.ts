@@ -570,6 +570,9 @@ async function edgePerEntityInRange(conn: Conn, outranks: string, after?: Date, 
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
+  // countByBucket reads the audits at most once, whatever the length of the id list
+  entityIdsLimit: null,
+
   async firstFor(conn, scope, modelId) {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(

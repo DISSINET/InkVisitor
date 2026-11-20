@@ -199,6 +199,10 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
     }
 
     const userLanguage = user?.options.defaultStatementLanguage;
+    // without the user's language every entity would count as another language
+    if (!userLanguage) {
+      return newData;
+    }
     const { data: entities } = await api.entitiesSearch({ entityIds: linkedEntityIds });
     const otherLanguage = new Map(
       entities.filter((e) => e.language !== userLanguage).map((e) => [e.id, e]),

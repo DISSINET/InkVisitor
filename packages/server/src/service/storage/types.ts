@@ -164,6 +164,8 @@ export interface AuditStore extends TableStore<IAudit> {
   page(conn: Conn, filter: { skip: number; take: number; from: Date }): Promise<IAudit[]>;
   /** event counts per time bucket and group key; group[0] is the bucket */
   countByBucket(conn: Conn, params: AuditCountParams): Promise<{ group: string[]; reduction: number }[]>;
+  /** the longest `entityIds` list countByBucket is given; null when a list of any length is served */
+  readonly entityIdsLimit: number | null;
 }
 
 export interface UserStore extends TableStore<IUser> {

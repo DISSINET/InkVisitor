@@ -46,8 +46,9 @@ export interface IResponseQuery {
   };
   /**
    * Cap on the number of entities the Stats view aggregates audits over, present
-   * only in the Stats view. When `total` exceeds it, the stats cover just the
-   * first `statsEntityLimit` entities and the client surfaces a warning.
+   * only in the Stats view and null when the storage has no cap. When `total`
+   * exceeds it, the stats cover just the first `statsEntityLimit` entities and
+   * the client surfaces a warning.
    */
-  statsEntityLimit?: number;
+  statsEntityLimit?: number | null;
 }

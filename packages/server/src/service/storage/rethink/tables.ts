@@ -347,6 +347,9 @@ async function edgePerEntityInRange(
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
+  // countByBucket tests every audit against the whole id list, so its cost is audits x ids
+  entityIdsLimit: 500,
+
   async firstFor(conn, scope, modelId) {
     const result = await byScopeAndModel(scope, modelId)
       .orderBy(r.asc("date"))

@@ -53,10 +53,8 @@ import Document from "@models/document/document";
 import Territory from "@models/territory/territory";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
-import {
-  EventType,
-  EXPLORE_STATS_ENTITY_LIMIT,
-} from "@inkvisitor/shared/types/stats";
+import { EventType } from "@inkvisitor/shared/types/stats";
+import { storage } from "@service/storage";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -1036,7 +1034,7 @@ export default Router()
           total: entityIds.length,
           expansion: querySearch.expansionCounts,
           stats,
-          statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
+          statsEntityLimit: storage.audits.entityIdsLimit,
         };
       }
 
