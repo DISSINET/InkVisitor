@@ -187,24 +187,26 @@ export class AnchorsNode implements IAnchorsNode {
    * The anchors of `entityId` in text order, each with the nearest territory
    * anchor around it. `anchorIndex` counts every opening tag of the entity,
    * the way Document.removeAnchor and Document.findAnchorWithIndex count
-   * them, so an anchor whose opening tag never closes takes an index but is
-   * left out, and it is no parent territory of the anchors a stored tree
-   * holds under it.
+   * them. An anchor whose opening tag never closes is `orphaned`: it spans
+   * no text, whatever a stored tree holds in it, and it is no parent
+   * territory of the anchors a stored tree holds under it.
    */
-  static pairedAnchorsOf(
+  static anchorsOf(
     nodes: AnchorsNode[],
     entityId: string
-  ): { node: AnchorsNode; anchorIndex: number; parentTerritoryId: string }[] {
-    const out: { node: AnchorsNode; anchorIndex: number; parentTerritoryId: string }[] = [];
+  ): { anchorText: string; anchorIndex: number; parentTerritoryId: string; orphaned: boolean }[] {
+    const out: ReturnType<typeof AnchorsNode.anchorsOf> = [];
     let anchorIndex = 0;
     const walk = (list: AnchorsNode[], parentTerritoryId: string) => {
       for (const node of list) {
         const orphaned = isOrphanedAnchor(node);
         if (node.anchor === entityId) {
-          if (!orphaned) {
-            out.push({ node, anchorIndex, parentTerritoryId });
-          }
-          anchorIndex++;
+          out.push({
+            anchorText: orphaned ? "" : node.getShortContent(),
+            anchorIndex: anchorIndex++,
+            parentTerritoryId,
+            orphaned,
+          });
         }
         walk(
           node.children,

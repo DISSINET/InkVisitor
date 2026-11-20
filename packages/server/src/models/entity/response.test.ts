@@ -687,10 +687,13 @@ describe("models/entity/response", function () {
       await db.close();
     });
 
-    it("lists the paired anchor only, at the index of its opening tag", async () => {
+    it("lists it flagged and without text, each anchor at the index of its opening tag", async () => {
       const rows = await new ResponseEntityDetail(entity).findUsedInDocuments(db.connection);
 
-      expect(rows.map((row) => [row.anchorText, row.anchorIndex])).toEqual([["paired", 1]]);
+      expect(rows.map((row) => [row.anchorText, row.anchorIndex, row.orphaned])).toEqual([
+        ["", 0, true],
+        ["paired", 1, undefined],
+      ]);
     });
   });
 

@@ -10,11 +10,13 @@ export namespace EntityTooltip {
   }
 
   // one entry per distinct anchor text in a document; count is the number of
-  // anchors with that text
+  // anchors with that text. The orphaned anchors of a document, which have no
+  // text, share one entry of their own.
   export interface IUsedInDocument {
     document: IResponseUsedInDocument["document"];
     anchorText: string;
     count: number;
+    orphaned?: true;
   }
 
   export type IIdentification = {

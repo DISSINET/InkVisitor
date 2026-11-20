@@ -60,6 +60,7 @@ export interface IResponseUsedInDocument {
   resourceId: string; // resource linked to the document
   parentTerritoryId: string; // id of the closest territory anchor in the document, "" if no territory is found
   anchorIndex: number; // index of the anchor in the document
+  orphaned?: true; // the anchor's opening tag never closes, so it has no text
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {

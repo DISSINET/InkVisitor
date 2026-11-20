@@ -133,4 +133,19 @@ describe("test ResponseTooltip.groupUsedInDocuments", function () {
       { document: docA, anchorText: "other", count: 1 },
     ]);
   });
+
+  it("should count the orphaned anchors of a document as one flagged entry, apart from a paired anchor with no text", () => {
+    const grouped = ResponseTooltip.groupUsedInDocuments([
+      { ...use(docA, "", 0), orphaned: true },
+      use(docA, "", 1),
+      { ...use(docA, "", 2), orphaned: true },
+      { ...use(docB, "", 0), orphaned: true },
+    ]);
+
+    expect(grouped).toEqual([
+      { document: docA, anchorText: "", count: 2, orphaned: true },
+      { document: docA, anchorText: "", count: 1 },
+      { document: docB, anchorText: "", count: 1, orphaned: true },
+    ]);
+  });
 });

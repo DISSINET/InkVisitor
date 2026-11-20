@@ -24,7 +24,9 @@ export class ResponseTooltip
 
   /**
    * Collapses anchors with the same (trimmed) text in the same document into
-   * one entry with their count, in the order of first occurrence
+   * one entry with their count, in the order of first occurrence. Orphaned
+   * anchors have no text, so those of a document collapse into one entry,
+   * kept apart from its paired anchors with no text.
    * @param uses one entry per anchor
    * @returns one entry per distinct document and anchor text
    */
@@ -36,12 +38,17 @@ export class ResponseTooltip
       // every client surface trims anchor texts, so surrounding whitespace
       // does not make a text distinct
       const anchorText = use.anchorText.trim();
-      const key = `${use.document.id}\u0000${anchorText}`;
+      const key = `${use.document.id}\u0000${use.orphaned ? "orphaned" : ""}\u0000${anchorText}`;
       const group = groups.get(key);
       if (group) {
         group.count++;
       } else {
-        groups.set(key, { document: use.document, anchorText, count: 1 });
+        groups.set(key, {
+          document: use.document,
+          anchorText,
+          count: 1,
+          ...(use.orphaned && { orphaned: use.orphaned }),
+        });
       }
     }
     return [...groups.values()];

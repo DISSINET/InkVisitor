@@ -233,7 +233,7 @@ describe("a stored anchors tree loaded into a Document", () => {
   });
 });
 
-describe("AnchorsNode.pairedAnchorsOf", () => {
+describe("AnchorsNode.anchorsOf", () => {
   const entityIds = {
     ...entityIdsFromContent(""),
     [EntityEnums.Class.Territory]: ["t1", "t2"],
@@ -241,31 +241,40 @@ describe("AnchorsNode.pairedAnchorsOf", () => {
   };
   const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
   const rows = (content: string) =>
-    AnchorsNode.pairedAnchorsOf(tree(content), "e1").map((row) => [
+    AnchorsNode.anchorsOf(tree(content), "e1").map((row) => [
       row.anchorIndex,
-      row.node.content,
+      row.anchorText,
       row.parentTerritoryId,
+      row.orphaned,
     ]);
 
-  test("leaves out an anchor whose opening tag never closes and still counts it", () => {
+  test("flags an anchor whose opening tag never closes, at the index of its opening tag", () => {
     expect(rows("<e1> a <e1>one</e1> b <e1>two</e1>")).toEqual([
-      [1, "one", ""],
-      [2, "two", ""],
+      [0, "", "", true],
+      [1, "one", "", false],
+      [2, "two", "", false],
     ]);
   });
 
   test("an orphaned territory anchor is nobody's parent T", () => {
     expect(rows("<t1>x <e1>one</e1></t1> <t2> y <e1>two</e1>")).toEqual([
-      [0, "one", "t1"],
-      [1, "two", ""],
+      [0, "one", "t1", false],
+      [1, "two", "", false],
     ]);
   });
 
-  test("does not count a self-closing tag", () => {
-    expect(rows('<e1 n="2"/> <e1> a <e1>one</e1>')).toEqual([[1, "one", ""]]);
+  test("an orphaned anchor keeps the territory anchor around it as its parent T", () => {
+    expect(rows("<t1>x <e1> a </t1>")).toEqual([[0, "", "t1", true]]);
   });
 
-  test("reads a stored tree whose orphan still holds anchors", () => {
+  test("does not count a self-closing tag", () => {
+    expect(rows('<e1 n="2"/> <e1> a <e1>one</e1>')).toEqual([
+      [0, "", "", true],
+      [1, "one", "", false],
+    ]);
+  });
+
+  test("an orphaned anchor of a stored tree has no text, and the anchors it holds stay listed", () => {
     const concept = EntityEnums.Class.Concept;
     const stale = [
       {
@@ -278,8 +287,11 @@ describe("AnchorsNode.pairedAnchorsOf", () => {
     const loaded = new Document({ anchors: stale }).anchors;
 
     expect(
-      AnchorsNode.pairedAnchorsOf(loaded, "e1").map((row) => [row.anchorIndex, row.node.content])
-    ).toEqual([[1, "one"]]);
+      AnchorsNode.anchorsOf(loaded, "e1").map((row) => [row.anchorIndex, row.anchorText, row.orphaned])
+    ).toEqual([
+      [0, "", true],
+      [1, "one", false],
+    ]);
   });
 
   test("an orphaned territory anchor of a stored tree is not the parent T of what it holds", () => {
@@ -293,16 +305,14 @@ describe("AnchorsNode.pairedAnchorsOf", () => {
     ] as IAnchorsNode[];
     const loaded = new Document({ anchors: stale }).anchors;
 
-    expect(
-      AnchorsNode.pairedAnchorsOf(loaded, "e1").map((row) => row.parentTerritoryId)
-    ).toEqual([""]);
+    expect(AnchorsNode.anchorsOf(loaded, "e1").map((row) => row.parentTerritoryId)).toEqual([""]);
   });
 
   test("its anchorIndex is the index Document.removeAnchor takes", () => {
     const content = '<e1 n="2"/> <e1> a <e1>one</e1> b <e1>two</e1>';
-    const [first] = AnchorsNode.pairedAnchorsOf(tree(content), "e1");
+    const firstPaired = AnchorsNode.anchorsOf(tree(content), "e1").find((row) => !row.orphaned);
     const document = new Document({ content });
-    document.removeAnchor("e1", first.anchorIndex);
+    document.removeAnchor("e1", firstPaired!.anchorIndex);
 
     expect(document.content).toEqual('<e1 n="2"/> <e1> a one b <e1>two</e1>');
   });

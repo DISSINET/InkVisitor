@@ -783,13 +783,15 @@ export default class Entity implements IEntity, IDbModel {
           updatedAt: docData.updatedAt,
         };
 
-        return AnchorsNode.pairedAnchorsOf(doc.anchors, this.id).map(
-          ({ node, anchorIndex, parentTerritoryId }): IResponseUsedInDocument => ({
+        return AnchorsNode.anchorsOf(doc.anchors, this.id).map(
+          ({ anchorText, anchorIndex, parentTerritoryId, orphaned }): IResponseUsedInDocument => ({
             document,
-            anchorText: node.getShortContent(),
+            anchorText,
             resourceId: resource?.id || "",
             parentTerritoryId,
             anchorIndex,
+            // the entry repeats per anchor, so only an orphaned one carries the flag
+            ...(orphaned && { orphaned }),
           })
         );
       })
