@@ -50,7 +50,10 @@ import { useGeocodingConfig } from "./hooks/useGeocodingConfig";
 import { useGeocodingPanels } from "./hooks/useGeocodingPanels";
 import { GeocodingLocation } from "./hooks/useGeocodingLocations";
 import { PlaceTypesProvider } from "./hooks/placeTypesContext";
-import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./hooks/usePlaceTypeAssignments";
+import {
+  PLACE_TYPE_ASSIGNMENTS_KEY,
+  usePlaceTypeAssignments,
+} from "./hooks/usePlaceTypeAssignments";
 import { useGeocodingSuggest } from "./hooks/useGeocodingSuggest";
 import { useGeocodingWriter } from "./hooks/useGeocodingWriter";
 import { useRecentGeocodes } from "./hooks/useRecentGeocodes";
@@ -80,12 +83,20 @@ export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
   const {
-    roles,
+    roles: storedRoles,
     context: stored,
     projectContext,
     isConfigured,
     missingRoles,
   } = useGeocodingConfig();
+  // the location types as the page uses them: each with its subclass tree, every
+  // Concept of which is a location type of its own. Only the settings window
+  // edits the list as it is stored
+  const typeHierarchy = usePlaceTypeAssignments(storedRoles.placeTypes);
+  const roles = useMemo(
+    () => ({ ...storedRoles, placeTypes: typeHierarchy.nodes }),
+    [storedRoles, typeHierarchy.nodes]
+  );
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
@@ -685,7 +696,11 @@ export const GeocodingPage: React.FC = () => {
   const canPlaceNew = canCreateLocation && isConfigured && !!user?.options;
 
   return (
-    <PlaceTypesProvider placeTypes={roles.placeTypes} viaLabels={browse.viaLabels}>
+    <PlaceTypesProvider
+      placeTypes={typeHierarchy.nodes}
+      concepts={typeHierarchy.conceptEntities}
+      viaLabels={browse.viaLabels}
+    >
       <HintLayer />
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also
@@ -944,7 +959,7 @@ export const GeocodingPage: React.FC = () => {
       {showActivity ? <GeocodingActivityModal onClose={() => setShowActivity(false)} /> : null}
       {showSettings ? (
         <GeocodingSettingsModal
-          roles={roles}
+          roles={storedRoles}
           projectContext={projectContext}
           onClose={() => setShowSettings(false)}
         />

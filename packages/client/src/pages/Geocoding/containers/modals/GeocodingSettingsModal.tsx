@@ -121,6 +121,25 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   });
   const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
 
+  /**
+   * The description of a location type is its Concept's detail. What is typed in
+   * the table is held here and written to the Concepts by Save, with the rest of
+   * the window, and only for a Concept whose text was changed.
+   */
+  const [details, setDetails] = useState<Record<string, string>>({});
+  const storedDetail = (conceptId: string) =>
+    assignments.conceptEntities[conceptId]?.detail ?? byId[conceptId]?.detail ?? "";
+  const detailOf = (conceptId: string) =>
+    conceptId in details ? details[conceptId] : storedDetail(conceptId);
+  // only Concepts still in the table: a row removed or given another Concept
+  // after its text was typed takes the text with it
+  const changedDetails = () => {
+    const shown = new Set(assignments.nodes.map((node) => node.conceptId));
+    return Object.entries(details).filter(
+      ([conceptId, detail]) => shown.has(conceptId) && detail !== storedDetail(conceptId)
+    );
+  };
+
   // every pick changes the id list and so the query key; the previous batch
   // keeps the other rows on screen while the new one loads
   const { data: assignedEntities, isFetching: loadingAssigned } = useEntitiesQuery(
@@ -157,6 +176,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       if (sourcesChanged) {
         await patchGeocodingContext({ disabledSources });
       }
+      for (const [conceptId, detail] of changedDetails()) {
+        await api.entityUpdate(conceptId, { detail });
+      }
       // a Resource created here carries no base url; the deep link needs one,
       // and only the entity detail form otherwise offers the field
       for (const [source, url] of Object.entries(baseUrls)) {
@@ -175,6 +197,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       queryClient.invalidateQueries({ queryKey: ["geocoding-locations"] });
       queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
       queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["geocoding-type-concepts"] });
       toast.success("Geocoding settings saved.");
       onClose();
     },
@@ -365,14 +388,23 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s location typology. The gazetteer location type select maps it onto
-            the gazetteers&apos; general typology, which is then used for prioritising the proper
-            category. A Concept must be assigned if you want to geocode that general type.
+            The project&apos;s location typology. The gazetteer type select maps it onto the
+            gazetteers&apos; general typology, which is then used for prioritising the proper
+            category. A Concept must be assigned if you want to geocode that general type. Every
+            subclass of the Concept is a location type of its own, with the same mark and gazetteer
+            type; untick one to stop offering it. The description is the Concept&apos;s detail,
+            saved to the Concept.
           </StyledSectionNote>
           <StyledKindsRow>
             <PlaceTypeTable
               value={draft.placeTypes}
               onChange={(placeTypes) => setDraft((d) => ({ ...d, placeTypes }))}
+              nodes={assignments.nodes}
+              concepts={assignments.conceptEntities}
+              detailOf={detailOf}
+              onDetailChange={(conceptId, detail) =>
+                setDetails((current) => ({ ...current, [conceptId]: detail }))
+              }
               renderConcept={(conceptId, set) =>
                 picker(conceptId || undefined, EntityEnums.Class.Concept, set)
               }

@@ -1,9 +1,10 @@
 import { IGeocodingPlaceType, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import { expandPlaceTypes, nodeIdOf } from "../../utils/context/placeTypeHierarchy";
 import React, { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlaceTypesProvider } from "../../hooks/placeTypesContext";
 import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
-import { render, Rendered } from "../../utils/test/renderForTest";
+import { click, press, render, Rendered } from "../../utils/test/renderForTest";
 import { PlaceTypePicker } from "./PlaceTypePicker";
 
 /**
@@ -25,6 +26,7 @@ const entry = (typeId: string, over: Partial<LocationTypeEntry> = {}): LocationT
   inferred: false,
   via: `c-${typeId}`,
   shadowed: false,
+  underNode: false,
   ...over,
 });
 
@@ -33,7 +35,10 @@ let view: Rendered | null = null;
 
 const mount = (props: Partial<React.ComponentProps<typeof PlaceTypePicker>> = {}) => {
   view = render(
-    <PlaceTypesProvider placeTypes={types} viaLabels={{ "c-city": "city" }}>
+    <PlaceTypesProvider
+      placeTypes={expandPlaceTypes(types, {}, {})}
+      viaLabels={{ "c-city": "city" }}
+    >
       <PlaceTypePicker anchor={anchor} onClose={() => undefined} {...props} />
     </PlaceTypesProvider>,
   );
@@ -234,3 +239,140 @@ describe("PlaceTypePicker, saying what the choice is about", () => {
   });
 });
 
+
+describe("PlaceTypePicker, with the subclass tree of a location type", () => {
+  // church <- cathedral <- metropolitan cathedral, church <- chapel
+  const tree = {
+    nodes: [
+      { id: "c-church", parents: [] },
+      { id: "c-cathedral", parents: ["c-church"] },
+      { id: "c-chapel", parents: ["c-church"] },
+      { id: "c-metropolitan", parents: ["c-cathedral"] },
+    ],
+    aliases: {},
+  };
+  const labels = {
+    "c-church": { label: "church", detail: "" },
+    "c-cathedral": { label: "cathedral", detail: "the church of a bishop's see" },
+    "c-chapel": { label: "chapel", detail: "" },
+    "c-metropolitan": { label: "metropolitan cathedral", detail: "" },
+  };
+  const nodes = (inactive: string[] = []) =>
+    expandPlaceTypes(
+      types.map((one) => (one.id === "church" ? { ...one, inactive } : one)),
+      { "c-church": tree },
+      labels
+    );
+  const mountTree = (
+    inactive: string[] = [],
+    props: Partial<React.ComponentProps<typeof PlaceTypePicker>> = {}
+  ) => {
+    view = render(
+      <PlaceTypesProvider placeTypes={nodes(inactive)}>
+        <PlaceTypePicker anchor={anchor} onClose={() => undefined} {...props} />
+      </PlaceTypesProvider>
+    );
+  };
+  const listOf = (label: string) =>
+    document.querySelector(`[role=listbox][aria-label="subclasses of ${label}"]`);
+  // the name, without the description under it
+  const namesIn = (list: Element | null) =>
+    [...(list?.querySelectorAll("[role=option]") ?? [])]
+      .filter((one) => one.closest("[role=listbox]") === list)
+      .map((one) => one.querySelector("span > span")?.textContent);
+  // the pointer leaves the list the row is in for the row, as it does when it
+  // moves from a row into the list opened beside it: only that row is entered.
+  // React reads enter and leave from the mouseout of where the pointer came from
+  const hover = async (name: string) => {
+    const row = option(name).parentElement!;
+    act(() => {
+      row
+        .closest("[role=listbox]")!
+        .dispatchEvent(new MouseEvent("mouseout", { bubbles: true, relatedTarget: row }));
+    });
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 200)));
+  };
+
+  it("lists the location types the project set up, and opens the subclasses of one beside it on hover", async () => {
+    mountTree([], { onChoose: vi.fn() });
+    expect(option("cathedral")).toBeUndefined();
+    await hover("church");
+    const list = listOf("church");
+    expect(namesIn(list)).toEqual(["cathedral", "chapel"]);
+  });
+
+  it("goes on down the tree, a subclass with subclasses of its own opening the next list", async () => {
+    mountTree([], { onChoose: vi.fn() });
+    await hover("church");
+    await hover("cathedral");
+    expect(namesIn(listOf("cathedral"))).toEqual(["metropolitan cathedral"]);
+  });
+
+  it("chooses a subclass with subclasses of its own by its own id, not by its root's", async () => {
+    const onChoose = vi.fn();
+    mountTree([], { onChoose });
+    await hover("church");
+    click(option("cathedral"));
+    expect(onChoose).toHaveBeenCalledWith(nodeIdOf("church", "c-cathedral"));
+  });
+
+  it("does not offer a deactivated Concept, but still opens the way to what is offered below it", async () => {
+    const onChoose = vi.fn();
+    mountTree(["c-cathedral"], { onChoose });
+    await hover("church");
+    expect(option("cathedral").getAttribute("aria-disabled")).toBe("true");
+    expect(option("cathedral").textContent).toContain("Deactivated");
+    click(option("cathedral"));
+    expect(onChoose).not.toHaveBeenCalled();
+    await hover("cathedral");
+    click(option("metropolitan cathedral"));
+    expect(onChoose).toHaveBeenCalledWith(nodeIdOf("church", "c-metropolitan"));
+  });
+
+  it("leaves out a deactivated Concept that has nothing offered below it", async () => {
+    mountTree(["c-chapel"], { onChoose: vi.fn() });
+    await hover("church");
+    expect(namesIn(listOf("church"))).toEqual(["cathedral"]);
+  });
+
+  it("opens the subclasses with the right arrow key and goes back with the left one", async () => {
+    mountTree([], { onChoose: vi.fn() });
+    act(() => option("church").focus());
+    press(option("church"), "ArrowRight");
+    await settle();
+    expect(document.activeElement).toBe(option("cathedral"));
+    press(option("cathedral"), "ArrowLeft");
+    await settle();
+    expect(listOf("church")).toBeNull();
+    expect(document.activeElement).toBe(option("church"));
+  });
+
+  it("closes only the innermost list with Escape, and the whole picker from the first list", async () => {
+    const onClose = vi.fn();
+    mountTree([], { onChoose: vi.fn(), onClose });
+    act(() => option("church").focus());
+    press(option("church"), "ArrowRight");
+    await settle();
+    press(option("cathedral"), "Escape");
+    await settle();
+    expect(listOf("church")).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(option("church"));
+    press(option("church"), "Escape");
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("keeps the arrow keys inside the picker, away from the row or card that opened it", () => {
+    const outside = vi.fn();
+    view = render(
+      <div onKeyDown={outside}>
+        <PlaceTypesProvider placeTypes={nodes()}>
+          <PlaceTypePicker anchor={anchor} onClose={() => undefined} onChoose={vi.fn()} />
+        </PlaceTypesProvider>
+      </div>
+    );
+    press(option("church"), "ArrowDown");
+    press(option("church"), "ArrowRight");
+    expect(outside).not.toHaveBeenCalled();
+  });
+});

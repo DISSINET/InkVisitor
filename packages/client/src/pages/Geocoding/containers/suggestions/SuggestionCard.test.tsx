@@ -1,4 +1,5 @@
 import { defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import { expandPlaceTypes } from "../../utils/context/placeTypeHierarchy";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import breslau from "../../fixtures/suggest-breslau.json";
@@ -22,7 +23,7 @@ afterEach(() => {
 
 const card = (suggestion: Suggestion) => {
   view = render(
-    <PlaceTypesProvider placeTypes={defaultPlaceTypes()}>
+    <PlaceTypesProvider placeTypes={expandPlaceTypes(defaultPlaceTypes(), {}, {})}>
       <SuggestionCard
         suggestion={suggestion}
         index={0}

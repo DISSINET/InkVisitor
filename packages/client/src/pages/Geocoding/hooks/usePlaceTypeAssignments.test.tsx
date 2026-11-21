@@ -4,11 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, Rendered } from "../utils/test/renderForTest";
-import {
-  PlaceTypeAssignments,
-  orderedEntries,
-  usePlaceTypeAssignments,
-} from "./usePlaceTypeAssignments";
+import { PlaceTypeAssignments, usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 
 const api = vi.hoisted(() => ({
   entitiesClassifiedUnder: vi.fn(),
@@ -35,33 +31,6 @@ const one = (concept: string, via: string, shadowed = false) => ({
   via,
   inferred: via !== concept,
   shadowed,
-});
-
-describe("orderedEntries", () => {
-  it("puts what a Location is classified under before what it is inferred to be, then what is shadowed", () => {
-    const entries = orderedEntries(types, [
-      one("c-settlement", "c-city", true),
-      one("c-church", "c-parish church"),
-      one("c-fortress", "c-fortress"),
-    ]);
-    expect(entries.map((entry) => [entry.typeId, entry.inferred, entry.shadowed])).toEqual([
-      ["fortress", false, false],
-      ["church", true, false],
-      ["settlement", true, true],
-    ]);
-  });
-
-  it("keeps the order the project lists its location types within each kind", () => {
-    const entries = orderedEntries(types, [
-      one("c-church", "c-church"),
-      one("c-settlement", "c-settlement"),
-    ]);
-    expect(entries.map((entry) => entry.typeId)).toEqual(["settlement", "church"]);
-  });
-
-  it("drops a Concept that no location type is assigned", () => {
-    expect(orderedEntries(types, [one("c-something-else", "c-something-else")])).toEqual([]);
-  });
 });
 
 let result: PlaceTypeAssignments;
@@ -94,8 +63,11 @@ const remount = async (props: React.ComponentProps<typeof Probe>) => {
   await settle();
 };
 
-const answer = (response: IResponseClassifiedUnder) =>
-  api.entitiesClassifiedUnder.mockResolvedValue({ data: response });
+/** An answer without subclass trees, as for Concepts that have no subclasses. */
+const answer = (response: Pick<IResponseClassifiedUnder, "entities" | "truncated">) =>
+  api.entitiesClassifiedUnder.mockResolvedValue({
+    data: { trees: {}, classifiedAs: {}, ...response },
+  });
 
 beforeEach(() => {
   api.entitiesClassifiedUnder.mockReset();
@@ -132,10 +104,16 @@ describe("usePlaceTypeAssignments", () => {
     });
     await mount({ types });
     expect(result.typesByLocation.get("direct")).toEqual([
-      { typeId: "settlement", inferred: false, via: "c-settlement", shadowed: false },
+      {
+        typeId: "settlement",
+        inferred: false,
+        via: "c-settlement",
+        shadowed: false,
+        underNode: false,
+      },
     ]);
     expect(result.typesByLocation.get("inferred")).toEqual([
-      { typeId: "settlement", inferred: true, via: "c-city", shadowed: false },
+      { typeId: "settlement", inferred: true, via: "c-city", shadowed: false, underNode: false },
     ]);
     expect(result.typesByLocation.has("nobody")).toBe(false);
   });
@@ -207,5 +185,44 @@ describe("usePlaceTypeAssignments", () => {
     api.entitiesClassifiedUnder.mockRejectedValue(new Error("down"));
     await mount({ types });
     expect(result.error).toBeTruthy();
+  });
+});
+
+describe("usePlaceTypeAssignments, with the subclass tree of a location type", () => {
+  it("lists the subclasses as location types, and counts a Location under every one it is at or below", async () => {
+    api.entitiesGet.mockImplementation(async (ids: string[]) => ({
+      data: ids.map((id) => ({ id, labels: [id.replace("c-", "")], detail: "" })),
+    }));
+    api.entitiesClassifiedUnder.mockResolvedValue({
+      data: {
+        entities: {
+          a: [one("c-settlement", "c-town")],
+          b: [one("c-settlement", "c-settlement")],
+        },
+        truncated: [],
+        trees: {
+          "c-settlement": {
+            nodes: [
+              { id: "c-settlement", parents: [] },
+              { id: "c-town", parents: ["c-settlement"] },
+            ],
+            aliases: {},
+          },
+        },
+        classifiedAs: { a: ["c-town"], b: ["c-settlement"] },
+      },
+    });
+    await mount({ types });
+    const town = result.nodes.find((node) => node.conceptId === "c-town")!;
+    expect(town.rootId).toBe("settlement");
+    expect(result.countByType[town.id]).toBe(1);
+    expect(result.countByType.settlement).toBe(2);
+    expect(result.inferredByType.settlement).toBe(1);
+    expect(
+      result.typesByLocation
+        .get("a")!
+        .filter((entry) => !entry.shadowed)
+        .map((entry) => entry.typeId)
+    ).toEqual([town.id]);
   });
 });

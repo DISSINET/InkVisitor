@@ -1,23 +1,35 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IResponseEntity } from "@inkvisitor/shared/types";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "components";
-import { IcoCheck } from "Theme/icons";
+import { EntityTag } from "components/advanced";
+import { IcoCheck, IcoChevronRight } from "Theme/icons";
 import { ButtonSize } from "types";
 import {
+  StyledPickerAside,
   StyledPickerBackdrop,
   StyledPickerCheck,
   StyledPickerDescription,
   StyledPickerFooter,
+  StyledPickerHead,
   StyledPickerLabel,
   StyledPickerList,
   StyledPickerOption,
   StyledPickerPanel,
+  StyledPickerRow,
+  StyledPickerSubmenu,
   StyledPickerTitle,
+  StyledSubmenuToggle,
 } from "./PlaceTypePickerStyles";
 import { UNKNOWN_PLACE_TYPE, kindInfo, placeTypeInfo } from "./placeTypeIcons";
 import { kindsForEngineType } from "../../utils/write/placeTypeEdits";
-import { usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
-import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
+import { usePlaceTypeConcepts, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import {
+  LocationTypeEntry,
+  PlaceTypeNode,
+  childrenOf,
+  rootsOf,
+} from "../../utils/context/placeTypeHierarchy";
 
 /**
  * The one control for choosing what location type something is.
@@ -65,6 +77,8 @@ const useFloatingPickerPosition = (anchor: FloatingPickerAnchor) => {
 interface FloatingPicker {
   anchor: FloatingPickerAnchor;
   ariaLabel: string;
+  /** The panel's own list scrolled. */
+  onScroll?: () => void;
   /** Several options can be selected at once. */
   multiselectable?: boolean;
   onClose: () => void;
@@ -82,6 +96,7 @@ interface FloatingPicker {
 export const FloatingPicker: React.FC<FloatingPicker> = ({
   anchor,
   ariaLabel,
+  onScroll,
   multiselectable,
   onClose,
   children,
@@ -101,13 +116,21 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
     };
   }, [panel]);
 
+  // up and down move within the list the focused option is in: a list of
+  // subclasses opened beside it is a list of its own, entered with the right arrow
   const moveFocus = (event: React.KeyboardEvent) => {
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
       return;
     }
+    // drawn in a portal, the panel's keys still bubble to whatever opened it
+    event.stopPropagation();
+    const focused = document.activeElement as HTMLElement | null;
+    const list =
+      (focused && panel.current?.contains(focused) && focused.closest("[role=listbox]")) ||
+      panel.current?.querySelector("[role=listbox]");
     const options = Array.from(
-      panel.current?.querySelectorAll<HTMLElement>("[role=option]:not(:disabled)") ?? [],
-    );
+      list?.querySelectorAll<HTMLElement>("[role=option]:not(:disabled)") ?? []
+    ).filter((option) => option.closest("[role=listbox]") === list);
     if (!options.length) {
       return;
     }
@@ -164,6 +187,7 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
         role="dialog"
         aria-label={ariaLabel}
         onKeyDown={moveFocus}
+        onScroll={(event) => event.target === event.currentTarget && onScroll?.()}
       >
         <StyledPickerList
           role="listbox"
@@ -175,7 +199,7 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
         {footer}
       </StyledPickerPanel>
     </>,
-    document.body,
+    document.body
   );
 };
 
@@ -214,6 +238,256 @@ interface PlaceTypePicker {
   onClose: () => void;
 }
 
+/** How long the pointer rests on an option before its subclasses open beside it. */
+const HOVER_OPEN_MS = 150;
+
+/**
+ * The subclasses of an option, opened beside the row they belong to: to its
+ * right, or to its left where the right has no room, and moved up where it
+ * would run off the bottom.
+ */
+const PickerSubmenu: React.FC<{
+  row: HTMLElement | null;
+  level: number;
+  label: string;
+  onScroll: () => void;
+  children: React.ReactNode;
+}> = ({ row, level, label, onScroll, children }) => {
+  const menu = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ left: -10000, top: 0 });
+
+  // measured after mounting, for the same reason the panel is: its height is
+  // that of what it lists
+  useLayoutEffect(() => {
+    if (!row) {
+      return;
+    }
+    const box = row.getBoundingClientRect();
+    const height = Math.min(menu.current?.offsetHeight || PANEL_MAX_HEIGHT, PANEL_MAX_HEIGHT);
+    setPosition({
+      left:
+        box.right + PANEL_WIDTH <= window.innerWidth - 8
+          ? box.right
+          : Math.max(8, box.left - PANEL_WIDTH),
+      top: Math.max(8, Math.min(box.top, window.innerHeight - 8 - height)),
+    });
+  }, [row]);
+
+  return (
+    <StyledPickerSubmenu
+      ref={menu}
+      role="listbox"
+      aria-label={label}
+      data-level={level}
+      $left={position.left}
+      $top={position.top}
+      $width={PANEL_WIDTH}
+      $maxHeight={PANEL_MAX_HEIGHT}
+      onScroll={(event) => event.target === event.currentTarget && onScroll()}
+    >
+      {children}
+    </StyledPickerSubmenu>
+  );
+};
+
+/** What a row of the picker needs of the picker it is in. */
+interface RowContext {
+  openPath: string[];
+  shownChildren: (kind: PlaceTypeNode) => PlaceTypeNode[];
+  answering: PlaceTypeNode[];
+  toggling: boolean;
+  busy: boolean;
+  ticked: Record<string, boolean>;
+  entryOf: (kind: PlaceTypeNode) => LocationTypeEntry | undefined;
+  directOf: (kind: PlaceTypeNode) => boolean;
+  concepts: Record<string, IResponseEntity>;
+  viaLabel: (conceptId: string) => string;
+  hover: (level: number, kind: PlaceTypeNode | null, hasChildren: boolean) => void;
+  open: (level: number, kindId: string | null) => void;
+  toggle: (kindId: string, on: boolean) => void;
+  onChoose?: (placeType: string | null) => void;
+  focusOnOpen: React.MutableRefObject<number | null>;
+}
+
+/** One option, with the toggle and the list of its subclasses where it has any. */
+const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext }> = ({
+  kind,
+  level,
+  ctx,
+}) => {
+  const {
+    openPath,
+    shownChildren,
+    answering,
+    toggling,
+    busy,
+    ticked,
+    entryOf,
+    directOf,
+    concepts,
+    viaLabel,
+    hover,
+    open,
+    toggle,
+    onChoose,
+    focusOnOpen,
+  } = ctx;
+  const row = useRef<HTMLDivElement>(null);
+  const children = shownChildren(kind);
+  const isOpen = openPath[level] === kind.id && children.length > 0;
+  const mapped = !!kind.conceptId;
+  const fits = answering.includes(kind);
+  const info = kindInfo(kind);
+  const Icon = info.icon;
+  const entry = entryOf(kind);
+  const direct = directOf(kind);
+  const inferred = !!entry?.inferred && !(kind.id in ticked);
+  const offered =
+    mapped && !inferred && !busy && (toggling ? kind.active || direct : kind.active && !direct);
+  const concept = concepts[kind.conceptId];
+
+  return (
+    <StyledPickerRow
+      ref={row}
+      onMouseEnter={(event) => {
+        event.stopPropagation();
+        hover(level, kind, children.length > 0);
+      }}
+    >
+      <StyledPickerOption
+        type="button"
+        role="option"
+        aria-selected={direct}
+        aria-haspopup={children.length > 0 ? "listbox" : undefined}
+        aria-expanded={children.length > 0 ? isOpen : undefined}
+        data-option-level={level}
+        data-option-id={kind.id}
+        disabled={!offered && !children.length}
+        aria-disabled={!offered || undefined}
+        $current={direct}
+        $suggested={fits}
+        onClick={() => {
+          if (!offered) {
+            open(level, children.length ? kind.id : null);
+            return;
+          }
+          if (toggling) {
+            toggle(kind.id, !direct);
+          } else {
+            onChoose?.(kind.id);
+          }
+        }}
+        onKeyDown={(event) => {
+          // the picker is drawn in a portal, so its keys still bubble to the
+          // row or card that opened it, which has arrow keys of its own
+          if (
+            event.key === "ArrowRight" ||
+            event.key === "ArrowLeft" ||
+            (event.key === "Escape" && level > 0)
+          ) {
+            event.stopPropagation();
+          }
+          if (event.key === "ArrowRight" && children.length) {
+            event.preventDefault();
+            focusOnOpen.current = level + 1;
+            open(level, kind.id);
+          } else if ((event.key === "ArrowLeft" || event.key === "Escape") && level > 0) {
+            // back to the option the list was opened from; Escape in the first
+            // list closes the whole picker
+            event.preventDefault();
+            const parent = openPath[level - 1];
+            open(level - 1, null);
+            document
+              .querySelector<HTMLElement>(
+                `[data-option-level="${level - 1}"][data-option-id="${parent}"]`
+              )
+              ?.focus();
+          }
+        }}
+      >
+        <Icon />
+        <StyledPickerLabel>
+          <StyledPickerHead>
+            {concept ? (
+              <EntityTag
+                entity={concept}
+                fullWidth
+                disableTooltip
+                disableDrag
+                disableCopyToClipboard
+                disableDoubleClick
+                disableContextMenu
+              />
+            ) : (
+              info.label
+            )}
+            {fits ? (
+              <StyledPickerAside>
+                {kind.favorite && answering.length > 1 ? "★ favourite" : "what the sources call it"}
+              </StyledPickerAside>
+            ) : null}
+          </StyledPickerHead>
+          {!mapped ? (
+            <StyledPickerDescription>
+              No Concept is assigned for this location type.
+            </StyledPickerDescription>
+          ) : inferred ? (
+            <StyledPickerDescription>
+              Already applies through {viaLabel(entry!.via)}.
+            </StyledPickerDescription>
+          ) : direct && !toggling ? (
+            <StyledPickerDescription>This place already has it.</StyledPickerDescription>
+          ) : !kind.active && !direct ? (
+            <StyledPickerDescription>
+              Deactivated: not offered for a new assignment.
+            </StyledPickerDescription>
+          ) : info.description ? (
+            <StyledPickerDescription>{info.description}</StyledPickerDescription>
+          ) : null}
+        </StyledPickerLabel>
+        {direct ? (
+          <StyledPickerCheck aria-hidden>
+            <IcoCheck />
+          </StyledPickerCheck>
+        ) : null}
+      </StyledPickerOption>
+      {children.length ? (
+        <StyledSubmenuToggle
+          type="button"
+          tabIndex={-1}
+          $open={isOpen}
+          aria-label={`subclasses of ${kind.name}`}
+          onClick={() => open(level, isOpen ? null : kind.id)}
+        >
+          <IcoChevronRight />
+        </StyledSubmenuToggle>
+      ) : null}
+      {isOpen ? (
+        <PickerSubmenu
+          row={row.current}
+          level={level + 1}
+          label={`subclasses of ${kind.name}`}
+          onScroll={() => open(level + 1, null)}
+        >
+          {children.map((child) => (
+            <PickerRow key={child.id} kind={child} level={level + 1} ctx={ctx} />
+          ))}
+        </PickerSubmenu>
+      ) : null}
+    </StyledPickerRow>
+  );
+};
+
+/**
+ * The one control for choosing what location type something is, the subclass
+ * tree of each opening beside it.
+ *
+ * The first list holds the location types the project set up. One whose
+ * Concept has subclasses opens them in a list beside it on hover, on its arrow
+ * or with the right arrow key, and so on down the tree; any of them, a group
+ * included, is chosen by clicking it. A deactivated Concept is not offered: it
+ * is left out, or shown only as the way to subclasses that are offered.
+ */
 export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   anchor,
   held,
@@ -226,11 +500,14 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   onClose,
 }) => {
   const kinds = usePlaceTypes();
+  const concepts = usePlaceTypeConcepts();
   const viaLabel = useViaLabel();
+  const below = useMemo(() => childrenOf(kinds), [kinds]);
   // the favourite leads the location types that answer to the suggestion; the rest keep
   // the order the project listed them in
+  const roots = rootsOf(kinds);
   const answering = kindsForEngineType(kinds, suggested);
-  const ordered = [...answering, ...kinds.filter((one) => !answering.includes(one))];
+  const ordered = [...answering, ...roots.filter((one) => !answering.includes(one))];
   const engineLabel = suggested ? placeTypeInfo(suggested).label : "";
   const toggling = !!onToggle;
 
@@ -241,6 +518,24 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   const [busy, setBusy] = useState(false);
   const heldKey = JSON.stringify(held ?? null);
   useEffect(() => setTicked({}), [heldKey]);
+
+  /** The node whose subclasses are open at each level, the first list being level 0. */
+  const [openPath, setOpenPath] = useState<string[]>([]);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusOnOpen = useRef<number | null>(null);
+  useEffect(() => () => (hoverTimer.current ? clearTimeout(hoverTimer.current) : undefined), []);
+
+  // the first option of a list opened from the keyboard takes the focus
+  useEffect(() => {
+    if (focusOnOpen.current === null) {
+      return;
+    }
+    const level = focusOnOpen.current;
+    focusOnOpen.current = null;
+    document
+      .querySelector<HTMLElement>(`[data-level="${level}"] [role=option]:not(:disabled)`)
+      ?.focus();
+  }, [openPath]);
 
   const toggle = async (kindId: string, on: boolean) => {
     setTicked((current) => ({ ...current, [kindId]: on }));
@@ -256,12 +551,73 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
     }
   };
 
+  const entryOf = (kind: PlaceTypeNode) => held?.find((one) => one.typeId === kind.id);
+  // set on this Location itself, or only through a subclass or a synonym
+  const directOf = (kind: PlaceTypeNode) => {
+    const entry = entryOf(kind);
+    return kind.id in ticked ? ticked[kind.id] : !!entry && !entry.inferred;
+  };
+
+  // a Concept is listed where it is offered, where the Location has it (so it
+  // can be taken off), or where something offered lies below it
+  const shownCache = new Map<string, boolean>();
+  const isShown = (kind: PlaceTypeNode, trail: Set<string> = new Set()): boolean => {
+    if (shownCache.has(kind.id)) {
+      return shownCache.get(kind.id)!;
+    }
+    const deeper = new Set(trail).add(kind.id);
+    const shown =
+      (kind.active && !!kind.conceptId) ||
+      directOf(kind) ||
+      (below.get(kind.id) ?? []).some((child) => !trail.has(child.id) && isShown(child, deeper));
+    shownCache.set(kind.id, shown);
+    return shown;
+  };
+  const shownChildren = (kind: PlaceTypeNode) =>
+    (below.get(kind.id) ?? []).filter((child) => isShown(child));
+
+  const open = (level: number, kindId: string | null) =>
+    setOpenPath((current) =>
+      kindId === null ? current.slice(0, level) : [...current.slice(0, level), kindId]
+    );
+
+  // one timer for every row, so passing over a row on the way into a list
+  // already open does not close it
+  const hover = (level: number, kind: PlaceTypeNode | null, hasChildren: boolean) => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+    }
+    hoverTimer.current = setTimeout(
+      () => open(level, kind && hasChildren ? kind.id : null),
+      HOVER_OPEN_MS
+    );
+  };
+
+  const ctx: RowContext = {
+    openPath,
+    shownChildren,
+    answering,
+    toggling,
+    busy,
+    ticked,
+    entryOf,
+    directOf,
+    concepts,
+    viaLabel,
+    hover,
+    open,
+    toggle,
+    onChoose,
+    focusOnOpen,
+  };
+
   return (
     <FloatingPicker
       anchor={anchor}
       ariaLabel="Location type"
       multiselectable={toggling}
       onClose={onClose}
+      onScroll={() => open(0, null)}
       footer={
         toggling ? (
           <StyledPickerFooter>
@@ -286,6 +642,7 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
           type="button"
           role="option"
           aria-selected={false}
+          onMouseEnter={() => hover(0, null, false)}
           onClick={() => onChoose?.(null)}
         >
           <UNKNOWN_PLACE_TYPE.icon />
@@ -298,45 +655,11 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
         </StyledPickerOption>
       ) : null}
 
-      {ordered.map((kind) => {
-        const mapped = !!kind.conceptId;
-        const fits = answering.includes(kind);
-        const info = kindInfo(kind);
-        const Icon = info.icon;
-        const entry = held?.find((one) => one.typeId === kind.id);
-        // set on this Location itself, or only through a subclass or a synonym
-        const direct = kind.id in ticked ? ticked[kind.id] : !!entry && !entry.inferred;
-        const inferred = !!entry?.inferred && !(kind.id in ticked);
-        const offered = mapped && !inferred && !busy && (toggling || !direct);
-        return (
-          <StyledPickerOption
-            key={kind.id}
-            type="button"
-            role="option"
-            aria-selected={direct}
-            disabled={!offered}
-            $current={direct}
-            $suggested={fits}
-            onClick={() => (toggling ? toggle(kind.id, !direct) : onChoose?.(kind.id))}
-          >
-            <Icon />
-            <StyledPickerLabel>
-              {info.label}
-              {fits ? (kind.favorite && answering.length > 1 ? " ★ favourite" : " · what the sources call it") : ""}
-              <StyledPickerDescription>
-                {!mapped
-                  ? "No Concept is assigned for this location type."
-                  : inferred
-                    ? `Already applies through ${viaLabel(entry!.via)}.`
-                    : direct && !toggling
-                      ? "This place already has it."
-                      : info.description}
-              </StyledPickerDescription>
-            </StyledPickerLabel>
-            {direct ? <StyledPickerCheck aria-hidden><IcoCheck /></StyledPickerCheck> : null}
-          </StyledPickerOption>
-        );
-      })}
+      {ordered
+        .filter((kind) => isShown(kind) || !kind.conceptId)
+        .map((kind) => (
+          <PickerRow key={kind.id} kind={kind} level={0} ctx={ctx} />
+        ))}
     </FloatingPicker>
   );
 };

@@ -266,9 +266,11 @@ export const PlaceTypeIcon: React.FC<{ placeType: string | null | undefined }> =
 };
 
 /** What a project's location type is called and covers; the unknown mark where it has none. */
-export const kindInfo = (kind: IGeocodingPlaceType | null | undefined): PlaceTypeInfo =>
+export const kindInfo = (
+  kind: (IGeocodingPlaceType & { description?: string }) | null | undefined,
+): PlaceTypeInfo =>
   kind
-    ? { icon: placeIcon(kind.icon), label: kind.name, description: kind.description }
+    ? { icon: placeIcon(kind.icon), label: kind.name, description: kind.description ?? "" }
     : UNKNOWN_PLACE_TYPE;
 
 /** The mark for a project's kind, or the unknown mark for none. */

@@ -61,7 +61,7 @@ export const StyledEngineTypeHelp = styled.div`
   }
 `;
 
-export const StyledKindRow = styled.div`
+export const StyledKindRow = styled.div<{ $inactive?: boolean }>`
   display: grid;
   grid-template-columns: ${COLUMNS};
   gap: ${({ theme }) => theme.space[2]};
@@ -69,12 +69,64 @@ export const StyledKindRow = styled.div`
   min-width: 70rem;
   padding: ${({ theme }) => theme.space[1]} 0;
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  /* a deactivated Concept is kept in its place, paler, so the tree stays whole */
+  opacity: ${({ $inactive }) => ($inactive ? 0.55 : 1)};
 `;
 
 export const StyledKindCell = styled.div`
   display: flex;
   align-items: center;
   min-width: 0;
+`;
+
+/** The Concept cell of a row: indented by its depth in the tree, the fold toggle and the tick before the tag. */
+export const StyledTreeCell = styled.div<{ $depth: number }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  min-width: 0;
+  padding-left: ${({ $depth }) => $depth * 1.4}rem;
+`;
+
+/** Folds or unfolds the subclasses of a row; an empty slot of the same width where there are none. */
+export const StyledFoldToggle = styled.button<{ $open: boolean }>`
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  font-size: ${({ theme }) => theme.fontSize.base};
+  color: ${({ theme }) => theme.color["black"]};
+  background: none;
+  border: none;
+  cursor: pointer;
+  transform: rotate(${({ $open }) => ($open ? 90 : 0)}deg);
+  transition: transform 0.1s;
+`;
+
+export const StyledFoldSpacer = styled.span`
+  flex: 0 0 auto;
+  width: 1.4rem;
+`;
+
+/** The mark a subclass shares with the location type at its root, shown but not edited here. */
+export const StyledInheritedMark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The switches above the table. */
+export const StyledKindToolbar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledKindCount = styled.div`

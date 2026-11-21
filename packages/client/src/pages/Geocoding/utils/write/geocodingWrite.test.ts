@@ -21,6 +21,7 @@ import {
   planGeocodingWrite,
 } from "./geocodingWrite";
 import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteExecute";
+import { expandPlaceTypes, nodeIdOf } from "../context/placeTypeHierarchy";
 
 /**
  * Covers I3, I6, I7 and I14–I17, with the geometry held as one GeoJSON Value.
@@ -829,5 +830,34 @@ describe("executeGeocodingWrite", () => {
     const result = await executeGeocodingWrite("L1", location(), plan, roles, g);
     expect(result.ok).toBe(true);
     expect(result.ok && result.undeletedValueIds).toEqual(["old-geo"]);
+  });
+});
+
+describe("planGeocodingWrite, a subclass chosen as the location type", () => {
+  // the settlement location type with the subclass tree of its Concept
+  const withTree: IGeocodingRoles = {
+    ...roles,
+    placeTypes: expandPlaceTypes(
+      roles.placeTypes,
+      {
+        "v-settlement": {
+          nodes: [
+            { id: "v-settlement", parents: [] },
+            { id: "v-town", parents: ["v-settlement"] },
+          ],
+          aliases: {},
+        },
+      },
+      { "v-town": { label: "town", detail: "" } }
+    ),
+  };
+
+  it("classifies the Location under the subclass's own Concept, not its root's", () => {
+    const plan = planGeocodingWrite({
+      ...baseInput,
+      roles: withTree,
+      placeType: nodeIdOf(roles.placeTypes[0].id, "v-town"),
+    }) as GeocodingWritePlan;
+    expect(plan.kindConceptId).toBe("v-town");
   });
 });

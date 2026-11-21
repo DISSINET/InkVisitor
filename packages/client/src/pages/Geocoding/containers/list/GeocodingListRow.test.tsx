@@ -1,4 +1,5 @@
 import { IGeocodingPlaceType, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import { expandPlaceTypes } from "../../utils/context/placeTypeHierarchy";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PlaceTypesProvider } from "../../hooks/placeTypesContext";
@@ -23,6 +24,7 @@ const entry = (index: number, over: Partial<LocationTypeEntry> = {}): LocationTy
   inferred: false,
   via: `c-${types[index].id}`,
   shadowed: false,
+  underNode: false,
   ...over,
 });
 
@@ -54,7 +56,7 @@ const rowOf = (typeEntries: LocationTypeEntry[]) => {
     typeof GeocodingListRow
   >[0];
   return (
-    <PlaceTypesProvider placeTypes={types}>
+    <PlaceTypesProvider placeTypes={expandPlaceTypes(types, {}, {})}>
       <GeocodingListRow {...props} />
     </PlaceTypesProvider>
   );

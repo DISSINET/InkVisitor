@@ -570,7 +570,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
               pending,
               accuracy,
               context.recordPlaceType,
-              defaultTypeFor(context, selected?.typeEntries ?? []),
+              defaultTypeFor(context, selected?.typeEntries ?? [], placeTypes),
             );
             if ("write" in step) {
               finish(pending, step.write.accuracy, step.write.placeType);

@@ -12,6 +12,7 @@ import {
   deriveGeocoding,
 } from "../utils/write/geocodingDerivation";
 import { LocationTypeEntry, usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { entryApplies } from "../utils/context/placeTypeHierarchy";
 
 /**
  * The one collection the list, the map and every count read.
@@ -26,15 +27,15 @@ import { LocationTypeEntry, usePlaceTypeAssignments } from "./usePlaceTypeAssign
 export interface GeocodingLocation extends DerivedGeocoding {
   entity: IResponseEntity;
   /**
-   * Every location type the Location comes under that is shown — classified
-   * under the type's own Concept or under one of its subclasses or synonyms,
-   * the first kind before the second, each in the order the project lists its
-   * location types. A type another of them lies below is not among them.
+   * Every location type the Location comes under, for filtering and counting:
+   * the ones shown, and the nodes of the same trees above them, so that a
+   * Location classified as a highway is found under road and path too. A root
+   * another location type lies below is not among them.
    */
   placeTypes: string[];
   /**
-   * The same, and the types left out, each with how the Location comes under it.
-   * `placeTypes` is these without the shadowed ones.
+   * The location types with how the Location comes under each, those shown
+   * first; the ones shown are those not shadowed.
    */
   typeEntries: LocationTypeEntry[];
 }
@@ -133,7 +134,7 @@ export const useGeocodingLocations = (
         entity,
         ...deriveGeocoding(entity, roles, byId),
         placeType: shown[0] ?? null,
-        placeTypes: shown,
+        placeTypes: entries.filter(entryApplies).map((entry) => entry.typeId),
         typeEntries: entries,
       };
     });

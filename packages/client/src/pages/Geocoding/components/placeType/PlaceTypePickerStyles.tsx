@@ -123,3 +123,62 @@ export const StyledPickerFooter = styled.div`
   background-color: ${({ theme }) => theme.color["gray"][200]};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][400]};
 `;
+
+/** One option with, where it has subclasses, the toggle that opens them beside the list. */
+export const StyledPickerRow = styled.div`
+  display: flex;
+  align-items: stretch;
+`;
+
+/** Opens the subclasses of an option; the arrow keys and hovering do the same. */
+export const StyledSubmenuToggle = styled.button<{ $open: boolean }>`
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  color: ${({ theme }) => theme.color["greyer"]};
+  background-color: ${({ theme, $open }) => ($open ? theme.color["gray"][200] : "transparent")};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][200]};
+  }
+`;
+
+/** The subclasses of an option, beside the list it is in. Fixed to the viewport, so the list's own scrolling does not clip it. */
+export const StyledPickerSubmenu = styled.div<{
+  $left: number;
+  $top: number;
+  $width: number;
+  $maxHeight: number;
+}>`
+  position: fixed;
+  left: ${({ $left }) => $left}px;
+  top: ${({ $top }) => $top}px;
+  width: ${({ $width }) => $width}px;
+  max-height: ${({ $maxHeight }) => $maxHeight}px;
+  overflow-y: auto;
+  z-index: ${({ theme }) => theme.zIndex.picker};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  box-shadow: ${({ theme }) => theme.boxShadow["high"]};
+`;
+
+/** What is said beside the tag: that the sources call it this, or that it is the favourite. */
+export const StyledPickerAside = styled.span`
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The tag and what is said beside it, on one line. */
+export const StyledPickerHead = styled.span`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+`;

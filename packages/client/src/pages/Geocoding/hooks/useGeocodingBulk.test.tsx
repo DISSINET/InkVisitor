@@ -28,7 +28,7 @@ let bulk: UseGeocodingBulk;
 const Probe = (props: { marked: Set<string>; context?: Partial<IGeocodingContext> }) => {
   bulk = useGeocodingBulk({
     user: { options: {} } as never,
-    roles: {} as IGeocodingRoles,
+    roles: { placeTypes: [] } as unknown as IGeocodingRoles,
     context: {
       quickStrategy: "topScore",
       quickTakeOffRegion: true,

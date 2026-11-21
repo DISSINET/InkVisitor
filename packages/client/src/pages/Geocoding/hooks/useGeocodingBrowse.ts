@@ -120,6 +120,10 @@ export interface UseGeocodingBrowse {
   clearFilters: () => void;
 }
 
+/** A location type's name, set in by its depth in the tree it belongs to. */
+export const indentedName = (placeType: IGeocodingPlaceType & { depth?: number }): string =>
+  `${"\u2003".repeat(placeType.depth ?? 0)}${placeType.name}`;
+
 /**
  * The location types present in a collection, as filter options.
  *
@@ -148,7 +152,7 @@ export const placeTypeOptionsFor = (
   // reorder itself as places are typed
   const typed = placeTypes
     .filter((placeType) => present.has(placeType.id))
-    .map((placeType) => ({ value: placeType.id, label: placeType.name }));
+    .map((placeType) => ({ value: placeType.id, label: indentedName(placeType) }));
   if (!typed.length) {
     return [{ value: ANY, label: "no location types recorded yet" }];
   }

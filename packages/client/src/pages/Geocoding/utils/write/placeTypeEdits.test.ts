@@ -1,6 +1,7 @@
 import { IGeocodingPlaceType, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
 import { describe, expect, it } from "vitest";
 import { assignConcept, kindsForEngineType, makeFavorite, pairEngineType } from "./placeTypeEdits";
+import { expandPlaceTypes } from "../context/placeTypeHierarchy";
 
 const kind = (id: string, over: Partial<IGeocodingPlaceType> = {}): IGeocodingPlaceType => ({
   ...defaultPlaceTypes()[0],
@@ -9,6 +10,7 @@ const kind = (id: string, over: Partial<IGeocodingPlaceType> = {}): IGeocodingPl
   conceptId: "",
   engineType: null,
   favorite: false,
+  inactive: [],
   ...over,
 });
 
@@ -81,5 +83,43 @@ describe("kindsForEngineType", () => {
   it("is empty for no gazetteer location type and for one no kind answers to", () => {
     expect(kindsForEngineType([kind("a", { engineType: "river" })], null)).toEqual([]);
     expect(kindsForEngineType([kind("a", { engineType: "river" })], "lake")).toEqual([]);
+  });
+});
+
+describe("location types with subclass trees", () => {
+  const tree = {
+    "c-path": {
+      nodes: [
+        { id: "c-path", parents: [] },
+        { id: "c-road", parents: ["c-path"] },
+      ],
+      aliases: {},
+    },
+  };
+
+  it("points a gazetteer type at the location types the project set up, not at the subclasses that share it", () => {
+    const nodes = expandPlaceTypes(
+      [kind("ways", { conceptId: "c-path", engineType: "road", favorite: true })],
+      tree,
+      { "c-road": { label: "road", detail: "" } }
+    );
+    expect(nodes).toHaveLength(2);
+    expect(kindsForEngineType(nodes, "road").map((one) => one.id)).toEqual(["ways"]);
+  });
+
+  it("does not point a gazetteer type at a location type whose own Concept is deactivated", () => {
+    const off = kind("ways", {
+      conceptId: "c-path",
+      engineType: "road",
+      favorite: true,
+      inactive: ["c-path"],
+    });
+    expect(kindsForEngineType([off], "road")).toEqual([]);
+  });
+
+  it("forgets what was deactivated when the location type is given another Concept, whose tree it was not", () => {
+    const kinds = [kind("ways", { conceptId: "c-path", inactive: ["c-road"] })];
+    expect(assignConcept(kinds, "ways", "c-street")[0].inactive).toEqual([]);
+    expect(assignConcept(kinds, "ways", "c-path")[0].inactive).toEqual(["c-road"]);
   });
 });

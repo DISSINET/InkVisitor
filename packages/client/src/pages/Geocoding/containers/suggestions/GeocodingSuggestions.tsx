@@ -30,6 +30,7 @@ import {
   shownEntries,
 } from "../../components/placeType/locationTypeText";
 import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
+import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { degradationsOf, problemsOf } from "../../utils/engine/suggestIntegrity";
 import { splitLabel } from "../../utils/suggestions/suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "../../utils/suggestions/suggestionRank";
@@ -844,7 +845,11 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
       // question is switched off, which is not the same as answering "none" —
       // answering it would strip the location type off every Location whose coordinate
       // is corrected
-      accept(suggestion, accuracy, defaultTypeFor(context, selected?.typeEntries ?? []));
+      accept(
+        suggestion,
+        accuracy,
+        defaultTypeFor(context, selected?.typeEntries ?? [], roles.placeTypes as PlaceTypeNode[]),
+      );
       return;
     }
     setPending({ index, accuracy, anchor });

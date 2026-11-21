@@ -667,8 +667,9 @@ place regardless. What they cannot do is notice this by looking at the list.
 
 A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
-classified under, a mark chosen from a set of sixty-three, a description and,
-optionally, the gazetteer location type it answers to. The gazetteer location
+classified under, a mark chosen from the set of marks and, optionally, the
+gazetteer type it answers to. Its description is the Concept's own detail, edited
+in the same table and written to the Concept when the window is saved. The gazetteer location
 types, the engine's twelve, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The
 default list is one location type per gazetteer location type. When several
@@ -692,8 +693,10 @@ Concepts, `GET /entities/classified-under`, and is told for every classified
 entity which of them it comes under, through which Concept, whether that is the
 assigned Concept itself (a **direct** location type) or not (an **inferred**
 one), and whether another of the project's types lies below this one on the same
-classification (**shadowed**). It is open to every logged-in user, a viewer
-among them, so the types read the same for everyone.
+classification (**shadowed**). The same answer carries the subclass tree below
+each assigned Concept and every Concept of those trees each entity is classified
+under, from which the page places the entity within a tree (below). It is open to
+every logged-in user, a viewer among them, so the types read the same for everyone.
 
 Only superclass and synonym links count. The Explorer's "include subordinates"
 also follows part-of links, and a settlement part is not a settlement: on the
@@ -717,6 +720,35 @@ create; the classification it comes from is changed in Detail. In the settings
 table a type's count is the Locations that read as it, with the share that is
 only inferred beside it, and a warning where the Concept has more subclasses than
 the walk can follow, so that some Locations are missing.
+
+### The subclass tree of a location type
+
+Every subclass of a location type's Concept, at every depth, is a location type of
+its own. The settings table draws the tree under the row the project set up,
+indented by depth and folded or unfolded per group, and the pickers open it as
+lists beside one another: hovering a Concept with subclasses (or its arrow, or the
+right arrow key) opens them beside it, and any Concept in the tree, a group
+included, is chosen by clicking it, which writes one Classification under that
+Concept. The tree is read from the superclass relations each time, not stored, so
+a subclass added in Detail is offered without anyone editing the settings. A
+Concept with two superclasses in the tree is one location type shown under both. A
+Concept that is another location type's own Concept is left out of the tree, since
+it is that location type.
+
+The mark, the gazetteer type and the favourite are set on the location type at
+the root and shared by its whole tree; a gazetteer type points at the roots only.
+Any Concept of the tree, the root's own included, can be unticked. An unticked
+Concept is not offered for a new assignment anywhere (it stays in a picker only as
+the way to subclasses that are offered), and a Location already classified under
+it still reads as it, with "deactivated for new assignments" in the hover. The
+settings store only the unticked Concepts of each tree; a switch above the table
+hides them.
+
+A Location classified under a deep Concept reads as that Concept, and the Concepts
+above it in the tree are hidden but still apply: they count it, so each row's count
+in the settings table is the Locations at it or below it, and the list's filter by
+a location type finds the Locations below it too. A Location classified under two
+Concepts of one branch shows the deeper one; under two branches, it shows both.
 
 What is classified is read as it was when the page asked, up to thirty seconds
 before: a subclass added in Detail shows on the Geocoding page after it is next

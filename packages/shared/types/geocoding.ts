@@ -123,8 +123,7 @@ export interface IGeocodingPlaceType {
   /** Stable and never shown; what a default and a write refer to. */
   id: string;
   name: string;
-  description: string;
-  /** A key into the client's icon set. */
+  /** A key into the client's icon set, shared by every Concept of the type's subclass tree. */
   icon: string;
   /** The Concept a Location is classified under. Empty means not assigned yet. */
   conceptId: string;
@@ -136,6 +135,13 @@ export interface IGeocodingPlaceType {
   engineType: GeocodingPlaceType | null;
   /** The location type offered first for its gazetteer location type; at most one per gazetteer location type. */
   favorite: boolean;
+  /**
+   * Concepts of the type's subclass tree, its own Concept included, that are not
+   * offered for a new assignment. A Location already classified under one still
+   * reads as it. Every other Concept of the tree is offered, a subclass added
+   * later included: the tree is read from the superclass relations, not stored.
+   */
+  inactive: string[];
 }
 
 /** One kind per gazetteer location type, each paired with its own — the list a project starts from. */
@@ -143,11 +149,11 @@ export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
   GEOCODING_PLACE_TYPES.map((engineType) => ({
     id: engineType,
     name: ENGINE_PLACE_TYPE_INFO[engineType].label,
-    description: ENGINE_PLACE_TYPE_INFO[engineType].description,
     icon: ENGINE_PLACE_TYPE_INFO[engineType].icon,
     conceptId: "",
     engineType,
     favorite: true,
+    inactive: [],
   }));
 
 /**
@@ -165,11 +171,13 @@ export const normalizePlaceTypes = (stored: unknown): IGeocodingPlaceType[] => {
       .map((one) => ({
         id: one.id,
         name: typeof one.name === "string" ? one.name : one.id,
-        description: typeof one.description === "string" ? one.description : "",
         icon: typeof one.icon === "string" ? one.icon : "unknown",
         conceptId: typeof one.conceptId === "string" ? one.conceptId : "",
         engineType: GEOCODING_PLACE_TYPES.includes(one.engineType) ? one.engineType : null,
         favorite: !!one.favorite,
+        inactive: Array.isArray(one.inactive)
+          ? one.inactive.filter((id: unknown): id is string => typeof id === "string")
+          : [],
       }));
   }
   const legacy: Record<string, unknown> =

@@ -1,5 +1,4 @@
-import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
-import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
+import { LocationTypeEntry, PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { findPlaceType } from "../../hooks/placeTypesContext";
 import { kindInfo } from "./placeTypeIcons";
 
@@ -15,22 +14,25 @@ export const shownEntries = (entries: LocationTypeEntry[]): LocationTypeEntry[] 
   entries.filter((entry) => !entry.shadowed);
 
 /**
- * One location type of a Location, as a line: its name, and where it comes from
- * when the Location is not classified under it directly.
+ * One location type of a Location, as a line: its name, where it comes from
+ * when the Location is not classified under it directly, and that it is not
+ * offered for a new assignment where the project deactivated it.
  */
 export const describeEntry = (
   entry: LocationTypeEntry,
-  placeTypes: IGeocodingPlaceType[],
+  placeTypes: PlaceTypeNode[],
   viaLabel: (conceptId: string) => string,
 ): string => {
-  const name = kindInfo(findPlaceType(placeTypes, entry.typeId)).label;
-  return entry.inferred ? `${name} — inferred from ${viaLabel(entry.via)}` : name;
+  const kind = findPlaceType(placeTypes, entry.typeId);
+  const name = kindInfo(kind).label;
+  const how = entry.inferred ? `${name} — inferred from ${viaLabel(entry.via)}` : name;
+  return kind && !kind.active ? `${how} (deactivated for new assignments)` : how;
 };
 
 /** Every shown location type of a Location, one per line, or the words for none. */
 export const describeEntries = (
   entries: LocationTypeEntry[],
-  placeTypes: IGeocodingPlaceType[],
+  placeTypes: PlaceTypeNode[],
   viaLabel: (conceptId: string) => string,
 ): string => {
   const shown = shownEntries(entries);
@@ -49,8 +51,13 @@ export const describeEntries = (
 export const defaultTypeFor = (
   context: { recordPlaceType?: boolean; defaultPlaceType?: string | null },
   entries: LocationTypeEntry[],
+  /** The location types; a default the project has since deactivated is not written. */
+  placeTypes: PlaceTypeNode[],
 ): string | undefined => {
   if (context.recordPlaceType !== false || !context.defaultPlaceType) {
+    return undefined;
+  }
+  if (findPlaceType(placeTypes, context.defaultPlaceType)?.active === false) {
     return undefined;
   }
   return entries.some((entry) => entry.typeId === context.defaultPlaceType)

@@ -201,6 +201,10 @@ export const planGeocodingWrite = (
     if (!kind.conceptId) {
       return { blocked: `No Concept is assigned for the location type "${kind.name}".` };
     }
+    // a choice offers only active location types; a default named earlier may not be
+    if ((kind as { active?: boolean }).active === false) {
+      return { blocked: `The location type "${kind.name}" is deactivated in the settings.` };
+    }
     kindConceptId = kind.conceptId;
   }
 

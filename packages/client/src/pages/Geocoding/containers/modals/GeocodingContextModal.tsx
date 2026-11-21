@@ -20,6 +20,8 @@ import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
 import React, { useState } from "react";
 import { usePlaceTypes } from "../../hooks/placeTypesContext";
+import { indentedName } from "../../hooks/useGeocodingBrowse";
+import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { toast } from "react-toastify";
 import {
   StyledFullRow,
@@ -70,9 +72,12 @@ const yesNoOptions = [
  */
 const NO_DEFAULT_PLACE_TYPE = "none";
 
-const defaultPlaceTypeOptions = (placeTypes: IGeocodingPlaceType[]) => [
+/** The location types a quick geocode can record: the ones offered for a new assignment. */
+const defaultPlaceTypeOptions = (placeTypes: PlaceTypeNode[]) => [
   { value: NO_DEFAULT_PLACE_TYPE, label: "nothing — leave each one alone" },
-  ...placeTypes.map((placeType) => ({ value: placeType.id, label: placeType.name })),
+  ...placeTypes
+    .filter((placeType) => placeType.active)
+    .map((placeType) => ({ value: placeType.id, label: indentedName(placeType) })),
 ];
 
 /** The keys this modal owns. The query fields belong to the panel, and writing
