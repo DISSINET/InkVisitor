@@ -60,7 +60,12 @@ import { IDocument, IDocumentExport, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseEntityExpansion } from "./response-entity-expansion";
-import { IClassifiedUnder, IResponseClassifiedUnder } from "./response-classified-under";
+import {
+  IClassifiedUnder,
+  IConceptTree,
+  IConceptTreeNode,
+  IResponseClassifiedUnder,
+} from "./response-classified-under";
 import { IResponseStats } from "./response-stats";
 import { IBookmarkFolder, IStoredTerritory, IUser, IUserOptions, IUserRight } from "./user";
 
@@ -119,6 +124,8 @@ export type {
   IRequestQuery,
   IRequestStats,
   IClassifiedUnder,
+  IConceptTree,
+  IConceptTreeNode,
   IResource,
   IResourceData,
   IResponseAudit,

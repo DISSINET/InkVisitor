@@ -69,6 +69,16 @@ describe("entities/classified-under", () => {
         ],
       },
       truncated: [],
+      trees: {
+        [settlement.id]: {
+          nodes: [
+            { id: settlement.id, parents: [] },
+            { id: city.id, parents: [settlement.id] },
+          ],
+          aliases: {},
+        },
+      },
+      classifiedAs: { [locationId]: [city.id] },
     });
   });
 

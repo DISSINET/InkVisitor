@@ -4,7 +4,7 @@ import { IClassifiedUnder } from "@inkvisitor/shared/types";
 import { Db } from "@service/storage";
 import { deleteRelations } from "@service/shorthands";
 import { saveRelationFixture } from "../../test/relations";
-import { getClassifiedUnder, getConceptsBelow } from "./classified-under";
+import { getClassifiedUnder, getConceptTree, getConceptsBelow } from "./classified-under";
 import * as functions from "./functions";
 import Relation from "./relation";
 
@@ -52,6 +52,11 @@ describe("getClassifiedUnder", () => {
     // a cycle
     await saveRelationFixture(db.connection, SCL, ["loop a", "loop b"]);
     await saveRelationFixture(db.connection, SCL, ["loop b", "loop a"]);
+    // a subclass of two subclasses of one Concept
+    await saveRelationFixture(db.connection, SCL, ["diamond left", "diamond top"]);
+    await saveRelationFixture(db.connection, SCL, ["diamond right", "diamond top"]);
+    await saveRelationFixture(db.connection, SCL, ["diamond bottom", "diamond left"]);
+    await saveRelationFixture(db.connection, SCL, ["diamond bottom", "diamond right"]);
 
     await classify("L-direct", "settlement");
     await classify("L-city", "city");
@@ -63,6 +68,7 @@ describe("getClassifiedUnder", () => {
     await classify("L-twice", "city");
     await classify("L-twice", "settlement");
     await classify("L-loop", "loop a");
+    await classify("L-diamond", "diamond bottom");
   });
 
   afterAll(async () => {
@@ -143,8 +149,71 @@ describe("getClassifiedUnder", () => {
     expect(await getClassifiedUnder(db.connection, ["town-with-nobody"])).toEqual({
       entities: {},
       truncated: [],
+      trees: { "town-with-nobody": { nodes: [{ id: "town-with-nobody", parents: [] }], aliases: {} } },
+      classifiedAs: {},
     });
-    expect(await getClassifiedUnder(db.connection, [])).toEqual({ entities: {}, truncated: [] });
+    expect(await getClassifiedUnder(db.connection, [])).toEqual({
+      entities: {},
+      truncated: [],
+      trees: {},
+      classifiedAs: {},
+    });
+  });
+
+  it("draws the subclass tree below a Concept, a synonym beside its node and a subclass of it below that node", async () => {
+    const { tree, truncated } = await getConceptTree(db.connection, "settlement");
+    const parentsOf: Record<string, string[]> = {};
+    tree.nodes.forEach((node) => (parentsOf[node.id] = node.parents));
+    expect(parentsOf).toEqual({
+      settlement: [],
+      city: ["settlement"],
+      village: ["settlement"],
+      town: ["settlement"],
+      "free civitas": ["city"],
+      "cathedral town": ["town"],
+    });
+    expect(tree.nodes[0].id).toBe("settlement");
+    expect(tree.aliases).toEqual({ civitas: "city" });
+    expect(truncated).toBe(false);
+  });
+
+  it("keeps both superclasses of a subclass that sits under two branches of one tree", async () => {
+    const { tree } = await getConceptTree(db.connection, "diamond top");
+    const bottom = tree.nodes.find((node) => node.id === "diamond bottom");
+    expect(bottom?.parents).toEqual(["diamond left", "diamond right"]);
+  });
+
+  it("drops the edge that would close a cycle, so every node leads back to the Concept asked", async () => {
+    const { tree } = await getConceptTree(db.connection, "loop a");
+    expect(tree.nodes).toEqual([
+      { id: "loop a", parents: [] },
+      { id: "loop b", parents: ["loop a"] },
+    ]);
+  });
+
+  it("returns the tree of every Concept asked", async () => {
+    const result = await getClassifiedUnder(db.connection, ["settlement", "religious"]);
+    expect(Object.keys(result.trees).sort()).toEqual(["religious", "settlement"]);
+    expect(result.trees.religious.nodes.map((node) => node.id)).toEqual([
+      "religious",
+      "cathedral",
+      "cathedral town",
+    ]);
+  });
+
+  it("lists every Concept of the trees an entity is classified under, not only the one that says most", async () => {
+    const result = await getClassifiedUnder(db.connection, ["settlement"]);
+    expect(result.classifiedAs["L-twice"]).toEqual(["city", "settlement"]);
+    expect(result.classifiedAs["L-civitas"]).toEqual(["civitas"]);
+    expect(result.classifiedAs["L-unrelated"]).toBeUndefined();
+    // the entry per asked Concept is unchanged: one, the one that says most
+    expect(result.entities["L-twice"]).toEqual([entry("settlement", "settlement")]);
+  });
+
+  it("reads an entity under the bottom of a diamond as under its top", async () => {
+    const result = await getClassifiedUnder(db.connection, ["diamond top"]);
+    expect(result.entities["L-diamond"]).toEqual([entry("diamond top", "diamond bottom")]);
+    expect(result.classifiedAs["L-diamond"]).toEqual(["diamond bottom"]);
   });
 
   it("lists the Concepts below one, itself included", async () => {
@@ -167,56 +236,59 @@ describe("getClassifiedUnder", () => {
 describe("getClassifiedUnder, when the walk hits its limit", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  const manyBelow = (round: { n: number }) =>
-    jest.spyOn(functions, "getSubordinateEntityIds").mockImplementation(async () => {
-      round.n += 1;
-      // a different thousand each time, as a very wide tree would give
-      return Array.from(
-        { length: functions.SUBORDINATE_MAX_NODES },
-        (_, index) => `deep-${round.n}-${index}`
-      );
-    });
+  /** Superclass relations as a very wide tree would give them: every Concept asked about has a thousand new subclasses. */
+  const wideTree = () => {
+    const calls = { superclass: 0 };
+    const spy = jest
+      .spyOn(Relation, "findForEntities")
+      .mockImplementation(async (_conn, ids, type): Promise<any[]> => {
+        if (type !== RelationEnums.Type.Superclass) {
+          return [];
+        }
+        calls.superclass += 1;
+        const relations: any[] = [];
+        ids.forEach((id: string) => {
+          for (let index = 0; index < functions.SUBORDINATE_MAX_NODES; index++) {
+            relations.push({ id: `${id}-${index}`, type, entityIds: [`${id}/${index}`, id] });
+          }
+        });
+        return relations;
+      });
+    return { calls, spy };
+  };
 
   it("says which Concept was cut short", async () => {
-    manyBelow({ n: 0 });
-    jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
-    jest.spyOn(Relation, "findForEntities").mockResolvedValue([]);
-
+    wideTree();
     const result = await getClassifiedUnder({} as any, ["broad"]);
-
     expect(result.truncated).toEqual(["broad"]);
   });
 
   it("stops at the limit rather than walking on through a wider and wider set", async () => {
-    const round = { n: 0 };
-    const walk = manyBelow(round);
-    jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
+    const { calls } = wideTree();
 
     const { below, truncated } = await getConceptsBelow({} as any, "broad");
 
     expect(truncated).toBe(true);
     expect(below.size).toBe(functions.SUBORDINATE_MAX_NODES);
     expect(below.has("broad")).toBe(true);
-    expect(walk).toHaveBeenCalledTimes(1);
+    expect(calls.superclass).toBe(1);
   });
 
-  it("does not say it was cut short for a set that merely took several passes", async () => {
-    // a chain of synonyms and subclasses that grows for a few rounds and ends
+  it("does not say it was cut short for a tree that merely took several levels", async () => {
     const subclasses: Record<string, string[]> = { a: ["b"], b: ["c"], c: [] };
     jest
-      .spyOn(functions, "getSubordinateEntityIds")
-      .mockImplementation(async (_conn, ids): Promise<string[]> => {
-        const found: string[] = [];
-        for (const id of ids) {
-          for (const sub of subclasses[id] ?? []) {
-            if (!ids.includes(sub) && !found.includes(sub)) {
-              found.push(sub);
-            }
-          }
+      .spyOn(Relation, "findForEntities")
+      .mockImplementation(async (_conn, ids, type): Promise<any[]> => {
+        const relations: any[] = [];
+        if (type === RelationEnums.Type.Superclass) {
+          ids.forEach((id: string) =>
+            (subclasses[id] ?? []).forEach((sub) =>
+              relations.push({ id: `${sub}>${id}`, type, entityIds: [sub, id] })
+            )
+          );
         }
-        return found;
+        return relations;
       });
-    jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
 
     const { below, truncated } = await getConceptsBelow({} as any, "a");
 
