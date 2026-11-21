@@ -139,7 +139,12 @@ class Acl {
     // (userCanManageDocument: Owner/Admin, or Editor assigned to the linked
     // Resource). This also avoids the auto-created roles:[] permission that the
     // ACL layer persists for routes lacking an explicit entry.
-    if (controller === "documents") {
+    // The routes of committing a document to GitHub are the exception: the
+    // roles that may reach them come from their acl_permissions rows, and the
+    // handlers add the per-document check on top.
+    const isGithubRoute =
+      route.split("/").includes("github") || route === ":documentId/repository";
+    if (controller === "documents" && !isGithubRoute) {
       return null;
     }
 

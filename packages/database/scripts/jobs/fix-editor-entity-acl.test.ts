@@ -42,6 +42,8 @@ test("grants the listed routes, narrows a wildcard and drops a removed route; a 
     { id: "auto", controller: "entities", method: "DELETE", route: ":entityId?", roles: [] },
     { id: "wider", controller: "statements", method: "PUT", route: "batch-move", roles: ["editor", "viewer"] },
     { id: "removed", controller: "statements", method: "PUT", route: ":statementId/elementsOrders", roles: ["editor"] },
+    // written by the ACL layer the first time the route was called
+    { id: "github-auto", controller: "documents", method: "POST", route: "github/device", roles: [], public: false },
   ]);
 
   await fixEditorEntityAcl(table);
@@ -53,8 +55,18 @@ test("grants the listed routes, narrows a wildcard and drops a removed route; a 
   assert.deepEqual(find(rows, "entities", "POST", ":entityId/restore")?.roles, ["editor"]);
   assert.equal(find(rows, "entities", "POST", ":entityId/restore")?.public, false);
   assert.deepEqual(find(rows, "territories", "GET", ":territoryId/statements")?.roles, ["*"]);
-  assert.deepEqual(writes, { inserted: 11, updated: 2, deleted: 1 });
+  // the five routes of committing a document to GitHub
+  for (const [method, route] of [
+    ["POST", "github/device"],
+    ["POST", "github/device/poll"],
+    ["PUT", ":documentId/repository"],
+    ["GET", ":documentId/github"],
+    ["POST", ":documentId/github/commit"],
+  ]) {
+    assert.deepEqual(find(rows, "documents", method, route)?.roles, ["editor"], `${method} ${route}`);
+  }
+  assert.deepEqual(writes, { inserted: 15, updated: 3, deleted: 1 });
 
   await fixEditorEntityAcl(table);
-  assert.deepEqual(writes, { inserted: 11, updated: 2, deleted: 1 });
+  assert.deepEqual(writes, { inserted: 15, updated: 3, deleted: 1 });
 });

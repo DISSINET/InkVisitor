@@ -61,5 +61,10 @@
 {"controller": "users", "id": "df2c19e7-fd6f-42d5-95b2-a7f518008323", "method": "GET", "public": false, "roles": [], "route": "owner"},
 {"controller": "settings", "id": "ed589847-0818-4cd0-a968-6abb2b56e2a0", "method": "PUT", "public": false, "roles": ["admin"], "route": "group/:groupkey"},
 {"controller": "entities", "id": "f82a0626-f2d1-4071-bd18-779e354052fc", "method": "POST", "public": false, "roles": ["editor"], "route": ":entityId/clone"},
-{"controller": "entities", "id": "ff66bc41-5520-4714-ad71-671b67f4c5c8", "method": "GET", "roles": ["editor"], "route": ":entityId/relations"}
+{"controller": "entities", "id": "ff66bc41-5520-4714-ad71-671b67f4c5c8", "method": "GET", "roles": ["editor"], "route": ":entityId/relations"},
+{"controller": "documents", "id": "237e2453-4a02-4fc9-8e28-9fc9b8e548c7", "method": "POST", "public": false, "roles": ["editor"], "route": "github/device"},
+{"controller": "documents", "id": "79d3d964-208d-4d18-b31e-f09acedf7365", "method": "POST", "public": false, "roles": ["editor"], "route": "github/device/poll"},
+{"controller": "documents", "id": "659cbd7b-32b6-4f9f-b0a7-74a204cb61fc", "method": "PUT", "public": false, "roles": ["editor"], "route": ":documentId/repository"},
+{"controller": "documents", "id": "f8e36c52-ad67-4856-83da-58681a375fed", "method": "GET", "public": false, "roles": ["editor"], "route": ":documentId/github"},
+{"controller": "documents", "id": "f6f66bbf-9238-4bcb-b927-f8c456c8acbd", "method": "POST", "public": false, "roles": ["editor"], "route": ":documentId/github/commit"}
 ]

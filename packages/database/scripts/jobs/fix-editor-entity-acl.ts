@@ -52,6 +52,14 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   { controller: "relations", method: "POST", route: "" },
   { controller: "relations", method: "PUT", route: "" },
   { controller: "relations", method: "DELETE", route: "" },
+  // committing a document to GitHub: unlike the other documents routes these
+  // are limited by role in the ACL table, so a database without the rows
+  // serves them to Admin/Owner only
+  { controller: "documents", method: "POST", route: "github/device" },
+  { controller: "documents", method: "POST", route: "github/device/poll" },
+  { controller: "documents", method: "PUT", route: ":documentId/repository" },
+  { controller: "documents", method: "GET", route: ":documentId/github" },
+  { controller: "documents", method: "POST", route: ":documentId/github/commit" },
 ];
 
 // read-only routes any signed-in user may reach - kept apart because they are
