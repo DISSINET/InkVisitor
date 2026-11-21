@@ -57,6 +57,16 @@ import {
 } from "./response-user";
 
 import { IDocument, IDocumentExport, IDocumentMeta } from "./document";
+import {
+  GithubDevicePollStatus,
+  GithubSyncState,
+  IDocumentGithubSync,
+  IGithubLastCommit,
+  IGithubTarget,
+  IRequestGithubCommit,
+  IResponseDocumentGithub,
+  IResponseGithubDevice,
+} from "./github";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseEntityExpansion } from "./response-entity-expansion";
@@ -95,6 +105,14 @@ export type {
   IDocument,
   IDocumentExport,
   IDocumentMeta,
+  GithubDevicePollStatus,
+  GithubSyncState,
+  IDocumentGithubSync,
+  IGithubLastCommit,
+  IGithubTarget,
+  IRequestGithubCommit,
+  IResponseDocumentGithub,
+  IResponseGithubDevice,
   IEntity,
   IEvent,
   IEventData,

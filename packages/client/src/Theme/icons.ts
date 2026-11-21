@@ -69,6 +69,7 @@ export { FaEdit as IcoEdit } from "react-icons/fa";
 export { FaExchangeAlt as IcoExchange } from "react-icons/fa";
 export { FaExclamationTriangle as IcoExclamation } from "react-icons/fa";
 export { FaExternalLinkAlt as IcoExternalLink } from "react-icons/fa";
+export { FaGithub as IcoGithub } from "react-icons/fa";
 export { FaFolder as IcoFolder } from "react-icons/fa";
 export { FaFolderOpen as IcoFolderOpen } from "react-icons/fa";
 export { FaGripVertical as IcoDragHandle } from "react-icons/fa";

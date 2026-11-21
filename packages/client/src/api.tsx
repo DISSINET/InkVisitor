@@ -3,8 +3,13 @@ import {
   EntityTooltip,
   IAudit,
   IBatchSetAttributeChanges,
+  GithubDevicePollStatus,
   IDocument,
   IDocumentExport,
+  IDocumentGithubSync,
+  IRequestGithubCommit,
+  IResponseDocumentGithub,
+  IResponseGithubDevice,
   IEntity,
   IReference,
   IRequestQuery,
@@ -1831,6 +1836,80 @@ class Api {
     try {
       const response = await this.connection.put(`/documents/${documentId}`, document, options);
       return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Both copies of a document - the one saved here and its file on GitHub -
+   * and how they relate
+   */
+  async documentGithubStatus(
+    documentId: string,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseDocumentGithub>> {
+    try {
+      return await this.connection.get(`/documents/${documentId}/github`, options);
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Sets the GitHub URL of the file the document is committed to; an empty
+   * string clears it
+   */
+  async documentSetRepository(
+    documentId: string,
+    repositoryUrl: string,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      return await this.connection.put(`/documents/${documentId}/repository`, { repositoryUrl }, options);
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Commits the saved document to GitHub. The server uploads the whole text,
+   * so the call gets more time than the connection's default.
+   */
+  async documentGithubCommit(
+    documentId: string,
+    body: IRequestGithubCommit,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IDocumentGithubSync>> {
+    try {
+      return await this.connection.post(`/documents/${documentId}/github/commit`, body, {
+        timeout: 120000,
+        ...options,
+      });
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Starts a GitHub sign-in: returns the code the user confirms on github.com
+   */
+  async githubDeviceStart(options?: IApiOptions): Promise<AxiosResponse<IResponseGithubDevice>> {
+    try {
+      return await this.connection.post(`/documents/github/device`, {}, options);
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Asks once whether the user confirmed the GitHub sign-in code
+   */
+  async githubDevicePoll(
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<{ status: GithubDevicePollStatus }>> {
+    try {
+      return await this.connection.post(`/documents/github/device/poll`, {}, options);
     } catch (err) {
       throw this.handleError(err);
     }
