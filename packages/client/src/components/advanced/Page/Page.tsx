@@ -2,6 +2,7 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
+import { OFFLINE_TOAST_ID } from "components/basic/Toast/Toast";
 import { LeftHeader, RightHeader, UserCustomizationModal } from "components/advanced";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
@@ -18,8 +19,6 @@ import { getHeaderColor } from "utils/appEnv";
 import { clearRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { StyledPage, StyledPageContent } from "./PageStyles";
-
-const OFFLINE_TOAST_ID = "offline";
 
 interface Page {
   children?: React.ReactNode;
@@ -55,7 +54,12 @@ export const Page: React.FC<Page> = ({ children }) => {
       if (online) {
         toast.dismiss(OFFLINE_TOAST_ID);
       } else {
-        toast.dark("you're offline", { autoClose: false, toastId: OFFLINE_TOAST_ID });
+        toast.dark("you're offline", {
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+          toastId: OFFLINE_TOAST_ID,
+        });
       }
     };
     showOnlineState(onlineManager.isOnline());
