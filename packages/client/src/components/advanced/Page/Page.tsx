@@ -1,5 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
 import { LeftHeader, RightHeader, UserCustomizationModal } from "components/advanced";
@@ -9,7 +9,7 @@ import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Id, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -18,6 +18,8 @@ import { getHeaderColor } from "utils/appEnv";
 import { clearRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { StyledPage, StyledPageContent } from "./PageStyles";
+
+const OFFLINE_TOAST_ID = "offline";
 
 interface Page {
   children?: React.ReactNode;
@@ -45,20 +47,20 @@ export const Page: React.FC<Page> = ({ children }) => {
     location.pathname === "/activate" ||
     location.pathname === "/password_reset";
 
-  const { data: user, isFetching: isFetchingUser, isPaused } = useUserQuery(!isAuthRoute);
+  const { data: user, isFetching: isFetchingUser } = useUserQuery(!isAuthRoute);
 
-  const toastId = React.useRef<Id | null>(null);
-  const notify = () => (toastId.current = toast.dark("you're offline", { autoClose: false }));
-
+  // the browser's online/offline events, the same state that holds back queries
   useEffect(() => {
-    if (isPaused) {
-      notify();
-    } else {
-      if (toastId.current && toast.isActive(toastId.current)) {
-        toast.dismiss(toastId.current);
+    const showOnlineState = (online: boolean) => {
+      if (online) {
+        toast.dismiss(OFFLINE_TOAST_ID);
+      } else {
+        toast.dark("you're offline", { autoClose: false, toastId: OFFLINE_TOAST_ID });
       }
-    }
-  }, [isPaused]);
+    };
+    showOnlineState(onlineManager.isOnline());
+    return onlineManager.subscribe(showOnlineState);
+  }, []);
 
   const logOutMutation = useMutation({
     mutationFn: async () => await api.signOut(),
