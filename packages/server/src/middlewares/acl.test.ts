@@ -7,6 +7,7 @@ import User from "@models/user/user";
 import { engineRoute } from "@modules/geocoding";
 import { asyncRouteHandler } from "@modules/index";
 import { IRequest } from "src/custom_typings/request";
+import server from "../server";
 import Acl, { aclGuard, permissionDeniedErr } from "./acl";
 import errorsMiddleware from "./errors";
 
@@ -30,6 +31,88 @@ const request = (
 
 const row = (data: Partial<AclPermission>) =>
   new AclPermission({ id: "row-1", roles: [], ...data });
+
+interface Layer {
+  name: string;
+  regexp: RegExp;
+  handle: RequestHandler & { stack: Layer[] };
+  route?: {
+    path: string;
+    methods: Record<string, boolean>;
+    stack: { handle: RequestHandler }[];
+  };
+}
+
+interface MountedRoute {
+  label: string;
+  controller: string;
+  method: string;
+  path: string;
+  handler: RequestHandler;
+}
+
+// Every route under the api router, once: the router is mounted on two paths.
+// Express keeps a mount path only as a pattern, ^\/users\/?(?=\/|$).
+const mountedRoutes = (): MountedRoute[] => {
+  const seen = new Set<unknown>();
+  const routes: MountedRoute[] = [];
+  const walk = (stack: Layer[], controller: string) => {
+    for (const layer of stack) {
+      if (layer.name === "router") {
+        const mount = layer.regexp.source.match(/^\^\\\/([\w-]+)/);
+        walk(layer.handle.stack, mount ? mount[1] : "");
+      } else if (layer.route && controller && !seen.has(layer.route)) {
+        seen.add(layer.route);
+        for (const verb of Object.keys(layer.route.methods)) {
+          const method = verb.toUpperCase();
+          const path = layer.route.path;
+          routes.push({
+            label: `${controller} ${method} ${path}`,
+            controller,
+            method,
+            path,
+            handler: layer.route.stack[0].handle,
+          });
+        }
+      }
+    }
+  };
+  walk((server as unknown as { _router: { stack: Layer[] } })._router.stack, "");
+  // /health sits in front of acl.authorize and answers anyone
+  return routes.filter((route) => route.label !== "api GET /health");
+};
+
+const routes = mountedRoutes();
+
+describe("the mounted routes", () => {
+  it("are found", () => {
+    expect(routes.length).toBeGreaterThan(50);
+  });
+
+  it("all take the ACL check before their handler runs", async () => {
+    const unguarded: string[] = [];
+    for (const route of routes) {
+      const validate = jest.fn().mockResolvedValue(permissionDeniedErr);
+      const next = jest.fn();
+      try {
+        await route.handler(
+          { acl: { validate } } as unknown as Request,
+          {} as Response,
+          next
+        );
+      } catch {
+        // a handler with no check fails on the bare request
+      }
+      if (
+        validate.mock.calls.length !== 1 ||
+        next.mock.calls[0]?.[0] !== permissionDeniedErr
+      ) {
+        unguarded.push(route.label);
+      }
+    }
+    expect(unguarded).toEqual([]);
+  });
+});
 
 describe("Acl.validate", () => {
   const acl = new Acl();
@@ -66,6 +149,34 @@ describe("Acl.validate", () => {
       expect(save).not.toHaveBeenCalled();
     }
   );
+
+  // documents, stats, saved-queries and geocoding are open as whole
+  // controllers; anywhere else a route is open one by one
+  it("opens no other route to every logged-in user than the listed ones", async () => {
+    const open: string[] = [];
+    for (const route of routes) {
+      findByRoute.mockClear();
+      await acl.validate(
+        request(route.controller, route.method, route.path, Viewer)
+      );
+      if (!findByRoute.mock.calls.length) {
+        open.push(route.label);
+      }
+    }
+
+    const whole = ["documents", "stats", "saved-queries", "geocoding"];
+    expect(
+      open.filter((label) => !whole.includes(label.split(" ")[0])).sort()
+    ).toEqual([
+      "entities GET /:entityId/detail",
+      "entities GET /:entityId/expansion",
+      "entities GET /:entityId/tooltip",
+      "entities GET /:entityId/used-relations",
+      "entities POST /batch",
+      "entities POST /query",
+      "users GET /simplified",
+    ]);
+  });
 
   it("does not allow the session of a deleted user on such a route", async () => {
     const req = request("documents", "GET", "/", Viewer);
@@ -129,6 +240,12 @@ describe("Acl.validate", () => {
       await acl.validate(request("backups", "GET", "/download", Editor))
     ).toBeNull();
     expect(findByRoute).toHaveBeenCalledTimes(2);
+    expect(findByRoute).toHaveBeenLastCalledWith(
+      expect.anything(),
+      "backups",
+      "GET",
+      "download"
+    );
   });
 
   it("fails with the insert's error when the route still has no row after it", async () => {

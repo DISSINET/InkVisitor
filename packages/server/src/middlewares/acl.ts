@@ -61,8 +61,7 @@ function isOpenToLoggedIn(
 
   // The entities batch read (POST /entities/batch) is the bulk equivalent of
   // the public GET /entities/:entityId; it backs e.g. fetching the entities
-  // behind a document's anchors. Allow it for any logged-in user (it has no
-  // seeded ACL entry, so it would otherwise be auto-denied to non-admins).
+  // behind a document's anchors. Allow it for any logged-in user.
   if (
     controller === "entities" &&
     route === "batch" &&
@@ -85,10 +84,10 @@ function isOpenToLoggedIn(
     return true;
   }
 
-  // GET /entities/:entityId/tooltip, /detail, /used-relations and /expansion have
-  // no seeded ACL entries. All are read-only companions to the public
-  // GET /entities/:entityId, so any logged-in user may call them; entity-level
-  // access, where there is any, is handled inside each handler.
+  // GET /entities/:entityId/tooltip, /detail, /used-relations and /expansion
+  // are read-only companions to the public GET /entities/:entityId, so any
+  // logged-in user may call them; entity-level access, where there is any, is
+  // handled inside each handler.
   if (
     controller === "entities" &&
     (route.endsWith("/tooltip") ||
@@ -181,8 +180,8 @@ class Acl {
       .join("/");
     const method = req.method as HttpMethods;
 
-    // decided before the read, so these routes cost a logged-in user no
-    // lookup and never get a row
+    // decided before the read, so a logged-in user costs these routes no
+    // lookup and no row
     if (req.user && isOpenToLoggedIn(controller, route, method)) {
       // throws for a session of a deleted user, which resolves to no user
       req.getUserOrFail();
