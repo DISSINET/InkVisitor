@@ -12,6 +12,11 @@ export interface IAnchorsNode {
   indexEnd: number; // End index of the anchor in the document
 }
 
+// an anchor whose opening tag no closing tag ends (indexEnd -1); a node stored
+// without indexEnd counts as paired
+export const isOrphanedAnchor = (node: Pick<IAnchorsNode, "indexEnd">): boolean =>
+  node.indexEnd === -1;
+
 // one document of a batch export - content already stripped of the anchors
 // whose entity class was left out
 export interface IDocumentExport {

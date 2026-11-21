@@ -372,4 +372,17 @@ describe("Document.getAnchorTextsForEntities", function () {
     const map = await Document.getAnchorTextsForEntities(db.connection, []);
     expect(map).toEqual({});
   });
+
+  test("an orphaned anchor of a stored tree adds no text", async () => {
+    const stale = new Entity({ id: tagSafeId() });
+    await stale.save(db.connection);
+    const staleDoc = new Document({ content: `a<${stale.id}>swallowed</${stale.id}>b` });
+    await staleDoc.preprocess(db.connection);
+    // the shape a tree stored before the rebuild can have: an orphan that holds text
+    staleDoc.anchors[0].indexEnd = -1;
+    await staleDoc.save(db.connection);
+
+    const map = await Document.getAnchorTextsForEntities(db.connection, [stale.id]);
+    expect(map[stale.id]).toBeUndefined();
+  });
 });

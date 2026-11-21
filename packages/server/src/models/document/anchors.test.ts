@@ -1,8 +1,9 @@
 import "ts-jest";
 import { createOpeningTagRegex } from "@common/regex";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IAnchorsNode } from "@inkvisitor/shared/types/document";
+import { IAnchorsNode, isOrphanedAnchor } from "@inkvisitor/shared/types/document";
 import { AnchorsNode } from "./anchors";
+import Document from "./document";
 
 const BASE_CONTENT = `<test>
 blahdddddsdsd
@@ -144,6 +145,179 @@ describe("AnchorsNode.buildAnchorsTree with paired tags that are not anchors", (
   });
 });
 
+describe("AnchorsNode.buildAnchorsTree with an opening tag that never closes", () => {
+  const entityIds = (ids: string[]) => ({
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Concept]: ids,
+  });
+
+  test("the anchor is a leaf that holds no anchors and no text", () => {
+    const content = 'x <e1 elvl="1">aa <e2>bb</e2> cc <e3>dd</e3> tail';
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1", "e2", "e3"]);
+    expect(tree[0].indexStart).toEqual(content.indexOf("<e1"));
+    expect(tree[0].indexEnd).toEqual(-1);
+    expect(tree[0].content).toEqual("");
+    expect(tree[0].children).toEqual([]);
+    expect(tree[1].content).toEqual("bb");
+    expect(tree[2].content).toEqual("dd");
+  });
+
+  test("the anchor around it keeps its whole text", () => {
+    const content = "<e1>aa <e2>bb</e1> cc";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].content).toEqual("aa bb");
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    expect(
+      tree[0].children.map((node) => [node.anchor, node.indexEnd, node.content])
+    ).toEqual([["e2", -1, ""]]);
+  });
+
+  test("crossing anchors around it keep their pairing and their text", () => {
+    const content = "<e1>a <e2>b <e3> c</e1> d</e2>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1", "e2", "e3"]));
+
+    expect(tree.map((node) => node.anchor)).toEqual(["e1"]);
+    expect(tree[0].indexEnd).toEqual(content.indexOf("</e1>") + "</e1>".length);
+    const crossing = tree[0].children[0];
+    expect(crossing.anchor).toEqual("e2");
+    expect(crossing.indexEnd).toEqual(content.length);
+    expect(crossing.content).toEqual("b  c d");
+    expect(crossing.children.map((node) => [node.anchor, node.indexEnd])).toEqual([["e3", -1]]);
+  });
+
+  test("two anchors of one entity stay in the order of their opening tags", () => {
+    const tree = AnchorsNode.buildAnchorsTree("<e1> a <e1>one</e1>", entityIds(["e1"]));
+
+    expect(tree.map((node) => [node.indexEnd === -1, node.content])).toEqual([
+      [true, ""],
+      [false, "one"],
+    ]);
+  });
+
+  test("an unclosed tag that is no entity builds no node", () => {
+    const content = "<hi> <e1>one</e1>";
+    const tree = AnchorsNode.buildAnchorsTree(content, entityIds(["e1"]));
+
+    expect(tree.map((node) => [node.anchor, node.content, node.indexEnd])).toEqual([
+      ["e1", "one", content.length],
+    ]);
+  });
+});
+
+describe("a stored anchors tree loaded into a Document", () => {
+  const entityIds = {
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Concept]: ["e1", "e2", "e3"],
+  };
+
+  test("keeps the indexes of every node", () => {
+    const built = AnchorsNode.buildAnchorsTree("<e1>a <e2>b</e2></e1> <e3> c", entityIds);
+    const stored = JSON.parse(JSON.stringify(built)) as IAnchorsNode[];
+    const loaded = new Document({ anchors: stored }).anchors;
+
+    expect(JSON.parse(JSON.stringify(loaded))).toEqual(stored);
+    expect(isOrphanedAnchor(loaded[1])).toEqual(true);
+    expect(isOrphanedAnchor(loaded[0].children[0])).toEqual(false);
+  });
+
+  test("a stored node with no indexEnd is not an orphan", () => {
+    const legacy = [
+      { anchor: "e1", content: "a", class: EntityEnums.Class.Concept, children: [] },
+    ] as unknown as IAnchorsNode[];
+
+    expect(isOrphanedAnchor(new Document({ anchors: legacy }).anchors[0])).toEqual(false);
+  });
+});
+
+describe("AnchorsNode.anchorsOf", () => {
+  const entityIds = {
+    ...entityIdsFromContent(""),
+    [EntityEnums.Class.Territory]: ["t1", "t2"],
+    [EntityEnums.Class.Concept]: ["e1"],
+  };
+  const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
+  const rows = (content: string) =>
+    AnchorsNode.anchorsOf(tree(content), "e1").map((row) => [
+      row.anchorIndex,
+      row.anchorText,
+      row.parentTerritoryId,
+      row.orphaned,
+    ]);
+
+  test("flags an anchor whose opening tag never closes, at the index of its opening tag", () => {
+    expect(rows("<e1> a <e1>one</e1> b <e1>two</e1>")).toEqual([
+      [0, "", "", true],
+      [1, "one", "", false],
+      [2, "two", "", false],
+    ]);
+  });
+
+  test("an orphaned territory anchor is nobody's parent T", () => {
+    expect(rows("<t1>x <e1>one</e1></t1> <t2> y <e1>two</e1>")).toEqual([
+      [0, "one", "t1", false],
+      [1, "two", "", false],
+    ]);
+  });
+
+  test("an orphaned anchor keeps the territory anchor around it as its parent T", () => {
+    expect(rows("<t1>x <e1> a </t1>")).toEqual([[0, "", "t1", true]]);
+  });
+
+  test("does not count a self-closing tag", () => {
+    expect(rows('<e1 n="2"/> <e1> a <e1>one</e1>')).toEqual([
+      [0, "", "", true],
+      [1, "one", "", false],
+    ]);
+  });
+
+  test("an orphaned anchor of a stored tree has no text, and the anchors it holds stay listed", () => {
+    const concept = EntityEnums.Class.Concept;
+    const stale = [
+      {
+        anchor: "e1", class: concept, content: "junk", indexStart: 0, indexEnd: -1,
+        children: [
+          { anchor: "e1", class: concept, content: "one", indexStart: 5, indexEnd: 16, children: [] },
+        ],
+      },
+    ] as IAnchorsNode[];
+    const loaded = new Document({ anchors: stale }).anchors;
+
+    expect(
+      AnchorsNode.anchorsOf(loaded, "e1").map((row) => [row.anchorIndex, row.anchorText, row.orphaned])
+    ).toEqual([
+      [0, "", true],
+      [1, "one", false],
+    ]);
+  });
+
+  test("an orphaned territory anchor of a stored tree is not the parent T of what it holds", () => {
+    const stale = [
+      {
+        anchor: "t1", class: EntityEnums.Class.Territory, content: "junk", indexStart: 0, indexEnd: -1,
+        children: [
+          { anchor: "e1", class: EntityEnums.Class.Concept, content: "one", indexStart: 5, indexEnd: 16, children: [] },
+        ],
+      },
+    ] as IAnchorsNode[];
+    const loaded = new Document({ anchors: stale }).anchors;
+
+    expect(AnchorsNode.anchorsOf(loaded, "e1").map((row) => row.parentTerritoryId)).toEqual([""]);
+  });
+
+  test("its anchorIndex is the index Document.removeAnchor takes", () => {
+    const content = '<e1 n="2"/> <e1> a <e1>one</e1> b <e1>two</e1>';
+    const firstPaired = AnchorsNode.anchorsOf(tree(content), "e1").find((row) => !row.orphaned);
+    const document = new Document({ content });
+    document.removeAnchor("e1", firstPaired!.anchorIndex);
+
+    expect(document.content).toEqual('<e1 n="2"/> <e1> a one b <e1>two</e1>');
+  });
+});
+
 describe("AnchorsNode.collectAnchoredNearby", () => {
   const entityIds = {
     ...entityIdsFromContent(""),
@@ -155,6 +329,14 @@ describe("AnchorsNode.collectAnchoredNearby", () => {
   const tree = (content: string) => AnchorsNode.buildAnchorsTree(content, entityIds);
   const nearby = (trees: IAnchorsNode[][], entityId = "s1") =>
     AnchorsNode.collectAnchoredNearby(trees, entityId).map((node) => node.id);
+
+  test("ignores an anchor whose opening tag never closes", () => {
+    expect(nearby([tree("<t1><s1>one</s1> <p1> a <p2>b</p2></t1>")])).toEqual(["p2"]);
+  });
+
+  test("lists nothing for a statement whose only anchor never closes", () => {
+    expect(nearby([tree("<t1><s1> a <p1>b</p1></t1>")])).toEqual([]);
+  });
 
   test("lists the statement's span first, then each territory anchor around it, nearest anchors first", () => {
     // s1 sits in the subT t2, which sits in t1
