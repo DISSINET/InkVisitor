@@ -331,6 +331,34 @@ class GeocodingEngineError extends CustomError {
 }
 
 /**
+ * GithubSignInRequiredError will be thrown when a GitHub commit route is called without a GitHub sign-in
+ */
+class GithubSignInRequiredError extends CustomError {
+  public static code = 403;
+  public static title = "GitHub sign-in required";
+  public static message = "Sign in to GitHub first";
+}
+
+/**
+ * GithubConflictError will be thrown when the file on GitHub is not the one the user was shown
+ */
+class GithubConflictError extends CustomError {
+  public static code = 409;
+  public static title = "GitHub file changed";
+  public static message = "The file on GitHub changed since it was shown";
+}
+
+/**
+ * GithubRequestError will be thrown when GitHub refuses a request or cannot be reached; the message carries GitHub's own text
+ */
+class GithubRequestError extends CustomError {
+  public static code = 502;
+  public static title = "GitHub error";
+  public static message = "GitHub did not accept the request";
+  loggable = true;
+}
+
+/**
  * UnauthorizedError will be thrown during request, which does not contain authorization data (without jwt token)
  */
 class UnauthorizedError extends CustomError {
@@ -585,6 +613,9 @@ const allErrors: Record<string, any> = {
   InternalServerError,
   GeocodingEngineUnconfiguredError,
   GeocodingEngineError,
+  GithubSignInRequiredError,
+  GithubConflictError,
+  GithubRequestError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
@@ -654,6 +685,9 @@ export {
   InternalServerError,
   GeocodingEngineUnconfiguredError,
   GeocodingEngineError,
+  GithubSignInRequiredError,
+  GithubConflictError,
+  GithubRequestError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,

@@ -29,8 +29,10 @@ export async function getAuthenticatedAgent(
   return agent;
 }
 
-export async function createAgentWithUserId(userId: string): Promise<AuthAgent> {
-  const sid = randomBytes(24).toString("hex");
+export async function createAgentWithUserId(
+  userId: string,
+  sid = randomBytes(24).toString("hex")
+): Promise<AuthAgent> {
   await new Promise<void>((resolve, reject) => {
     sessionStore.set(
       sid,

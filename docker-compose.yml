@@ -87,6 +87,8 @@ services:
       # HGA-Engine behind the Geocoding page (blank = page works without suggestions)
       HGA_ENGINE_URL: ${HGA_ENGINE_URL:-}
       HGA_ENGINE_API_KEY: ${HGA_ENGINE_API_KEY:-}
+      # client id of the GitHub App behind "commit to GitHub" (blank = not set up)
+      GITHUB_APP_CLIENT_ID: ${GITHUB_APP_CLIENT_ID:-}
     ports:
       - "3000:3000"
     networks:

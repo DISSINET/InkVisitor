@@ -93,6 +93,10 @@ const requestTimeout = (path: string): string | null => {
   if (path.endsWith("/geocoding/state/stream")) {
     return null;
   }
+  // the server uploads the whole document to GitHub, several MB for a long text
+  if (path.endsWith("/github/commit")) {
+    return "2m";
+  }
   return "20s";
 };
 server.use((req, res, next) => {

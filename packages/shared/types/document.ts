@@ -1,4 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IDocumentGithubSync } from "./github";
 
 // just meta information + title...without content
 export type IDocumentMeta = Omit<IDocument, "content">;
@@ -29,4 +30,7 @@ export interface IDocument {
   anchors: IAnchorsNode[];
   createdAt?: Date;
   updatedAt?: Date;
+  // full GitHub URL of the file this document is committed to
+  repositoryUrl?: string;
+  githubSync?: IDocumentGithubSync | null;
 }

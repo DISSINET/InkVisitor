@@ -486,12 +486,13 @@ export const documents: DocumentStore = {
       return [];
     }
     // one row is one match, so a document listing an id twice comes back once;
-    // content is dropped: no caller needs the blob
+    // content is dropped: no caller needs the blob; the GitHub fields are
+    // dropped: these rows reach every logged-in user
     return docs<IDocumentMeta>(
       TABLE.documents,
       await q(
         conn,
-        `SELECT doc - 'content' AS doc FROM documents WHERE entity_ids && $1::text[] ORDER BY id`,
+        `SELECT doc - 'content' - 'repositoryUrl' - 'githubSync' AS doc FROM documents WHERE entity_ids && $1::text[] ORDER BY id`,
         [entityIds]
       )
     );

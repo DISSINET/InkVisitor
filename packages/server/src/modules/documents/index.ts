@@ -3,8 +3,6 @@ import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { AnchorsNode } from "@models/document/anchors";
-import Resource from "@models/resource/resource";
-import User from "@models/user/user";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -25,63 +23,16 @@ import {
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { Router } from "express";
-import { Conn, storage } from "@service/storage";
+import { storage } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { filterDocumentContent } from "./export";
-
-/**
- * Whether the user may edit/delete/export the given document. Owner/Admin
- * always can; Viewer never. An Editor may manage a document only when assigned
- * (in Manage Users) the Resource that links to it via data.documentId.
- */
-async function userCanManageDocument(
-  conn: Conn,
-  documentId: string,
-  user: User
-): Promise<boolean> {
-  if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
-    return true;
-  }
-  if (user.role !== UserEnums.Role.Editor) {
-    return false;
-  }
-  const resource = await Resource.findByDocumentId(conn, documentId);
-  return !!resource && user.hasAnnotateRightForResource(resource.id);
-}
-
-/**
- * Subset of the given documents the user may manage, by the same rules as
- * userCanManageDocument. The Editor branch resolves the whole list through one
- * Resource lookup - that lookup filters on the unindexed data.documentId, so a
- * per-document call would walk the entity table once per id.
- */
-async function documentsManageableByUser(
-  conn: Conn,
-  documentIds: string[],
-  user: User
-): Promise<Set<string>> {
-  if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
-    return new Set(documentIds);
-  }
-  if (user.role !== UserEnums.Role.Editor) {
-    return new Set();
-  }
-
-  const resources = await Resource.findByDocumentIds(conn, documentIds);
-  const manageable = new Set<string>();
-
-  for (const resource of resources) {
-    const documentId = resource.data.documentId;
-    if (documentId && user.hasAnnotateRightForResource(resource.id)) {
-      manageable.add(documentId);
-    }
-  }
-
-  return manageable;
-}
+import { documentsManageableByUser, userCanManageDocument } from "./permissions";
+import GithubRouter from "./githubRoutes";
 
 export default Router()
+  // first, so its static /github paths are matched before /:documentId
+  .use(GithubRouter)
   /**
    * @openapi
    * /documents/:
@@ -122,6 +73,7 @@ export default Router()
       // recompute them on read - documents pre-dating preprocess must
       // be re-saved (any edit triggers it) to populate the fields.
       const docs = await storage.documents.listMeta(request.db.connection);
+      const hideGithubFields = request.getUserOrFail().role === UserEnums.Role.Viewer;
 
       return docs.map((d) => {
         const document = new Document(d);
@@ -135,7 +87,7 @@ export default Router()
         // shape here so the client never reads entityIds.T as undefined and
         // crashes. No-op for current rows; re-saving a legacy doc fixes it.
         document.entityIds = Document.normalizeEntityIds(document.entityIds);
-        return document;
+        return hideGithubFields ? Document.withoutGithubFields(document) : document;
       });
     })
   )
@@ -188,7 +140,9 @@ export default Router()
 
       await document.preprocess(request.db.connection);
 
-      return document;
+      return request.getUserOrFail().role === UserEnums.Role.Viewer
+        ? Document.withoutGithubFields(document)
+        : document;
     })
   )
   // express 4 does not catch a rejected handler promise, so everything that
