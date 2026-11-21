@@ -63,7 +63,7 @@ export const StyledErrorToastCopyButton = styled.button`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   color: ${({ theme }) => theme.color["white"]};
-  background: transparent;
+  background: ${({ theme }) => theme.color["primaryTransparent"]};
   border: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["white"]}`};
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   cursor: pointer;
