@@ -18,6 +18,7 @@ export interface IRequest<TParams = any, TBody = any, TQuery = any> {
   params: TParams;
   body: TBody;
   query: TQuery;
+  headers?: Record<string, string | string[] | undefined>;
 }
 
 declare global {

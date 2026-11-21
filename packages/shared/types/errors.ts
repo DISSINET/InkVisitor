@@ -453,6 +453,18 @@ class DocumentDoesNotExist extends CustomError {
 }
 
 /**
+ * DocumentChangedConcurrently will be thrown when a document write carries a
+ * content fingerprint that no longer matches what is stored - the client built
+ * its edit on content another user has since replaced.
+ */
+class DocumentChangedConcurrently extends CustomError {
+  public static code = 409;
+  public static title = "Document changed";
+  public static message =
+    "Somebody else changed this document while you were editing it";
+}
+
+/**
  * Will be thrown when passwords is not safe
  */
 class UnsafePasswordError extends CustomError {
@@ -611,6 +623,7 @@ const allErrors: Record<string, any> = {
   RelationPathExist,
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
+  DocumentChangedConcurrently,
   NetworkError,
   ServerUnavailableError,
   ClientError,
@@ -680,6 +693,7 @@ export {
   RelationPathExist,
   RelationAsymetricalPathExist,
   DocumentDoesNotExist,
+  DocumentChangedConcurrently,
   NetworkError,
   ServerUnavailableError,
   ClientError,

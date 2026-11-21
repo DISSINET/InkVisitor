@@ -2,6 +2,7 @@ import { EditMode } from "@inkvisitor/annotator/src/lib";
 import { describe, expect, it } from "vitest";
 import {
   FindPanel,
+  formatCountdown,
   resolveEditActions,
   resolveFindPanel,
   shouldShowSelectionMenu,
@@ -114,5 +115,25 @@ describe("resolveEditActions", () => {
 
   it("disables while the document is refetching", () => {
     expect(resolveEditActions({ ...base, dataDocumentIsFetching: true }).disabled).toBe(true);
+  });
+});
+
+describe("formatCountdown", () => {
+  it("formats whole minutes", () => {
+    expect(formatCountdown(600)).toEqual("10:00");
+    expect(formatCountdown(60)).toEqual("1:00");
+  });
+
+  it("zero-pads the seconds", () => {
+    expect(formatCountdown(65)).toEqual("1:05");
+    expect(formatCountdown(9)).toEqual("0:09");
+  });
+
+  it("floors fractional seconds", () => {
+    expect(formatCountdown(59.9)).toEqual("0:59");
+  });
+
+  it("never renders a negative countdown", () => {
+    expect(formatCountdown(-5)).toEqual("0:00");
   });
 });

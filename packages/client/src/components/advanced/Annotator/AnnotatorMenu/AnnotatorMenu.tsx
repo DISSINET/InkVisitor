@@ -29,7 +29,7 @@ import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch } from "redux/hooks";
-import { IcoPlus, IcoTrash } from "Theme/icons";
+import { IcoLock, IcoPlus, IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
 import { useAnnotatorNearbySuggestions } from "../hooks/useAnnotatorNearbySuggestions";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
@@ -49,6 +49,7 @@ import {
   StyledAnnotatorItemContent,
   StyledAnnotatorItemContentLine,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorLockNotice,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
   StyledCaretButtonWrapper,
@@ -134,6 +135,12 @@ interface TextAnnotatorMenuProps {
 
   /** View-only menu: hides anchor unlink/elvl controls (e.g. unassigned documents). */
   readonly?: boolean;
+  /**
+   * Name of the user whose in-progress text edit is holding the document, when
+   * that is what made the menu read-only. Distinguishes a temporary lock from
+   * the permanent read-only of a document the user has no rights to.
+   */
+  lockedByName?: string | null;
 
   isLoading: boolean;
 
@@ -165,6 +172,7 @@ export const TextAnnotatorMenu = ({
   onEscapePressed,
   disableCreate,
   readonly = false,
+  lockedByName = null,
 
   isLoading = false,
 
@@ -457,6 +465,15 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorMenuDragHandle {...menuDragHandleProps}>
           <MdDragIndicator size={18} />
         </StyledAnnotatorMenuDragHandle>
+      )}
+
+      {lockedByName && (
+        <StyledAnnotatorLockNotice>
+          <IcoLock size={13} />
+          <span>
+            {lockedByName} is editing the text. Anchors cannot be changed until they save.
+          </span>
+        </StyledAnnotatorLockNotice>
       )}
 
       {movingAnchor && movingEntity ? (
