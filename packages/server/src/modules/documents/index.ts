@@ -28,6 +28,7 @@ import { Router } from "express";
 import { Conn, storage } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
+import { aclGuard } from "@middlewares/acl";
 import { filterDocumentContent } from "./export";
 
 /**
@@ -194,7 +195,7 @@ export default Router()
   // express 4 does not catch a rejected handler promise, so everything that
   // may throw goes through next(err) - a bare throw would leave the request
   // hanging instead of returning the error response
-  .post("/export", async (request: IRequest, res: any, next: any) => {
+  .post("/export", aclGuard(async (request: IRequest, res: any, next: any) => {
     try {
       const id = request.body.documentId;
       const exportedEntities = request.body
@@ -232,7 +233,7 @@ export default Router()
     } catch (err) {
       next(err);
     }
-  })
+  }))
   /**
    * @openapi
    * /documents/export-batch:
@@ -265,8 +266,9 @@ export default Router()
    *               items:
    *                 $ref: "#/components/schemas/IDocumentExport"
    */
-  .post("/export-batch", async (request: IRequest, res: any, next: any) => {
-    try {
+  .post(
+    "/export-batch",
+    asyncRouteHandler<IDocumentExport[]>(async (request: IRequest) => {
       const documentIds = request.body.documentIds as string[];
       const exportedEntities = request.body
         .exportedEntities as EntityEnums.Class[];
@@ -325,11 +327,9 @@ export default Router()
         });
       }
 
-      res.json(exports);
-    } catch (err) {
-      next(err);
-    }
-  })
+      return exports;
+    })
+  )
   /**
    * @openapi
    * /documents/:

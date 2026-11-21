@@ -1,4 +1,5 @@
 import { asyncRouteHandler } from "../index";
+import { aclGuard } from "@middlewares/acl";
 import { NextFunction, Response, Router } from "express";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseBackup } from "@inkvisitor/shared/types";
@@ -77,12 +78,12 @@ export default Router()
    * The file is piped through the api (behind the session cookie) - it is never
    * exposed as a public/static link.
    *
-   * This is a raw handler (binary stream) so it does not go through
-   * asyncRouteHandler - the owner check is therefore enforced explicitly below.
+   * The handler writes the response itself (binary stream), so it takes the
+   * ACL check from aclGuard, not from asyncRouteHandler.
    */
   .get(
     "/download",
-    async (request: IRequest, res: Response, next: NextFunction) => {
+    aclGuard(async (request: IRequest, res: Response, next: NextFunction) => {
       try {
         assertOwner(request);
         const { resolved } = requireBackup(request);
@@ -101,5 +102,5 @@ export default Router()
       } catch (err) {
         next(err);
       }
-    }
+    })
   );

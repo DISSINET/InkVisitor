@@ -2,6 +2,7 @@ import { IResponseGeneric } from "@inkvisitor/shared/types";
 import { getErrorByCode, IErrorSignature } from "@inkvisitor/shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 import { IRequest } from "src/custom_typings/request";
+import { aclGuard } from "@middlewares/acl";
 
 export const supertestConfig = {
   login: "admin",
@@ -11,15 +12,7 @@ export const supertestConfig = {
 export function asyncRouteHandler<T = unknown>(
   fn: (req: IRequest) => Promise<T>
 ): (req: Request, res: Response, next: NextFunction) => void {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    if (req.acl) {
-      const err = await req.acl.validate(req);
-      if (err) {
-        next(err);
-        return;
-      }
-    }
-
+  return aclGuard(async (req: Request, res: Response, next: NextFunction) => {
     try {
       const returnedData = await fn(req);
       if ((returnedData as IResponseGeneric).error) {
@@ -30,5 +23,5 @@ export function asyncRouteHandler<T = unknown>(
     } catch (err) {
       next(err);
     }
-  };
+  });
 }

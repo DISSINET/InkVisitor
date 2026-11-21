@@ -1,6 +1,7 @@
 import http from "http";
 import { AddressInfo } from "net";
 import express from "express";
+import Acl from "@middlewares/acl";
 import errorsMiddleware from "@middlewares/errors";
 import GeocodingRouter from "./index";
 
@@ -33,6 +34,8 @@ let proxyUrl: string;
 let seen: IStubRequest[] = [];
 let respond: Record<string, IStubReply> = {};
 let hanging: http.ServerResponse[] = [];
+// the ACL check the proxy runs in front of its routes, none by default
+let acl: Acl | undefined;
 let secondFrameAt = 0;
 // resolves when a stream response's connection closes before the stub ended it
 let upstreamClosed: Promise<void>;
@@ -115,6 +118,10 @@ beforeAll(async () => {
   proxy = http.createServer(
     express()
       .use(express.json())
+      .use((req, _res, next) => {
+        if (acl) req.acl = acl;
+        next();
+      })
       .use("/geocoding", GeocodingRouter)
       .use(errorsMiddleware)
   );
@@ -133,6 +140,7 @@ beforeEach(() => {
   process.env.ENV = "test-instance";
   seen = [];
   respond = {};
+  acl = undefined;
   secondFrameAt = 0;
   upstreamClosed = new Promise((resolve) => (markUpstreamClosed = resolve));
 });
@@ -315,5 +323,23 @@ describe("geocoding proxy", () => {
 
     expect(await closedWithin(1000)).toBe(true);
     expect(seen[0].url).toBe("/state/stream?requestId=r2");
+  });
+
+  it("never calls the engine when the browser disconnects during the ACL check", async () => {
+    respond["/state/stream"] = { stream: "silent" };
+    acl = {
+      validate: () => new Promise((resolve) => setTimeout(() => resolve(null), 150)),
+    } as unknown as Acl;
+    const browser = new AbortController();
+    const pending = fetch(
+      proxyUrl + "/geocoding/state/stream?requestId=r3",
+      { signal: browser.signal }
+    ).catch((err) => err);
+    setTimeout(() => browser.abort(), 30);
+    expect((await pending).name).toBe("AbortError");
+
+    // well past the end of the check
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(seen).toHaveLength(0);
   });
 });
