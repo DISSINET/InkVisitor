@@ -192,47 +192,40 @@ export default Router()
       return document;
     })
   )
-  // express 4 does not catch a rejected handler promise, so everything that
-  // may throw goes through next(err) - a bare throw would leave the request
-  // hanging instead of returning the error response
-  .post("/export", aclGuard(async (request: IRequest, res: any, next: any) => {
-    try {
-      const id = request.body.documentId;
-      const exportedEntities = request.body
-        .exportedEntities as EntityEnums.Class[];
+  .post("/export", aclGuard(async (request: IRequest, res: any) => {
+    const id = request.body.documentId;
+    const exportedEntities = request.body
+      .exportedEntities as EntityEnums.Class[];
 
-      if (!id) {
-        throw new BadParams("document id has to be set");
-      }
-
-      if (!Array.isArray(exportedEntities)) {
-        throw new BadParams("exported entities have to be set");
-      }
-
-      const document = await Document.getDocumentById(request.db.connection, id);
-
-      if (!document) {
-        throw DocumentDoesNotExist.forId(id);
-      }
-
-      if (
-        !(await userCanManageDocument(
-          request.db.connection,
-          id,
-          request.getUserOrFail()
-        ))
-      ) {
-        throw new PermissionDeniedError("document cannot be exported");
-      }
-
-      const filteredContent = filterDocumentContent(document, exportedEntities);
-
-      res.setHeader("content-type", "text/plain");
-      res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
-      res.send(filteredContent);
-    } catch (err) {
-      next(err);
+    if (!id) {
+      throw new BadParams("document id has to be set");
     }
+
+    if (!Array.isArray(exportedEntities)) {
+      throw new BadParams("exported entities have to be set");
+    }
+
+    const document = await Document.getDocumentById(request.db.connection, id);
+
+    if (!document) {
+      throw DocumentDoesNotExist.forId(id);
+    }
+
+    if (
+      !(await userCanManageDocument(
+        request.db.connection,
+        id,
+        request.getUserOrFail()
+      ))
+    ) {
+      throw new PermissionDeniedError("document cannot be exported");
+    }
+
+    const filteredContent = filterDocumentContent(document, exportedEntities);
+
+    res.setHeader("content-type", "text/plain");
+    res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
+    res.send(filteredContent);
   }))
   /**
    * @openapi

@@ -4,7 +4,6 @@ import express, { Request, RequestHandler, Response } from "express";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import AclPermission from "@models/acl/acl_permission";
 import User from "@models/user/user";
-import { engineRoute } from "@modules/geocoding";
 import { asyncRouteHandler } from "@modules/index";
 import { IRequest } from "src/custom_typings/request";
 import server from "../server";
@@ -126,45 +125,28 @@ describe("Acl.validate", () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it.each([
-    ["documents", "GET", "/"],
-    ["documents", "POST", "/export"],
-    ["stats", "POST", "/materialized"],
-    ["saved-queries", "PUT", "/:id"],
-    ["geocoding", "GET", "/search"],
-    ["users", "GET", "/simplified"],
-    ["entities", "POST", "/batch"],
-    ["entities", "POST", "/query"],
-    ["entities", "GET", "/:entityId/tooltip"],
-    ["entities", "GET", "/:entityId/detail"],
-    ["entities", "GET", "/:entityId/used-relations"],
-    ["entities", "GET", "/:entityId/expansion"],
-  ])(
-    "allows a logged-in user on %s %s %s without reading or creating a row",
-    async (controller, method, path) => {
-      expect(
-        await acl.validate(request(controller, method, path, Viewer))
-      ).toBeNull();
-      expect(findByRoute).not.toHaveBeenCalled();
-      expect(save).not.toHaveBeenCalled();
-    }
-  );
-
   // documents, stats, saved-queries and geocoding are open as whole
   // controllers; anywhere else a route is open one by one
-  it("opens no other route to every logged-in user than the listed ones", async () => {
+  it("allows a logged-in user on the open routes, and on no other, without reading or creating a row", async () => {
+    const whole = ["documents", "stats", "saved-queries", "geocoding"];
     const open: string[] = [];
     for (const route of routes) {
       findByRoute.mockClear();
-      await acl.validate(
+      save.mockClear();
+      const denied = await acl.validate(
         request(route.controller, route.method, route.path, Viewer)
       );
-      if (!findByRoute.mock.calls.length) {
+      if (!findByRoute.mock.calls.length && !save.mock.calls.length) {
+        expect(denied).toBeNull();
         open.push(route.label);
       }
     }
 
-    const whole = ["documents", "stats", "saved-queries", "geocoding"];
+    expect(
+      routes
+        .filter((route) => whole.includes(route.controller))
+        .filter((route) => !open.includes(route.label))
+    ).toEqual([]);
     expect(
       open.filter((label) => !whole.includes(label.split(" ")[0])).sort()
     ).toEqual([
@@ -264,9 +246,6 @@ describe("a check that fails", () => {
   // every shape a route takes the check in
   const routes: Record<string, RequestHandler> = {
     "/json": asyncRouteHandler(async () => ({ reached: true })),
-    "/engine": engineRoute(async (_req, res) => {
-      res.json({ reached: true });
-    }),
     "/raw": aclGuard((_req, res) => {
       res.json({ reached: true });
     }),
@@ -331,6 +310,15 @@ describe("aclGuard", () => {
     await aclGuard(handler)({ acl } as Request, res, next);
     expect(next).toHaveBeenCalledWith(permissionDeniedErr);
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("hands a handler's own rejection to next", async () => {
+    const err = new Error("handler failed");
+    const next = jest.fn();
+    await aclGuard(async () => {
+      throw err;
+    })({} as Request, res, next);
+    expect(next).toHaveBeenCalledWith(err);
   });
 
   it("runs the handler when the check allows, and when no check is mounted", async () => {

@@ -4,12 +4,7 @@
  * browser never sees either. Only the routes registered below are forwarded:
  * the proxy is an explicit allowlist, never a wildcard pass-through.
  */
-import {
-  Request,
-  RequestHandler,
-  Response as ExpressResponse,
-  Router,
-} from "express";
+import { Request, Router } from "express";
 import { Readable, pipeline } from "node:stream";
 import { promisify } from "node:util";
 import {
@@ -91,21 +86,9 @@ export const engineRequest = async (
   return r;
 };
 
-/** Wraps a handler with the ACL check and hands any error to the errors middleware. */
-export const engineRoute = (
-  fn: (req: Request, res: ExpressResponse) => Promise<void>
-): RequestHandler =>
-  aclGuard(async (req, res, next) => {
-    try {
-      await fn(req, res);
-    } catch (err) {
-      next(err);
-    }
-  });
-
 /** Relays the engine's status and body unchanged. */
 export const relayJson = (path: string) =>
-  engineRoute(async (req, res) => {
+  aclGuard(async (req, res) => {
     const r = await engineRequest(
       req,
       path,
@@ -125,7 +108,7 @@ export const relayStream = (
   path: string,
   query?: (req: Request) => string
 ) =>
-  engineRoute(async (req, res) => {
+  aclGuard(async (req, res) => {
     const q = query?.(req);
     const controller = new AbortController();
     res.on("close", () => controller.abort());
@@ -168,7 +151,7 @@ const stateQuery = (req: Request): string => {
 };
 
 // always 200: the answer itself says whether the engine is configured and up
-const health = engineRoute(async (_req, res) => {
+const health = aclGuard(async (_req, res) => {
   if (!engineUrl()) {
     res.json({ configured: false } as IGeocodingHealth);
     return;

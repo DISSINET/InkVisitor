@@ -84,23 +84,19 @@ export default Router()
   .get(
     "/download",
     aclGuard(async (request: IRequest, res: Response, next: NextFunction) => {
-      try {
-        assertOwner(request);
-        const { resolved } = requireBackup(request);
+      assertOwner(request);
+      const { resolved } = requireBackup(request);
 
-        const stat = fs.statSync(resolved);
-        res.setHeader("Content-Type", "application/gzip");
-        res.setHeader("Content-Length", stat.size);
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${path.basename(resolved)}"`
-        );
+      const stat = fs.statSync(resolved);
+      res.setHeader("Content-Type", "application/gzip");
+      res.setHeader("Content-Length", stat.size);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${path.basename(resolved)}"`
+      );
 
-        const stream = fs.createReadStream(resolved);
-        stream.on("error", next);
-        stream.pipe(res);
-      } catch (err) {
-        next(err);
-      }
+      const stream = fs.createReadStream(resolved);
+      stream.on("error", next);
+      stream.pipe(res);
     })
   );

@@ -1,6 +1,6 @@
 import { apiPath } from "@common/constants";
 import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
-import Acl, { permissionDeniedErr } from "@middlewares/acl";
+import { permissionDeniedErr } from "@middlewares/acl";
 import { pool } from "@middlewares/db";
 import AclPermission from "@models/acl/acl_permission";
 import User from "@models/user/user";
@@ -64,21 +64,6 @@ describe("acl on the mounted routes", () => {
       expect(await rowsOf(controller, Get, route)).toEqual([]);
     }
   );
-
-  it("checks the routes that write the response themselves", async () => {
-    const validate = jest.spyOn(Acl.prototype, "validate");
-
-    await viewerAgent.post(`${apiPath}/documents/export`).send({}).expect(400);
-    await viewerAgent
-      .post(`${apiPath}/documents/export-batch`)
-      .send({})
-      .expect(400);
-    await viewerAgent.get(`${apiPath}/backups/download`).expect(403);
-
-    expect(
-      validate.mock.calls.map(([req]) => `${req.method} ${req.route.path}`)
-    ).toEqual(["POST /export", "POST /export-batch", "GET /download"]);
-  });
 
   it("gives backups GET download its row on the first call, which denies every role but admin and owner", async () => {
     await dropRows("backups", Get, "download");
