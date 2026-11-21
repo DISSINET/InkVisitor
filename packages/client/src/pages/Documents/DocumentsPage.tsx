@@ -5,7 +5,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Box, Loader, Panel, Submit } from "components";
-import { DocumentModalView, DocumentModalExport } from "components/advanced";
+import { DocumentGithubModal, DocumentModalView, DocumentModalExport } from "components/advanced";
 import { useDocumentsQuery, useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
@@ -32,6 +32,9 @@ export const DocumentsPage: React.FC = ({}) => {
   const { data: userData } = useUserQuery(true);
   const isAdminOrOwner =
     userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
+  // Committing to GitHub is offered to editors, admins and owners: a viewer
+  // sees neither its button nor its column.
+  const canUseGithub = isAdminOrOwner || userData?.role === UserEnums.Role.Editor;
   const assignedResourceIds = useMemo(
     () => userData?.resourceRights?.map((r) => r.resource.id) ?? [],
     [userData],
@@ -219,6 +222,7 @@ export const DocumentsPage: React.FC = ({}) => {
   });
 
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
+  const [githubDocumentId, setGithubDocumentId] = useState<string | false>(false);
   const [editDocumentId, setEditDocumentId] = useState<string | false>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -240,8 +244,9 @@ export const DocumentsPage: React.FC = ({}) => {
           <StyledDocumentsContent>
             <StyledDocumentsColumn>
               <StyledGridScrollArea>
-                <StyledGrid>
+                <StyledGrid $withGithub={canUseGithub}>
                   <DocumentsTableHeader
+                    showGithub={canUseGithub}
                     sort={sort}
                     onSort={handleSort}
                     allSelected={
@@ -271,6 +276,8 @@ export const DocumentsPage: React.FC = ({}) => {
                           onToggleSelected={handleToggleSelected}
                           handleDocumentOpen={handleDocumentOpen}
                           handleDocumentExport={handleDocumentExport}
+                          handleDocumentGithub={setGithubDocumentId}
+                          showGithub={canUseGithub}
                           setDocToDelete={setDocToDelete}
                           updateDocumentMutation={updateDocumentMutation}
                           editMode={editDocumentId === documentId}
@@ -309,6 +316,12 @@ export const DocumentsPage: React.FC = ({}) => {
           canEditDocument={canManageDocument(
             openedDocumentResource ? openedDocumentResource.id : false,
           )}
+        />
+      )}
+      {githubDocumentId && (
+        <DocumentGithubModal
+          documentId={githubDocumentId}
+          onClose={() => setGithubDocumentId(false)}
         />
       )}
       {exportedDocuments.length > 0 && (

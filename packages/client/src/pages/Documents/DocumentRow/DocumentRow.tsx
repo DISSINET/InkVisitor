@@ -12,7 +12,9 @@ import {
 } from "components/advanced/DocumentTitle/DocumentTitleStyles";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { IcoTrash } from "Theme/icons";
+import { formatStamp, toDate } from "components/basic/Timestamp/utils";
+import { isSavedSinceCommit } from "components/advanced/DocumentGithubModal/githubNotice";
+import { IcoGithub, IcoTrash } from "Theme/icons";
 import { EntityColors } from "types";
 import {
   StyledActionsCell,
@@ -21,7 +23,11 @@ import {
   StyledDisabledSelect,
   StyledDocumentRow,
   StyledExportIcon,
+  StyledGithubCell,
+  StyledGithubCellLink,
+  StyledGithubCellNote,
   StyledOpenIcon,
+  StyledSavedSinceTag,
   StyledReference,
   StyledSelectCell,
   StyledTitle,
@@ -38,6 +44,9 @@ interface DocumentRow {
   onToggleSelected: (id: string) => void;
   handleDocumentOpen: (id: string) => void;
   handleDocumentExport: (id: string) => void;
+  handleDocumentGithub: (id: string) => void;
+  // false for a viewer: the row then has no GitHub button and no GitHub cell
+  showGithub: boolean;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
     AxiosResponse<IDocument, any>,
@@ -60,6 +69,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   onToggleSelected,
   handleDocumentOpen,
   handleDocumentExport,
+  handleDocumentGithub,
+  showGithub,
   setDocToDelete,
   updateDocumentMutation,
   editMode,
@@ -114,6 +125,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
     },
   });
+
+  const lastCommitDate = document.githubSync ? toDate(document.githubSync.committedAt) : null;
 
   const { ref: titleRef, width: titleWidth = 0 } = useResizeObserver<HTMLDivElement>();
   const [titleHead, titleTail] = splitTitleTail(localTitle, 7);
@@ -170,6 +183,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             onClick={() => handleDocumentOpen(document.id)}
             tooltipLabel={"open document"}
           />
+          {showGithub && (
+            <Button
+              icon={<IcoGithub />}
+              shape="square"
+              color="info"
+              inverted
+              disabled={!canManage}
+              tooltipLabel={canManage ? "commit to GitHub" : "you are not assigned to this resource"}
+              onClick={() => handleDocumentGithub(document.id)}
+            />
+          )}
           <Button
             icon={<IcoTrash />}
             shape="square"
@@ -205,6 +229,32 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         ) : null}
       </StyledReference>
+      {showGithub && (
+        <StyledGithubCell>
+          {document.repositoryUrl && (
+            <>
+              <StyledGithubCellLink href={document.repositoryUrl} target="_blank" rel="noopener noreferrer">
+                <IcoGithub />
+              </StyledGithubCellLink>
+              {lastCommitDate && document.githubSync ? (
+                <>
+                  <StyledGithubCellLink
+                    href={document.githubSync.commitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {formatStamp(lastCommitDate)}
+                  </StyledGithubCellLink>
+                  <StyledGithubCellNote>{document.githubSync.userName}</StyledGithubCellNote>
+                </>
+              ) : (
+                <StyledGithubCellNote>not committed yet</StyledGithubCellNote>
+              )}
+              {isSavedSinceCommit(document) && <StyledSavedSinceTag>saved since</StyledSavedSinceTag>}
+            </>
+          )}
+        </StyledGithubCell>
+      )}
       <StyledCount>
         {countTotal} {countTotal === 1 ? "entity" : "entities"}
         {Object.values(EntityEnums.Class)

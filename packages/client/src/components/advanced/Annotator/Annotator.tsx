@@ -75,6 +75,7 @@ import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
+import { DocumentGithubModal } from "../DocumentGithubModal/DocumentGithubModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
 import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
@@ -626,6 +627,7 @@ export const TextAnnotator = ({
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isGithubModalOpen, setIsGithubModalOpen] = useState<boolean>(false);
   // isSavingWithoutRefresh is the way to preserve the saving state while not refreshing the annotator
   // e.g. when updating an anchor elvl
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
@@ -1689,6 +1691,10 @@ export const TextAnnotator = ({
         />
       )}
 
+      {isGithubModalOpen && documentId && (
+        <DocumentGithubModal documentId={documentId} onClose={() => setIsGithubModalOpen(false)} />
+      )}
+
       <AnnotatorWarningsModal
         anchors={asymmetricalAnchors}
         onUnlink={onRemoveAsymmetricalAnchor}
@@ -1936,6 +1942,10 @@ export const TextAnnotator = ({
             onGoToParagraphClose={() => setIsGoToParagraphOpen(false)}
             onGoToParagraph={goToParagraph}
             goToParagraphInputRef={goToParagraphInputRef}
+            onCommitClick={
+              canEditDocument && documentId ? () => setIsGithubModalOpen(true) : undefined
+            }
+            commitDisabled={isChangeMade}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

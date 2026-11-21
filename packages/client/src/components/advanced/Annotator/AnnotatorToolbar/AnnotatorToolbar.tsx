@@ -7,7 +7,7 @@ import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { HiCodeBracket } from "react-icons/hi2";
 import { useTheme } from "styled-components";
 import { ButtonSize } from "types";
-import { IcoListNumbered, IcoSearch, IcoUndo } from "Theme/icons";
+import { IcoGithub, IcoListNumbered, IcoSearch, IcoUndo } from "Theme/icons";
 import {
   StyledAnnotatorToolbar,
   StyledAnnotatorToolbarButtonWrap,
@@ -40,6 +40,11 @@ interface AnnotatorToolbar {
   onGoToParagraph: (input: string) => void;
   goToParagraphInputRef: React.RefObject<HTMLInputElement | null>;
 
+  /** Opens the commit dialog. Left out for a user who may not manage the document. */
+  onCommitClick?: () => void;
+  /** A commit takes the saved document, so unsaved text edits block it. */
+  commitDisabled?: boolean;
+
   /** Warnings chip, when this host has not supplied its own. */
   warningChip?: ReactNode;
   /**
@@ -65,6 +70,8 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   onGoToParagraphClose,
   onGoToParagraph,
   goToParagraphInputRef,
+  onCommitClick,
+  commitDisabled = false,
   warningChip,
   toolbarExtras,
 }) => {
@@ -167,6 +174,24 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
 
         {toolbarExtras && (
           <StyledAnnotatorToolbarGroup>{toolbarExtras(annotatorMode)}</StyledAnnotatorToolbarGroup>
+        )}
+
+        {onCommitClick && (
+          <StyledAnnotatorToolbarGroup>
+            <Button
+              size={ButtonSize.Small}
+              shape="square"
+              color="info"
+              inverted
+              icon={<IcoGithub size={TOOLBAR_ICON_SIZE} />}
+              disabled={commitDisabled}
+              onClick={onCommitClick}
+              tooltipLabel={
+                commitDisabled ? "save or discard your text edits first" : "commit to GitHub"
+              }
+              tooltipPosition="top"
+            />
+          </StyledAnnotatorToolbarGroup>
         )}
 
         {editActionsVisible && (

@@ -6,6 +6,7 @@ import {
   StyledBulkExportCount,
   StyledBulkExportWrap,
   StyledExportIcon,
+  StyledGithubHeaderCell,
   StyledGridHeader,
   StyledSelectHeaderCell,
   StyledSortableHeaderCell,
@@ -22,6 +23,8 @@ type DocumentsTableHeaderProps = {
   onToggleSelectAll: (selected: boolean) => void;
   selectedCount: number;
   onExportSelected: () => void;
+  // the GitHub column is drawn only for users who may commit documents
+  showGithub: boolean;
 };
 
 const SortableHeader: React.FC<{
@@ -63,6 +66,7 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
   onToggleSelectAll,
   selectedCount,
   onExportSelected,
+  showGithub,
 }) => (
   <StyledGridHeader>
     <StyledSelectHeaderCell>
@@ -97,6 +101,7 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
       </StyledBulkExportWrap>
     </StyledActionsHeaderCell>
     <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
+    {showGithub && <StyledGithubHeaderCell>GitHub</StyledGithubHeaderCell>}
     <SortableHeader field="entityCount" label="Entities" sort={sort} onSort={onSort} />
   </StyledGridHeader>
 );
