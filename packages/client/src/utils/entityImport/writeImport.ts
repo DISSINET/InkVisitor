@@ -1,27 +1,50 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
-import { errorMessage, quote, unique } from "./helpers";
+import { appendChanges, isStale, storedFields } from "./appendMerge";
+import { errorMessage, quote, sameJson, staleMessage, unique } from "./helpers";
 import { ImportDataSource, ImportIssue, ImportPlan } from "./types";
 
 export interface ImportWriteApi extends ImportDataSource {
+  // every stored relation of the entity, the ones pointing at it included
+  getRelations: (entityId: string) => Promise<Relation.IRelation[]>;
   createEntity: (entity: IEntity) => Promise<void>;
+  updateEntity: (entityId: string, changes: Partial<IEntity>) => Promise<void>;
   createRelation: (relation: Relation.IRelation) => Promise<void>;
+  updateRelation: (relationId: string, changes: Partial<Relation.IRelation>) => Promise<void>;
   deleteRelation: (relationId: string) => Promise<void>;
   // resolves to the ids the server did not delete
   deleteEntities: (entityIds: string[]) => Promise<string[]>;
 }
 
 export type ImportWriteOutcome =
-  | { status: "created"; entityIds: string[]; relationCount: number }
-  // an input id was taken while the preview was open; nothing was written
+  | {
+      status: "created";
+      entityIds: string[];
+      appendedIds: string[];
+      relationCount: number;
+      // stored relations of appended entities the drafts changed or unlinked
+      updatedRelationCount: number;
+      deletedRelationCount: number;
+    }
+  // an input id was taken, or an appended entity or a stored relation the
+  // drafts change was saved, while the drafts were open; nothing was written
   | { status: "conflict"; errors: ImportIssue[] }
-  | { status: "rolledBack"; failure: string; entityCount: number; relationCount: number }
+  | {
+      status: "rolledBack";
+      failure: string;
+      entityCount: number;
+      appendCount: number;
+      relationCount: number;
+      // stored relations changed or unlinked, then put back
+      storedRelationCount: number;
+    }
   | { status: "rollbackFailed"; failure: string; leftovers: string[] };
 
 /**
- * Creates the planned entities, then the relations, one request at a time.
- * On the first failed write everything created so far is removed again, so an
- * import lands whole or not at all.
+ * Creates the planned entities, appends to the stored ones, writes the edits
+ * to their stored relations, then creates the relations, one request at a
+ * time. On the first failed write everything
+ * written so far is undone, so an import lands whole or not at all.
  *
  * Creating a synonym relation makes the server merge every synonym group
  * sharing a member into it and delete those groups, so the groups of existing
@@ -39,32 +62,91 @@ export const writeImport = async (
   ]);
   const labelOf = (entityId: string) => quote(entityById.get(entityId)?.labels[0] ?? entityId);
 
-  const taken = await api.getEntities(plan.entities.map((entity) => entity.id));
-  if (taken.length) {
-    return {
-      status: "conflict",
-      errors: taken.map((entity) => {
-        const planned = plan.entities.findIndex((candidate) => candidate.id === entity.id);
-        return {
-          entityIndex: planned + 1,
-          label: plan.entities[planned]?.labels[0],
-          path: "id",
-          message: `id ${quote(entity.id)} was created in the database while the preview was open`,
-        };
-      }),
-    };
+  const describeStored = (relation: Relation.IRelation) =>
+    `stored relation ${Relation.RelationRules[relation.type]!.label} ${relation.entityIds
+      .map(labelOf)
+      .join(", ")}`;
+  const plannedIssue = (entityId: string) => {
+    const planned = plan.entities.findIndex((candidate) => candidate.id === entityId);
+    return { entityIndex: planned + 1, label: plan.entities[planned]?.labels[0], entityId };
+  };
+
+  const { updated: toUpdate, deleted: toDelete } = plan.storedRelationChanges ?? {
+    updated: [],
+    deleted: [],
+  };
+
+  // Nothing is written when an id was taken, or an appended entity or a
+  // stored relation the drafts change was saved, since the drafts loaded it.
+  const found = await api.getEntities(plan.entities.map((entity) => entity.id));
+  const errors: ImportIssue[] = found
+    .filter((entity) => {
+      const append = plan.appends[entity.id];
+      return !append || isStale(append.stored, entity);
+    })
+    .map((entity) =>
+      plan.appends[entity.id]
+        ? {
+            ...plannedIssue(entity.id),
+            path: "id",
+            message: staleMessage(quote(entity.labels[0])),
+            stale: true,
+          }
+        : {
+            ...plannedIssue(entity.id),
+            path: "id",
+            message: `id ${quote(entity.id)} was created in the database while the drafts were open`,
+          }
+    );
+  // each stored relation is checked through the appended draft it belongs to
+  const touched = [...toUpdate.map(({ before }) => before), ...toDelete].flatMap((relation) => {
+    const ownerId = relation.entityIds.find((entityId) => entityId in plan.appends);
+    return ownerId ? [{ relation, ownerId }] : [];
+  });
+  const ownerIds = unique(touched.map(({ ownerId }) => ownerId));
+  const current = new Map(
+    (await Promise.all(ownerIds.map((entityId) => api.getRelations(entityId))))
+      .flat()
+      .map((relation) => [relation.id, relation])
+  );
+  const staleOwners = new Set(errors.map((issue) => issue.entityId));
+  for (const { relation, ownerId } of touched) {
+    const now = current.get(relation.id);
+    if ((!now || !sameJson(now, relation)) && !staleOwners.has(ownerId)) {
+      staleOwners.add(ownerId);
+      errors.push({
+        ...plannedIssue(ownerId),
+        message: staleMessage(describeStored(relation)),
+        stale: true,
+      });
+    }
+  }
+  if (errors.length) {
+    return { status: "conflict", errors };
   }
 
-  const total = plan.entities.length + plan.relations.length;
+  const toCreate = plan.entities.filter((entity) => !plan.appends[entity.id]);
+  const toAppend = plan.entities
+    .filter((entity) => plan.appends[entity.id])
+    .map((entity) => ({
+      entity,
+      changes: appendChanges(plan.appends[entity.id].stored, entity),
+    }))
+    .filter(({ changes }) => Object.keys(changes).length > 0);
+  const total =
+    toCreate.length + toAppend.length + toUpdate.length + toDelete.length + plan.relations.length;
   let done = 0;
   const createdEntityIds: string[] = [];
+  const appendedIds: string[] = [];
   const createdRelationIds: string[] = [];
+  const updatedRelations: Relation.IRelation[] = [];
+  const deletedRelations: Relation.IRelation[] = [];
   // relations of this import the server already deleted by merging them
   const mergedAwayRelationIds = new Set<string>();
   const replacedSynonymGroups: Relation.IRelation[] = [];
   let failure: string | null = null;
 
-  for (const entity of plan.entities) {
+  for (const entity of toCreate) {
     try {
       await api.createEntity(entity);
     } catch (error) {
@@ -73,6 +155,47 @@ export const writeImport = async (
     }
     createdEntityIds.push(entity.id);
     onProgress(++done, total);
+  }
+
+  // appended metaprops may point at the entities created above
+  if (!failure) {
+    for (const { entity, changes } of toAppend) {
+      try {
+        await api.updateEntity(entity.id, changes);
+      } catch (error) {
+        failure = `Failed at appending to ${quote(entity.labels[0])}: ${errorMessage(error)}`;
+        break;
+      }
+      appendedIds.push(entity.id);
+      onProgress(++done, total);
+    }
+  }
+
+  // a stored relation may be edited to point at an entity created above, and
+  // an unlinked one makes room for a new relation of a type allowed only once
+  if (!failure) {
+    for (const { before, changes } of toUpdate) {
+      try {
+        await api.updateRelation(before.id, changes);
+      } catch (error) {
+        failure = `Failed at changing ${describeStored(before)}: ${errorMessage(error)}`;
+        break;
+      }
+      updatedRelations.push(before);
+      onProgress(++done, total);
+    }
+  }
+  if (!failure) {
+    for (const relation of toDelete) {
+      try {
+        await api.deleteRelation(relation.id);
+      } catch (error) {
+        failure = `Failed at unlinking ${describeStored(relation)}: ${errorMessage(error)}`;
+        break;
+      }
+      deletedRelations.push(relation);
+      onProgress(++done, total);
+    }
   }
 
   if (!failure) {
@@ -117,7 +240,10 @@ export const writeImport = async (
     return {
       status: "created",
       entityIds: createdEntityIds,
+      appendedIds,
       relationCount: createdRelationIds.length - mergedAwayRelationIds.size,
+      updatedRelationCount: updatedRelations.length,
+      deletedRelationCount: deletedRelations.length,
     };
   }
 
@@ -148,6 +274,39 @@ export const writeImport = async (
     }
   }
 
+  // the stored relations come back as they were, before the entities a
+  // changed one may point at are deleted
+  for (const relation of [...deletedRelations].reverse()) {
+    try {
+      await api.createRelation(relation);
+    } catch (error) {
+      leftovers.push(
+        `${describeStored(relation)} (${relation.id}): not restored, ${errorMessage(error)}`
+      );
+    }
+  }
+  for (const before of [...updatedRelations].reverse()) {
+    const { id, ...stored } = before;
+    try {
+      await api.updateRelation(id, stored);
+    } catch (error) {
+      leftovers.push(`${describeStored(before)} (${id}): not changed back, ${errorMessage(error)}`);
+    }
+  }
+
+  // the appended metaprops can point at created entities, so the appends are
+  // undone before those are deleted
+  // the appends ran in order and stopped at the first failure
+  for (const { entity, changes } of toAppend.slice(0, appendedIds.length)) {
+    try {
+      await api.updateEntity(entity.id, storedFields(plan.appends[entity.id].stored, changes));
+    } catch (error) {
+      leftovers.push(
+        `appended to ${labelOf(entity.id)} (${entity.id}): not undone, ${errorMessage(error)}`
+      );
+    }
+  }
+
   if (createdEntityIds.length) {
     let notDeleted: string[];
     try {
@@ -165,6 +324,8 @@ export const writeImport = async (
     status: "rolledBack",
     failure,
     entityCount: createdEntityIds.length,
+    appendCount: appendedIds.length,
     relationCount: relationsToDelete.length,
+    storedRelationCount: updatedRelations.length + deletedRelations.length,
   };
 };

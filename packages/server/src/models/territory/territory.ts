@@ -232,6 +232,9 @@ class Territory extends Entity implements ITerritoryModel {
     db: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
+    this.updatedAt = new Date();
+    updateData["updatedAt"] = this.updatedAt;
+
     if (updateData["data"] && (updateData["data"] as any)["parent"]) {
       const parentData = (updateData["data"] as any)["parent"];
 

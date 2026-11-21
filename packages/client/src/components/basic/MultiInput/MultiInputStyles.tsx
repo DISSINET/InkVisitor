@@ -1,7 +1,10 @@
+import { ImportMark } from "hooks/useEntityEditing";
+import { importMarkCss } from "Theme/importMark";
 import styled from "styled-components";
 
 interface StyledRow {
   $isDragging: boolean;
+  $importMark?: ImportMark;
 }
 export const StyledRow = styled.div<StyledRow>`
   position: relative;
@@ -9,6 +12,7 @@ export const StyledRow = styled.div<StyledRow>`
   flex-direction: column;
   margin-bottom: 1rem;
   opacity: ${({ $isDragging }) => ($isDragging ? 0.2 : 1)};
+  ${importMarkCss}
 `;
 
 // action icons stack in the note's top-right corner, revealed on hover

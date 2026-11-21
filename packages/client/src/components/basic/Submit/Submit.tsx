@@ -22,6 +22,7 @@ interface Submit {
   onCancel: () => void;
   loading?: boolean;
   submitLabel?: string;
+  cancelLabel?: string;
   /** Carries the weight of what the confirmation guards - danger for a removal,
    * a plainer color for a change that can be made again. */
   submitColor?: keyof ThemeColor;
@@ -38,6 +39,7 @@ export const Submit: React.FC<Submit> = ({
   onCancel,
   loading = false,
   submitLabel = "Confirm",
+  cancelLabel,
   submitColor = "danger",
   bgClickCancels = false,
 }) => {
@@ -63,7 +65,7 @@ export const Submit: React.FC<Submit> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <CancelButton onClick={onCancel} />
+            <CancelButton label={cancelLabel} onClick={onCancel} />
             <Button label={submitLabel} color={submitColor} onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>

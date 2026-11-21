@@ -10,6 +10,7 @@ import {
   STORED_ENTITY_EDITING,
   useEntityEditing,
   useEntityWrites,
+  useImportMark,
 } from "./useEntityEditing";
 import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
@@ -35,6 +36,7 @@ export {
   STORED_ENTITY_EDITING,
   useEntityEditing,
   useEntityWrites,
+  useImportMark,
   useIsInViewport,
   useSearchParams,
   useDebouncedCallback,

@@ -1,3 +1,5 @@
+import { ImportMark } from "hooks/useEntityEditing";
+import { importMarkCss } from "Theme/importMark";
 import styled from "styled-components";
 
 // references
@@ -49,13 +51,16 @@ export const StyledReferenceValuePartLabel = styled.div`
   color: ${({ theme }) => theme.color.black};
 `;
 
-interface StyledGrid {}
+interface StyledGrid {
+  $importMark?: ImportMark;
+}
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   grid-template-columns: repeat(3, auto) 1fr;
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 0.5rem;
+  ${importMarkCss}
 `;
 export const StyledDragHandle = styled.span`
   display: flex;

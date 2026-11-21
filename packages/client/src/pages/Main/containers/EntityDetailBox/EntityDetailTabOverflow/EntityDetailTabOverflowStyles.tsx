@@ -28,8 +28,9 @@ export const StyledOverflowCount = styled.span`
   color: ${({ theme }) => theme.color["gray"][700]};
 `;
 
+// as high as the other dropdown lists, so it opens over a modal too
 export const StyledOverflowList = styled.div`
-  z-index: 200;
+  z-index: 10000;
   display: flex;
   flex-direction: column;
   min-width: 16rem;

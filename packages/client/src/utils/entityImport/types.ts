@@ -1,7 +1,10 @@
-import { RelationEnums } from "@inkvisitor/shared/enums";
+import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
+import { AppendInfo } from "./appendMerge";
 
-export const MAX_IMPORT_ENTITIES = 10;
+/** How many entities one import may hold: Owners import in bigger batches. */
+export const maxImportEntities = (role: UserEnums.Role): number =>
+  role === UserEnums.Role.Owner ? 200 : 25;
 
 /**
  * One line of feedback on the input. As an error it blocks the import; as a
@@ -15,6 +18,11 @@ export interface ImportIssue {
   // field path inside the entity, e.g. "props[1].type.entityId"
   path?: string;
   message: string;
+  // the draft the issue is about, once the drafts are open
+  entityId?: string;
+  // the appended draft's stored entity or stored relations changed in the
+  // database since the drafts loaded them; see rebaseAppend
+  stale?: boolean;
 }
 
 /** A relation as written in the input, with where it was written. */
@@ -51,6 +59,15 @@ export interface ImportDataSource {
   ) => Promise<Relation.IRelation[]>;
 }
 
+/**
+ * What the drafts did to the stored relations of the appended entities: the
+ * ones unlinked, and the ones edited, each with the fields that changed.
+ */
+export interface StoredRelationChanges {
+  deleted: Relation.IRelation[];
+  updated: { before: Relation.IRelation; changes: Partial<Relation.IRelation> }[];
+}
+
 export interface ImportPlan {
   // creation order: every territory comes after its parent territory
   entities: IEntity[];
@@ -59,6 +76,11 @@ export interface ImportPlan {
   existingEntities: Record<string, IEntity>;
   // Values the import made for slots naming a stored Value (see validateImport)
   valueCopyIds: string[];
+  // input entities whose id is taken, appended to the stored entity instead
+  // of created; in `entities` with what they will hold after the append
+  appends: Record<string, AppendInfo>;
+  // set by the drafts: their edits to the stored relations of appended entities
+  storedRelationChanges?: StoredRelationChanges;
 }
 
 export interface ImportValidation {

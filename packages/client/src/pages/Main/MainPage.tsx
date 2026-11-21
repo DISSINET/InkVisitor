@@ -11,7 +11,7 @@ import {
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { EntityImportModal } from "./containers/EntityImportModal/EntityImportModal";
-import { useTreeQuery, useUserQuery } from "hooks/react-query";
+import { DETAIL_TAB_ENTITIES_KEY, useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
   ReactNode,
@@ -51,6 +51,7 @@ import {
   setPanelWidthVars,
 } from "utils/layoutTransition";
 import { getStoredUserRole } from "utils/userStorage";
+import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { searchTree } from "utils/utils";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
@@ -770,8 +771,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                           onClick={() => setShowEntityCreateModal(true)}
                           tooltipLabel="create new entity"
                         />
-                        {/* only owners may import entities */}
-                        {userRole === UserEnums.Role.Owner && (
+                        {/* only owners and admins may import entities */}
+                        {(userRole === UserEnums.Role.Owner ||
+                          userRole === UserEnums.Role.Admin) && (
                           <Button
                             icon={<IcoCode />}
                             label="import"
@@ -863,15 +865,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
         {showEntityImportModal && (
           <EntityImportModal
             closeModal={() => setShowEntityImportModal(false)}
-            onImported={(entities) => {
+            onImported={(entities, detailOpenCount) => {
+              // an append changes stored entities, which other boxes show by
+              // label, so this refreshes what a Detail save of them refreshes
               queryClient.invalidateQueries({ queryKey: ["entity"] });
+              queryClient.invalidateQueries({ queryKey: ["statement"] });
+              queryClient.invalidateQueries({ queryKey: ["territory"] });
+              queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+              queryClient.invalidateQueries({ queryKey: ["suggestion"] });
+              queryClient.invalidateQueries({ queryKey: ["audit"] });
+              queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
+              invalidateAllExplorerQueries(queryClient);
               if (entities.some((entity) => entity.class === EntityEnums.Class.Territory)) {
                 queryClient.invalidateQueries({ queryKey: ["tree"] });
               }
               // Values are not opened in Detail, as after creating one
               const detailIds = entities
                 .filter((entity) => entity.class !== EntityEnums.Class.Value)
-                .map((entity) => entity.id);
+                .map((entity) => entity.id)
+                .slice(0, detailOpenCount);
               if (detailIds.length) {
                 appendMultipleDetailIds(detailIds);
               }

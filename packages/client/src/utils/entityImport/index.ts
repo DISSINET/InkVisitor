@@ -1,24 +1,47 @@
-export { importDataSource, importWriteApi } from "./apiAdapters";
+export {
+  importDataSource,
+  importWriteApi,
+  searchCandidates,
+  storedRelationsOf,
+} from "./apiAdapters";
 export { buildEntityJson } from "./entityJson";
-export { errorMessage, formatIssue } from "./helpers";
-export { MAX_IMPORT_ENTITIES } from "./types";
-export type { ImportIssue, ImportPlan, ImportValidation } from "./types";
+export { count, errorMessage, formatIssue, STALE_ACTION } from "./helpers";
+export { maxImportEntities } from "./types";
+export type { ImportIssue, ImportPlan, ImportValidation, StoredRelationChanges } from "./types";
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
+export { describeSkips, pairWarnings, sameEntityBy } from "./appendMerge";
+export { rebaseAppend } from "./rebase";
+export type { AppendConflict, AppendInfo, AppendPairWarning } from "./appendMerge";
 export {
+  addDraftEntity,
+  addStoredRelations,
+  appendTargetsOf,
+  appendUndoOf,
+  draftAfterAppend,
   buildDraftDetail,
   createDraftWrites,
   createDraftRelation,
   deleteDraftRelation,
   draftFromPlan,
   draftToImportJson,
+  issuesWithEntityIds,
+  importMarksOf,
+  leftOutDrafts,
+  removedFromProtocols,
   missingEntityIds,
   missingSynonymGroupIds,
-  removeDraftEntity,
   reorderDraftRelations,
+  replaceEntityId,
+  replaceUndoEntityId,
+  setAllConflictChoices,
+  setConflictChoice,
+  storedRelationChanges,
+  toggleLeftOut,
+  undoAppend,
   tabEntities,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
-export type { DraftCleanup, ImportDraft } from "./draft";
+export type { AppendUndo, ImportDraft } from "./draft";

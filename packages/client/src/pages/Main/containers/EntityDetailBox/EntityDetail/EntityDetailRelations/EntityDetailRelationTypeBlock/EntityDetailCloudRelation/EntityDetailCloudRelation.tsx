@@ -1,6 +1,7 @@
 import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { Cloud } from "components";
+import { useImportMark } from "hooks";
 import { CopyUuidsButton, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -40,6 +41,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   relationDeleteMutation,
   userCanEdit,
 }) => {
+  const importMark = useImportMark(relation.id);
   const handleCloudRemove = () => {
     if (relations[0]?.entityIds?.length > 2) {
       const newEntityIds = relations[0].entityIds.filter(
@@ -69,7 +71,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
           disabled={!userCanEdit}
           topRightSlot={<CopyUuidsButton uuids={relation.entityIds} />}
         >
-          <StyledRelation>
+          <StyledRelation $importMark={importMark}>
             {relation.entityIds.map((relationEntityId, key) => {
               const relationEntity = entities[relationEntityId];
 

@@ -97,7 +97,7 @@ describe("normalizeEntities", () => {
     expect(paths(notes)).toEqual(["createdAt", "updatedAt"]);
   });
 
-  it("rejects template fields that carry a value and notes empty ones", () => {
+  it("rejects template fields that carry a value and drops empty ones silently", () => {
     const rejected = normalizeOne({
       class: "C",
       labels: ["dog"],
@@ -114,7 +114,7 @@ describe("normalizeEntities", () => {
       templateData: {},
     });
     expect(ignored.errors).toEqual([]);
-    expect(paths(ignored.notes)).toEqual(["isTemplate", "usedTemplate", "templateData"]);
+    expect(ignored.notes).toEqual([]);
 
     // database rows also store "not a template" as 0 or ""
     expect(normalizeOne({ class: "C", labels: ["dog"], isTemplate: 0 }).errors).toEqual([]);
@@ -322,7 +322,7 @@ describe("normalizeEntities", () => {
     ]);
   });
 
-  it("drops the fields the Detail view adds to an entity, with one note", () => {
+  it("drops the fields the Detail view adds to an entity silently", () => {
     const { errors, notes } = normalizeOne({
       class: "C",
       labels: ["dog"],
@@ -333,6 +333,6 @@ describe("normalizeEntities", () => {
     });
 
     expect(errors).toEqual([]);
-    expect(notes.map((note) => note.path)).toEqual(["usedInStatements, warnings, entities, right"]);
+    expect(notes).toEqual([]);
   });
 });

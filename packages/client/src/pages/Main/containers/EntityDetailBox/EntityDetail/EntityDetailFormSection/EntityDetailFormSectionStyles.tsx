@@ -1,5 +1,5 @@
 import { IoClose, IoStar, IoStarOutline } from "react-icons/io5";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const StyledAlternativeLabels = styled.div`
   display: flex;
@@ -8,6 +8,8 @@ export const StyledAlternativeLabels = styled.div`
 `;
 interface StyledAlternativeLabelWrapProps {
   $isEditing: boolean;
+  // a label the import adds to the stored entity
+  $isImportAdded?: boolean;
 }
 export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapProps>`
   position: relative;
@@ -34,11 +36,21 @@ export const StyledAlternativeLabelWrap = styled.div<StyledAlternativeLabelWrapP
     border-color: ${({ theme }) => theme.color["primary"]};
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
+  ${({ $isImportAdded, theme }) =>
+    $isImportAdded &&
+    css`
+      &,
+      &:hover {
+        background-color: ${theme.color.invertedBg["success"]};
+      }
+    `}
 `;
-export const StyledGreyBar = styled.div`
+// the bar of a label the import adds takes the color of the import marks
+export const StyledGreyBar = styled.div<{ $isImportAdded?: boolean }>`
   position: absolute;
   width: 0.3rem;
-  background-color: ${({ theme }) => theme.color["gray"][300]};
+  background-color: ${({ theme, $isImportAdded }) =>
+    $isImportAdded ? theme.color["success"] : theme.color["gray"][300]};
   top: 0;
   bottom: 0;
   left: 0;

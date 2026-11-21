@@ -1,6 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { AttributeIcon, Button, ButtonGroup, Submit } from "components";
+import { useImportMark } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
@@ -99,6 +100,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   autoFocusType,
   autoFocusValue,
 }) => {
+  const importMark = useImportMark(prop.id);
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
 
@@ -187,6 +189,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         <StyledGrid
           key={level + "|" + id}
           $tempDisabled={tempDisabled && category === draggedPropRow.category}
+          $importMark={importMark}
         >
           <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
             {userCanEdit && hasOrder ? (

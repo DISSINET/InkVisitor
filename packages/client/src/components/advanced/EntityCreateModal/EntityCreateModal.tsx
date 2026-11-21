@@ -36,6 +36,7 @@ import {
   StyledAnchorElvlWrap,
   StyledNote,
 } from "./EntityCreateModalStyles";
+import { useEntityEditing } from "hooks";
 import { useOrderedLanguageDict, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
@@ -82,7 +83,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   anchorElvl,
   onAnchorElvlChange,
 }) => {
-  const entityClasses = allowedEntityClasses ? allowedEntityClasses : classesAll;
+  const { createDraft } = useEntityEditing();
+  // a draft can't be a Statement, which the import leaves out
+  const entityClasses = (allowedEntityClasses ?? classesAll).filter(
+    (entityClass) => !createDraft || entityClass !== EntityEnums.Class.Statement
+  );
 
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -126,6 +131,16 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       closeModal();
     },
   });
+  // in the import's drafts the new entity is one more draft, not stored yet
+  const createEntity = (newEntity: IEntity) => {
+    if (createDraft) {
+      createDraft(newEntity);
+      onMutationSuccess(newEntity);
+      closeModal();
+    } else {
+      entityCreateMutation.mutate(newEntity);
+    }
+  };
 
   const userRole = getStoredUserRole() as UserEnums.Role;
 
@@ -198,7 +213,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             undefined,
             entityCreateStatementOrder ?? EntityEnums.Order.Last
           );
-          entityCreateMutation.mutate(newStatement);
+          createEntity(newStatement);
         }
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
@@ -212,7 +227,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
           entityCreateTerritoryOrder ?? EntityEnums.Order.Last
         );
-        entityCreateMutation.mutate(newTerritory);
+        createEntity(newTerritory);
       } else if (newCreated.entityClass === EntityEnums.Class.Action) {
         const newAction = CAction(
           {
@@ -223,7 +238,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           actionPos,
           newCreated.detail
         );
-        entityCreateMutation.mutate(newAction);
+        createEntity(newAction);
       } else if (newCreated.entityClass === EntityEnums.Class.Concept) {
         const newConcept = CConcept(
           {
@@ -234,7 +249,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           conceptPos,
           newCreated.detail
         );
-        entityCreateMutation.mutate(newConcept);
+        createEntity(newConcept);
       } else {
         const newEntity = CEntity(
           {
@@ -245,7 +260,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           newCreated.label,
           newCreated.detail
         );
-        entityCreateMutation.mutate(newEntity);
+        createEntity(newEntity);
       }
     }
   };
@@ -328,25 +343,30 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         />
         <ModalContent column>
           <ModalInputForm alignLeft>
-            <ModalInputLabel>{"Apply Template: "}</ModalInputLabel>
-            <ModalInputWrap>
-              <Dropdown.Single.Basic
-                placeholder="select template.."
-                disabled={templateOptions.length === 0}
-                width="full"
-                value={selectedTemplate}
-                options={[
-                  { value: defaultDropdownValue, label: "Select template..." },
-                  ...templateOptions,
-                ]}
-                onChange={(templateToApply) => {
-                  if (templateToApply !== defaultDropdownValue) {
-                    setSelectedTemplate(templateToApply);
-                    handleAskForTemplateApply(templateToApply);
-                  }
-                }}
-              />
-            </ModalInputWrap>
+            {/* a template instance is written to the database at once */}
+            {!createDraft && (
+              <>
+                <ModalInputLabel>{"Apply Template: "}</ModalInputLabel>
+                <ModalInputWrap>
+                  <Dropdown.Single.Basic
+                    placeholder="select template.."
+                    disabled={templateOptions.length === 0}
+                    width="full"
+                    value={selectedTemplate}
+                    options={[
+                      { value: defaultDropdownValue, label: "Select template..." },
+                      ...templateOptions,
+                    ]}
+                    onChange={(templateToApply) => {
+                      if (templateToApply !== defaultDropdownValue) {
+                        setSelectedTemplate(templateToApply);
+                        handleAskForTemplateApply(templateToApply);
+                      }
+                    }}
+                  />
+                </ModalInputWrap>
+              </>
+            )}
             <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
               <EntitySuggester

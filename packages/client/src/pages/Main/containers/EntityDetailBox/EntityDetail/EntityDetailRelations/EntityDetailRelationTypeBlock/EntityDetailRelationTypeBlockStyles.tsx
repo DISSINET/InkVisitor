@@ -1,10 +1,13 @@
+import { ImportMark } from "hooks/useEntityEditing";
+import { importMarkCss } from "Theme/importMark";
 import styled from "styled-components";
 import { Handle } from "reactflow";
 
-export const StyledRelation = styled.div`
+export const StyledRelation = styled.div<{ $importMark?: ImportMark }>`
   display: inline-flex;
   overflow: hidden;
   flex-wrap: wrap;
+  ${importMarkCss}
 `;
 export const StyledEntityWrapper = styled.div`
   display: inline-flex;
@@ -22,6 +25,7 @@ export const StyledCloudEntityWrapper = styled.div`
 interface StyledGrid {
   $hasAttribute?: boolean;
   $hasOrder: boolean;
+  $importMark?: ImportMark;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
@@ -32,6 +36,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   max-width: 100%;
   align-items: center;
   width: fit-content;
+  ${importMarkCss}
 `;
 export const StyledGridColumn = styled.div`
   margin: ${({ theme }) => theme.space[1]};

@@ -1,9 +1,10 @@
-import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
   Button,
   ButtonGroup,
   CancelButton,
+  Input,
   Modal,
   Submit,
   ModalContent,
@@ -11,23 +12,39 @@ import {
   ModalHeader,
 } from "components";
 import { useUserQuery } from "hooks/react-query";
-import update from "immutability-helper";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { maxTabCount } from "Theme/constants";
 import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
 import {
+  addStoredRelations,
+  appendTargetsOf,
+  appendUndoOf,
+  AppendUndo,
+  count,
+  draftAfterAppend,
   draftFromPlan,
   draftToImportJson,
   errorMessage,
   ImportDraft,
   ImportIssue,
   ImportWriteOutcome,
+  issuesWithEntityIds,
+  leftOutDrafts,
   importDataSource,
   importWriteApi,
-  MAX_IMPORT_ENTITIES,
+  maxImportEntities,
   missingEntityIds,
   missingSynonymGroupIds,
-  removeDraftEntity,
+  rebaseAppend,
+  replaceEntityId,
+  replaceUndoEntityId,
+  setAllConflictChoices,
+  setConflictChoice,
+  storedRelationChanges,
+  storedRelationsOf,
+  toggleLeftOut,
+  undoAppend,
   tabEntities,
   validateImport,
   writeImport,
@@ -40,6 +57,8 @@ import {
   StyledDraftModeHint,
   StyledHiddenFileInput,
   StyledHint,
+  StyledInputHint,
+  StyledLoadArea,
   StyledProgress,
   StyledResult,
   StyledResultFailure,
@@ -57,19 +76,32 @@ const INPUT_PLACEHOLDER = `[
   }
 ]`;
 
-// the drafts in the import format, in id order: moving a tab is no edit
+// the drafts in the import format, in id order: moving a tab is no edit; with
+// the edits to stored relations, which the import format leaves out
 const draftSnapshot = (draft: ImportDraft) =>
-  JSON.stringify(
+  JSON.stringify([
     [...draftToImportJson(draft)].sort((a, b) =>
       String((a as { id: string }).id).localeCompare(String((b as { id: string }).id)),
     ),
-  );
+    storedRelationChanges(draft),
+  ]);
 
-const entityCount = (count: number) => `${count} ${count === 1 ? "entity" : "entities"}`;
+const entityCount = (amount: number) => count(amount, "entity", "entities");
+
+// one "append to it", with what undoing it needs
+interface AppendRecord {
+  undo: AppendUndo;
+  storedLabel?: string;
+}
+
+// how many imported entities Create opens in Detail unless the user sets it
+const DEFAULT_DETAIL_OPEN_COUNT = 10;
 
 interface EntityImportModal {
   closeModal: () => void;
-  onImported: (entities: IEntity[]) => void;
+  // `detailOpenCount`: how many of the entities, Values not counted, to open
+  // in Detail
+  onImported: (entities: IEntity[], detailOpenCount: number) => void;
 }
 
 export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onImported }) => {
@@ -82,14 +114,20 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
   const [step, setStep] = useState<Step>("input");
   const [text, setText] = useState("");
+  // null: the default, capped by the number of entities that can open
+  const [detailOpenChoice, setDetailOpenChoice] = useState<number | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
+  // the text Validate last refused; Validate stays off until it is changed
+  const [refusedText, setRefusedText] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<ImportDraft | null>(null);
   // the drafts as Validate opened them, to tell whether they were edited
   const validatedSnapshot = useRef("");
   const [draftErrors, setDraftErrors] = useState<ImportIssue[]>([]);
   const [draftNotes, setDraftNotes] = useState<ImportIssue[]>([]);
+  // every "append to it" still in the drafts, by stored id
+  const [appendRecords, setAppendRecords] = useState<Record<string, AppendRecord>>({});
 
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [outcome, setOutcome] = useState<ImportWriteOutcome | null>(null);
@@ -98,16 +136,27 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   // a write in progress must finish or roll back before the modal can close
   const isWriting = step === "writing";
 
-  // Closing the modal while Create still checks the drafts cancels the
+  // Closing the modal while Import still checks the drafts cancels the
   // import: the check runs on, but nothing is written once it is done.
   const isClosedRef = useRef(false);
-  const handleClose = () => {
+  // drafts changed since Validate are lost on close, so the user is asked first
+  const [showCloseSubmit, setShowCloseSubmit] = useState(false);
+  const closeNow = () => {
+    setShowCloseSubmit(false);
     isClosedRef.current = true;
     closeModal();
   };
+  const handleClose = () => {
+    if (step === "drafts" && draft && draftSnapshot(draft) !== validatedSnapshot.current) {
+      setShowCloseSubmit(true);
+    } else {
+      closeNow();
+    }
+  };
 
+  const role = getStoredUserRole() as UserEnums.Role;
   const validationContext = () => ({
-    role: getStoredUserRole() as UserEnums.Role,
+    role,
     defaultLanguage: user!.options.defaultLanguage,
     source: importDataSource,
   });
@@ -169,6 +218,27 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       .catch(() => ids.forEach((id) => requestedSynonymIds.current.delete(id)));
   }, [draft]);
 
+  // the stored relations of each appended draft, so Detail shows and edits
+  // them; loaded once per stored entity
+  const requestedRelationIds = useRef(new Set<string>());
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+    const ids = Object.keys(draft.appends ?? {}).filter(
+      (id) => !requestedRelationIds.current.has(id),
+    );
+    if (!ids.length) {
+      return;
+    }
+    ids.forEach((id) => requestedRelationIds.current.add(id));
+    Promise.all(ids.map(storedRelationsOf))
+      .then((found) =>
+        setDraft((current) => current && addStoredRelations(current, found.flat())),
+      )
+      .catch(() => ids.forEach((id) => requestedRelationIds.current.delete(id)));
+  }, [draft]);
+
   const handleFileLoad = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // cleared so loading the same file again fires a change
@@ -179,6 +249,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
   };
 
+  const canValidate = !!text.trim() && text !== refusedText && !isValidating && !!user;
   const handleValidate = async () => {
     if (!user) {
       return;
@@ -187,6 +258,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     try {
       const result = await validateImport(text, validationContext());
       setInputErrors(result.errors);
+      setRefusedText(result.plan ? null : text);
       if (result.plan) {
         const validatedDraft = draftFromPlan(result.plan);
         validatedSnapshot.current = draftSnapshot(validatedDraft);
@@ -219,8 +291,10 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setDraft(null);
     setDraftErrors([]);
     setDraftNotes([]);
+    setAppendRecords({});
     setInputErrors([]);
     requestedIds.current.clear();
+    requestedRelationIds.current.clear();
     requestedSynonymIds.current.clear();
     setStep("input");
   };
@@ -231,61 +305,150 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     [],
   );
 
-  const handleCloseTab = (entityId: string) => {
-    if (!draft) {
+  const handleToggleLeftOut = (entityId: string) =>
+    setDraft((current) => current && toggleLeftOut(current, entityId));
+
+  const handleConflictChoice = (entityId: string, conflictIndex: number, useImported: boolean) =>
+    setDraft((current) => current && setConflictChoice(current, entityId, conflictIndex, useImported));
+  const handleAllConflictChoices = (useImported: boolean) =>
+    setDraft((current) => current && setAllConflictChoices(current, useImported));
+
+  // The draft takes the id of the stored entity everywhere in the drafts, and
+  // the drafts are validated again: the draft is merged into the stored
+  // entity, the drafts already appended keep their final state.
+  const handleAppendTo = async (entityId: string, storedId: string): Promise<boolean> => {
+    if (!draft || !user) {
+      return false;
+    }
+    const label = draft.entities.find((entity) => entity.id === entityId)?.labels[0];
+    // the left-out drafts skip the validation, so an error in them blocks
+    // nothing; draftAfterAppend brings them back unchanged
+    const replaced = replaceEntityId(draft, entityId, storedId);
+    const json = JSON.stringify(draftToImportJson(replaced));
+    setIsValidating(true);
+    try {
+      const { errors, plan } = await validateImport(json, {
+        ...validationContext(),
+        appendTargets: appendTargetsOf(draft),
+        fromDrafts: true,
+        valueCopyIds: draft.valueCopyIds,
+      });
+      if (!plan) {
+        setDraftErrors(issuesWithEntityIds(replaced, errors));
+        return false;
+      }
+      const next = draftAfterAppend(replaced, plan);
+      const storedLabel = plan.appends[storedId]?.stored.labels[0];
+      setDraft(next);
+      // the earlier appends' undos follow the draft to its stored id
+      setAppendRecords((records) => ({
+        ...Object.fromEntries(
+          Object.entries(records).map(([id, record]) => [
+            id,
+            { ...record, undo: replaceUndoEntityId(record.undo, entityId, storedId) },
+          ])
+        ),
+        [storedId]: { undo: appendUndoOf(draft, entityId, storedId), storedLabel },
+      }));
+      setDraftErrors([]);
+      setDraftNotes((notes) => [
+        ...notes,
+        { label, message: `appended to "${storedLabel}" in the database` },
+      ]);
+      return true;
+    } catch (error) {
+      setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  // only the appended draft goes back to how it was; the other drafts keep
+  // every change made since
+  const handleUndoAppend = (storedId: string) => {
+    const record = appendRecords[storedId];
+    if (!record) {
       return;
     }
-    const entity = draft.entities.find((candidate) => candidate.id === entityId);
-    const { draft: rest, removedRelations, cleanups } = removeDraftEntity(draft, entityId);
-    setDraft(rest);
-    const labelOf = (id: string) =>
-      draft.entities.find((candidate) => candidate.id === id)?.labels[0];
+    setDraft((current) => current && undoAppend(current, record.undo));
+    // its stored relations load again if it is appended again
+    requestedRelationIds.current.delete(storedId);
+    setAppendRecords((records) => {
+      const rest = { ...records };
+      delete rest[storedId];
+      return rest;
+    });
+    setDraftErrors([]);
     setDraftNotes((notes) => [
       ...notes,
       {
-        label: entity?.labels[0],
-        message: `left out of the import${
-          removedRelations.length
-            ? `, with ${removedRelations.length} ${
-                removedRelations.length === 1 ? "relation" : "relations"
-              }`
-            : ""
-        }`,
+        label: record.undo.entity.labels[0],
+        message: `no longer appended to "${record.storedLabel}"`,
       },
-      // the other drafts no longer point at it
-      ...cleanups.map((cleanup) => ({
-        label: labelOf(cleanup.entityId),
-        message: `${cleanup.changes.join(", ")} (they pointed at "${entity?.labels[0]}")`,
-      })),
     ]);
   };
 
-  // the indexes count tabs; the Value copies, which have none, stay first
-  const handleMoveTab = useCallback(
-    (dragIndex: number, hoverIndex: number) =>
-      setDraft((current) => {
-        if (!current) {
-          return current;
-        }
-        const tabs = tabEntities(current);
-        const copies = current.entities.filter((entity) => !tabs.includes(entity));
-        return {
-          ...current,
-          entities: [
-            ...copies,
-            ...update(tabs, {
-              $splice: [
-                [dragIndex, 1],
-                [hoverIndex, 0, tabs[dragIndex]],
-              ],
-            }),
-          ],
-        };
-      }),
-    [],
-  );
+  // The appended draft moves onto its stored entity and stored relations as
+  // the database holds them now; what it can't keep is listed in the notes.
+  const handleRebase = async (entityId: string) => {
+    if (!draft) {
+      return;
+    }
+    const entityOf = (id: string) =>
+      draft.entities.find((entity) => entity.id === id) ?? draft.existing[id];
+    const labelOf = (id: string) => entityOf(id)?.labels[0] ?? id;
+    const label = labelOf(entityId);
+    const withoutStale = (issues: ImportIssue[]) =>
+      issues.filter((issue) => !(issue.stale && issue.entityId === entityId));
+    setIsValidating(true);
+    try {
+      const [[current], relations] = await Promise.all([
+        importDataSource.getEntities([entityId]),
+        storedRelationsOf(entityId),
+      ]);
+      if (!current) {
+        setDraftErrors((errors) => [
+          ...withoutStale(errors),
+          {
+            entityId,
+            label,
+            message: `"${label}" is no longer in the database; leave it out, or go back to JSON`,
+          },
+        ]);
+        return;
+      }
+      const rebased = rebaseAppend(draft, entityId, current, relations, labelOf);
+      setDraft(rebased.draft);
+      setDraftErrors(withoutStale);
+      setDraftNotes((notes) => [
+        ...notes,
+        { label, entityId, message: "moved onto its current database version" },
+        ...rebased.notes.map((message) => ({ label, entityId, message })),
+      ]);
+    } catch (error) {
+      setDraftErrors((errors) => [
+        ...errors,
+        { message: `The database version could not load: ${errorMessage(error)}` },
+      ]);
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
-  const handleCreate = async () => {
+  // Import removes the stored relations the drafts unlinked, so it asks first
+  const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const relationChanges = draft ? storedRelationChanges(draft) : { updated: [], deleted: [] };
+  const handleCreate = () => {
+    if (relationChanges.deleted.length) {
+      setShowRemoveSubmit(true);
+    } else {
+      createDrafts();
+    }
+  };
+
+  const createDrafts = async () => {
+    setShowRemoveSubmit(false);
     if (!draft || !user) {
       return;
     }
@@ -295,12 +458,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setIsValidating(true);
     let plan;
     try {
-      const result = await validateImport(
-        JSON.stringify(draftToImportJson(draft)),
-        validationContext(),
-      );
-      setDraftErrors(result.errors);
-      plan = result.plan;
+      const result = await validateImport(JSON.stringify(draftToImportJson(draft)), {
+        ...validationContext(),
+        appendTargets: appendTargetsOf(draft),
+        allowAppend: false,
+        valueCopyIds: draft.valueCopyIds,
+      });
+      setDraftErrors(issuesWithEntityIds(draft, result.errors));
+      plan = result.plan && { ...result.plan, storedRelationChanges: storedRelationChanges(draft) };
     } catch (error) {
       setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
     } finally {
@@ -311,7 +476,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
 
     setStep("writing");
-    setProgress({ done: 0, total: plan.entities.length + plan.relations.length });
+    setProgress({
+      done: 0,
+      total:
+        plan.entities.length +
+        plan.relations.length +
+        relationChanges.updated.length +
+        relationChanges.deleted.length,
+    });
 
     let result: ImportWriteOutcome;
     try {
@@ -327,19 +499,26 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
 
     if (result.status === "created") {
-      onImported(plan.entities);
+      onImported(plan.entities, detailOpenCount);
       // the Value copies were made by the import, not given in the input
-      const copyCount = plan.entities.filter((entity) =>
-        draft.valueCopyIds?.includes(entity.id),
-      ).length;
-      const relations = `${result.relationCount} ${
-        result.relationCount === 1 ? "relation" : "relations"
-      }`;
-      const copies = copyCount
-        ? `; ${copyCount} ${copyCount === 1 ? "Value" : "Values"} created`
+      const copyCount = result.entityIds.filter((id) => draft.valueCopyIds?.includes(id)).length;
+      const relations = count(result.relationCount, "relation", "relations");
+      const appended = result.appendedIds.length
+        ? `, appended to ${entityCount(result.appendedIds.length)}`
         : "";
+      const copies = copyCount
+        ? `; ${count(copyCount, "Value", "Values")} created`
+        : "";
+      const stored = [
+        result.updatedRelationCount ? `${result.updatedRelationCount} changed` : "",
+        result.deletedRelationCount ? `${result.deletedRelationCount} unlinked` : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
       toast.info(
-        `Imported ${entityCount(plan.entities.length - copyCount)}, ${relations}${copies}`,
+        `Imported ${entityCount(result.entityIds.length - copyCount)}${appended}, ${relations}${copies}${
+          stored ? `; stored relations: ${stored}` : ""
+        }`,
       );
       closeModal();
     } else if (result.status === "conflict") {
@@ -351,13 +530,23 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
   };
 
-  const draftCount = draft ? tabEntities(draft).length : 0;
+  const leftOut = draft ? leftOutDrafts(draft) : new Map<string, string>();
+  const included = draft ? tabEntities(draft).filter((entity) => !leftOut.has(entity.id)) : [];
+  const draftCount = included.length;
+  // Values never open in Detail, and Detail holds at most maxTabCount tabs
+  const detailOpenMax = Math.min(
+    included.filter((entity) => entity.class !== EntityEnums.Class.Value).length,
+    maxTabCount
+  );
+  const detailOpenCount = Math.min(detailOpenChoice ?? DEFAULT_DETAIL_OPEN_COUNT, detailOpenMax);
 
   return (
     <Modal
       showModal={showModal}
-      // wide enough for a relation line with two ids to fit unwrapped
-      width="fat"
+      // the list, Detail and the append column side by side, up to 1300px,
+      // past which Detail only gets wider lines
+      width="full"
+      maxWidth={1300}
       // the JSON field and the Detail of the drafts fill the height; the
       // result keeps the height of its content
       fullHeight={step === "input" || step === "drafts"}
@@ -371,16 +560,20 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         title="Import entities from JSON"
         onClose={isWriting ? undefined : handleClose}
       />
-      <ModalContent column enableScroll={step !== "drafts"}>
+      {/* only a scrolling body shrinks below its content, so the Detail of the
+          drafts fits the window instead of pushing the footer out of it */}
+      <ModalContent column enableScroll>
         {step === "input" && (
           <StyledStep>
-            <StyledHint>
-              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. Detail's JSON section shows this format; give a copy a new id.`}
-            </StyledHint>
+            <StyledLoadArea type="button" onClick={() => fileInputRef.current?.click()}>
+              <IcoFileText />
+              {"Load a .json file"}
+            </StyledLoadArea>
             <EntityImportJsonEditor
               value={text}
               onChange={setText}
               placeholder={INPUT_PLACEHOLDER}
+              onSubmit={() => canValidate && handleValidate()}
             />
             <StyledHiddenFileInput
               ref={fileInputRef}
@@ -404,8 +597,13 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             <EntityImportDrafts
               draft={draft}
               onDraftChange={handleDraftChange}
-              onCloseTab={handleCloseTab}
-              onMoveTab={handleMoveTab}
+              onToggleLeftOut={handleToggleLeftOut}
+              onConflictChoice={handleConflictChoice}
+              onAllConflictChoices={handleAllConflictChoices}
+              onAppendTo={handleAppendTo}
+              undoableAppendIds={Object.keys(appendRecords)}
+              onUndoAppend={handleUndoAppend}
+              onRebase={handleRebase}
               errors={draftErrors}
               notes={draftNotes}
             />
@@ -420,7 +618,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           <StyledResult>
             <StyledResultFailure>{outcome.failure}</StyledResultFailure>
             <p>
-              {`Rolled back: ${outcome.entityCount} entities, ${outcome.relationCount} relations. Nothing was imported.`}
+              {`Rolled back: ${outcome.entityCount} entities, ${outcome.appendCount} appends, ${outcome.relationCount} relations, ${outcome.storedRelationCount} stored relations put back. Nothing was imported.`}
             </p>
           </StyledResult>
         )}
@@ -439,18 +637,15 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       <ModalFooter spaceBetween={step === "input" || step === "drafts"}>
         {step === "input" && (
           <>
-            <Button
-              label="load file"
-              icon={<IcoFileText />}
-              inverted
-              onClick={() => fileInputRef.current?.click()}
-            />
+            <StyledInputHint>
+              {`Load a .json file or paste up to ${maxImportEntities(role)} entities as a JSON object or array. Detail's JSON section shows this format. An entity whose id is in the database is appended to it.`}
+            </StyledInputHint>
             <ButtonGroup>
               <CancelButton onClick={handleClose} />
               <Button
                 label="Validate"
                 color="info"
-                disabled={!text.trim() || isValidating || !user}
+                disabled={!canValidate}
                 onClick={handleValidate}
               />
             </ButtonGroup>
@@ -467,13 +662,30 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             />
             <StyledDraftModeHint>
               {
-                "Draft mode. Nothing is saved until Create, so suggesters can't create new entities."
+                "Draft mode. Nothing is saved until Import, so suggesters can't create new entities. The × on a row leaves its entity out until you bring it back."
               }
             </StyledDraftModeHint>
             <ButtonGroup>
+              <Input
+                type="number"
+                label="open in Detail"
+                labelSpaceNoWrap
+                width={50}
+                value={String(detailOpenCount)}
+                min={0}
+                max={detailOpenMax}
+                changeOnType
+                disabled={detailOpenMax === 0}
+                onChangeFn={(value) => {
+                  const count = Number(value);
+                  setDetailOpenChoice(
+                    Math.min(Math.max(0, Number.isFinite(count) ? count : 0), detailOpenMax)
+                  );
+                }}
+              />
               <CancelButton onClick={handleClose} />
               <Button
-                label={`Create ${entityCount(draftCount)}`}
+                label={`Import ${entityCount(draftCount)}`}
                 color="info"
                 disabled={draftCount === 0 || isValidating}
                 onClick={handleCreate}
@@ -498,11 +710,41 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
       <Submit
         title="Back to JSON"
-        text="The JSON field shows the input as you pasted it. Your changes in the tabs will be lost."
-        submitLabel="Back to JSON"
+        text="The JSON field shows the input as you pasted it. Your changes in the drafts will be lost."
+        submitLabel="Discard changes and go back"
+        cancelLabel="Keep editing"
         show={showBackSubmit}
         onSubmit={goBackToJson}
         onCancel={() => setShowBackSubmit(false)}
+      />
+      <Submit
+        title="Remove stored relations"
+        text={`The import also removes ${count(
+          relationChanges.deleted.length,
+          "stored relation",
+          "stored relations",
+        )} you unlinked${
+          relationChanges.updated.length
+            ? ` and changes ${count(
+                relationChanges.updated.length,
+                "stored relation",
+                "stored relations",
+              )}`
+            : ""
+        }, in the database.`}
+        submitLabel="Import"
+        show={showRemoveSubmit}
+        onSubmit={createDrafts}
+        onCancel={() => setShowRemoveSubmit(false)}
+      />
+      <Submit
+        title="Close the import"
+        text="Nothing has been imported. Your changes in the drafts will be lost."
+        submitLabel="Discard changes and close"
+        cancelLabel="Keep editing"
+        show={showCloseSubmit}
+        onSubmit={closeNow}
+        onCancel={() => setShowCloseSubmit(false)}
       />
     </Modal>
   );

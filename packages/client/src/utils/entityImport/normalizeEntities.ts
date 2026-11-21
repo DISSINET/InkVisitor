@@ -35,8 +35,8 @@ const ENTITY_KEYS = [
 ];
 const SERVER_MANAGED_KEYS = ["createdAt", "updatedAt"];
 // What the entity detail response carries on top of the entity itself; an
-// entity taken from it keeps its other fields, these are dropped rather than
-// rejected. Its relations still have to be written as the flat list.
+// entity taken from it keeps its other fields, these are dropped silently
+// rather than rejected. Its relations still have to be written as the flat list.
 const DETAIL_VIEW_KEYS = [
   "entities",
   "usedInStatements",
@@ -56,7 +56,7 @@ const DETAIL_VIEW_KEYS = [
   "anchorTexts",
 ];
 // Rejected when they carry a value; empty ones (isTemplate: false, as in a
-// database dump) are dropped with a note.
+// database dump) are dropped silently.
 const TEMPLATE_KEYS: Record<string, string> = {
   isTemplate: "templates can't be imported",
   usedTemplate: "entities created from a template can't be imported",
@@ -525,30 +525,19 @@ const normalizeEntity = (
     return null;
   }
 
-  const detailViewKeys: string[] = [];
   for (const [key, value] of Object.entries(raw)) {
-    if (ENTITY_KEYS.includes(key)) {
+    if (ENTITY_KEYS.includes(key) || DETAIL_VIEW_KEYS.includes(key)) {
       continue;
     } else if (SERVER_MANAGED_KEYS.includes(key)) {
       report.note(key, "ignored, set by the server");
-    } else if (DETAIL_VIEW_KEYS.includes(key)) {
-      detailViewKeys.push(key);
     } else if (key in TEMPLATE_KEYS) {
-      if (isEmptyValue(value)) {
-        report.note(key, "ignored, it is empty");
-      } else {
+      if (!isEmptyValue(value)) {
         report.error(key, TEMPLATE_KEYS[key]);
       }
     } else {
       const hint = KEY_HINTS[key] ? `; did you mean "${KEY_HINTS[key]}"?` : "";
       report.error(key, `unknown field${hint}`);
     }
-  }
-  if (detailViewKeys.length) {
-    report.note(
-      detailViewKeys.join(", "),
-      "ignored, shown by the Detail view but not part of the entity"
-    );
   }
 
   // an entity without an id, or with an empty one, gets a new one

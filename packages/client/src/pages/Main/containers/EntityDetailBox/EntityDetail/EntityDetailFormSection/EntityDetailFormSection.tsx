@@ -84,7 +84,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  const { offersStoredEntityFeatures } = useEntityEditing();
+  const { offersStoredEntityFeatures, importMarks } = useEntityEditing();
   const writes = useEntityWrites();
 
   const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
@@ -628,6 +628,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <MultiInput
                 disabled={!userCanEdit}
                 values={entity.notes}
+                markedValues={importMarks?.addedNotes}
                 width="full"
                 onChange={(newValues: string[]) => {
                   updateEntityMutation.mutate({ notes: newValues });

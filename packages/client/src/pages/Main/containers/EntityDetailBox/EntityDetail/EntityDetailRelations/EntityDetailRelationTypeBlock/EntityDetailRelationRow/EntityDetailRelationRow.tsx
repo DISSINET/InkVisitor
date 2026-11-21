@@ -19,7 +19,7 @@ import {
   StyledGridColumn,
 } from "../EntityDetailRelationTypeBlockStyles";
 import { ThemeContext } from "styled-components";
-import { useTheme } from "hooks";
+import { useImportMark, useTheme } from "hooks";
 
 interface EntityDetailRelationRow {
   relation: Relation.IRelation | Relation.IIdentification;
@@ -65,6 +65,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   updateOrderFn,
   userCanEdit,
 }) => {
+  const importMark = useImportMark(relation.id);
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
@@ -141,6 +142,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
         style={{ opacity: opacity }}
         $hasAttribute={relationRule.attributes.length > 0}
         $hasOrder={hasOrder}
+        $importMark={importMark}
       >
         {uniqueRelationIds.map((relationEntityId, key) => {
           const relationEntity = entities[relationEntityId];

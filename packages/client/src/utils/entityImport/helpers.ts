@@ -5,6 +5,15 @@ import { ImportIssue } from "./types";
 export const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+/** Whether two values hold the same JSON, whatever the order of their keys. */
+export const sameJson = (a: unknown, b: unknown): boolean => {
+  const sorted = (_key: string, value: unknown) =>
+    isPlainObject(value)
+      ? Object.fromEntries(Object.entries(value).sort(([x], [y]) => x.localeCompare(y)))
+      : value;
+  return JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
+};
+
 export const isEnumValue = <T extends Record<string, string | number>>(
   enumObject: T,
   value: unknown
@@ -29,6 +38,13 @@ export const quote = (value: unknown): string => {
     : `"${text}"`;
 };
 
+// the panel beside an appended draft's Detail offers the button it names
+export const STALE_ACTION = "use the current database version";
+
+/** The error on an appended draft whose stored entity or relations changed. */
+export const staleMessage = (subject: string): string =>
+  `${subject} was changed in the database since the drafts loaded it; open the draft and ${STALE_ACTION}`;
+
 export const className = (entityClass: EntityEnums.Class): string =>
   entitiesDictKeys[entityClass]?.label ?? entityClass;
 
@@ -42,6 +58,26 @@ export const enumList = (enumObject: Record<string, string | number>): string =>
     .join(", ");
 
 export const unique = <T,>(values: T[]): T[] => [...new Set(values)];
+
+/** "1 metaprop", "2 metaprops" */
+export const count = (amount: number, singular: string, plural: string) =>
+  `${amount} ${amount === 1 ? singular : plural}`;
+
+const pathKeys = (path: string) => path.match(/[^.[\]]+/g)!;
+
+/** The field at a path such as "props[0].value.entityId". */
+export const getAtPath = (target: object, path: string): unknown =>
+  pathKeys(path).reduce<unknown>((node, key) => (node as Record<string, unknown>)?.[key], target);
+
+/** Sets the field at a path such as "props[0].value.entityId", in place. */
+export const setAtPath = (target: object, path: string, value: unknown) => {
+  const keys = pathKeys(path);
+  let node = target as Record<string, unknown>;
+  keys.slice(0, -1).forEach((key) => {
+    node = node[key] as Record<string, unknown>;
+  });
+  node[keys[keys.length - 1]] = value;
+};
 
 /** `Entity 3 "sacral kingship" › props[1].type.entityId: <message>` */
 export const formatIssue = (issue: ImportIssue): string => {
