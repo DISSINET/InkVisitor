@@ -25,6 +25,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - An anchor of an Entity in another language than the user's default source language is created as inferential, with a toast, and sequential anchoring asks first (#3255)
 - Text and XML can be edited in the Documents page annotator by users who may manage the document; Esc closes one layer at a time instead of the whole document (#3321, #3322)
 - The Annotator mode is kept when the Territory changes within the same document (#3326)
+- Editors, admins and owners can commit a document to its file on GitHub from the Annotator toolbar or the Documents page, with their own GitHub account (an editor only for documents of a resource assigned to them): the dialog shows the document and the GitHub file side by side and warns before it overwrites a change made on GitHub or when no file is found at the repository URL. The Documents page shows the repository link and the last commit of each document (#2943)
 - Hovering the closing tag of an asymmetrical anchor shows the Entity tag (#3435), and the full Entity tag shows on hover in XML mode
 - Highlighting and select-all are fast on large documents (select-all on a 6,400-paragraph document went from ~8.6 s to ~21 ms per frame)
 - Search terms are capped at 200 characters, so searching a whole selected document no longer crashes the page
@@ -93,4 +94,5 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - `migrate --drop` is renamed `--replace`; the replaced database is kept as `<pg>_replaced_<timestamp>` until dropped by hand (#3402)
 - PostgreSQL backups run only once the `backup-pg.sh` cron line from the database README is added on each host (#3397)
 - A server start whose schema sync waits more than 10 s for a lock (e.g. behind a running `pg_dump`) fails with the lock error; a restart retries it (#3405)
+- Committing documents to GitHub (#2943) needs a GitHub App, registered once by an owner of the GitHub organisation: no webhook, repository permission Contents (read and write), device flow enabled, installed only on the repositories documents are committed to. Each instance then sets `GITHUB_APP_CLIENT_ID` in the server env. Without it the commit dialog reports the feature as not set up. Run `fixEditorEntityAclJob` again: it opens the five GitHub routes to editors. Without it only admins and owners can use the feature and editors get "Endpoint not allowed".
 - A blank `APIURL` at client build falls back to the app origin; behind a proxy serving the container under a sub-path, set `APIURL` with the sub-path
