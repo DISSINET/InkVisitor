@@ -174,7 +174,7 @@ interface StyledSuggestionRow {
 const SUGGESTION_ICON_COLUMN_WIDTH = "1.75rem";
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto
+  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} minmax(0, 1fr)
     ${({ theme, $iconColumns }) =>
       $iconColumns
         ? `calc(${$iconColumns} * ${SUGGESTION_ICON_COLUMN_WIDTH} + ${theme.space[5]})`
@@ -195,7 +195,9 @@ export const StyledSuggestionLineTag = styled.div<Column>`
 export const StyledSuggestionLineIcons = styled.div<{ $columns: number }>`
   display: grid;
   grid-template-columns: repeat(${({ $columns }) => $columns}, ${SUGGESTION_ICON_COLUMN_WIDTH});
-  padding: 0 ${({ theme }) => theme.space[2]} 0 ${({ theme }) => theme.space[3]};
+  /* the row's last track counts this padding only when there are icon columns */
+  padding: ${({ theme, $columns }) =>
+    $columns ? `0 ${theme.space[2]} 0 ${theme.space[3]}` : "0"};
   height: 100%;
   align-items: center;
   justify-items: center;
