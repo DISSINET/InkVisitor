@@ -70,6 +70,54 @@ describe("the icon set a project chooses from", () => {
     expect(markup).toContain('stroke-width="2"');
   });
 
+  it("offers marks for religious, historical, cultural and trade places, each its own", () => {
+    const added = [
+      "jewishStar",
+      "menorah",
+      "bible",
+      "prayer",
+      "candle",
+      "coffin",
+      "ankh",
+      "om",
+      "yinYang",
+      "rook",
+      "prison",
+      "court",
+      "archive",
+      "scriptorium",
+      "vineyard",
+      "theater",
+      "music",
+      "art",
+      "arena",
+      "ichthys",
+      "bishop",
+      "waysideCross",
+      "pilgrimage",
+      "pagoda",
+      "magic",
+      "royal",
+      "knight",
+      "laurel",
+      "seal",
+      "scales",
+      "mint",
+      "observatory",
+      "apothecary",
+      "smithy",
+      "cellar",
+      "textile",
+      "salt",
+      "farm",
+    ];
+    for (const key of added) {
+      expect(placeIcon(key)).not.toBe(UNKNOWN_PLACE_TYPE.icon);
+    }
+    // two keys drawing one mark would be indistinguishable in the list
+    expect(new Set(added.map((key) => PLACE_ICONS[key])).size).toBe(added.length);
+  });
+
   it("falls back to the unknown mark for a key the set does not have", () => {
     expect(placeIcon("not-an-icon")).toBe(UNKNOWN_PLACE_TYPE.icon);
     expect(placeIcon(undefined)).toBe(UNKNOWN_PLACE_TYPE.icon);
