@@ -76,13 +76,14 @@ function linkedIds(
     // Entity Reference Values
     case Explore.EExploreColumnType.ERV: {
       const { resource } = column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
-      const ids = new Set<string>();
+      // one id per reference, in references order and with repeats, as for EPV
+      const ids: string[] = [];
       for (const reference of entity.references) {
         if (reference.resource === resource && reference.value) {
-          ids.add(reference.value);
+          ids.push(reference.value);
         }
       }
-      return [...ids];
+      return ids;
     }
     // Entity Property types
     case Explore.EExploreColumnType.EPT:

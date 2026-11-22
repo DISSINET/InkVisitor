@@ -159,8 +159,16 @@ export const getTagLabelMaxWidth = (
   return label > TAG_LABEL_MAX_PX ? label : undefined;
 };
 
-// A value column (EPV) shows one tag per top-level metaprop of its type, in props
-// order, so the n-th tag of a value stands for the n-th metaprop with that value.
+// The value (EPV), reference resource (ERR) and reference value (ERV) columns show
+// one tag per metaprop or reference, in the row's order, so the n-th tag of an
+// entity stands for the n-th metaprop or reference that holds it.
+
+/** `items` without the `occurrence`-th (counted from 0) item that `matches` */
+const withoutNth = <T>(items: T[], matches: (item: T) => boolean, occurrence: number): T[] => {
+  let seen = -1;
+  return items.filter((item) => !(matches(item) && ++seen === occurrence));
+};
+
 const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
   prop.type?.entityId === typeId && prop.value?.entityId === valueId;
 
@@ -168,22 +176,14 @@ const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
 export const hasPropPair = (props: IProp[], typeId: string, valueId: string): boolean =>
   props.some((prop) => isPropPair(prop, typeId, valueId));
 
-/**
- * `props` without the `occurrence`-th (counted from 0) top-level metaprop of `typeId` whose
- * value is `valueId`
- */
+/** `props` without the `occurrence`-th top-level metaprop of `typeId` whose value is `valueId` */
 export const withoutNthPropPair = (
   props: IProp[],
   typeId: string,
   valueId: string,
   occurrence: number,
-): IProp[] => {
-  let seen = -1;
-  return props.filter((prop) => !(isPropPair(prop, typeId, valueId) && ++seen === occurrence));
-};
+): IProp[] => withoutNth(props, (prop) => isPropPair(prop, typeId, valueId), occurrence);
 
-// A reference value column (ERV) lists the values of the row's references to its
-// resource, each value once, so one tag stands for every such reference.
 const isReferencePair = (reference: IReference, resourceId: string, valueId: string): boolean =>
   reference.resource === resourceId && reference.value === valueId;
 
@@ -194,10 +194,23 @@ export const hasReferencePair = (
   valueId: string,
 ): boolean => references.some((reference) => isReferencePair(reference, resourceId, valueId));
 
-/** `references` without those to `resourceId` whose value is `valueId` */
-export const withoutReferencePair = (
+/** `references` without the `occurrence`-th one to `resourceId` whose value is `valueId` */
+export const withoutNthReferencePair = (
   references: IReference[],
   resourceId: string,
   valueId: string,
+  occurrence: number,
 ): IReference[] =>
-  references.filter((reference) => !isReferencePair(reference, resourceId, valueId));
+  withoutNth(
+    references,
+    (reference) => isReferencePair(reference, resourceId, valueId),
+    occurrence,
+  );
+
+/** `references` without the `occurrence`-th one to `resourceId`, whatever its value */
+export const withoutNthReferenceTo = (
+  references: IReference[],
+  resourceId: string,
+  occurrence: number,
+): IReference[] =>
+  withoutNth(references, (reference) => reference.resource === resourceId, occurrence);

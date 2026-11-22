@@ -13,7 +13,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
-import { deleteProp, deleteRef } from "constructors";
+import { deleteProp } from "constructors";
 import { useOrderedLanguageDict } from "hooks/react-query";
 
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -43,7 +43,8 @@ import {
   getColumnWidth,
   getTagLabelMaxWidth,
   withoutNthPropPair,
-  withoutReferencePair,
+  withoutNthReferencePair,
+  withoutNthReferenceTo,
 } from "./utils";
 
 const EditableCellValue: React.FC<{
@@ -303,24 +304,25 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            references: withoutReferencePair(
+            references: withoutNthReferencePair(
               sourceEntity.references,
               resource,
               entityToRemove.id,
+              occurrence,
             ),
           },
         });
       }
 
       if (column?.type === Explore.EExploreColumnType.ERR) {
-        const newEntity = deleteRef(sourceEntity, {
-          resourceId: entityToRemove.id,
-        });
-
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            references: newEntity.references,
+            references: withoutNthReferenceTo(
+              sourceEntity.references,
+              entityToRemove.id,
+              occurrence,
+            ),
           },
         });
       }

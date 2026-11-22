@@ -7,7 +7,8 @@ import {
   hasPropPair,
   hasReferencePair,
   withoutNthPropPair,
-  withoutReferencePair,
+  withoutNthReferencePair,
+  withoutNthReferenceTo,
 } from "./utils";
 
 const column = (
@@ -100,7 +101,17 @@ describe("reference value column references", () => {
     expect(hasReferencePair(references, "book", "page2")).toBe(false);
   });
 
-  it("removes every reference of the pair and nothing else", () => {
-    expect(withoutReferencePair(references, "book", "page1").map((r) => r.id)).toEqual(["f3"]);
+  it("removes only the n-th reference of the pair", () => {
+    const ids = (occurrence: number) =>
+      withoutNthReferencePair(references, "book", "page1", occurrence).map((r) => r.id);
+    expect(ids(0)).toEqual(["f2", "f3"]);
+    expect(ids(1)).toEqual(["f1", "f3"]);
+  });
+
+  it("removes only the n-th reference to the resource, whatever its value", () => {
+    const ids = (occurrence: number) =>
+      withoutNthReferenceTo(references, "book", occurrence).map((r) => r.id);
+    expect(ids(1)).toEqual(["f1", "f3"]);
+    expect(ids(2)).toEqual(["f1", "f2", "f3"]);
   });
 });
