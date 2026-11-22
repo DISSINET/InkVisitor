@@ -213,7 +213,6 @@
                 "geocoding": {
                   "context": {}
                 },
-                "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "*",
                 "searchLanguages": [],
                 "starredTemplates": [],
@@ -431,7 +430,6 @@
                 "geocoding": {
                   "context": {}
                 },
-                "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "*",
                 "searchLanguages": [],
                 "starredTemplates": [],
