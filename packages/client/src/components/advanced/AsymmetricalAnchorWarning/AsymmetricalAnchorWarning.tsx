@@ -11,6 +11,6 @@ import { StyledAsymmetricalAnchorWarning } from "./AsymmetricalAnchorWarningStyl
 export const AsymmetricalAnchorWarning: React.FC = () => (
   <StyledAsymmetricalAnchorWarning>
     <IcoExclamation />
-    asymmetrical anchor
+    broken anchor
   </StyledAsymmetricalAnchorWarning>
 );

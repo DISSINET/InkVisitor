@@ -258,7 +258,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Cell: ({ row }: CellType) => {
           // removing an anchor takes out its opening and its closing tag; an
           // orphaned anchor has no closing tag, and its lone tag is unlinked
-          // in the Annotator's list of asymmetrical anchors
+          // in the Annotator's list of broken anchors
           return row.original.orphaned ? (
             <></>
           ) : (

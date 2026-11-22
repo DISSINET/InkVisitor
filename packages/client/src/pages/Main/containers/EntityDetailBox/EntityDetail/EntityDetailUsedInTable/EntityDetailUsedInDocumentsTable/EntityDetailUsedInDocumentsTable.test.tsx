@@ -68,15 +68,15 @@ describe("EntityDetailUsedInDocumentsTable", () => {
     container.remove();
   });
 
-  it("marks an orphaned anchor as asymmetrical and offers no removal for it", () => {
+  it("marks an orphaned anchor as broken and offers no removal for it", () => {
     const [orphaned, paired] = rows([
       use({ orphaned: true }),
       use({ anchorText: "paired", anchorIndex: 1 }),
     ]);
 
-    expect(orphaned.textContent).toContain("asymmetrical anchor");
+    expect(orphaned.textContent).toContain("broken anchor");
     expect(paired.textContent).toContain("paired");
-    expect(paired.textContent).not.toContain("asymmetrical anchor");
+    expect(paired.textContent).not.toContain("broken anchor");
     expect([orphaned, paired].map((row) => row.querySelector("td:last-child button") !== null)).toEqual([
       false,
       true,
