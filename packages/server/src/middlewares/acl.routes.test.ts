@@ -4,7 +4,7 @@ import { permissionDeniedErr } from "@middlewares/acl";
 import { pool } from "@middlewares/db";
 import AclPermission from "@models/acl/acl_permission";
 import User from "@models/user/user";
-import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId } from "../test/testAuth";
 import { Db, storage } from "@service/storage";
 
 // acl_permissions holds one row per route on PostgreSQL only
