@@ -90,6 +90,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const { data: userData } = useUserQuery(true);
   const canBatchEdit =
     userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
+  const canBatchReplace = canBatchEdit || userData?.role === UserEnums.Role.Editor;
   const {
     selectedDetailId,
     detailIdArray,
@@ -1217,6 +1218,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
                 onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
+                canBatchReplace={canBatchReplace}
               />
             </Box>
           </>

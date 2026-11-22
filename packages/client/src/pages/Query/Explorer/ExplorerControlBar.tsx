@@ -12,7 +12,7 @@ import {
   StyledControlGroup,
   StyledTableControl,
 } from "./ExplorerTable/ExplorerTableStyles";
-import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
+import { BatchAction, batchOptions, isBatchActionOffered } from "./ExplorerTable/types";
 import { ButtonSize } from "types";
 import { IcoExchange } from "Theme/icons";
 
@@ -31,6 +31,8 @@ export interface ExplorerSelectionControls {
   onApplyBatchAction: () => void;
   /** When false, data-mutating batch actions (add metaprop / reference / relation) are hidden. */
   canBatchEdit?: boolean;
+  /** When false, the replace relation batch action is hidden (viewers). */
+  canBatchReplace?: boolean;
 }
 
 /** New-column toggle. Table view only (the stats view has no columns). */
@@ -113,8 +115,11 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
                 selection.setBatchActionSelected(newSelectedAction);
               }
             }}
-            options={batchOptions.filter(
-              (o) => selection.canBatchEdit || !restrictedBatchActions.has(o.value)
+            options={batchOptions.filter((o) =>
+              isBatchActionOffered(o.value, {
+                canBatchEdit: !!selection.canBatchEdit,
+                canBatchReplace: !!selection.canBatchReplace,
+              })
             )}
           />
           <Button
