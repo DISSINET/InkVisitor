@@ -758,6 +758,18 @@ const writes: Step[] = [
   get("admin", "health-after-writes", "/health", health),
 ];
 
+// ---- batch replace relation -----------------------------------------------
+
+// rp-p holds the CLA to c3 that entities-batch-add-relation gave it; rp-c, a
+// Concept, holds none, so the dry run counts changed: 1, unmatched: 1
+const batchReplace: Step[] = [
+  post("admin", "entities-batch-replace-relation-dry", "/entities/batchReplaceRelation", { entityIds: ["rp-p", "rp-c"], relationType: "CLA", fromEntityId: "c3", toEntityId: "c2", dryRun: true }),
+  post("admin", "entities-batch-replace-relation", "/entities/batchReplaceRelation", { entityIds: ["rp-p", "rp-c"], relationType: "CLA", fromEntityId: "c3", toEntityId: "c2" }),
+  post("admin", "entities-batch-replace-relation-invalid-type", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "SYN", fromEntityId: "c3", toEntityId: "c2" }),
+  post("editor", "entities-batch-replace-relation-editor", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "CLA", fromEntityId: "c2", toEntityId: "c3" }),
+  post("viewer", "entities-batch-replace-relation-denied", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "CLA", fromEntityId: "c3", toEntityId: "c2" }),
+];
+
 // ---- signout --------------------------------------------------------------
 
 const signout: Step[] = [
@@ -777,5 +789,6 @@ export const steps: Step[] = [
   ...reads(""),
   ...writes,
   ...reads("-after"),
+  ...batchReplace,
   ...signout,
 ];

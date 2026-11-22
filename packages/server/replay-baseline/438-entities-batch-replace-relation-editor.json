@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceRelation",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromEntityId": "c2",
+      "relationType": "CLA",
+      "toEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "changed": 1,
+      "errors": {},
+      "failed": 0,
+      "items": 1,
+      "merged": 0,
+      "nested": 0,
+      "result": true,
+      "selected": 1,
+      "skipped": 0,
+      "unmatched": 0
+    }
+  }
+}

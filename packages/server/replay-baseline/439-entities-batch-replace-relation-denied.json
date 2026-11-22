@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceRelation",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromEntityId": "c3",
+      "relationType": "CLA",
+      "toEntityId": "c2"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceRelation",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromEntityId": "c3",
+      "relationType": "SYN",
+      "toEntityId": "c2"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "relation type SYN cannot be replaced in batch",
+      "result": false
+    }
+  }
+}
