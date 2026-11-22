@@ -3,8 +3,8 @@ import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import {
   canFormCycle,
-  leadsTo,
   matchRelationsToReplace,
+  reachableFrom,
   replacementOf,
   rowsRelatedTo,
 } from "./batch-replace-relation";
@@ -121,29 +121,33 @@ describe("canFormCycle", () => {
   });
 });
 
-describe("leadsTo", () => {
+describe("reachableFrom", () => {
   const e = (a: string, b: string) => ({ entityIds: [a, b] });
 
   test("plain chain", () => {
     const rels = [e("a", "b"), e("b", "c")];
-    expect(leadsTo(rels, "a", "c")).toBe(true);
-    expect(leadsTo(rels, "c", "a")).toBe(false);
+    expect(reachableFrom(rels, "a")).toEqual(new Set(["b", "c"]));
+    expect(reachableFrom(rels, "c")).toEqual(new Set());
   });
 
   test("diamond", () => {
-    expect(leadsTo([e("y", "m1"), e("y", "m2"), e("m2", "row")], "y", "row")).toBe(true);
+    expect(reachableFrom([e("y", "m1"), e("y", "m2"), e("m2", "row")], "y")).toEqual(
+      new Set(["m1", "m2", "row"])
+    );
   });
 
-  test("an existing loop and a target outside it", () => {
-    expect(leadsTo([e("a", "b"), e("b", "a")], "a", "z")).toBe(false);
+  test("an existing loop ends the walk", () => {
+    expect(reachableFrom([e("a", "b"), e("b", "a"), e("z", "a")], "a")).toEqual(
+      new Set(["a", "b"])
+    );
   });
 
   test("a self-loop is walked over", () => {
-    expect(leadsTo([e("a", "a"), e("a", "b")], "a", "b")).toBe(true);
-    expect(leadsTo([e("a", "a")], "a", "b")).toBe(false);
+    expect(reachableFrom([e("a", "a"), e("a", "b")], "a")).toEqual(new Set(["a", "b"]));
+    expect(reachableFrom([e("a", "a")], "a")).toEqual(new Set(["a"]));
   });
 
-  test("from === to is false when no relation closes on it", () => {
-    expect(leadsTo([e("a", "b")], "a", "a")).toBe(false);
+  test("from is not in the set when no relation comes back to it", () => {
+    expect(reachableFrom([e("a", "b")], "a")).toEqual(new Set(["b"]));
   });
 });

@@ -3,8 +3,9 @@ import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 
 type Rel = RelationTypes.IRelation;
 
-/** Why a matched row was not changed, as the batch replace answer lists it per
- * entity id. */
+/** Why a matched row is counted as failed, as the batch replace answer lists it
+ * per entity id: refused before any write, or left with its old relation by a
+ * write that did not go through. */
 export const ReplaceReason = {
   denied: "permission denied",
   isTarget: "is the new target itself",
@@ -96,24 +97,27 @@ export function canFormCycle(type: RelationEnums.Type): boolean {
   return patterns.some((p) => sources.has(p[1]));
 }
 
-/** Whether a path leads from `from` to `to` along entityIds[0] -> entityIds[1]. */
-export function leadsTo(relations: Pick<Rel, "entityIds">[], from: string, to: string): boolean {
+/** Every entity a path of one or more steps along entityIds[0] -> entityIds[1]
+ * leads to from `from`; `from` is among them only when a path comes back to it. */
+export function reachableFrom(relations: Pick<Rel, "entityIds">[], from: string): Set<string> {
   const next = new Map<string, string[]>();
-  for (const [source, target] of relations.map((r) => r.entityIds)) {
-    next.set(source, [...(next.get(source) ?? []), target]);
+  for (const { entityIds: [source, target] } of relations) {
+    const targets = next.get(source);
+    if (targets) {
+      targets.push(target);
+    } else {
+      next.set(source, [target]);
+    }
   }
-  const visited = new Set<string>();
+  const reached = new Set<string>();
   const stack = [from];
   while (stack.length) {
     for (const target of next.get(stack.pop() as string) ?? []) {
-      if (target === to) {
-        return true;
-      }
-      if (!visited.has(target)) {
-        visited.add(target);
+      if (!reached.has(target)) {
+        reached.add(target);
         stack.push(target);
       }
     }
   }
-  return false;
+  return reached;
 }

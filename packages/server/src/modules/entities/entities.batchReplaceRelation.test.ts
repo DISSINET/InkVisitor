@@ -7,11 +7,14 @@ import { pool } from "@middlewares/db";
 import { createMockTree, seedAcl } from "@modules/common.test";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
+import Audit from "@models/audit/audit";
 import User from "@models/user/user";
 import { getEntityClass, getRelationClass } from "@models/factory";
 import treeCache from "@service/treeCache";
+import { deleteAudits } from "@service/shorthands";
 import { EntityEnums, HttpMethods, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IRequestBatchReplaceRelation, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
 import { ReplaceReason } from "./batch-replace-relation";
 
@@ -22,11 +25,12 @@ const { Concept, Person, Location, Resource, Statement, Event } = EntityEnums.Cl
 type Body = Partial<IRequestBatchReplaceRelation>;
 
 /**
- * Every request here is a dry run: the route decides every row and counts,
- * and writes nothing, which each request checks on the relations of its type
- * and on the audits.
+ * `replace` and `replaceAs` send a dry run: the route decides every row and
+ * counts, and writes nothing, which each of them checks on the relations of
+ * the type and on the audits. `save` and `saveAs` send the body without
+ * `dryRun`; their tests check the relations and audits the save leaves.
  */
-describe("Entities batchReplaceRelation, dry run", () => {
+describe("Entities batchReplaceRelation", () => {
   const db = new Db();
   let adminAgent: AuthAgent;
 
@@ -86,7 +90,41 @@ describe("Entities batchReplaceRelation, dry run", () => {
 
   const replace = (body: Body) => replaceAs(adminAgent, body);
 
+  const saveAs = async (agent: AuthAgent, body: Body) => {
+    const res = await agent
+      .post(`${apiPath}/entities/batchReplaceRelation`)
+      .send({ relationType: CLA, ...body });
+
+    if (res.status === 200) {
+      const { selected, unmatched, changed, skipped, failed } = res.body;
+      expect(selected).toBe(unmatched + changed + skipped + failed);
+    }
+    return res;
+  };
+
+  const save = (body: Body) => saveAs(adminAgent, body);
+
   const ids = (...entities: Entity[]) => entities.map((e) => e.id);
+
+  const relationsOfRow = async (
+    type: RelationEnums.Type,
+    row: Entity
+  ): Promise<RelationTypes.IRelation[]> =>
+    (await relationsOf(type)).filter((relation) => relation.entityIds.includes(row.id));
+
+  // the other end of each relation of the type the row holds, sorted
+  const targetsOf = async (type: RelationEnums.Type, row: Entity): Promise<string[]> =>
+    (await relationsOfRow(type, row))
+      .map((relation) => relation.entityIds.find((id) => id !== row.id) as string)
+      .sort();
+
+  // "<event type> <relation id>" of every relation audit that names the entity, sorted
+  const auditsOf = async (entity: Entity): Promise<string[]> =>
+    (await Audit.getRelationAuditsForEntity(db.connection, entity.id, 100))
+      .map(({ type, modelId }) => `${type} ${modelId}`)
+      .sort();
+  const created = (id: string) => `${EventType.RELATION_CREATE} ${id}`;
+  const deleted = (id: string) => `${EventType.RELATION_DELETE} ${id}`;
 
   beforeAll(async () => {
     await db.initDb();
@@ -354,6 +392,38 @@ describe("Entities batchReplaceRelation, dry run", () => {
       expect(res.body.errors).toEqual({ [y.id]: ReplaceReason.isTarget });
     });
 
+    it("leaves Y unmatched as a row when it has no relation to X", async () => {
+      const [x, y, row] = [
+        await makeEntity(Person),
+        await makeEntity(Person),
+        await makeEntity(Person),
+      ];
+      await relate(REL, row, x);
+
+      const res = await replace({
+        entityIds: ids(y, row),
+        relationType: REL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 2, unmatched: 1, changed: 1, failed: 0 });
+      expect(res.body.errors).toEqual({});
+    });
+
+    it("counts a row that already holds a template Y as merged, not as not valid", async () => {
+      const x = await makeEntity(Concept);
+      const y = await makeEntity(Concept, { isTemplate: true });
+      const row = await makeEntity(Person);
+      await relate(CLA, row, x);
+      await relate(CLA, row, y);
+
+      const res = await replace({ entityIds: [row.id], fromEntityId: x.id, toEntityId: y.id });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 1, merged: 1, failed: 0, items: 1 });
+      expect(res.body.errors).toEqual({});
+    });
+
     it("refuses every matched row when Y is a template", async () => {
       const x = await makeEntity(Concept);
       const y = await makeEntity(Concept, { isTemplate: true });
@@ -390,6 +460,8 @@ describe("Entities batchReplaceRelation, dry run", () => {
       ["X equal to Y", () => ({ toEntityId: x.id })],
       ["no toEntityId", () => ({ toEntityId: undefined })],
       ["an empty toEntityId", () => ({ toEntityId: "" })],
+      ["an entity id that is not a string", () => ({ entityIds: ["a", 5] as unknown as string[] })],
+      ["an empty entity id", () => ({ entityIds: [""] })],
       [
         `${MAX_BATCH_REPLACE_ENTITIES + 1} ids`,
         () => ({
@@ -410,6 +482,7 @@ describe("Entities batchReplaceRelation, dry run", () => {
     });
 
     it.each<[string, () => Body]>([
+      ["every row", () => ({ entityIds: [`brr-missing-${randomUUID()}`] })],
       ["an X", () => ({ fromEntityId: `brr-missing-${randomUUID()}` })],
       ["a Y", () => ({ toEntityId: `brr-missing-${randomUUID()}` })],
     ])("refuses %s that does not exist as not found", async (_, override) => {
@@ -422,6 +495,211 @@ describe("Entities batchReplaceRelation, dry run", () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe("EntityDoesNotExist");
+    });
+  });
+
+  describe("a save", () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it("replaces CLA X by CLA Y with its order and audits, as its dry run counted", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const rows = [
+        await makeEntity(Resource),
+        await makeEntity(Resource),
+        await makeEntity(Resource),
+      ];
+      const old: RelationTypes.IRelation[] = [];
+      for (const [i, row] of rows.entries()) {
+        old.push(await relate(CLA, row, x, i + 1));
+      }
+      const without = await makeEntity(Resource);
+      const notSelected = await makeEntity(Resource);
+      const untouched = await relate(CLA, notSelected, x, 7);
+      const body = { entityIds: ids(...rows, without), fromEntityId: x.id, toEntityId: y.id };
+
+      const dry = await replace(body);
+      const res = await save(body);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(dry.body);
+      expect(res.body).toMatchObject({ changed: 3, failed: 0, items: 3 });
+
+      const copies: RelationTypes.IRelation[] = [];
+      for (const [i, row] of rows.entries()) {
+        const held = await relationsOfRow(CLA, row);
+        expect(held).toHaveLength(1);
+        expect(held[0]).toMatchObject({ entityIds: [row.id, y.id], order: i + 1 });
+        expect(await auditsOf(row)).toEqual([created(held[0].id), deleted(old[i].id)].sort());
+        copies.push(held[0]);
+      }
+      expect(await auditsOf(y)).toEqual(copies.map(({ id }) => created(id)).sort());
+      expect(await auditsOf(x)).toEqual(old.map(({ id }) => deleted(id)).sort());
+      expect(await relationsOfRow(CLA, notSelected)).toEqual([{ ...untouched }]);
+      expect(await relationsOfRow(CLA, without)).toEqual([]);
+
+      const relationsBefore = await relationsOf(CLA);
+      const auditsBefore = await auditCount();
+      const again = await save(body);
+
+      expect(again.body).toMatchObject({
+        selected: 4,
+        unmatched: 4,
+        changed: 0,
+        items: 0,
+        result: false,
+      });
+      expect(await relationsOf(CLA)).toEqual(relationsBefore);
+      expect(await auditCount()).toBe(auditsBefore);
+    });
+
+    it("leaves a row holding CLA X and CLA Y with CLA Y only", async () => {
+      const [x, y, row] = [
+        await makeEntity(Concept),
+        await makeEntity(Concept),
+        await makeEntity(Person),
+      ];
+      await relate(CLA, row, x);
+      const kept = await relate(CLA, row, y);
+
+      const res = await save({ entityIds: [row.id], fromEntityId: x.id, toEntityId: y.id });
+
+      expect(res.body).toMatchObject({ changed: 1, merged: 1, failed: 0, items: 1 });
+      expect((await relationsOfRow(CLA, row)).map(({ id }) => id)).toEqual([kept.id]);
+    });
+
+    // PostgreSQL holds one relation per type and pair (unique key), so the
+    // second CLA X cannot be stored there
+    (storage.kind === "postgres" ? it.skip : it)(
+      "leaves a row holding CLA X twice with CLA Y once",
+      async () => {
+        const [x, y, row] = [
+          await makeEntity(Concept),
+          await makeEntity(Concept),
+          await makeEntity(Person),
+        ];
+        await relate(CLA, row, x);
+        await storage.relations.insert(db.connection, {
+          id: `brr-rel-${randomUUID()}`,
+          type: CLA,
+          entityIds: [row.id, x.id],
+          order: EntityEnums.Order.Last,
+        });
+
+        const res = await save({ entityIds: [row.id], fromEntityId: x.id, toEntityId: y.id });
+
+        expect(res.body).toMatchObject({ changed: 1, merged: 0, failed: 0, items: 2 });
+        expect(await targetsOf(CLA, row)).toEqual([y.id]);
+      }
+    );
+
+    it("puts Y in the slot X had in a REL", async () => {
+      const [x, y, row] = [
+        await makeEntity(Person),
+        await makeEntity(Person),
+        await makeEntity(Person),
+      ];
+      await relate(REL, x, row);
+
+      const res = await save({
+        entityIds: [row.id],
+        relationType: REL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, failed: 0, items: 1 });
+      expect((await relationsOfRow(REL, row)).map(({ entityIds }) => entityIds)).toEqual([
+        [y.id, row.id],
+      ]);
+    });
+
+    it("replaces an SCL stored without order by a copy without one", async () => {
+      const [x, y, row] = [
+        await makeEntity(Concept),
+        await makeEntity(Concept),
+        await makeEntity(Concept),
+      ];
+      // the Superclass model sets an order on every relation it builds
+      await storage.relations.insert(db.connection, {
+        id: `brr-rel-${randomUUID()}`,
+        type: SCL,
+        entityIds: [row.id, x.id],
+      });
+      expect(typeof (await relationsOfRow(SCL, row))[0].order).not.toBe("number");
+
+      const res = await save({
+        entityIds: [row.id],
+        relationType: SCL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ changed: 1, failed: 0, items: 1 });
+      const held = await relationsOfRow(SCL, row);
+      expect(held.map(({ entityIds }) => entityIds)).toEqual([[row.id, y.id]]);
+      expect(typeof held[0].order).not.toBe("number");
+    });
+
+    it("deletes nothing when the insert fails", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const rows = [await makeEntity(Person), await makeEntity(Person)];
+      for (const row of rows) {
+        await relate(CLA, row, x);
+      }
+      jest
+        .spyOn(Relation, "insertMany")
+        .mockImplementationOnce(async (_, relations) => ({
+          written: [],
+          failed: relations.map(({ id }) => id),
+        }));
+
+      const res = await save({ entityIds: ids(...rows), fromEntityId: x.id, toEntityId: y.id });
+
+      expect(res.body).toMatchObject({
+        selected: 2,
+        changed: 0,
+        failed: 2,
+        items: 0,
+        result: false,
+      });
+      expect(res.body.errors).toEqual({
+        [rows[0].id]: ReplaceReason.insertFailed,
+        [rows[1].id]: ReplaceReason.insertFailed,
+      });
+      for (const row of rows) {
+        expect(await targetsOf(CLA, row)).toEqual([x.id]);
+        expect(await auditsOf(row)).toEqual([]);
+      }
+      expect(await auditsOf(x)).toEqual([]);
+    });
+
+    it("reports rows whose old relation stayed as holding both, and a second save finishes them", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const rows = [await makeEntity(Person), await makeEntity(Person)];
+      for (const row of rows) {
+        await relate(CLA, row, x);
+      }
+      const body = { entityIds: ids(...rows), fromEntityId: x.id, toEntityId: y.id };
+      jest.spyOn(Relation, "deleteMany").mockRejectedValueOnce(new Error("delete refused"));
+
+      const res = await save(body);
+
+      expect(res.body).toMatchObject({ changed: 0, merged: 0, failed: 2, items: 0 });
+      expect(res.body.errors).toEqual({
+        [rows[0].id]: ReplaceReason.bothKept,
+        [rows[1].id]: ReplaceReason.bothKept,
+      });
+      for (const row of rows) {
+        expect(await targetsOf(CLA, row)).toEqual([x.id, y.id].sort());
+      }
+
+      const again = await save(body);
+
+      expect(again.body).toMatchObject({ changed: 2, merged: 2, failed: 0, items: 2 });
+      for (const row of rows) {
+        expect(await targetsOf(CLA, row)).toEqual([y.id]);
+      }
     });
   });
 
@@ -463,6 +741,9 @@ describe("Entities batchReplaceRelation, dry run", () => {
     });
 
     afterAll(async () => {
+      // the editor's save leaves audits naming the editor, and PostgreSQL keeps
+      // a user that audits name
+      await deleteAudits(db);
       await storage.users.deleteMany(db.connection, [editorId, viewerId]);
     });
 
@@ -495,6 +776,52 @@ describe("Entities batchReplaceRelation, dry run", () => {
         [readOnlyStatement.id]: ReplaceReason.denied,
         [resourceWithDocument.id]: ReplaceReason.denied,
       });
+    });
+
+    it("is refused a row it may only read that holds CLA X and CLA Y, before the merge", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const row = await statementIn(readOnlyT);
+      await relate(CLA, row, x);
+      await relate(CLA, row, y);
+
+      const res = await replaceAs(editorAgent, {
+        entityIds: [row.id],
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 0, merged: 0, failed: 1 });
+      expect(res.body.errors).toEqual({ [row.id]: ReplaceReason.denied });
+    });
+
+    it("saves the rows it may edit and leaves the refused ones as they were", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const readOnlyWithY = await statementIn(readOnlyT);
+      const resourceWithDocument = await makeEntity(Resource, {
+        data: { documentId: `doc-${rand}` },
+      });
+      const person = await makeEntity(Person);
+      for (const row of [readOnlyWithY, resourceWithDocument, person]) {
+        await relate(CLA, row, x);
+      }
+      await relate(CLA, readOnlyWithY, y);
+
+      const res = await saveAs(editorAgent, {
+        entityIds: ids(readOnlyWithY, resourceWithDocument, person),
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 3, changed: 1, merged: 0, failed: 2, items: 1 });
+      expect(res.body.errors).toEqual({
+        [readOnlyWithY.id]: ReplaceReason.denied,
+        [resourceWithDocument.id]: ReplaceReason.denied,
+      });
+      expect(await targetsOf(CLA, person)).toEqual([y.id]);
+      expect(await targetsOf(CLA, readOnlyWithY)).toEqual([x.id, y.id].sort());
+      expect(await targetsOf(CLA, resourceWithDocument)).toEqual([x.id]);
+      expect(await auditsOf(readOnlyWithY)).toEqual([]);
+      expect(await auditsOf(resourceWithDocument)).toEqual([]);
     });
 
     it("is refused an SOE away from an X it may only read", async () => {
@@ -546,6 +873,27 @@ describe("Entities batchReplaceRelation, dry run", () => {
       });
 
       expect(res.status).toBe(403);
+    });
+
+    it("refuses a viewer's save and changes nothing", async () => {
+      const [x, y, row] = [
+        await makeEntity(Concept),
+        await makeEntity(Concept),
+        await makeEntity(Person),
+      ];
+      await relate(CLA, row, x);
+      const relationsBefore = await relationsOf(CLA);
+      const auditsBefore = await auditCount();
+
+      const res = await saveAs(viewerAgent, {
+        entityIds: [row.id],
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.status).toBe(403);
+      expect(await relationsOf(CLA)).toEqual(relationsBefore);
+      expect(await auditCount()).toBe(auditsBefore);
     });
   });
 });

@@ -66,8 +66,8 @@ import { randomUUID } from "crypto";
 import {
   ReplaceReason,
   canFormCycle,
-  leadsTo,
   matchRelationsToReplace,
+  reachableFrom,
   replacementOf,
   rowsRelatedTo,
 } from "./batch-replace-relation";
@@ -1531,7 +1531,13 @@ export default Router()
         const isId = (value: unknown): value is string =>
           typeof value === "string" && value.length > 0;
 
-        if (!ids.length || !isId(relationType) || !isId(fromEntityId) || !isId(toEntityId)) {
+        if (
+          !ids.length ||
+          !ids.every(isId) ||
+          !isId(relationType) ||
+          !isId(fromEntityId) ||
+          !isId(toEntityId)
+        ) {
           throw new BadParams(
             "entityIds, relationType, fromEntityId and toEntityId must be provided"
           );
@@ -1584,15 +1590,15 @@ export default Router()
         const rowIds = new Set(rows.map((row) => row.id));
         const matches = matchRelationsToReplace(relationType, fromEntityId, rowIds, touchingFrom);
         const holdingY = rowsRelatedTo(relationType, toEntityId, rowIds, touchingTo);
+        // a new relation from a row Y already leads to would close a cycle
+        const reachedFromY = cyclic ? reachableFrom(ofType, toEntityId) : new Set<string>();
 
         const user = request.getUserOrFail();
         const errors: Record<string, string> = {};
-        const toInsert: RelationType.IRelation[] = [];
-        const toDelete: string[] = [];
+        // the writes of each changed row: its copy to Y (none when it already
+        // holds Y) and the ids of its relations to X
+        const plans: { rowId: string; copy?: RelationType.IRelation; old: string[] }[] = [];
         let unmatched = 0;
-        let changed = 0;
-        let merged = 0;
-        let items = 0;
 
         for (const row of rows) {
           const matched = matches.get(row.id);
@@ -1620,9 +1626,8 @@ export default Router()
             continue;
           }
 
-          if (holdingY.has(row.id)) {
-            merged++;
-          } else {
+          let copy: RelationType.IRelation | undefined;
+          if (!holdingY.has(row.id)) {
             const replacement = replacementOf(matched[0], fromEntityId, toEntityId, randomUUID());
             const model = getRelationClass({ ...replacement });
             model.entities = [row, to];
@@ -1634,34 +1639,68 @@ export default Router()
               errors[row.id] = ReplaceReason.notValid;
               continue;
             }
-            if (cyclic && leadsTo(ofType, toEntityId, row.id)) {
+            if (reachedFromY.has(row.id)) {
               errors[row.id] = ReplaceReason.cycle;
               continue;
             }
-            toInsert.push(replacement);
+            copy = replacement;
           }
-          changed++;
-          items += matched.length;
-          toDelete.push(...matched.map((relation) => relation.id));
+          plans.push({ rowId: row.id, copy, old: matched.map((relation) => relation.id) });
         }
 
-        const failed = Object.keys(errors).length;
+        const answer = (done: typeof plans, items: number): IResponseBatchReplace => ({
+          result: done.length > 0,
+          selected: rows.length,
+          unmatched,
+          changed: done.length,
+          merged: done.filter((plan) => !plan.copy).length,
+          skipped: 0,
+          failed: Object.keys(errors).length,
+          items,
+          nested: 0,
+          errors,
+        });
+
         if (dryRun) {
-          return {
-            result: changed > 0,
-            selected: rows.length,
-            unmatched,
-            changed,
-            merged,
-            skipped: 0,
-            failed,
-            items,
-            nested: 0,
-            errors,
-          };
+          return answer(plans, plans.reduce((sum, plan) => sum + plan.old.length, 0));
         }
 
-        throw new InternalServerError("not implemented");
+        // a row loses X only once its relation to Y is there, so a write that
+        // fails leaves it with X and Y or with X alone, never with neither
+        const { written } = await Relation.insertMany(
+          request,
+          plans.map((plan) => plan.copy).filter((copy): copy is RelationType.IRelation => !!copy)
+        );
+        const inserted = new Set(written);
+        const withY = plans.filter((plan) => {
+          if (plan.copy && !inserted.has(plan.copy.id)) {
+            errors[plan.rowId] = ReplaceReason.insertFailed;
+            return false;
+          }
+          return true;
+        });
+
+        const removed = new Set<string>();
+        try {
+          const { changes = [] } = await Relation.deleteMany(
+            request,
+            ([] as string[]).concat(...withY.map((plan) => plan.old))
+          );
+          for (const { old_val, error } of changes) {
+            if (old_val && !error) {
+              removed.add(old_val.id);
+            }
+          }
+        } catch {
+          // a delete that throws counts as deleting nothing; its rows keep X next to Y
+        }
+        for (const plan of withY) {
+          if (!plan.old.every((id) => removed.has(id))) {
+            errors[plan.rowId] = ReplaceReason.bothKept;
+          }
+        }
+
+        return answer(withY.filter((plan) => !errors[plan.rowId]), removed.size);
       }
     )
   )
