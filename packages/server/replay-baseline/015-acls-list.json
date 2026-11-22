@@ -499,14 +499,6 @@
       },
       {
         "controller": "users",
-        "id": "<uuid-1>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": "simplified"
-      },
-      {
-        "controller": "users",
         "id": "acl-29",
         "method": "PATCH",
         "roles": [
