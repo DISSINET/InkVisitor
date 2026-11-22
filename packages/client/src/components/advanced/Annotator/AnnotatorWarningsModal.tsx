@@ -22,7 +22,7 @@ import {
 } from "./styles";
 
 const warningsTitle = (count: number): string =>
-  `${count} asymmetrical anchor${count === 1 ? "" : "s"}`;
+  `${count} broken anchor${count === 1 ? "" : "s"}`;
 
 const issuesFoundLabel = (count: number): string =>
   `${count} issue${count === 1 ? "" : "s"} found in the document`;
@@ -63,7 +63,7 @@ interface AnnotatorWarningsModalProps {
 }
 
 const kindLabel = (type: AsymmetricalAnchor["type"]): string =>
-  type === "orphaned-opening" ? "orphaned opening < >" : "orphaned closing < / >";
+  type === "orphaned-opening" ? "asymmetrical opening < >" : "asymmetrical closing < / >";
 
 /**
  * Surfaces asymmetrical (broken) anchors detected by the annotator (#2601).
@@ -108,7 +108,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
 
       <Modal width="auto" showModal={open} onClose={() => onOpenChange(false)}>
         <ModalHeader
-          title={"Asymmetrical anchors"}
+          title={"Broken anchors"}
           icon={<FaExclamationTriangle />}
           iconColor="warning"
           onClose={() => onOpenChange(false)}
