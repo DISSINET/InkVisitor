@@ -121,7 +121,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
         <ButtonGroup>
           <CancelButton onClick={onClose} />
           <Button
-            label="Export"
+            label={isExporting ? "Exporting" : "Export"}
             color="primary"
             onClick={() => onExport(selectedColumnIds)}
             disabled={selectedColumnIds.length === 0 || isExporting}

@@ -129,7 +129,7 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
             )}
           />
           <Button
-            label="apply"
+            label={selection.isExporting ? "exporting" : "apply"}
             color="primary"
             inverted
             onClick={selection.onApplyBatchAction}
