@@ -3,6 +3,17 @@ import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 
 type Rel = RelationTypes.IRelation;
 
+/** Why a matched row was not changed, as the batch replace answer lists it per
+ * entity id. */
+export const ReplaceReason = {
+  denied: "permission denied",
+  isTarget: "is the new target itself",
+  notValid: "relation not valid for these entities",
+  cycle: "would create a cycle",
+  insertFailed: "update failed",
+  bothKept: "new relation created, the old one could not be removed",
+} as const;
+
 const isAsymmetrical = (type: RelationEnums.Type): boolean =>
   RelationTypes.RelationRules[type]?.asymmetrical ?? false;
 

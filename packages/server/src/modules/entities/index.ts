@@ -32,7 +32,10 @@ import {
   AuditScope,
   EXPANSION_RESPONSE_MAX,
   IResponseEntityRelations,
+  IRequestBatchReplaceRelation,
+  IResponseBatchReplace,
 } from "@inkvisitor/shared/types";
+import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
 import {
   AuditDoesNotExist,
   BadParams,
@@ -60,6 +63,14 @@ import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import User from "@models/user/user";
 import { randomUUID } from "crypto";
+import {
+  ReplaceReason,
+  canFormCycle,
+  leadsTo,
+  matchRelationsToReplace,
+  replacementOf,
+  rowsRelatedTo,
+} from "./batch-replace-relation";
 
 export default Router()
   /**
@@ -1501,6 +1512,156 @@ export default Router()
             Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
         };
+      }
+    )
+  )
+
+  /**
+   * Replaces, on each selected entity, its relations of one type to X by a
+   * relation of that type to Y, or drops them where the entity already holds
+   * one to Y. Every row is decided in memory before anything is written, so a
+   * dry run answers with the counts a save would have.
+   */
+  .post(
+    "/batchReplaceRelation",
+    asyncRouteHandler<IResponseBatchReplace>(
+      async (request: IRequest<unknown, IRequestBatchReplaceRelation>) => {
+        const { entityIds, relationType, fromEntityId, toEntityId, dryRun } = request.body;
+        const ids = Array.isArray(entityIds) ? [...new Set(entityIds)] : [];
+        const isId = (value: unknown): value is string =>
+          typeof value === "string" && value.length > 0;
+
+        if (!ids.length || !isId(relationType) || !isId(fromEntityId) || !isId(toEntityId)) {
+          throw new BadParams(
+            "entityIds, relationType, fromEntityId and toEntityId must be provided"
+          );
+        }
+        if (fromEntityId === toEntityId) {
+          throw new BadParams("fromEntityId and toEntityId must differ");
+        }
+        if (!RelationEnums.BatchTypes.includes(relationType)) {
+          throw new BadParams(`relation type ${relationType} cannot be replaced in batch`);
+        }
+        if (ids.length > MAX_BATCH_REPLACE_ENTITIES) {
+          throw new BadParams(`at most ${MAX_BATCH_REPLACE_ENTITIES} entities in one request`);
+        }
+
+        if (!dryRun) {
+          await request.db.lock();
+        }
+
+        const conn = request.db.connection;
+        const rows = await Entity.findEntitiesByIds(conn, ids);
+        if (!rows.length) {
+          throw new EntityDoesNotExist("none of the provided entities were found", ids[0]);
+        }
+
+        // storage order, missing ids skipped: X and Y are told apart by id
+        const ends = await Entity.findEntitiesByIds(conn, [fromEntityId, toEntityId]);
+        const from = ends.find((entity) => entity.id === fromEntityId);
+        const to = ends.find((entity) => entity.id === toEntityId);
+        if (!from) {
+          throw new EntityDoesNotExist("entity to replace was not found", fromEntityId);
+        }
+        if (!to) {
+          throw new EntityDoesNotExist("replacing entity was not found", toEntityId);
+        }
+
+        const rules = RelationType.RelationRules[relationType];
+        const patterns = rules?.allowedEntitiesPattern ?? [];
+        const canTarget = patterns.length
+          ? patterns.some((pattern) => pattern[1] === to.class)
+          : !rules?.disabledEntities?.includes(to.class);
+        if (!canTarget) {
+          throw new BadParams(`relation type ${relationType} cannot lead to class ${to.class}`);
+        }
+
+        const touchingFrom = await Relation.findForEntities(conn, [fromEntityId], relationType);
+        const touchingTo = await Relation.findForEntities(conn, [toEntityId], relationType);
+        const cyclic = canFormCycle(relationType);
+        const ofType = cyclic ? await Relation.getByType(conn, relationType) : [];
+
+        const rowIds = new Set(rows.map((row) => row.id));
+        const matches = matchRelationsToReplace(relationType, fromEntityId, rowIds, touchingFrom);
+        const holdingY = rowsRelatedTo(relationType, toEntityId, rowIds, touchingTo);
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        const toInsert: RelationType.IRelation[] = [];
+        const toDelete: string[] = [];
+        let unmatched = 0;
+        let changed = 0;
+        let merged = 0;
+        let items = 0;
+
+        for (const row of rows) {
+          const matched = matches.get(row.id);
+          if (!matched) {
+            unmatched++;
+            continue;
+          }
+          if (row.id === toEntityId) {
+            errors[row.id] = ReplaceReason.isTarget;
+            continue;
+          }
+          // relation rights look only at Statements and Territories; a row of
+          // another class can be closed too (a Resource with a document needs
+          // the annotate right)
+          if (!getEntityClass({ ...row }).canBeEditedByUser(user)) {
+            errors[row.id] = ReplaceReason.denied;
+            continue;
+          }
+          // every matched relation joins the same two entities, so one check
+          // covers them all
+          const stored = getRelationClass({ ...matched[0] });
+          stored.entities = [row, from];
+          if (!stored.canBeDeletedByUser(user)) {
+            errors[row.id] = ReplaceReason.denied;
+            continue;
+          }
+
+          if (holdingY.has(row.id)) {
+            merged++;
+          } else {
+            const replacement = replacementOf(matched[0], fromEntityId, toEntityId, randomUUID());
+            const model = getRelationClass({ ...replacement });
+            model.entities = [row, to];
+            if (!model.canBeCreatedByUser(user)) {
+              errors[row.id] = ReplaceReason.denied;
+              continue;
+            }
+            if (model.validateEntities()) {
+              errors[row.id] = ReplaceReason.notValid;
+              continue;
+            }
+            if (cyclic && leadsTo(ofType, toEntityId, row.id)) {
+              errors[row.id] = ReplaceReason.cycle;
+              continue;
+            }
+            toInsert.push(replacement);
+          }
+          changed++;
+          items += matched.length;
+          toDelete.push(...matched.map((relation) => relation.id));
+        }
+
+        const failed = Object.keys(errors).length;
+        if (dryRun) {
+          return {
+            result: changed > 0,
+            selected: rows.length,
+            unmatched,
+            changed,
+            merged,
+            skipped: 0,
+            failed,
+            items,
+            nested: 0,
+            errors,
+          };
+        }
+
+        throw new InternalServerError("not implemented");
       }
     )
   )
