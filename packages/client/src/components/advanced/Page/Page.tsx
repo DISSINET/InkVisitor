@@ -1,7 +1,8 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
+import { OFFLINE_TOAST_ID } from "components/basic/Toast/Toast";
 import { LeftHeader, RightHeader, UserCustomizationModal } from "components/advanced";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
@@ -9,7 +10,7 @@ import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Id, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -45,20 +46,25 @@ export const Page: React.FC<Page> = ({ children }) => {
     location.pathname === "/activate" ||
     location.pathname === "/password_reset";
 
-  const { data: user, isFetching: isFetchingUser, isPaused } = useUserQuery(!isAuthRoute);
+  const { data: user, isFetching: isFetchingUser } = useUserQuery(!isAuthRoute);
 
-  const toastId = React.useRef<Id | null>(null);
-  const notify = () => (toastId.current = toast.dark("you're offline", { autoClose: false }));
-
+  // the browser's online/offline events, the same state that holds back queries
   useEffect(() => {
-    if (isPaused) {
-      notify();
-    } else {
-      if (toastId.current && toast.isActive(toastId.current)) {
-        toast.dismiss(toastId.current);
+    const showOnlineState = (online: boolean) => {
+      if (online) {
+        toast.dismiss(OFFLINE_TOAST_ID);
+      } else {
+        toast.dark("you're offline", {
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+          toastId: OFFLINE_TOAST_ID,
+        });
       }
-    }
-  }, [isPaused]);
+    };
+    showOnlineState(onlineManager.isOnline());
+    return onlineManager.subscribe(showOnlineState);
+  }, []);
 
   const logOutMutation = useMutation({
     mutationFn: async () => await api.signOut(),
