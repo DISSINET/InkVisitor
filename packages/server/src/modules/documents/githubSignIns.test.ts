@@ -44,6 +44,16 @@ describe("modules/documents githubSignIns", () => {
     expect(githubSignIns.pending("sid", "user-1")).toBeUndefined();
   });
 
+  it("holds a token with the pending device code, out of reach until the sign-in is complete", () => {
+    githubSignIns.setPending("sid", "user-1", "device", 900, 5);
+    githubSignIns.holdToken("sid", "user-1", { accessToken: "tok", expiresInSec: 60 });
+    expect(githubSignIns.pending("sid", "user-1")?.heldToken).toEqual({ accessToken: "tok", expiresInSec: 60 });
+    expect(githubSignIns.token("sid", "user-1")).toBeUndefined();
+    // it lives as long as the device code it came from
+    jest.advanceTimersByTime(901_000);
+    expect(githubSignIns.pending("sid", "user-1")).toBeUndefined();
+  });
+
   it("replaces the pending device code when the token arrives", () => {
     githubSignIns.setPending("sid", "user-1", "device", 900, 5);
     githubSignIns.setToken("sid", "user-1", "tok", 60, "octo");

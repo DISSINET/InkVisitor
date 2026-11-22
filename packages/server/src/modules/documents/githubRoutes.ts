@@ -15,6 +15,7 @@ import {
   BadParams,
   DocumentDoesNotExist,
   GithubConflictError,
+  GithubRequestError,
   GithubSignInRequiredError,
   InternalServerError,
   PermissionDeniedError,
@@ -164,16 +165,40 @@ export default Router()
         return { status: "expired" };
       }
 
-      const result = await pollDeviceToken(pending.deviceCode);
-      if (result.status === "authorized") {
-        const login = await getGithubLogin(result.accessToken);
-        githubSignIns.setToken(sessionId, user.id, result.accessToken, result.expiresIn, login);
+      // GitHub hands a token over once per device code, so a token is held
+      // with the pending sign-in until its login is read: a poll that got the
+      // token and not the login is followed by one that asks for the login alone
+      let held = pending.heldToken;
+      if (!held) {
+        const result = await pollDeviceToken(pending.deviceCode);
+        if (result.status !== "authorized") {
+          if (result.status === "expired" || result.status === "denied") {
+            githubSignIns.drop(sessionId);
+          }
+          return { status: result.status };
+        }
+        held = { accessToken: result.accessToken, expiresInSec: result.expiresIn };
+        githubSignIns.holdToken(sessionId, user.id, held);
+      }
+
+      try {
+        const login = await getGithubLogin(held.accessToken);
+        githubSignIns.setToken(sessionId, user.id, held.accessToken, held.expiresInSec, login);
         return { status: "authorized" };
+      } catch (err) {
+        if (err instanceof GithubUnauthorized) {
+          githubSignIns.drop(sessionId);
+          return { status: "denied" };
+        }
+        if (err instanceof GithubRequestError) {
+          // ponytail: no retry limit. While GitHub keeps failing the read, the
+          // dialog waits until the device code expires and then reports the
+          // code as expired; a status of its own for the browser is the upgrade path.
+          console.warn(`[github] sign-in of user ${user.id} waits for its GitHub login: ${err.message}`);
+          return { status: "pending" };
+        }
+        throw err;
       }
-      if (result.status === "expired" || result.status === "denied") {
-        githubSignIns.drop(sessionId);
-      }
-      return { status: result.status };
     })
   )
   /**

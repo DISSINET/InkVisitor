@@ -6,9 +6,17 @@ interface IGithubSignIn {
   // set while the user has yet to confirm the code on github.com
   deviceCode?: string;
   intervalSec?: number;
-  // set once GitHub handed the token over
+  // the token of a confirmed code, while its GitHub login is not known yet
+  heldToken?: IHeldToken;
+  // set once the sign-in is complete
   accessToken?: string;
   login?: string;
+}
+
+interface IHeldToken {
+  accessToken: string;
+  // GitHub's own lifetime of the token, when it names one
+  expiresInSec?: number;
 }
 
 const TOKEN_LIFETIME_SEC = 8 * 3600;
@@ -53,9 +61,26 @@ export const githubSignIns = {
     signIns.set(sessionId, { userId, deviceCode, intervalSec, expiresAt: Date.now() + expiresInSec * 1000 });
   },
 
-  pending(sessionId: string, userId: string): { deviceCode: string; intervalSec: number } | undefined {
+  pending(
+    sessionId: string,
+    userId: string
+  ): { deviceCode: string; intervalSec: number; heldToken?: IHeldToken } | undefined {
     const entry = read(sessionId, userId);
-    return entry?.deviceCode ? { deviceCode: entry.deviceCode, intervalSec: entry.intervalSec ?? 5 } : undefined;
+    return entry?.deviceCode
+      ? { deviceCode: entry.deviceCode, intervalSec: entry.intervalSec ?? 5, heldToken: entry.heldToken }
+      : undefined;
+  },
+
+  /**
+   * Keeps a token with the pending sign-in it came from. GitHub hands a token
+   * over once per device code, so the token has to outlive a failed read of
+   * its login. It expires with the device code and `token` does not return it.
+   */
+  holdToken(sessionId: string, userId: string, heldToken: IHeldToken): void {
+    const entry = read(sessionId, userId);
+    if (entry?.deviceCode) {
+      entry.heldToken = heldToken;
+    }
   },
 
   setToken(

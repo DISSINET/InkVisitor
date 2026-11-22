@@ -234,6 +234,8 @@ describe("modules/documents github", () => {
       poll: Record<string, unknown>;
       // status of the device code request, when GitHub is to refuse it
       deviceStatus?: number;
+      // status of the read of the signed-in user, when GitHub is to fail it
+      userStatus?: number;
       // runs while GitHub handles the write
       onPut?: () => Promise<unknown>;
     };
@@ -280,6 +282,9 @@ describe("modules/documents github", () => {
         return reply(401, { message: "Bad credentials" });
       }
       if (pathname === "/user") {
+        if (remote.userStatus) {
+          return reply(remote.userStatus, { message: "Service unavailable" });
+        }
         return reply(200, { login: "octo" });
       }
       if (call.method === "GET" && pathname === CONTENTS) {
@@ -509,6 +514,29 @@ describe("modules/documents github", () => {
         const res = await call(curatorAgent, "post", "/github/device/poll");
         expect(res.body).toEqual({ status: expected });
         expect((await status()).body.authorized).toBe(false);
+      });
+
+      it("keeps the token when its login cannot be read, and asks for the login alone next", async () => {
+        await call(curatorAgent, "post", "/github/device");
+        remote.userStatus = 503;
+        const failed = await call(curatorAgent, "post", "/github/device/poll");
+        expect(failed.body).toEqual({ status: "pending" });
+        expect((await status()).body.authorized).toBe(false);
+
+        remote.userStatus = undefined;
+        const retried = await call(curatorAgent, "post", "/github/device/poll");
+        expect(retried.body).toEqual({ status: "authorized" });
+        expect((await status()).body).toMatchObject({ authorized: true, githubLogin: "octo" });
+        // GitHub hands a token over once per device code
+        expect(seen.filter((c) => c.url.pathname === "/login/oauth/access_token")).toHaveLength(1);
+      });
+
+      it("answers a token GitHub refuses right away as denied and forgets the sign-in", async () => {
+        await call(curatorAgent, "post", "/github/device");
+        remote.unauthorized = true;
+        const res = await call(curatorAgent, "post", "/github/device/poll");
+        expect(res.body).toEqual({ status: "denied" });
+        expect(githubSignIns.size()).toBe(0);
       });
 
       it("answers a poll with no sign-in under way as expired", async () => {
