@@ -35,6 +35,15 @@ interface BatchActionReplaceRelation {
   onClearSelection: () => void;
 }
 
+/** what Apply sent as a dry run; the save sends the same ids and fields */
+interface ConfirmedRun {
+  run: BatchReplaceRun;
+  relationType: RelationEnums.Type;
+  fromEntityId: string;
+  toEntityId: string;
+  selectedCount: number;
+}
+
 interface Confirmation {
   headline: string;
   notes: string[];
@@ -55,31 +64,41 @@ export const BatchActionReplaceRelation: React.FC<BatchActionReplaceRelation> = 
   const [relationType, setRelationType] = useState<RelationEnums.Type | undefined>();
   const [fromEntity, setFromEntity] = useState<IEntity | undefined>();
   const [toEntity, setToEntity] = useState<IEntity | undefined>();
-  const [run, setRun] = useState<BatchReplaceRun | undefined>();
+  const [confirmedRun, setConfirmedRun] = useState<ConfirmedRun | undefined>();
   const [confirmation, setConfirmation] = useState<Confirmation | undefined>();
   const [pending, setPending] = useState(false);
 
   const targetClasses = useMemo(() => relationTargetClasses(relationType), [relationType]);
 
   const call =
-    (dryRun?: boolean) =>
+    (request: ConfirmedRun, dryRun?: boolean) =>
     async (ids: string[]) =>
       (
         await api.batchEntityReplaceRelation({
           entityIds: ids,
-          relationType: relationType!,
-          fromEntityId: fromEntity!.id,
-          toEntityId: toEntity!.id,
+          relationType: request.relationType,
+          fromEntityId: request.fromEntityId,
+          toEntityId: request.toEntityId,
           dryRun,
         })
       ).data;
 
+  const handleClose = () => {
+    if (!pending) onClose();
+  };
+
   const handleApply = async () => {
     if (!relationType || !fromEntity || !toEntity) return;
-    const nextRun = createBatchReplaceRun(selectedEntityIds);
-    setRun(nextRun);
+    const request: ConfirmedRun = {
+      run: createBatchReplaceRun(selectedEntityIds),
+      relationType,
+      fromEntityId: fromEntity.id,
+      toEntityId: toEntity.id,
+      selectedCount: selectedEntityIds.length,
+    };
+    setConfirmedRun(request);
     setPending(true);
-    const outcome = await nextRun.run(call(true));
+    const outcome = await request.run.run(call(request, true));
     setPending(false);
     if (!outcome) return;
     if (outcome.error !== undefined) {
@@ -96,12 +115,12 @@ export const BatchActionReplaceRelation: React.FC<BatchActionReplaceRelation> = 
   };
 
   const handleConfirm = async () => {
-    if (!run) return;
+    if (!confirmedRun) return;
     setPending(true);
-    const outcome = await run.run(call());
+    const outcome = await confirmedRun.run.run(call(confirmedRun));
     setPending(false);
     if (!outcome) return;
-    const message = batchReplaceToast(outcome, selectedEntityIds.length);
+    const message = batchReplaceToast(outcome, confirmedRun.selectedCount);
     if (outcome.error === undefined && outcome.total.failed === 0) {
       toast.success(message);
       onClearSelection();
@@ -113,10 +132,16 @@ export const BatchActionReplaceRelation: React.FC<BatchActionReplaceRelation> = 
 
   return (
     <>
-      <Modal showModal onClose={onClose} width="fat" isLoading={pending}>
+      <Modal
+        showModal
+        onClose={handleClose}
+        width="fat"
+        isLoading={pending}
+        disableEscapeClose={pending}
+      >
         <ModalHeader
           title={`Replace relation (${selectedEntityIds.length} entities)`}
-          onClose={onClose}
+          onClose={handleClose}
         />
         <ModalContent column enableScroll>
           <StyledBatchWrapper>
@@ -179,7 +204,7 @@ export const BatchActionReplaceRelation: React.FC<BatchActionReplaceRelation> = 
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <CancelButton onClick={() => !pending && onClose()} />
+            <CancelButton onClick={handleClose} />
             <Button
               label="Apply"
               color="primary"

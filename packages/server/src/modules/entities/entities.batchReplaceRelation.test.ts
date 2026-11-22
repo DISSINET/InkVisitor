@@ -442,6 +442,57 @@ describe("Entities batchReplaceRelation", () => {
     });
   });
 
+  describe("a template Y", () => {
+    it("refuses an SCL row, the base rule refusing a template on either side", async () => {
+      const x = await makeEntity(Concept);
+      const y = await makeEntity(Concept, { isTemplate: true });
+      const row = await makeEntity(Concept);
+      await relate(SCL, row, x);
+
+      const res = await replace({
+        entityIds: [row.id],
+        relationType: SCL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 0, failed: 1, items: 0 });
+      expect(res.body.errors).toEqual({ [row.id]: ReplaceReason.notValid });
+    });
+
+    it("takes a REL row when Y is a template of a class the REL rule allows as template", async () => {
+      const [x, row] = [await makeEntity(Person), await makeEntity(Person)];
+      const y = await makeEntity(Person, { isTemplate: true });
+      await relate(REL, row, x);
+
+      const res = await replace({
+        entityIds: [row.id],
+        relationType: REL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 1, failed: 0, items: 1 });
+      expect(res.body.errors).toEqual({});
+    });
+
+    it("refuses a REL row when Y is a template of a class the REL rule refuses as template", async () => {
+      const [x, row] = [await makeEntity(Person), await makeEntity(Person)];
+      const y = await makeEntity(Concept, { isTemplate: true });
+      await relate(REL, row, x);
+
+      const res = await replace({
+        entityIds: [row.id],
+        relationType: REL,
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 0, failed: 1, items: 0 });
+      expect(res.body.errors).toEqual({ [row.id]: ReplaceReason.notValid });
+    });
+  });
+
   describe("refused requests", () => {
     let x: Entity, y: Entity, row: Entity, person: Entity;
 
@@ -787,6 +838,7 @@ describe("Entities batchReplaceRelation", () => {
     const readOnlyT = `T2-${rand}`;
     const editorId = `editor-brr-${rand}`;
     const viewerId = `viewer-brr-${rand}`;
+    const annotatorId = `annotator-brr-${rand}`;
     let editorAgent: AuthAgent;
     let viewerAgent: AuthAgent;
 
@@ -821,7 +873,7 @@ describe("Entities batchReplaceRelation", () => {
       // the editor's save leaves audits naming the editor, and PostgreSQL keeps
       // a user that audits name
       await deleteAudits(db);
-      await storage.users.deleteMany(db.connection, [editorId, viewerId]);
+      await storage.users.deleteMany(db.connection, [editorId, viewerId, annotatorId]);
     });
 
     it("is refused the rows it may not edit and leaves a row without X unmatched", async () => {
@@ -853,6 +905,33 @@ describe("Entities batchReplaceRelation", () => {
         [readOnlyStatement.id]: ReplaceReason.denied,
         [resourceWithDocument.id]: ReplaceReason.denied,
       });
+    });
+
+    it("changes a Resource with a document when it holds the annotate right for it", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const resourceId = `brr-resource-${randomUUID()}`;
+      const resourceWithDocument = await makeEntity(Resource, {
+        id: resourceId,
+        data: { documentId: `doc-${rand}` },
+      });
+      await relate(CLA, resourceWithDocument, x);
+      await new User({
+        id: annotatorId,
+        role: UserEnums.Role.Editor,
+        active: true,
+        verified: true,
+        rights: [{ territory: resourceId, mode: UserEnums.RoleMode.Annotate }],
+      }).save(db.connection);
+      const annotatorAgent = await createAgentWithUserId(annotatorId);
+
+      const res = await replaceAs(annotatorAgent, {
+        entityIds: [resourceWithDocument.id],
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 1, failed: 0, items: 1 });
+      expect(res.body.errors).toEqual({});
     });
 
     it("is refused a row it may only read that holds CLA X and CLA Y, before the merge", async () => {

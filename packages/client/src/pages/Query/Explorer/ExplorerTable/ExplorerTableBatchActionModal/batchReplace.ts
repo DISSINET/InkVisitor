@@ -95,6 +95,11 @@ export const groupReasons = (
     .sort((a, b) => b.count - a.count || a.reason.localeCompare(b.reason));
 };
 
+const reasonList = (errors: Record<string, string>): string =>
+  groupReasons(errors)
+    .map(({ reason, count }) => `${count}x ${reason}`)
+    .join(", ");
+
 export const relationReplaceLines = (
   total: IResponseBatchReplace,
   names: { type: string; from: string; to: string }
@@ -123,19 +128,24 @@ export const relationReplaceLines = (
     );
   }
   if (failed > 0) {
-    const reasons = groupReasons(total.errors)
-      .map(({ reason, count }) => `${count}x ${reason}`)
-      .join(", ");
-    notes.push(`${failed} cannot change: ${reasons}.`);
+    const reasons = reasonList(total.errors);
+    notes.push(`${failed} cannot change${reasons ? `: ${reasons}` : ""}.`);
   }
   return { headline, notes, canConfirm };
 };
 
 export const batchReplaceToast = (outcome: BatchReplaceOutcome, selected: number): string => {
   const { total, sent, error } = outcome;
-  if (error !== undefined) {
-    return `Stopped after ${sent} of ${selected} entities: ${total.changed} replaced, the rest were not sent. Apply again to finish.`;
+  let message =
+    error !== undefined
+      ? `Stopped after ${sent} of ${selected} entities: ${total.changed} replaced`
+      : `Replaced on ${total.changed} of ${selected} entities`;
+  if (total.failed > 0) {
+    const reasons = reasonList(total.errors);
+    message += `, ${total.failed} could not change${reasons ? `: ${reasons}` : ""}`;
   }
-  const failed = total.failed > 0 ? `, ${total.failed} could not change` : "";
-  return `Replaced on ${total.changed} of ${selected} entities${failed}`;
+  if (error !== undefined) {
+    message += ". The next request failed; apply again to finish.";
+  }
+  return message;
 };

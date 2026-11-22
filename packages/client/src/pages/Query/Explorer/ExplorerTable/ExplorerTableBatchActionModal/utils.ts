@@ -1,3 +1,4 @@
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types";
 
@@ -62,14 +63,24 @@ export const batchAttributeFromOptions = <T extends string>(
       : { value: option.value, label: option.label }
   );
 
-/** classes a relation of `type` may point at; every class when the rule names
- * no pattern or the type is not chosen yet */
+/** classes a relation of `type` may point at; the rule's pattern when it names
+ * one, every class but the disabled ones when it names none, and the classes of
+ * a person-to-value pick while the type is not chosen yet */
 export const relationTargetClasses = (type?: RelationEnums.Type): EntityEnums.Class[] => {
-  const pattern = type ? Relation.RelationRules[type]?.allowedEntitiesPattern : undefined;
-  if (!pattern || pattern.length === 0) {
+  const rule = type ? Relation.RelationRules[type] : undefined;
+  if (!rule) {
     return EntityEnums.PLOGESTRBV;
   }
+  if (rule.allowedEntitiesPattern.length === 0) {
+    return entitiesDict
+      .map((e) => e.value)
+      .filter((c) => !rule.disabledEntities?.includes(c));
+  }
   return [
-    ...new Set(pattern.map((p) => p[1]).filter((c): c is EntityEnums.Class => c !== undefined)),
+    ...new Set(
+      rule.allowedEntitiesPattern
+        .map((p) => p[1])
+        .filter((c): c is EntityEnums.Class => c !== undefined)
+    ),
   ];
 };

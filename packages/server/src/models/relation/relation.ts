@@ -749,9 +749,9 @@ export default class Relation implements IRelationModel {
     return relationsCopied;
   }
   /**
-   * Removes multiple relation entries, emitting a deletion audit for each.
-   * Loads the relations first (the audit needs the snapshot) before the bulk
-   * delete.
+   * Removes multiple relation entries in one bulk delete and writes one
+   * deletion audit per relation the delete reports as removed, from the
+   * snapshot the delete returns.
    * @param request
    * @param ids
    * @returns
@@ -809,8 +809,10 @@ export default class Relation implements IRelationModel {
         );
         writtenIds(result).forEach((id) => written.add(id));
       } catch (e) {
-        // PostgreSQL throws for the whole chunk (unique key on type and
-        // entityIds); its rows stay unwritten
+        // any error of the insert (a dropped connection, a released handle)
+        // leaves the whole chunk unwritten; the caller reports those rows as
+        // failed
+        console.error("[Relation.insertMany]: inserting a chunk failed", e);
       }
     }
 

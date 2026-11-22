@@ -29,10 +29,15 @@ export const BatchReplaceConfirm: React.FC<BatchReplaceConfirm> = ({
   onConfirm,
   onCancel,
 }) => {
+  const handleCancel = () => {
+    if (!loading) onCancel();
+  };
+
   return (
     <Modal
       showModal={show}
-      onClose={onCancel}
+      onClose={handleCancel}
+      disableEscapeClose={loading}
       onEnterPress={canConfirm ? onConfirm : undefined}
       disableBgClick
       isLoading={loading}
@@ -51,7 +56,7 @@ export const BatchReplaceConfirm: React.FC<BatchReplaceConfirm> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <CancelButton onClick={() => !loading && onCancel()} />
+          <CancelButton onClick={handleCancel} />
           {canConfirm && (
             <Button label="Replace" color="primary" onClick={onConfirm} disabled={loading} />
           )}

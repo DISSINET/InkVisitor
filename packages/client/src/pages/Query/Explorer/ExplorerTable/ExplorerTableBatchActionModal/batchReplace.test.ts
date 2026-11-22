@@ -197,6 +197,15 @@ describe("relationReplaceLines", () => {
     });
   });
 
+  it("words the cannot-change note without a reason list when no reason is known", () => {
+    expect(relationReplaceLines(answer({ selected: 3, changed: 1, failed: 2 }), names).notes).toEqual([
+      "2 cannot change.",
+    ]);
+    expect(relationReplaceLines(answer({ selected: 2, changed: 1, failed: 1 }), names).notes).toEqual([
+      "1 cannot change.",
+    ]);
+  });
+
   it("has no notes when everything changes cleanly", () => {
     expect(
       relationReplaceLines(answer({ result: true, selected: 2, changed: 2 }), names).notes
@@ -209,7 +218,18 @@ describe("batchReplaceToast", () => {
     const total = answer({ selected: 300, changed: 295 });
     expect(batchReplaceToast({ total, sent: 300 }, 300)).toBe("Replaced on 295 of 300 entities");
   });
-  it("adds the failures", () => {
+  it("adds the failures with their reasons", () => {
+    const total = answer({
+      selected: 300,
+      changed: 295,
+      failed: 2,
+      errors: { a: "permission denied", b: "update failed" },
+    });
+    expect(batchReplaceToast({ total, sent: 300 }, 300)).toBe(
+      "Replaced on 295 of 300 entities, 2 could not change: 1x permission denied, 1x update failed"
+    );
+  });
+  it("adds the failures when no reason is known", () => {
     const total = answer({ selected: 300, changed: 295, failed: 2 });
     expect(batchReplaceToast({ total, sent: 300 }, 300)).toBe(
       "Replaced on 295 of 300 entities, 2 could not change"
@@ -218,7 +238,20 @@ describe("batchReplaceToast", () => {
   it("reports a stopped run", () => {
     const total = answer({ selected: 1000, changed: 990 });
     expect(batchReplaceToast({ total, sent: 1000, error: new Error("x") }, 2500)).toBe(
-      "Stopped after 1000 of 2500 entities: 990 replaced, the rest were not sent. Apply again to finish."
+      "Stopped after 1000 of 2500 entities: 990 replaced. The next request failed; apply again to finish."
+    );
+  });
+  it("reports a stopped run with failures", () => {
+    const total = answer({
+      selected: 1000,
+      changed: 990,
+      failed: 10,
+      errors: Object.fromEntries(
+        Array.from({ length: 10 }, (_, i) => [`e${i}`, "permission denied"])
+      ),
+    });
+    expect(batchReplaceToast({ total, sent: 1000, error: new Error("x") }, 2500)).toBe(
+      "Stopped after 1000 of 2500 entities: 990 replaced, 10 could not change: 10x permission denied. The next request failed; apply again to finish."
     );
   });
 });

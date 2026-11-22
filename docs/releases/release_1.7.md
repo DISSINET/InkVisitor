@@ -19,6 +19,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - Fixed query export shifting cells left when a Created by or Parent Territory value was missing (#3450)
 - The Entity open in Detail refreshes after an Explorer batch action
 - Batch action **replace relation**: the selected entities related to X become related to Y, with a confirmation that counts what will change; open to editors (#2938)
+- Batch actions and the counter beside them take the selected rows of the current result only; rows ticked under an earlier query are left out, and "copy UUIDs" follows the order of the result (#3474)
 
 ## Annotator
 
