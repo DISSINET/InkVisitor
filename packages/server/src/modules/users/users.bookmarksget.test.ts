@@ -9,7 +9,7 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import User from "@models/user/user";
 import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";

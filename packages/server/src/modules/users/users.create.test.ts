@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { successfulGenericResponse } from "@modules/common.test";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { deleteUsers } from "@service/shorthands";

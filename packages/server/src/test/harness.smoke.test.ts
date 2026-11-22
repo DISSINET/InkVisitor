@@ -3,7 +3,7 @@ import { r } from "rethinkdb-ts";
 import app from "../server";
 import { apiPath } from "@common/constants";
 import { Db } from "@service/rethink";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "./testAuth";
 import { pool } from "@middlewares/db";
 
 /**

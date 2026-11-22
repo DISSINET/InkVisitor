@@ -5,7 +5,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { findEntityById } from "@service/shorthands";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { IEntity } from "@inkvisitor/shared/types";
 import Territory from "@models/territory/territory";
 import Classification from "@models/relation/classification";

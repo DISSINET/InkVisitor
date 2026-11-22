@@ -42,7 +42,7 @@ export default async function globalSetup(): Promise<void> {
     // Cookie-session auth signs in via POST /users/signin. The ACL layer treats
     // that route as admin-only unless a public permission row exists, so an
     // unauthenticated signin would be denied (403). Production seeds this row;
-    // mirror it here so getAuthenticatedAgent (see @modules/testAuth) is reachable
+    // mirror it here so getAuthenticatedAgent (see src/test/testAuth.ts) is reachable
     // in every suite, independent of file execution order. isolate.ts leaves
     // acl_permissions untouched, so this persists for the whole run.
     await r

@@ -3,7 +3,7 @@ import { UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent, testCredentials } from "@modules/testAuth";
+import { getAuthenticatedAgent, testCredentials } from "../../test/testAuth";
 import mailer, { EmailSubject } from "@service/mailer";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";

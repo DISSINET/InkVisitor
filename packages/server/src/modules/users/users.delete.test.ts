@@ -8,7 +8,7 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "../common.test";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import User from "@models/user/user";
 import { pool } from "@middlewares/db";
 

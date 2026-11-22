@@ -5,7 +5,7 @@ import {
 } from "@modules/common.test";
 import { createEntity } from "@service/shorthands";
 import request from "supertest";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Territory from "@models/territory/territory";

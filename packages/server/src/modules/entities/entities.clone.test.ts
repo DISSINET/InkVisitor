@@ -4,7 +4,7 @@ import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";

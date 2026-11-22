@@ -5,7 +5,7 @@ import {
   TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";

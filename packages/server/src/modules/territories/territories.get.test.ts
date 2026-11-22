@@ -7,7 +7,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Statement, { StatementData } from "@models/statement/statement";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { pool } from "@middlewares/db";
 import treeCache from "@service/treeCache";
 

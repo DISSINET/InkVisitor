@@ -91,7 +91,7 @@ Cross-site form posts cannot set the custom header, so they cannot reuse a victi
 
 Short-lived signed `?token=` query parameters are still used for one-shot backup download URLs where a cookie cannot be sent.
 
-Tests authenticate with `getAuthenticatedAgent()` from `src/modules/testAuth.ts` (cookie jar via supertest agent). CSRF checks are skipped when `NODE_ENV=test`.
+Tests authenticate with `getAuthenticatedAgent()` from `src/test/testAuth.ts` (cookie jar via supertest agent). CSRF checks are skipped when `NODE_ENV=test`.
 
 ## Errors
 

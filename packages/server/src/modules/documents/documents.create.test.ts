@@ -7,7 +7,7 @@ import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import Document from "@models/document/document";

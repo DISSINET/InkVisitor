@@ -3,7 +3,7 @@ import { UserNotActiveError } from "@inkvisitor/shared/types/errors";
 import { apiPath } from "@common/constants";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
-import { createAgentWithUserId } from "@modules/testAuth";
+import { createAgentWithUserId } from "../test/testAuth";
 import { pool } from "./db";
 import { UserEnums } from "@inkvisitor/shared/enums";
 

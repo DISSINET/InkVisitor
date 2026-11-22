@@ -1,6 +1,6 @@
 import { Db } from "@service/rethink";
 import { apiPath } from "@common/constants";
-import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId } from "../../test/testAuth";
 import { createMockTree } from "@modules/common.test";
 import User from "@models/user/user";
 import Statement, { StatementTerritory } from "@models/statement/statement";

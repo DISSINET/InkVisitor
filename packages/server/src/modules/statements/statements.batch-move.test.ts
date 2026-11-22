@@ -14,7 +14,7 @@ import {
   AuthAgent,
   createAgentWithUserId,
   getAuthenticatedAgent,
-} from "@modules/testAuth";
+} from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import app from "../../server";

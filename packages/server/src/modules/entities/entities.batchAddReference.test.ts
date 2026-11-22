@@ -1,6 +1,6 @@
 import "ts-jest";
 import { apiPath } from "@common/constants";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";

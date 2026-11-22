@@ -1,6 +1,6 @@
 import { createMockTree, clean } from "@modules/common.test";
 import request from "supertest";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { ITerritory } from "@inkvisitor/shared/types";

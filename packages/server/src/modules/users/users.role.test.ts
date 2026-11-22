@@ -2,7 +2,7 @@ import { apiPath } from "@common/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
 import User from "@models/user/user";
-import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId } from "../../test/testAuth";
 import { Db } from "@service/rethink";
 import { deleteUsers } from "@service/shorthands";
 import { IUser } from "@inkvisitor/shared/types";

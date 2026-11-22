@@ -1,7 +1,7 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, NotFound, UnauthorizedError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { createAgentWithUserId, AuthAgent } from "@modules/testAuth";
+import { createAgentWithUserId, AuthAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
