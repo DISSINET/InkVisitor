@@ -88,8 +88,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
   const { data: userData } = useUserQuery(true);
-  const canBatchEdit =
-    userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
+  const isOwner = userData?.role === UserEnums.Role.Owner;
+  const canBatchEdit = isOwner || userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -322,6 +322,14 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
       exportExplore,
       rowIndices,
+    );
+  };
+
+  const handleExportJson = (entityIds: string[]) => {
+    toast.success("Exporting data...");
+    api.queryExportJson(
+      entityIds,
+      buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
     );
   };
 
@@ -1212,11 +1220,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
+                onExportJson={handleExportJson}
                 includeEquivalents={committedExpansion.equivalents}
                 includeSubordinates={committedExpansion.subordinates}
                 onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
                 onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
+                isOwner={isOwner}
               />
             </Box>
           </>

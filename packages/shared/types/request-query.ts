@@ -9,3 +9,6 @@ export interface IRequestQueryExport {
   explore: Explore.IExplore;
   rowIndices: number[];
 }
+export interface IRequestQueryExportJson {
+  entityIds: string[];
+}

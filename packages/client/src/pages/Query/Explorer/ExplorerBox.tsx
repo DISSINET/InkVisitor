@@ -31,6 +31,7 @@ interface ExplorerBoxProps {
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+  onExportJson?: (entityIds: string[]) => void;
 
   /** Page-level result expansion (#2969), announced above the results. */
   includeEquivalents?: boolean;
@@ -40,6 +41,8 @@ interface ExplorerBoxProps {
 
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
+  /** When false the owner-only batch actions are hidden too. */
+  isOwner?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -54,11 +57,13 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   onOpenEntitiesInDetail,
+  onExportJson,
   includeEquivalents = false,
   includeSubordinates = false,
   onToggleIncludeEquivalents = () => {},
   onToggleIncludeSubordinates = () => {},
   canBatchEdit = false,
+  isOwner = false,
 }) => {
   const isStats = state.view.mode === Explore.EViewMode.Stats;
   // Stats view with no search criteria: show only the prompt, hiding the control
@@ -71,6 +76,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     getCachedEntity,
     onExport,
     onOpenEntitiesInDetail,
+    onExportJson,
     stableSignature,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
@@ -100,6 +106,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                     setBatchActionSelected: controls.setBatchActionSelected,
                     onApplyBatchAction: controls.handleApplyBatchAction,
                     canBatchEdit,
+                    isOwner,
                   }
             }
             newColumn={

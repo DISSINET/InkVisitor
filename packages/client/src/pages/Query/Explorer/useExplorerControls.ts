@@ -8,6 +8,7 @@ interface UseExplorerControlsParams {
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+  onExportJson?: (entityIds: string[]) => void;
   /**
    * Identity of the current query (excludes offset/limit). Changes on a new
    * search/filter/sort/view but not on scroll pagination — used to drop the
@@ -29,6 +30,7 @@ export const useExplorerControls = ({
   getCachedEntity,
   onExport,
   onOpenEntitiesInDetail,
+  onExportJson,
   stableSignature,
 }: UseExplorerControlsParams) => {
   // `data` is undefined while a scroll-pagination window is fetching (the new
@@ -133,10 +135,12 @@ export const useExplorerControls = ({
     setRowLastClicked(-1);
   }, [entityIds, selectedEntityIdsSet]);
 
-  const selectedInCurrentCount = useMemo(
-    () => entityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
+  // the selection can outlive a search; these are its rows in the current results
+  const selectedInCurrentIds = useMemo(
+    () => entityIds.filter((id) => selectedEntityIdsSet.has(id)),
     [entityIds, selectedEntityIdsSet],
   );
+  const selectedInCurrentCount = selectedInCurrentIds.length;
   const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
   const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
 
@@ -166,8 +170,20 @@ export const useExplorerControls = ({
       toast.info("UUIDs copied to clipboard");
       return;
     }
+    if (batchActionSelected === BatchAction.export_json) {
+      if (selectedInCurrentIds.length > 0) {
+        onExportJson?.(selectedInCurrentIds);
+      }
+      return;
+    }
     setIsBatchModalOpen(true);
-  }, [batchActionSelected, selectedEntityIds, onOpenEntitiesInDetail]);
+  }, [
+    batchActionSelected,
+    selectedEntityIds,
+    selectedInCurrentIds,
+    onOpenEntitiesInDetail,
+    onExportJson,
+  ]);
 
   return {
     selectedEntityIds,

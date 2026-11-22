@@ -37,6 +37,7 @@ import {
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { IResponseQueryExportJson } from "@inkvisitor/shared/types/response-query";
 import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
@@ -48,6 +49,8 @@ import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { ErrorToast } from "components/basic/Toast/ErrorToast";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import { buildExplorerJsonExport } from "utils/explorerJsonExport";
+import packageJson from "../package.json";
 import {
   formatRequestErrorDetails,
   readApiErrorPayload,
@@ -1017,6 +1020,38 @@ class Api {
       document.body.removeChild(a);
     } catch (err) {
       console.log("err export", err);
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Downloads the selected entities with their relations and audits as JSON
+   * (owner only).
+   * @param query the query the entities were selected from, saved in the file
+   */
+  async queryExportJson(
+    entityIds: string[],
+    query: Query.INode,
+    options?: IApiOptions,
+  ): Promise<void> {
+    try {
+      const exportedAt = new Date();
+      const response = await this.connection.post<IResponseQueryExportJson>(
+        `/entities/query-export-json`,
+        { entityIds },
+        options,
+      );
+      const file = buildExplorerJsonExport(response.data, entityIds, {
+        exportedAt: exportedAt.toISOString(),
+        version: packageJson.version,
+        query,
+      });
+
+      triggerDownload(
+        new Blob([JSON.stringify(file, null, 2)], { type: "application/json" }),
+        `query-${exportedAt.toLocaleString()}.json`,
+      );
+    } catch (err) {
       throw this.handleError(err);
     }
   }

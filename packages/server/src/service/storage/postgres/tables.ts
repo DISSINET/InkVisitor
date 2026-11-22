@@ -615,6 +615,32 @@ export const audits: AuditStore = {
     );
   },
 
+  async allForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    return docs<IAudit>(
+      TABLE.audits,
+      await q(conn, `SELECT doc FROM audits WHERE audit_scope = $1 AND model_id = ANY($2::text[])`, [
+        scope,
+        modelIds,
+      ])
+    );
+  },
+
+  async relationAuditsForEntities(conn, entityIds) {
+    if (!entityIds.length) {
+      return [];
+    }
+    return docs<IAudit>(
+      TABLE.audits,
+      await q(conn, `SELECT doc FROM audits WHERE entity_ids && $1::text[] AND audit_scope = $2`, [
+        entityIds,
+        AuditScope.Relation,
+      ])
+    );
+  },
+
   async relationAuditsForEntity(conn, entityId, n) {
     return docs<IAudit>(
       TABLE.audits,
