@@ -30,6 +30,7 @@ interface BatchActionExportCsvProps {
   selectedEntityIds: string[];
   columns: Explore.IExploreColumn[];
   onExport: (selectedColumnIds: string[]) => void;
+  isExporting: boolean;
   onClose: () => void;
 }
 
@@ -39,6 +40,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   selectedEntityIds,
   columns,
   onExport,
+  isExporting,
   onClose,
 }) => {
   const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(columns.map((c) => c.id));
@@ -84,7 +86,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   };
 
   return (
-    <Modal showModal onClose={onClose} width="fat">
+    <Modal showModal onClose={onClose} width="fat" isLoading={isExporting}>
       <ModalHeader
         title={`Export as TSV (${selectedEntityIds.length} entities)`}
         onClose={onClose}
@@ -122,7 +124,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
             label="Export"
             color="primary"
             onClick={() => onExport(selectedColumnIds)}
-            disabled={selectedColumnIds.length === 0}
+            disabled={selectedColumnIds.length === 0 || isExporting}
           />
         </ButtonGroup>
       </ModalFooter>

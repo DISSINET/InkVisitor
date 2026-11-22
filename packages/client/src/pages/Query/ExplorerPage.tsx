@@ -303,7 +303,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
   const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
-    toast.success("Exporting data...");
     const exportExplore =
       selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
         ? {
@@ -318,20 +317,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         : exploreState;
     // export must run the same (resolved) query as the displayed results -
     // rowIndices are positional against the server-side result order
-    api.queryExport(
+    return api.queryExport(
       buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
       exportExplore,
       rowIndices,
     );
   };
 
-  const handleExportJson = (entityIds: string[]) => {
-    toast.success("Exporting data...");
+  const handleExportJson = (entityIds: string[]) =>
     api.queryExportJson(
       entityIds,
       buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
     );
-  };
 
   const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
   const explorerBoxMinimizedStorageKey = "queryExplorerBoxMinimized";

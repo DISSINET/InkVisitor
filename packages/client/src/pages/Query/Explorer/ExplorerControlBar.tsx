@@ -38,6 +38,8 @@ export interface ExplorerSelectionControls {
   canBatchEdit?: boolean;
   /** When false, owner-only batch actions (export as json) are hidden. */
   isOwner?: boolean;
+  /** True while an export is being prepared on the server. */
+  isExporting?: boolean;
 }
 
 /** New-column toggle. Table view only (the stats view has no columns). */
@@ -131,7 +133,7 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
             color="primary"
             inverted
             onClick={selection.onApplyBatchAction}
-            disabled={selection.selectedCount === 0}
+            disabled={selection.selectedCount === 0 || selection.isExporting}
             size={ButtonSize.Medium}
           />
         </StyledControlGroup>
@@ -153,7 +155,11 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
           />
         )}
         {/* Table only - the stats view carries its own loader over the chart. */}
-        <Loader loaderStyle="beat" show={isTable && isQueryFetching} size={7} />
+        <Loader
+          loaderStyle="beat"
+          show={isTable && (isQueryFetching || !!selection?.isExporting)}
+          size={7}
+        />
       </StyledControlGroup>
     </StyledTableControl>
   );

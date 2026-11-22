@@ -6,9 +6,9 @@ import { BatchAction, batchOptions } from "./ExplorerTable/types";
 interface UseExplorerControlsParams {
   data: IResponseQuery | undefined;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
-  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => Promise<void>;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
-  onExportJson?: (entityIds: string[]) => void;
+  onExportJson?: (entityIds: string[]) => Promise<void>;
   /**
    * Identity of the current query (excludes offset/limit). Changes on a new
    * search/filter/sort/view but not on scroll pagination — used to drop the
@@ -144,14 +144,29 @@ export const useExplorerControls = ({
   const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
   const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  /** Resolves to whether the file was downloaded; the API shows its own error toast. */
+  const runExport = useCallback(async (download: () => Promise<void>) => {
+    setIsExporting(true);
+    try {
+      await download();
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
   const handleExport = useCallback(
     (selectedColumnIds?: string[]) => {
       const rowIndices = selectedEntityIds
         .map((entityId) => entityIds.indexOf(entityId))
         .filter((index) => index >= 0);
-      onExport(rowIndices, selectedColumnIds);
+      return runExport(() => onExport(rowIndices, selectedColumnIds));
     },
-    [selectedEntityIds, entityIds, onExport],
+    [selectedEntityIds, entityIds, onExport, runExport],
   );
 
   const handleApplyBatchAction = useCallback(async () => {
@@ -171,8 +186,8 @@ export const useExplorerControls = ({
       return;
     }
     if (batchActionSelected === BatchAction.export_json) {
-      if (selectedInCurrentIds.length > 0) {
-        onExportJson?.(selectedInCurrentIds);
+      if (onExportJson && selectedInCurrentIds.length > 0) {
+        await runExport(() => onExportJson(selectedInCurrentIds));
       }
       return;
     }
@@ -183,6 +198,7 @@ export const useExplorerControls = ({
     selectedInCurrentIds,
     onOpenEntitiesInDetail,
     onExportJson,
+    runExport,
   ]);
 
   return {
@@ -206,6 +222,7 @@ export const useExplorerControls = ({
     handleInvertSelection,
     handleApplyBatchAction,
     handleExport,
+    isExporting,
   };
 };
 
