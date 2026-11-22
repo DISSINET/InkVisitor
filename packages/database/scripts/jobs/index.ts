@@ -17,6 +17,7 @@ import fixEditorEntityAclJob from "./fix-editor-entity-acl";
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 import cancelPasswordResetLinksJob from "./cancel-password-reset-links";
+import removeDeadUserOptionsJob from "./remove-dead-user-options";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -39,6 +40,7 @@ const alljobs: Record<string, IJob> = {
   migrateGeocodingGeometryJob,
   migrateGeocodingPlaceTypesJob,
   cancelPasswordResetLinksJob,
+  removeDeadUserOptionsJob,
 };
 
 export default alljobs;

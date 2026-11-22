@@ -43,7 +43,6 @@ export class UserOptions implements IUserOptions {
   defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
   workingLanguages: EntityEnums.Language[] = [];
-  hideStatementElementsOrderTable?: boolean = false;
   askBeforePropDelete?: boolean = true;
   geocoding?: IGeocodingUserSettings = { context: {} };
   starredTemplates: string[] = [];

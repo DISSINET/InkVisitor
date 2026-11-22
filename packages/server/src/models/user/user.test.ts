@@ -20,7 +20,6 @@ const prepareUserData = (): IUser => {
       defaultStatementLanguage: EntityEnums.Language.English,
       searchLanguages: [],
       workingLanguages: [],
-      hideStatementElementsOrderTable: false,
       askBeforePropDelete: true,
       geocoding: { context: {} },
       starredTemplates: ["template1"],
@@ -60,6 +59,21 @@ describe("models/user", function () {
 
       it("should return full user", () => {
         expect(JSON.parse(JSON.stringify(fullUser))).toEqual(fullData);
+      });
+    });
+
+    describe("options the model does not declare", () => {
+      // rows written by older releases still carry these keys
+      it("should leave them out of the user", () => {
+        const user = new User({
+          options: {
+            allowMaterializedStats: true,
+            hideStatementElementsOrderTable: true,
+          } as unknown as IUser["options"],
+        });
+        const options = JSON.parse(JSON.stringify(user)).options;
+        expect(options).not.toHaveProperty("allowMaterializedStats");
+        expect(options).not.toHaveProperty("hideStatementElementsOrderTable");
       });
     });
 
