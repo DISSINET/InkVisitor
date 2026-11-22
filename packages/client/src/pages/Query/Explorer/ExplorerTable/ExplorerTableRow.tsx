@@ -42,7 +42,7 @@ import { isReadOnlyColumn, wideColumnTypes } from "./types";
 import {
   getColumnWidth,
   getTagLabelMaxWidth,
-  withoutPropPair,
+  withoutNthPropPair,
   withoutReferencePair,
 } from "./utils";
 
@@ -262,7 +262,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   };
 
   const handleUnlinkEntity = React.useCallback(
-    async (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
+    async (
+      sourceEntity: IEntity,
+      entityToRemove: IEntity,
+      columnId: string,
+      occurrence: number,
+    ) => {
       const column = columns.find((column) => column.id === columnId);
 
       if (column?.type === Explore.EExploreColumnType.EPT) {
@@ -283,7 +288,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            props: withoutPropPair(sourceEntity.props, propertyType, entityToRemove.id),
+            props: withoutNthPropPair(
+              sourceEntity.props,
+              propertyType,
+              entityToRemove.id,
+              occurrence,
+            ),
           },
         });
       }
@@ -343,7 +353,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     (
       cellValue: IEntity | number | string | IUser,
       recordEntity: IEntity,
-      column: Explore.IExploreColumn
+      column: Explore.IExploreColumn,
+      // how many tags of the same entity come before this one in the cell
+      occurrence = 0
     ): React.ReactElement => {
       if (typeof (cellValue as IEntity)?.class !== "undefined") {
         return (
@@ -364,7 +376,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               unlinkButton={
                 isColumnEditable(column) && {
                   onClick: () => {
-                    handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id);
+                    handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id, occurrence);
                   },
                 }
               }
@@ -522,11 +534,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
+                const id = (cellEntity as IEntity)?.id;
+                const occurrence = id
+                  ? cellData.slice(0, key).filter((item) => (item as IEntity)?.id === id).length
+                  : 0;
                 return (
-                  <React.Fragment
-                    key={(cellEntity as IEntity)?.id ? (cellEntity as IEntity).id : key}
-                  >
-                    {renderCellValue(cellEntity, recordEntity, column)}
+                  <React.Fragment key={id ? `${id}-${occurrence}` : key}>
+                    {renderCellValue(cellEntity, recordEntity, column, occurrence)}
                   </React.Fragment>
                 );
               })}

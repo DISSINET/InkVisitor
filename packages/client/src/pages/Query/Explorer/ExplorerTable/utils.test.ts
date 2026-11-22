@@ -6,7 +6,7 @@ import {
   getTagLabelMaxWidth,
   hasPropPair,
   hasReferencePair,
-  withoutPropPair,
+  withoutNthPropPair,
   withoutReferencePair,
 } from "./utils";
 
@@ -77,9 +77,14 @@ describe("value column props", () => {
     expect(hasPropPair(props, "other", "r1")).toBe(false);
   });
 
-  it("removes every top-level prop of the pair and nothing else", () => {
-    expect(withoutPropPair(props, "represents", "r1").map((p) => p.id)).toEqual(["p3", "p4"]);
-    expect(withoutPropPair(props, "represents", "r1")[1].children).toHaveLength(1);
+  it("removes only the n-th top-level prop of the pair", () => {
+    const ids = (occurrence: number) =>
+      withoutNthPropPair(props, "represents", "r1", occurrence).map((p) => p.id);
+    expect(ids(0)).toEqual(["p2", "p3", "p4"]);
+    expect(ids(1)).toEqual(["p1", "p3", "p4"]);
+    // no third prop of the pair, so nothing goes
+    expect(ids(2)).toEqual(["p1", "p2", "p3", "p4"]);
+    expect(withoutNthPropPair(props, "represents", "r1", 0)[2].children).toHaveLength(1);
   });
 });
 

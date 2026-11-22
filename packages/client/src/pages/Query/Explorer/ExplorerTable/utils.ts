@@ -159,8 +159,8 @@ export const getTagLabelMaxWidth = (
   return label > TAG_LABEL_MAX_PX ? label : undefined;
 };
 
-// A value column (EPV) lists the values of the row's top-level metaprops of its
-// type, each value once, so one tag stands for every metaprop of that type and value.
+// A value column (EPV) shows one tag per top-level metaprop of its type, in props
+// order, so the n-th tag of a value stands for the n-th metaprop with that value.
 const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
   prop.type?.entityId === typeId && prop.value?.entityId === valueId;
 
@@ -168,9 +168,19 @@ const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
 export const hasPropPair = (props: IProp[], typeId: string, valueId: string): boolean =>
   props.some((prop) => isPropPair(prop, typeId, valueId));
 
-/** `props` without the top-level metaprops of `typeId` whose value is `valueId` */
-export const withoutPropPair = (props: IProp[], typeId: string, valueId: string): IProp[] =>
-  props.filter((prop) => !isPropPair(prop, typeId, valueId));
+/**
+ * `props` without the `occurrence`-th (counted from 0) top-level metaprop of `typeId` whose
+ * value is `valueId`
+ */
+export const withoutNthPropPair = (
+  props: IProp[],
+  typeId: string,
+  valueId: string,
+  occurrence: number,
+): IProp[] => {
+  let seen = -1;
+  return props.filter((prop) => !(isPropPair(prop, typeId, valueId) && ++seen === occurrence));
+};
 
 // A reference value column (ERV) lists the values of the row's references to its
 // resource, each value once, so one tag stands for every such reference.

@@ -60,13 +60,15 @@ function linkedIds(
     // Entity Property value
     case Explore.EExploreColumnType.EPV: {
       const { propertyType } = column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-      const ids = new Set<string>();
+      // one id per prop, in props order and with repeats, so the client can tell which
+      // prop a tag stands for by counting the tags with the same id before it
+      const ids: string[] = [];
       for (const prop of entity.props) {
         if (prop.type.entityId === propertyType && prop.value && prop.value.entityId) {
-          ids.add(prop.value.entityId);
+          ids.push(prop.value.entityId);
         }
       }
-      return [...ids];
+      return ids;
     }
     // Entity Reference Resources
     case Explore.EExploreColumnType.ERR:

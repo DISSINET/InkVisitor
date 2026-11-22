@@ -179,6 +179,21 @@ describe("Results column data", () => {
     expect(a["value"]).toEqual([linked.z2, linked.b2]);
   });
 
+  it("lists a value once per prop of the type, repeats included", async () => {
+    const row = entity("a", {
+      props: [prop("pt", "v1"), prop("other", "v1"), prop("pt", "v2"), prop("pt", "v1")],
+    });
+    const linked: Record<string, IEntity> = { v1: entity("v1"), v2: entity("v2") };
+    jest
+      .spyOn(storage.entities, "getMany")
+      .mockImplementation(async (_conn, ids: string[]) => ids.filter((id) => linked[id]).map((id) => linked[id]));
+    const cols = [column("value", C.EPV, { propertyType: "pt" })];
+
+    const results = new Results<IEntity>();
+    const context = await results.prepareColumnsContext(conn, [row], cols);
+    expect(results.columns(row, cols, context)["value"]).toEqual([linked.v1, linked.v2, linked.v1]);
+  });
+
   it("lists the entities whose top-level props of the type have the row as value", async () => {
     const t1 = entity("t1", { class: "T" });
     const t2 = entity("t2", { class: "T" });
