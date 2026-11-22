@@ -1,7 +1,7 @@
 import "ts-jest";
 import { clean } from "@modules/common.test";
 import { apiPath } from "@common/constants";
-import { AuthAgent, createAgentWithUserId, getAuthenticatedAgent } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId, getAuthenticatedAgent } from "../../test/testAuth";
 import { Db, storage } from "@service/storage";
 import Document from "@models/document/document";
 import Person from "@models/person/person";

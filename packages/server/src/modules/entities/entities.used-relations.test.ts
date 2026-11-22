@@ -1,6 +1,6 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
-import { AuthAgent, createAgentWithUserId, getAuthenticatedAgent } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId, getAuthenticatedAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import { Db, storage } from "@service/storage";
 import { pool } from "@middlewares/db";

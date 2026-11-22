@@ -25,7 +25,7 @@ import { ITerritory } from "@inkvisitor/shared/types";
 import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import "ts-jest";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import app from "../../server";
 
 describe("Entities create", function () {

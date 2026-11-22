@@ -11,7 +11,7 @@ import { pool } from "@middlewares/db";
 import {
   createAgentWithUserId,
   getAuthenticatedAgent,
-} from "@modules/testAuth";
+} from "../../test/testAuth";
 
 describe("Users update", function () {
   let db: Db;

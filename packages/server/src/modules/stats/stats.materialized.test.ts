@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../../server";
 import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { apiPath } from "@common/constants";
 import { MaterializedStats } from "@models/stats/materialized-stats";
 import { EventType, Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
