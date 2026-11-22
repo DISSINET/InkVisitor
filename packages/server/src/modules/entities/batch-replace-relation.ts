@@ -12,7 +12,7 @@ export const ReplaceReason = {
   notValid: "relation not valid for these entities",
   cycle: "would create a cycle",
   insertFailed: "update failed",
-  bothKept: "new relation created, the old one could not be removed",
+  bothKept: "the new relation is in place, removing the old one failed",
 } as const;
 
 const isAsymmetrical = (type: RelationEnums.Type): boolean =>

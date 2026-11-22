@@ -701,6 +701,83 @@ describe("Entities batchReplaceRelation", () => {
         expect(await targetsOf(CLA, row)).toEqual([y.id]);
       }
     });
+
+    it("counts the relations a delete removed before it threw", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const rows = [await makeEntity(Person), await makeEntity(Person)];
+      for (const row of rows) {
+        await relate(CLA, row, x);
+      }
+      const deleteMany = Relation.deleteMany;
+      jest.spyOn(Relation, "deleteMany").mockImplementationOnce(async (request, relationIds) => {
+        await deleteMany(request, relationIds);
+        throw new Error("audits refused");
+      });
+
+      const res = await save({ entityIds: ids(...rows), fromEntityId: x.id, toEntityId: y.id });
+
+      expect(res.body).toMatchObject({ changed: 2, failed: 0, items: 2 });
+      expect(res.body.errors).toEqual({});
+      for (const row of rows) {
+        expect(await targetsOf(CLA, row)).toEqual([y.id]);
+      }
+    });
+
+    it("reports only the row whose old relation the delete left", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const [removedRow, keptRow] = [await makeEntity(Person), await makeEntity(Person)];
+      const removedOld = await relate(CLA, removedRow, x);
+      await relate(CLA, keptRow, x);
+      const deleteMany = Relation.deleteMany;
+      jest
+        .spyOn(Relation, "deleteMany")
+        .mockImplementationOnce((request) => deleteMany(request, [removedOld.id]));
+
+      const res = await save({
+        entityIds: ids(removedRow, keptRow),
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, failed: 1, items: 1 });
+      expect(res.body.errors).toEqual({ [keptRow.id]: ReplaceReason.bothKept });
+      expect(await targetsOf(CLA, removedRow)).toEqual([y.id]);
+      expect(await targetsOf(CLA, keptRow)).toEqual([x.id, y.id].sort());
+    });
+
+    it("deletes X from the written and the merged rows when one insert fails", async () => {
+      const [x, y] = [await makeEntity(Concept), await makeEntity(Concept)];
+      const [writtenRow, refusedRow, mergedRow] = [
+        await makeEntity(Person),
+        await makeEntity(Person),
+        await makeEntity(Person),
+      ];
+      for (const row of [writtenRow, refusedRow, mergedRow]) {
+        await relate(CLA, row, x);
+      }
+      await relate(CLA, mergedRow, y);
+      const insertMany = Relation.insertMany;
+      jest.spyOn(Relation, "insertMany").mockImplementationOnce(async (request, relations) => {
+        const refused = relations.filter(({ entityIds }) => entityIds[0] === refusedRow.id);
+        const { written } = await insertMany(
+          request,
+          relations.filter((relation) => !refused.includes(relation))
+        );
+        return { written, failed: refused.map(({ id }) => id) };
+      });
+
+      const res = await save({
+        entityIds: ids(writtenRow, refusedRow, mergedRow),
+        fromEntityId: x.id,
+        toEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 2, merged: 1, failed: 1, items: 2 });
+      expect(res.body.errors).toEqual({ [refusedRow.id]: ReplaceReason.insertFailed });
+      expect(await targetsOf(CLA, writtenRow)).toEqual([y.id]);
+      expect(await targetsOf(CLA, mergedRow)).toEqual([y.id]);
+      expect(await targetsOf(CLA, refusedRow)).toEqual([x.id]);
+    });
   });
 
   // createMockTree empties the entities table, so this block runs last

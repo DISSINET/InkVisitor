@@ -1681,18 +1681,26 @@ export default Router()
         });
 
         const removed = new Set<string>();
+        const oldIds = ([] as string[]).concat(...withY.map((plan) => plan.old));
         try {
-          const { changes = [] } = await Relation.deleteMany(
-            request,
-            ([] as string[]).concat(...withY.map((plan) => plan.old))
-          );
+          const { changes = [] } = await Relation.deleteMany(request, oldIds);
           for (const { old_val, error } of changes) {
             if (old_val && !error) {
               removed.add(old_val.id);
             }
           }
-        } catch {
-          // a delete that throws counts as deleting nothing; its rows keep X next to Y
+        } catch (e) {
+          console.error("[batchReplaceRelation]: deleting the old relations failed", e);
+          // the delete can throw after removing rows (its audits are written
+          // second), so an old id no longer stored counts as removed; a failed
+          // re-read counts as nothing removed
+          try {
+            const left = await Relation.findForEntities(conn, [fromEntityId], relationType);
+            const leftIds = new Set(left.map((relation) => relation.id));
+            oldIds.filter((id) => !leftIds.has(id)).forEach((id) => removed.add(id));
+          } catch (reread) {
+            console.error("[batchReplaceRelation]: re-reading the old relations failed", reread);
+          }
         }
         for (const plan of withY) {
           if (!plan.old.every((id) => removed.has(id))) {
