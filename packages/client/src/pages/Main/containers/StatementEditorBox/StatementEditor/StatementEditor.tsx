@@ -791,10 +791,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <DocumentTitle title={documentAnchor.document.title} />
                       </div>
                       {documentAnchor.resourceId && (
-                        <EntityTag entity={statement.entities[documentAnchor.resourceId]} />
+                        <EntityTag entity={statement.entities[documentAnchor.resourceId]} fullWidth />
                       )}
                       {documentAnchor.parentTerritoryId && (
-                        <EntityTag entity={statement.entities[documentAnchor.parentTerritoryId]} />
+                        <EntityTag
+                          entity={statement.entities[documentAnchor.parentTerritoryId]}
+                          fullWidth
+                        />
                       )}
                     </StyledAnchorMeta>
                   </StyledEditorAnchorSectionAnchor>
