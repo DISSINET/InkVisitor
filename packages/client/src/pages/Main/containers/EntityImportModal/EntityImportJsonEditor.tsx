@@ -34,6 +34,18 @@ export const EntityImportJsonEditor: React.FC<EntityImportJsonEditor> = ({
             // the editor skips its own Enter handling for a prevented event
             event.preventDefault();
             onSubmit();
+            return;
+          }
+          // Tab in the empty editor, where the placeholder shows, writes it in
+          const plainTab =
+            event.key === "Tab" &&
+            !event.shiftKey &&
+            !event.metaKey &&
+            !event.ctrlKey &&
+            !event.altKey;
+          if (plainTab && value === "" && placeholder) {
+            event.preventDefault();
+            onChange(placeholder);
           }
         }}
         highlight={highlightJson}
