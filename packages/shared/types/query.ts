@@ -1504,6 +1504,7 @@ export namespace Explore {
     ER = "ER", // Entity Relations
     EPV = "EPV", // Entity Property value
     EPT = "EPT", // Entity Property types
+    EPO = "EPO", // Entity Property origins
     ERR = "ERR", // Entity Reference Resources
     ERV = "ERV", // Entity Reference Values
     ES = "ES", // Entity Statements
@@ -1568,6 +1569,7 @@ export namespace Explore {
     [EExploreColumnType.ER]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsER>;
     [EExploreColumnType.EPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
     [EExploreColumnType.EPT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPO]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
     [EExploreColumnType.ERR]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ERV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsERV>;
     [EExploreColumnType.ES]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
@@ -1626,6 +1628,21 @@ export namespace Explore {
         "Shows the types (Concepts) of metaproperties attached to the entity. Editable: you can add or remove property types.",
       isDisabled: false,
       params: {},
+    },
+    [EExploreColumnType.EPO]: {
+      label: "Entity Property origins",
+      description:
+        "Shows the entities that have a metaproperty of a specific type whose value is this entity, the origins of those metaproperties. The property type is a Concept entity that defines which metaproperties are followed.",
+      isDisabled: false,
+      params: { propertyType: "" },
+      paramsDef: [
+        {
+          id: "propertyType",
+          type: "entity",
+          label: "Property type",
+          isRequired: true,
+        },
+      ],
     },
     [EExploreColumnType.ERR]: {
       label: "Entity Reference Resources",

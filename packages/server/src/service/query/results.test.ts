@@ -179,6 +179,63 @@ describe("Results column data", () => {
     expect(a["value"]).toEqual([linked.z2, linked.b2]);
   });
 
+  it("lists a value once per prop of the type or reference to the resource, repeats included", async () => {
+    const row = entity("a", {
+      props: [prop("pt", "v1"), prop("other", "v1"), prop("pt", "v2"), prop("pt", "v1")],
+      references: [
+        { resource: "r", value: "v1" },
+        { resource: "other", value: "v1" },
+        { resource: "r", value: "v1" },
+      ],
+    });
+    const linked: Record<string, IEntity> = { v1: entity("v1"), v2: entity("v2") };
+    jest
+      .spyOn(storage.entities, "getMany")
+      .mockImplementation(async (_conn, ids: string[]) => ids.filter((id) => linked[id]).map((id) => linked[id]));
+    const cols = [
+      column("value", C.EPV, { propertyType: "pt" }),
+      column("ref-values", C.ERV, { resource: "r" }),
+    ];
+
+    const results = new Results<IEntity>();
+    const context = await results.prepareColumnsContext(conn, [row], cols);
+    const cells = results.columns(row, cols, context);
+    expect(cells["value"]).toEqual([linked.v1, linked.v2, linked.v1]);
+    expect(cells["ref-values"]).toEqual([linked.v1, linked.v1]);
+  });
+
+  it("lists the entities whose top-level props of the type have the row as value", async () => {
+    const t1 = entity("t1", { class: "T" });
+    const t2 = entity("t2", { class: "T" });
+    const holders = [
+      entity("r1", { class: "R", props: [prop("represented", "t1"), prop("other", "t2")] }),
+      // a repeated prop lists its origin once
+      entity("r2", { class: "R", props: [prop("represented", "t1"), prop("represented", "t1")] }),
+      // a subproperty is not a metaprop of r3
+      entity("r3", {
+        class: "R",
+        props: [{ ...prop("x", "y"), children: [prop("represented", "t2")] }],
+      }),
+    ];
+    const byIndex = jest.spyOn(storage.entities, "byIndex").mockResolvedValue(holders);
+    const getMany = jest.spyOn(storage.entities, "getMany").mockResolvedValue([]);
+    const cols = [
+      column("origin", C.EPO, { propertyType: "represented" }),
+      column("other-origin", C.EPO, { propertyType: "other" }),
+    ];
+
+    const results = new Results<IEntity>();
+    const context = await results.prepareColumnsContext(conn, [t1, t2], cols);
+    const [first, second] = [t1, t2].map((row) => results.columns(row, cols, context));
+
+    expect(byIndex).toHaveBeenCalledTimes(1); // shared by both EPO columns
+    expect(getMany).not.toHaveBeenCalled(); // the holders are the linked entities
+    expect(first["origin"]).toEqual([holders[0], holders[1]]);
+    expect(first["other-origin"]).toEqual([]);
+    expect(second["origin"]).toEqual([]);
+    expect(second["other-origin"]).toEqual([holders[0]]);
+  });
+
   it("serves a row whose id is an Object.prototype key like any other", async () => {
     jest.spyOn(storage.entities, "getMany").mockResolvedValue([]);
     jest.spyOn(storage.relations, "forEntities").mockResolvedValue([]);
