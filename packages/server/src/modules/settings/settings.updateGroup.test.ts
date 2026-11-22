@@ -6,7 +6,7 @@ import { pool } from "@middlewares/db";
 import { SettingGroupDict } from "@inkvisitor/shared/dictionaries/settinggroup";
 import { globalValidationsDict } from "@inkvisitor/shared/enums/warning";
 import { Setting } from "@models/setting/setting";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 
 describe("Settings updateGroup", function () {
   const db = new Db();

@@ -3,7 +3,7 @@ import { BadParams, UserDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { pool } from "@middlewares/db";
 
 describe("Users get", function () {

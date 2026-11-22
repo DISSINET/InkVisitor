@@ -8,7 +8,7 @@ import { Db } from "@service/storage";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
