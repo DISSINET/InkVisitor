@@ -1,6 +1,6 @@
 import { clean } from "@modules/common.test";
 import { apiPath } from "@common/constants";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { Db } from "@service/storage";
 import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
