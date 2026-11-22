@@ -31,7 +31,7 @@ import ExploreTableHeader from "./Header/ExploreTableHeader";
 import { CELL_DISPLAY_LIMIT } from "./Cell/ExplorerCellOverflow";
 import { HEIGHT_ROW_DEFAULT, ROW_NUMBER_MIN_DIGITS, WIDTH_COLUMN_FIRST } from "./constants";
 import { contentSizedColumnTypes } from "./types";
-import { estimateColumnWidth, getColumnWidth } from "./utils";
+import { estimateColumnWidth, fillColumnWidths, getColumnWidth } from "./utils";
 
 const OVERSCAN_ROWS = 10;
 
@@ -349,6 +349,17 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     );
   }, [columns, columnWidths]);
 
+  // The stack is sized from widthTable, never from the filled widths, so its
+  // measured width is the room the panel gives the table and filling it cannot
+  // feed back into the measurement.
+  const { ref: stackRef, width: widthStack = 0 } = useResizeObserver<HTMLDivElement>();
+
+  const columnWidthsFilled = useMemo(
+    () =>
+      fillColumnWidths(columns, columnWidths, widthStack - SCROLLBAR_SIZE, WIDTH_COLUMN_FIRST),
+    [columns, columnWidths, widthStack],
+  );
+
   // The last row carries the longest ordinal, so the number slot is sized from
   // the result count and handed to the header, the rows and the placeholders as
   // a CSS variable - a re-render of every memoized row would be the alternative.
@@ -444,7 +455,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               rowId={index}
               rowItem={rowItem!}
               columns={columns}
-              columnWidths={columnWidths}
+              columnWidths={columnWidthsFilled}
               handleEditColumn={handleEditColumn}
               onRowSelect={onRowSelect}
               onRowClick={handleRowClick}
@@ -471,7 +482,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       getCachedEntity,
       onOpenEntityInDetail,
       total,
-      columnWidths,
+      columnWidthsFilled,
     ],
   );
 
@@ -535,6 +546,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             table by the list's vertical scrollbar, which takes layout width,
             so the rows keep the header's full width. */}
         <div
+          ref={stackRef}
           style={{
             width: widthTable + SCROLLBAR_SIZE,
             minWidth: "100%",
@@ -547,7 +559,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
           <ExploreTableHeader
             columns={columns}
-            columnWidths={columnWidths}
+            columnWidths={columnWidthsFilled}
             onRemoveColumn={handleRemoveColumn}
             onMoveColumn={handleMoveColumn}
           />

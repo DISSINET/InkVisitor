@@ -104,3 +104,51 @@ export const estimateColumnWidth = (
   // columns; cap stops a single long row from blowing up the table.
   return Math.min(Math.max(width, WIDTH_COLUMN_MIN), WIDTH_COLUMN_MAX);
 };
+
+/**
+ * The width of every column once the columns share the space the table leaves
+ * free in `available` (px, the entity column included) in equal parts. Each
+ * keeps its own width (`baseWidths`, else its type's width) as the minimum, so
+ * a table wider than `available` keeps its widths and scrolls.
+ */
+export const fillColumnWidths = (
+  columns: Explore.IExploreColumn[],
+  baseWidths: Record<string, number>,
+  available: number,
+  firstColumnWidth: number,
+): Record<string, number> => {
+  const widths: Record<string, number> = {};
+  let used = firstColumnWidth;
+  for (const column of columns) {
+    widths[column.id] = baseWidths[column.id] ?? getColumnWidth(column.type);
+    used += widths[column.id];
+  }
+  const share = columns.length ? Math.floor((available - used) / columns.length) : 0;
+  if (share > 0) {
+    for (const column of columns) {
+      widths[column.id] += share;
+    }
+  }
+  return widths;
+};
+
+/**
+ * The label width (px) that lets a cell of `width` show `displayLimit` tags
+ * side by side, with the overflow chip and, in an editable column, the
+ * suggester and the unlink buttons; undefined while that is no more than the
+ * tag's default label width, which then applies.
+ */
+export const getTagLabelMaxWidth = (
+  column: Explore.IExploreColumn,
+  width: number,
+  displayLimit: number,
+): number | undefined => {
+  const free =
+    width -
+    CELL_PADDING_PX -
+    OVERFLOW_CHIP_PX -
+    (column.editable ? SUGGESTER_PX + CELL_GAP_PX : 0);
+  const perTag = Math.floor(free / displayLimit) - CELL_GAP_PX;
+  const label = perTag - TAG_MARKER_PX - (column.editable ? TAG_BUTTON_PX : 0);
+  return label > TAG_LABEL_MAX_PX ? label : undefined;
+};

@@ -39,7 +39,7 @@ import {
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { isReadOnlyColumn, wideColumnTypes } from "./types";
-import { getColumnWidth } from "./utils";
+import { getColumnWidth, getTagLabelMaxWidth } from "./utils";
 
 const EditableCellValue: React.FC<{
   value: string;
@@ -347,6 +347,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             <EntityTag
               entity={cellValue as IEntity}
               fullWidth={wideColumnTypes.has(column.type)}
+              tagMaxWidth={
+                wideColumnTypes.has(column.type)
+                  ? undefined
+                  : getTagLabelMaxWidth(
+                      column,
+                      columnWidths[column.id] ?? getColumnWidth(column.type),
+                      CELL_DISPLAY_LIMIT,
+                    )
+              }
               onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
               unlinkButton={
                 isColumnEditable(column) && {
@@ -493,6 +502,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       updateEntityMutation,
       orderedLanguageDict,
       isColumnEditable,
+      columnWidths,
     ]
   );
 
