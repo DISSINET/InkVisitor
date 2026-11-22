@@ -205,34 +205,8 @@
             "col-cla-inverse": [],
             "col-class": "Territory",
             "col-created-by": {
-              "active": true,
-              "bookmarks": [],
-              "email": "admin@admin.com",
-              "hash": "",
               "id": "1",
-              "name": "admin",
-              "options": {
-                "askBeforePropDelete": true,
-                "defaultLanguage": "",
-                "defaultStatementLanguage": "",
-                "defaultTerritory": "",
-                "geocoding": {
-                  "context": {}
-                },
-                "promotedTemplateClass": "*",
-                "searchLanguages": [],
-                "starredTemplates": [],
-                "workingLanguages": []
-              },
-              "rights": [
-                {
-                  "mode": "admin",
-                  "territory": "T0"
-                }
-              ],
-              "role": "admin",
-              "storedTerritories": [],
-              "verified": true
+              "name": "admin"
             },
             "col-detail": "",
             "col-language": "English",
