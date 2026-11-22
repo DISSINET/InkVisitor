@@ -3,7 +3,7 @@ import Relation from "./relation";
 import Synonym from "./synonym";
 import Audit from "@models/audit/audit";
 import { DbEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import { AuditScope } from "@inkvisitor/shared/types";
+import { AuditScope, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { IRequest } from "../../custom_typings/request";
 
@@ -112,6 +112,82 @@ describe("Relation audits", () => {
 
     const remaining = await storage.relations.getMany(connection(), [a.id, b.id]);
     expect(remaining).toHaveLength(0);
+  });
+
+  it("insertMany writes the given relations with one create audit each", async () => {
+    const rels = [0, 1, 2].map((i) => ({
+      id: `im-${i}`,
+      type: RelationEnums.Type.Superclass,
+      entityIds: [`imA${i}`, `imB${i}`],
+      order: i,
+    })) as RelationTypes.IRelation[];
+
+    const result = await Relation.insertMany(mockRequest(db), rels);
+    expect(result.written).toEqual(rels.map((r) => r.id));
+    expect(result.failed).toEqual([]);
+
+    for (const r of rels) {
+      const audits = await relationAudits(r.id);
+      expect(audits).toHaveLength(1);
+      expect(audits[0].type).toBe(EventType.RELATION_CREATE);
+      expect(audits[0].auditScope).toBe(AuditScope.Relation);
+      expect(audits[0].modelId).toBe(r.id);
+      expect(audits[0].changes).toEqual({
+        id: r.id,
+        type: r.type,
+        entityIds: r.entityIds,
+        order: r.order,
+      });
+    }
+
+    await Relation.deleteMany(mockRequest(db), result.written);
+  });
+
+  it("insertMany reports an existing id as failed and gives it no new audit", async () => {
+    const existing = newSuperclass(["ex1", "ex2"]);
+    await existing.save(connection());
+
+    const fresh = {
+      id: "im-fresh",
+      type: RelationEnums.Type.Superclass,
+      entityIds: ["ex3", "ex4"],
+    } as RelationTypes.IRelation;
+    const result = await Relation.insertMany(mockRequest(db), [
+      { ...existing } as RelationTypes.IRelation,
+      fresh,
+    ]);
+
+    expect(result.failed).toContain(existing.id);
+    expect(await relationAudits(existing.id)).toHaveLength(0);
+    for (const id of result.written) {
+      expect(await relationAudits(id)).toHaveLength(1);
+    }
+
+    await Relation.deleteMany(mockRequest(db), [existing.id, fresh.id]);
+  });
+
+  it("deleteMany writes one delete audit per relation, found from both entities", async () => {
+    const rels = [0, 1, 2].map((i) => newSuperclass([`dmA${i}`, `dmB${i}`]));
+    for (const r of rels) await r.save(connection());
+    const snapshots = rels.map((r) => r.auditSnapshot());
+
+    await Relation.deleteMany(mockRequest(db), rels.map((r) => r.id));
+
+    for (const [i, r] of rels.entries()) {
+      const audits = await relationAudits(r.id);
+      expect(audits).toHaveLength(1);
+      expect(audits[0].type).toBe(EventType.RELATION_DELETE);
+      expect(audits[0].changes).toEqual(snapshots[i]);
+      for (const entityId of r.entityIds) {
+        const found = await Audit.getRelationAuditsForEntity(connection(), entityId);
+        expect(found.map((a) => a.modelId)).toEqual([r.id]);
+      }
+    }
+  });
+
+  it("deleteMany writes no audit for an id that does not exist", async () => {
+    await Relation.deleteMany(mockRequest(db), ["dm-missing"]);
+    expect(await relationAudits("dm-missing")).toHaveLength(0);
   });
 
   it("getRelationAuditsForEntity returns relation audits touching the entity, not entity audits", async () => {
