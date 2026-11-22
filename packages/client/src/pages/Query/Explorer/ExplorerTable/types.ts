@@ -59,6 +59,7 @@ export const contentSizedColumnTypes = new Set([
   Explore.EExploreColumnType.ER,
   Explore.EExploreColumnType.EPV,
   Explore.EExploreColumnType.EPT,
+  Explore.EExploreColumnType.EPO,
   Explore.EExploreColumnType.ERR,
   Explore.EExploreColumnType.ERV,
   Explore.EExploreColumnType.EUI,
@@ -82,6 +83,8 @@ export const readOnlyColumnTypes = new Set([
   // territories are derived from the statements using the entity, so there is
   // nothing on the entity itself to write back to
   Explore.EExploreColumnType.EUI,
+  // the props belong to the origin entities, not to the row
+  Explore.EExploreColumnType.EPO,
 ]);
 
 /**
