@@ -27,7 +27,7 @@ import {
   StyledBatchWarningSection,
   StyledBatchWrapper,
 } from "./styles";
-import { getRelationLabel, isRelationTypeEligible } from "./utils";
+import { getRelationLabel, isRelationTypeEligible, relationTargetClasses } from "./utils";
 
 /** Above this count we skip fetching entities for relation-type eligibility UI. */
 const RELATION_ELIGIBILITY_FETCH_MAX = 1000;
@@ -190,22 +190,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     selectedEntityIds.length,
   ]);
 
-  const allowedTargetEntityClasses = useMemo<EntityEnums.Class[]>(() => {
-    // if allowedEntitiesPattern is empty, return all entity classes
-    if (
-      activeType ? Relation.RelationRules[activeType]?.allowedEntitiesPattern.length === 0 : true
-    ) {
-      return EntityEnums.PLOGESTRBV;
-    }
-    const targetEntityClasses = new Set<EntityEnums.Class>();
-    activeType
-      ? Relation.RelationRules[activeType]?.allowedEntitiesPattern
-          .map((p) => p[1])
-          .filter((c) => c !== undefined)
-          .filter((c) => targetEntityClasses.add(c))
-      : ([] as EntityEnums.Class[]);
-    return [...targetEntityClasses];
-  }, [activeType, rule]);
+  const allowedTargetEntityClasses = useMemo(() => relationTargetClasses(activeType), [activeType]);
 
   const selectionCount = selectedEntityIds.length;
   const eligibilityReady =

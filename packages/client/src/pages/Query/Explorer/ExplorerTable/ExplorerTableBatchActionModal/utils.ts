@@ -61,3 +61,15 @@ export const batchAttributeFromOptions = <T extends string>(
       ? { value: option.value, label: "(empty / missing)" }
       : { value: option.value, label: option.label }
   );
+
+/** classes a relation of `type` may point at; every class when the rule names
+ * no pattern or the type is not chosen yet */
+export const relationTargetClasses = (type?: RelationEnums.Type): EntityEnums.Class[] => {
+  const pattern = type ? Relation.RelationRules[type]?.allowedEntitiesPattern : undefined;
+  if (!pattern || pattern.length === 0) {
+    return EntityEnums.PLOGESTRBV;
+  }
+  return [
+    ...new Set(pattern.map((p) => p[1]).filter((c): c is EntityEnums.Class => c !== undefined)),
+  ];
+};

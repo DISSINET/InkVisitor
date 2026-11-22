@@ -1,5 +1,6 @@
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { batchAttributeChangeNote } from "./utils";
+import { batchAttributeChangeNote, relationTargetClasses } from "./utils";
 
 describe("batchAttributeChangeNote", () => {
   it("names how many entities already hold the target", () => {
@@ -19,5 +20,18 @@ describe("batchAttributeChangeNote", () => {
 
   it("is empty when neither applies", () => {
     expect(batchAttributeChangeNote(0, false)).toEqual("");
+  });
+});
+
+describe("relationTargetClasses", () => {
+  it("lists the target classes the relation rule allows", () => {
+    expect(relationTargetClasses(RelationEnums.Type.Classification)).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("allows every class when the rule has no pattern or the type is missing", () => {
+    expect(relationTargetClasses(RelationEnums.Type.Related)).toEqual(EntityEnums.PLOGESTRBV);
+    expect(relationTargetClasses(undefined)).toEqual(EntityEnums.PLOGESTRBV);
   });
 });

@@ -171,9 +171,13 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
             controls.handleExport(selectedColumnIds);
             controls.setIsBatchModalOpen(false);
           }}
+          onClearSelection={controls.clearSelection}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);
             queryClient.invalidateQueries({ queryKey: ["entity"] });
+            queryClient.invalidateQueries({ queryKey: ["audit"] });
+            queryClient.invalidateQueries({ queryKey: ["statement"] });
+            queryClient.invalidateQueries({ queryKey: ["territory"] });
             invalidateExplorerQuery();
           }}
         />
