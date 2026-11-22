@@ -202,6 +202,4 @@ server.all("*", catchAll);
 
 server.use(errorsMiddleware);
 
-acl.assignRoutes(router);
-
 export default server;
