@@ -6,7 +6,7 @@ import treeCache from "@service/treeCache";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQueryEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { findEntityById } from "@service/shorthands";
@@ -252,13 +252,8 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[],
     context?: IColumnsContext
-  ): Promise<
-    Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
-  > {
-    const out: Record<
-      string,
-      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
-    > = {};
+  ): Promise<IResponseQueryEntity["columnData"]> {
+    const out: IResponseQueryEntity["columnData"] = {};
     for (const column of columnsData) {
       switch (column.type) {
         // Entity Property value
@@ -287,7 +282,7 @@ export default class Results<T extends { id: string }> {
           if (audit && audit.user) {
             const user = await User.findUserById(db, audit?.user);
             if (user) {
-              out[column.id] = user;
+              out[column.id] = { id: user.id, name: user.name };
             }
           }
           break;

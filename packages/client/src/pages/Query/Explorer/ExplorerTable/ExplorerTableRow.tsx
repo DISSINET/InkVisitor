@@ -8,7 +8,7 @@ import {
   actionPartOfSpeechDict,
   actantLogicalTypeDict,
 } from "@inkvisitor/shared/dictionaries";
-import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQueryEntity, IResponseQueryUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Checkbox } from "components";
@@ -337,7 +337,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const renderCellValue = React.useCallback(
     (
-      cellValue: IEntity | number | string | IUser,
+      cellValue: IEntity | number | string | IResponseQueryUser,
       recordEntity: IEntity,
       column: Explore.IExploreColumn
     ): React.ReactElement => {
@@ -358,9 +358,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             />
           </span>
         );
-      } else if (typeof (cellValue as IUser)?.email !== "undefined") {
-        // is type IUser[]
-        return <UserTag userId={(cellValue as IUser).id} />;
+      } else if (column.type === Explore.EExploreColumnType.EUC && cellValue) {
+        return <UserTag userId={(cellValue as IResponseQueryUser).id} />;
       } else {
         if (isColumnEditable(column)) {
           if (column.type === Explore.EExploreColumnType.ELI) {
@@ -499,7 +498,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   const renderCell = React.useCallback(
     (
       recordEntity: IEntity,
-      cellData: IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[],
+      cellData: IResponseQueryEntity["columnData"][string],
       column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {

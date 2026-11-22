@@ -1,4 +1,9 @@
 import "ts-jest";
+import Audit from "@models/audit/audit";
+import User from "@models/user/user";
+import { IEntity } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
+import { Connection } from "rethinkdb-ts";
 import Results from "./results";
 
 describe("Results.orderByIds", () => {
@@ -46,5 +51,36 @@ describe("Results.orderByIds", () => {
     const nul = make(null);
     nul.orderByIds(["a"]);
     expect(nul.items).toBeNull();
+  });
+});
+
+describe("Results.columns", () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it("puts only the creator's id and name into a created-by cell", async () => {
+    const creator = {
+      id: "u1",
+      name: "creator",
+      email: "creator@example.com",
+      hash: "h1",
+      password: "p1",
+      rights: [{ territory: "t0", mode: "admin" }],
+      bookmarks: [{ id: "f", name: "F", entityIds: ["a"] }],
+    };
+    jest.spyOn(Audit, "getFirstForEntity").mockResolvedValue({ user: "u1" } as Audit);
+    jest
+      .spyOn(User, "findUserById")
+      .mockImplementation(async (_db, id) => (id === "u1" ? (creator as unknown as User) : null));
+    const column = {
+      id: "creator",
+      name: "Created by",
+      type: Explore.EExploreColumnType.EUC,
+      editable: false,
+      params: {},
+    } as Explore.IExploreColumn;
+
+    const out = await new Results().columns({} as Connection, { id: "e1" } as IEntity, [column]);
+
+    expect(out).toStrictEqual({ creator: { id: "u1", name: "creator" } });
   });
 });
