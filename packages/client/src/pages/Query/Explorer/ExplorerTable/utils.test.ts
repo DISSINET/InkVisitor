@@ -1,6 +1,14 @@
+import { IProp, IReference } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { describe, expect, it } from "vitest";
-import { fillColumnWidths, getTagLabelMaxWidth } from "./utils";
+import {
+  fillColumnWidths,
+  getTagLabelMaxWidth,
+  hasPropPair,
+  hasReferencePair,
+  withoutPropPair,
+  withoutReferencePair,
+} from "./utils";
 
 const column = (
   id: string,
@@ -48,5 +56,46 @@ describe("getTagLabelMaxWidth", () => {
   it("an editable column keeps room for the suggester and the unlink buttons", () => {
     const editable = column("value", Explore.EExploreColumnType.EPV, true);
     expect(getTagLabelMaxWidth(editable, 720, 2)).toBe(231);
+  });
+});
+
+const prop = (id: string, type: string, value: string, children: IProp[] = []): IProp =>
+  ({ id, type: { entityId: type }, value: { entityId: value }, children }) as unknown as IProp;
+
+describe("value column props", () => {
+  const props = [
+    prop("p1", "represents", "r1"),
+    prop("p2", "represents", "r1"),
+    prop("p3", "represents", "r2"),
+    // the same value under another type, and as a subproperty
+    prop("p4", "mentions", "r1", [prop("p5", "represents", "r1")]),
+  ];
+
+  it("finds a type and value pair among the top-level props", () => {
+    expect(hasPropPair(props, "represents", "r1")).toBe(true);
+    expect(hasPropPair(props, "represents", "r3")).toBe(false);
+    expect(hasPropPair(props, "other", "r1")).toBe(false);
+  });
+
+  it("removes every top-level prop of the pair and nothing else", () => {
+    expect(withoutPropPair(props, "represents", "r1").map((p) => p.id)).toEqual(["p3", "p4"]);
+    expect(withoutPropPair(props, "represents", "r1")[1].children).toHaveLength(1);
+  });
+});
+
+describe("reference value column references", () => {
+  const references: IReference[] = [
+    { id: "f1", resource: "book", value: "page1" },
+    { id: "f2", resource: "book", value: "page1" },
+    { id: "f3", resource: "other", value: "page1" },
+  ];
+
+  it("finds a resource and value pair", () => {
+    expect(hasReferencePair(references, "book", "page1")).toBe(true);
+    expect(hasReferencePair(references, "book", "page2")).toBe(false);
+  });
+
+  it("removes every reference of the pair and nothing else", () => {
+    expect(withoutReferencePair(references, "book", "page1").map((r) => r.id)).toEqual(["f3"]);
   });
 });

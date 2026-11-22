@@ -1,4 +1,10 @@
-import { IEntity, IResponseQueryEntity, IUser } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IReference,
+  IResponseQueryEntity,
+  IUser,
+} from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import {
   WIDTH_COLUMN_DEFAULT,
@@ -152,3 +158,36 @@ export const getTagLabelMaxWidth = (
   const label = perTag - TAG_MARKER_PX - (column.editable ? TAG_BUTTON_PX : 0);
   return label > TAG_LABEL_MAX_PX ? label : undefined;
 };
+
+// A value column (EPV) lists the values of the row's top-level metaprops of its
+// type, each value once, so one tag stands for every metaprop of that type and value.
+const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
+  prop.type?.entityId === typeId && prop.value?.entityId === valueId;
+
+/** whether `props` hold a top-level metaprop of `typeId` whose value is `valueId` */
+export const hasPropPair = (props: IProp[], typeId: string, valueId: string): boolean =>
+  props.some((prop) => isPropPair(prop, typeId, valueId));
+
+/** `props` without the top-level metaprops of `typeId` whose value is `valueId` */
+export const withoutPropPair = (props: IProp[], typeId: string, valueId: string): IProp[] =>
+  props.filter((prop) => !isPropPair(prop, typeId, valueId));
+
+// A reference value column (ERV) lists the values of the row's references to its
+// resource, each value once, so one tag stands for every such reference.
+const isReferencePair = (reference: IReference, resourceId: string, valueId: string): boolean =>
+  reference.resource === resourceId && reference.value === valueId;
+
+/** whether `references` hold one to `resourceId` whose value is `valueId` */
+export const hasReferencePair = (
+  references: IReference[],
+  resourceId: string,
+  valueId: string,
+): boolean => references.some((reference) => isReferencePair(reference, resourceId, valueId));
+
+/** `references` without those to `resourceId` whose value is `valueId` */
+export const withoutReferencePair = (
+  references: IReference[],
+  resourceId: string,
+  valueId: string,
+): IReference[] =>
+  references.filter((reference) => !isReferencePair(reference, resourceId, valueId));

@@ -39,7 +39,12 @@ import {
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { isReadOnlyColumn, wideColumnTypes } from "./types";
-import { getColumnWidth, getTagLabelMaxWidth } from "./utils";
+import {
+  getColumnWidth,
+  getTagLabelMaxWidth,
+  withoutPropPair,
+  withoutReferencePair,
+} from "./utils";
 
 const EditableCellValue: React.FC<{
   value: string;
@@ -207,6 +212,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -273,27 +279,25 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
 
       if (column?.type === Explore.EExploreColumnType.EPV) {
-        const newEntity = deleteProp(sourceEntity, {
-          valueEntityId: entityToRemove.id,
-        });
-
+        const { propertyType } = column.params as Explore.IExploreColumnParamsEPV;
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            props: newEntity.props,
+            props: withoutPropPair(sourceEntity.props, propertyType, entityToRemove.id),
           },
         });
       }
 
       if (column?.type === Explore.EExploreColumnType.ERV) {
-        const newEntity = deleteRef(sourceEntity, {
-          valueId: entityToRemove.id,
-        });
-
+        const { resource } = column.params as Explore.IExploreColumnParamsERV;
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            references: newEntity.references,
+            references: withoutReferencePair(
+              sourceEntity.references,
+              resource,
+              entityToRemove.id,
+            ),
           },
         });
       }
