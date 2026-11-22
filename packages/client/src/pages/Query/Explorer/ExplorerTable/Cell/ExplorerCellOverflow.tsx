@@ -13,6 +13,9 @@ import {
 
 export const CELL_DISPLAY_LIMIT = 2;
 
+// twice the default EntityTag label cap (theme.space[30], 75px)
+const OVERFLOW_TAG_MAX_WIDTH = 150;
+
 type CellOverflowItem = IEntity | IUser | string | number;
 
 function isEntity(item: CellOverflowItem): item is IEntity {
@@ -61,6 +64,7 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
           key={entity.id ?? key}
           entity={entity}
           tooltipPosition="bottom"
+          tagMaxWidth={OVERFLOW_TAG_MAX_WIDTH}
           onDoubleClick={onEntityDoubleClick?.(entity)}
         />
       ))}
