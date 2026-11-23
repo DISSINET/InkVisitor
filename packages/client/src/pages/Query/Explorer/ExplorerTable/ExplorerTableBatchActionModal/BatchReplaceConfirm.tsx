@@ -38,7 +38,7 @@ export const BatchReplaceConfirm: React.FC<BatchReplaceConfirm> = ({
       showModal={show}
       onClose={handleCancel}
       disableEscapeClose={loading}
-      onEnterPress={canConfirm ? onConfirm : undefined}
+      onEnterPress={canConfirm && !loading ? onConfirm : undefined}
       disableBgClick
       isLoading={loading}
       width="auto"
