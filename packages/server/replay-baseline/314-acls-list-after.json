@@ -240,6 +240,15 @@
       },
       {
         "controller": "entities",
+        "id": "acl-63",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": "batchReplaceRelation"
+      },
+      {
+        "controller": "entities",
         "id": "<uuid-37>",
         "method": "POST",
         "public": false,
