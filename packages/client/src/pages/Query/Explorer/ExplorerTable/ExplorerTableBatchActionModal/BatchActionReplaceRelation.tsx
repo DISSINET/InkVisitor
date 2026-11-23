@@ -175,6 +175,8 @@ export const BatchActionReplaceRelation: React.FC<BatchActionReplaceRelation> = 
                   inputWidth="full"
                   categoryTypes={targetClasses}
                   reuseDroppedValue
+                  disableCreate
+                  disableTemplateInstantiation
                   disabled={!relationType}
                 />
               )}
