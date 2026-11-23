@@ -3,6 +3,7 @@ import {
   applyReplacements,
   clampActiveOccurenceIndex,
   nextOccurenceIndexAfter,
+  stepOccurenceIndex,
 } from "./replaceUtils";
 
 describe("applyReplacements", () => {
@@ -82,5 +83,27 @@ describe("nextOccurenceIndexAfter", () => {
 
   it("returns 0 for an empty list", () => {
     expect(nextOccurenceIndexAfter([], 13)).toBe(0);
+  });
+});
+
+describe("stepOccurenceIndex", () => {
+  it("moves to the next occurrence and wraps past the last one", () => {
+    expect(stepOccurenceIndex(0, 3, 1, false)).toBe(1);
+    expect(stepOccurenceIndex(2, 3, 1, false)).toBe(0);
+  });
+
+  it("moves to the previous occurrence and wraps before the first one", () => {
+    expect(stepOccurenceIndex(1, 3, -1, false)).toBe(0);
+    expect(stepOccurenceIndex(0, 3, -1, false)).toBe(2);
+  });
+
+  it("stays on an active occurrence that Next has yet to show", () => {
+    expect(stepOccurenceIndex(2, 5, 1, true)).toBe(2);
+    // the only occurrence left: stepping would also land here, selecting nothing
+    expect(stepOccurenceIndex(0, 1, 1, true)).toBe(0);
+  });
+
+  it("steps back from an active occurrence that was not shown", () => {
+    expect(stepOccurenceIndex(2, 5, -1, true)).toBe(1);
   });
 });

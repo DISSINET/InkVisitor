@@ -33,6 +33,8 @@ interface AnnotatorFindReplaceModal {
   findInputRef: React.RefObject<HTMLInputElement | null>;
 
   searchOccurences: Occurrence[] | null;
+  /** True while the active occurrence is not selected in the text. */
+  isOccurenceSelectionDeferred: boolean;
   /** Re-runs the search after the annotator's text changed underneath it. */
   refreshSearch: () => void;
   searchActiveOccurence: number;
@@ -59,6 +61,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
   setSearchTerm,
   findInputRef,
   searchOccurences,
+  isOccurenceSelectionDeferred,
   refreshSearch,
   searchActiveOccurence,
   setSearchActiveOccurence,
@@ -147,6 +150,12 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
 
   const replaceOccurence = () => {
     if (searchOccurences === null) {
+      return;
+    }
+    // Replace writes over the selection, and a deferred active occurrence is
+    // not selected: this click selects it, the following one replaces it.
+    if (isOccurenceSelectionDeferred) {
+      goToNextOccurence();
       return;
     }
     const replaced = searchOccurences[searchActiveOccurence];
