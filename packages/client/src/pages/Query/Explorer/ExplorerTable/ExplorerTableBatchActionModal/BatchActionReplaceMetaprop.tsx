@@ -175,6 +175,7 @@ export const BatchActionReplaceMetaprop: React.FC<BatchActionReplaceMetaprop> = 
                   categoryTypes={classesPropType}
                   reuseDroppedValue
                   disableCreate
+                  disableTemplateInstantiation
                 />
               )}
             </StyledBatchSection>
@@ -197,6 +198,7 @@ export const BatchActionReplaceMetaprop: React.FC<BatchActionReplaceMetaprop> = 
                       categoryTypes={classesAll}
                       reuseDroppedValue
                       disableCreate
+                      disableTemplateInstantiation
                     />
                   )}
                   <Checkbox
