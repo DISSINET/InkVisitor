@@ -1034,13 +1034,18 @@ class Api {
     query: Query.INode,
     options?: IApiOptions,
   ): Promise<void> {
+    const exportedAt = new Date();
+    let response: AxiosResponse<IResponseQueryExportJson>;
     try {
-      const exportedAt = new Date();
-      const response = await this.connection.post<IResponseQueryExportJson>(
+      response = await this.connection.post<IResponseQueryExportJson>(
         `/entities/query-export-json`,
         { entityIds },
         options,
       );
+    } catch (err) {
+      throw this.handleError(err);
+    }
+    try {
       const file = buildExplorerJsonExport(response.data, entityIds, {
         exportedAt: exportedAt.toISOString(),
         version: packageJson.version,
@@ -1052,6 +1057,8 @@ class Api {
         `query-${exportedAt.toLocaleString()}.json`,
       );
     } catch (err) {
+      // the response interceptor toasts failed requests only, not a failure building the file
+      this.showErrorToast(err);
       throw this.handleError(err);
     }
   }
