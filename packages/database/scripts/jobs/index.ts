@@ -18,6 +18,8 @@ import fixEditorEntityAclJob, { fixEditorEntityAclPgJob } from "./fix-editor-ent
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 import fixDuplicateRowsJob from "./fix-duplicate-rows";
+import removeDeadUserOptionsJob, { removeDeadUserOptionsPgJob } from "./remove-dead-user-options";
+import cancelPasswordResetLinksJob, { cancelPasswordResetLinksPgJob } from "./cancel-password-reset-links";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -30,6 +32,8 @@ export type IPgJob = (db: Client) => Promise<void>;
  */
 export const pgJobs: Record<string, IPgJob> = {
   fixEditorEntityAclJob: fixEditorEntityAclPgJob,
+  removeDeadUserOptionsJob: removeDeadUserOptionsPgJob,
+  cancelPasswordResetLinksJob: cancelPasswordResetLinksPgJob,
 };
 
 const alljobs: Record<string, IJob> = {
@@ -51,6 +55,8 @@ const alljobs: Record<string, IJob> = {
   migrateGeocodingGeometryJob,
   migrateGeocodingPlaceTypesJob,
   fixDuplicateRowsJob,
+  removeDeadUserOptionsJob,
+  cancelPasswordResetLinksJob,
 };
 
 export default alljobs;

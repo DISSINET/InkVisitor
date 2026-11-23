@@ -217,6 +217,15 @@
       },
       {
         "controller": "entities",
+        "id": "acl-63",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": "batchReplaceRelation"
+      },
+      {
+        "controller": "entities",
         "id": "acl-40",
         "method": "POST",
         "roles": [
@@ -496,14 +505,6 @@
         "public": true,
         "roles": [],
         "route": "password_reset"
-      },
-      {
-        "controller": "users",
-        "id": "<uuid-1>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": "simplified"
       },
       {
         "controller": "users",

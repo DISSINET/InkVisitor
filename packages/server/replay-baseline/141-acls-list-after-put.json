@@ -163,14 +163,6 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-4>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": ":entityId/expansion"
-      },
-      {
-        "controller": "entities",
         "id": "acl-43",
         "method": "GET",
         "roles": [
@@ -225,11 +217,12 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-5>",
+        "id": "acl-63",
         "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": "query"
+        "roles": [
+          "editor"
+        ],
+        "route": "batchReplaceRelation"
       },
       {
         "controller": "entities",
@@ -269,7 +262,7 @@
       },
       {
         "controller": "relations",
-        "id": "<uuid-6>",
+        "id": "<uuid-3>",
         "method": "GET",
         "public": false,
         "roles": [],
@@ -303,14 +296,6 @@
         "route": ":relationId?"
       },
       {
-        "controller": "saved-queries",
-        "id": "<uuid-7>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": ""
-      },
-      {
         "controller": "settings",
         "id": "acl-60",
         "method": "GET",
@@ -322,7 +307,7 @@
       },
       {
         "controller": "settings",
-        "id": "<uuid-8>",
+        "id": "<uuid-4>",
         "method": "GET",
         "public": false,
         "roles": [],
@@ -401,22 +386,6 @@
           "admin"
         ],
         "route": ""
-      },
-      {
-        "controller": "stats",
-        "id": "<uuid-9>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": ""
-      },
-      {
-        "controller": "stats",
-        "id": "<uuid-10>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": "materialized"
       },
       {
         "controller": "territories",
@@ -553,14 +522,6 @@
         "public": true,
         "roles": [],
         "route": "password_reset"
-      },
-      {
-        "controller": "users",
-        "id": "<uuid-1>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": "simplified"
       },
       {
         "controller": "users",

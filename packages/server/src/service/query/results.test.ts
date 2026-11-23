@@ -103,7 +103,16 @@ describe("Results column data", () => {
       { id: "au-b", modelId: "b", user: "deleted" },
     ] as any);
     const firstFor = jest.spyOn(storage.audits, "firstFor");
-    jest.spyOn(User, "findUserById").mockImplementation(async (_db, id) => (id === "u1" ? ({ id: "u1" } as any) : null));
+    const creator = {
+      id: "u1",
+      name: "creator",
+      email: "creator@example.com",
+      hash: "h1",
+      password: "p1",
+      rights: [{ territory: "t0", mode: "admin" }],
+      bookmarks: [{ id: "f", name: "F", entityIds: ["a"] }],
+    };
+    jest.spyOn(User, "findUserById").mockImplementation(async (_db, id) => (id === "u1" ? (creator as any) : null));
 
     const results = new Results<IEntity>();
     const context = await results.prepareColumnsContext(conn, rows, columns);
@@ -122,7 +131,7 @@ describe("Results column data", () => {
     expect(a["types"]).toEqual([known.pt]);
     expect(a["resources"]).toEqual([known.r, known.r]); // a repeated resource stays repeated, "" is dropped
     expect(a["ref-values"]).toEqual([known.pv]);
-    expect(a["creator"]).toEqual({ id: "u1" });
+    expect(a["creator"]).toStrictEqual({ id: "u1", name: "creator" });
     expect(b["creator"]).toBeUndefined(); // creator deleted
     expect(t1["creator"]).toBeUndefined(); // no audit
     expect(t1["parent"]).toEqual(known.t0);

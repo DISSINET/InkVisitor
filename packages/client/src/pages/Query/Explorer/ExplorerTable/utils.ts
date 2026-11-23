@@ -3,7 +3,7 @@ import {
   IProp,
   IReference,
   IResponseQueryEntity,
-  IUser,
+  IResponseQueryUser,
 } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import {
@@ -53,7 +53,7 @@ const SUGGESTER_PX = 110;
 
 const getItemLabel = (item: unknown): string => {
   if (item && typeof item === "object") {
-    const it = item as Partial<IEntity> & Partial<IUser>;
+    const it = item as Partial<IEntity> & Partial<IResponseQueryUser>;
     return it.labels?.[0] ?? it.name ?? "";
   }
   return String(item ?? "");

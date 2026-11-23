@@ -2,7 +2,7 @@
   "request": {
     "as": "admin",
     "method": "DELETE",
-    "path": "/api/saved-queries/<uuid-12>"
+    "path": "/api/saved-queries/<uuid-6>"
   },
   "response": {
     "status": 200,

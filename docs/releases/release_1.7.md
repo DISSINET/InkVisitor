@@ -92,8 +92,10 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 
 - Node 22.23.4 or newer is required (CVE-2026-111497); the Docker image builds on the official `node:22-alpine` (#3332)
 - docker-compose: the `database` service is renamed `rethinkdb` (container `inkvisitor-rethinkdb`), and a `postgres` service is added
+- After the deploy, run `cancelPasswordResetLinksJob` once on every environment (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is covered too
 - After the deploy, on every environment, rebuild the stored anchor trees: `ENV_FILE=<env> pnpm -C packages/server rebuild-anchors --dry-run`, then the same without `--dry-run` (#2033, #3451)
 - After the deploy, on every environment, run `fixEditorEntityAclJob`: it opens `POST /entities/batchReplaceRelation` and `POST /entities/batchReplaceMetaprop` to editors, who get "Endpoint not allowed" until then. The job gives "editor" back to every route it lists, so a route an admin closed by hand is open again after the run (#2938)
+- Once an instance runs a server with #3399, run `removeDeadUserOptionsJob` on it (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is cleaned too. An older server writes `hideStatementElementsOrderTable` again on every user it creates (#3399)
 - Switching an instance to PostgreSQL: run `fixDuplicateRowsJob` ahead of time, stop the API, run `pnpm -C packages/database migrate --db=<name> <env>` and check for `databases match`, then set `DB_ADAPTER=postgres` and the `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASS` block in the server env and start the API. RethinkDB is left untouched for a rollback.
 - `migrate --drop` is renamed `--replace`; the replaced database is kept as `<pg>_replaced_<timestamp>` until dropped by hand (#3402)
 - PostgreSQL backups run only once the `backup-pg.sh` cron line from the database README is added on each host (#3397)
