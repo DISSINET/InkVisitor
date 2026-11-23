@@ -38,6 +38,9 @@ export const sumBatchReplace = (
     items: a.items + b.items,
     nested: a.nested + b.nested,
     errors: { ...a.errors, ...b.errors },
+    ...(a.skippedIds || b.skippedIds
+      ? { skippedIds: [...(a.skippedIds ?? []), ...(b.skippedIds ?? [])] }
+      : {}),
   };
 };
 
@@ -134,12 +137,82 @@ export const relationReplaceLines = (
   return { headline, notes, canConfirm };
 };
 
+/** The value `from: null` is the empty one: the metaprops of the type without a value. */
+export const metapropReplaceLines = (
+  total: IResponseBatchReplace,
+  names: { type: string; from: string | null; to: string }
+): { headline: string; notes: string[]; canConfirm: boolean } => {
+  const { selected, changed, merged, skipped, unmatched, failed, items, nested } = total;
+  const { type, from, to } = names;
+  const canConfirm = changed > 0;
+  const metaprops = `${items} ${items === 1 ? "metaprop" : "metaprops"} of type "${type}"`;
+  const onSelected = `on ${changed} of ${selected} selected ${selected === 1 ? "entity" : "entities"}.`;
+  const headline = canConfirm
+    ? from === null
+      ? `Fill the empty value of ${metaprops} with "${to}" ${onSelected}`
+      : `Replace "${from}" with "${to}" in ${metaprops} ${onSelected}`
+    : selected === 1
+      ? "The selected entity would not change."
+      : `None of the ${selected} selected entities would change.`;
+
+  const notes: string[] = [];
+  if (merged > 0) {
+    const removed =
+      from === null
+        ? `${merged === 1 ? "Its" : "Their"} "${type}" without a value is removed there.`
+        : `"${from}" is removed there.`;
+    notes.push(
+      `${merged} of them already ${merged === 1 ? "has" : "have"} "${type}" "${to}". ${removed}`
+    );
+  }
+  if (skipped > 0) {
+    const held = from === null ? `"${type}" without a value` : `"${from}"`;
+    const remove = from === null ? "it" : `"${from}"`;
+    notes.push(
+      skipped === 1
+        ? `1 selected entity already has "${type}" "${to}", but its ${held} has other settings (such as elvl or certainty) or subproperties. It stays as it is and stays selected; remove ${remove} there in Detail.`
+        : `${skipped} selected entities already have "${type}" "${to}", but their ${held} has other settings (such as elvl or certainty) or subproperties. They stay as they are and stay selected; remove ${remove} there in Detail.`
+    );
+  }
+  if (unmatched > 0) {
+    const missing = from === null ? `"${type}" without a value` : `"${type}" "${from}"`;
+    notes.push(
+      unmatched === 1
+        ? `1 selected entity has no ${missing} and stays as it is.`
+        : `${unmatched} selected entities have no ${missing} and stay as they are.`
+    );
+  }
+  if (nested > 0) {
+    if (from === null) {
+      notes.push(
+        nested === 1
+          ? `1 subproperty of type "${type}" without a value stays empty; it is not replaced.`
+          : `${nested} subproperties of type "${type}" without a value stay empty; they are not replaced.`
+      );
+    } else {
+      notes.push(
+        nested === 1
+          ? `"${from}" stays in 1 subproperty of type "${type}", which is not replaced.`
+          : `"${from}" stays in ${nested} subproperties of type "${type}", which are not replaced.`
+      );
+    }
+  }
+  if (failed > 0) {
+    const reasons = reasonList(total.errors);
+    notes.push(`${failed} cannot change${reasons ? `: ${reasons}` : ""}.`);
+  }
+  return { headline, notes, canConfirm };
+};
+
 export const batchReplaceToast = (outcome: BatchReplaceOutcome, selected: number): string => {
   const { total, sent, error } = outcome;
   let message =
     error !== undefined
       ? `Stopped after ${sent} of ${selected} entities: ${total.changed} replaced`
       : `Replaced on ${total.changed} of ${selected} entities`;
+  if (total.skipped > 0) {
+    message += `, ${total.skipped} skipped`;
+  }
   if (total.failed > 0) {
     const reasons = reasonList(total.errors);
     message += `, ${total.failed} could not change${reasons ? `: ${reasons}` : ""}`;
@@ -149,3 +222,9 @@ export const batchReplaceToast = (outcome: BatchReplaceOutcome, selected: number
   }
   return message;
 };
+
+/** The ids to keep selected after a save: null keeps the selection as it is (a
+ * request failed, so the rows not sent are still to do); [] clears it; else the
+ * skipped and the failed rows. */
+export const rowsLeftSelected = ({ total, error }: BatchReplaceOutcome): string[] | null =>
+  error !== undefined ? null : [...(total.skippedIds ?? []), ...Object.keys(total.errors)];
