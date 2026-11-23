@@ -768,6 +768,14 @@ const batchReplace: Step[] = [
   post("admin", "entities-batch-replace-relation-invalid-type", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "SYN", fromEntityId: "c3", toEntityId: "c2" }),
   post("editor", "entities-batch-replace-relation-editor", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "CLA", fromEntityId: "c2", toEntityId: "c3" }),
   post("viewer", "entities-batch-replace-relation-denied", "/entities/batchReplaceRelation", { entityIds: ["rp-p"], relationType: "CLA", fromEntityId: "c3", toEntityId: "c2" }),
+  // rp-c and rp-p hold the metaprop (c3, l1) that entities-batch-add-metaprop
+  // gave them and rp-l holds none, so the dry run counts changed: 2,
+  // unmatched: 1; rp-v is a Value, refused as the new value, and c2 a Concept
+  post("admin", "entities-batch-replace-metaprop-dry", "/entities/batchReplaceMetaprop", { entityIds: ["rp-c", "rp-p", "rp-l"], typeEntityId: "c3", fromValueEntityId: "l1", toValueEntityId: "c2", dryRun: true }),
+  post("admin", "entities-batch-replace-metaprop", "/entities/batchReplaceMetaprop", { entityIds: ["rp-c", "rp-p", "rp-l"], typeEntityId: "c3", fromValueEntityId: "l1", toValueEntityId: "c2" }),
+  post("admin", "entities-batch-replace-metaprop-value-to", "/entities/batchReplaceMetaprop", { entityIds: ["rp-p"], typeEntityId: "c3", fromValueEntityId: "c2", toValueEntityId: "rp-v" }),
+  post("editor", "entities-batch-replace-metaprop-editor", "/entities/batchReplaceMetaprop", { entityIds: ["rp-p"], typeEntityId: "c3", fromValueEntityId: "c2", toValueEntityId: "l1" }),
+  post("viewer", "entities-batch-replace-metaprop-denied", "/entities/batchReplaceMetaprop", { entityIds: ["rp-p"], typeEntityId: "c3", fromValueEntityId: "l1", toValueEntityId: "c2" }),
 ];
 
 // ---- signout --------------------------------------------------------------

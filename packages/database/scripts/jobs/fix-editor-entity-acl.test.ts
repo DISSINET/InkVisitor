@@ -53,8 +53,8 @@ test("grants the listed routes, narrows a wildcard and drops a removed route; a 
   assert.deepEqual(find(rows, "entities", "POST", ":entityId/restore")?.roles, ["editor"]);
   assert.equal(find(rows, "entities", "POST", ":entityId/restore")?.public, false);
   assert.deepEqual(find(rows, "territories", "GET", ":territoryId/statements")?.roles, ["*"]);
-  assert.deepEqual(writes, { inserted: 12, updated: 2, deleted: 1 });
+  assert.deepEqual(writes, { inserted: 13, updated: 2, deleted: 1 });
 
   await fixEditorEntityAcl(table);
-  assert.deepEqual(writes, { inserted: 12, updated: 2, deleted: 1 });
+  assert.deepEqual(writes, { inserted: 13, updated: 2, deleted: 1 });
 });

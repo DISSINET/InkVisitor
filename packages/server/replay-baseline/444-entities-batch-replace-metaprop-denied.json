@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceMetaprop",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromValueEntityId": "l1",
+      "toValueEntityId": "c2",
+      "typeEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}
