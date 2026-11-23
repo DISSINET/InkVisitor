@@ -73,6 +73,7 @@ import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
 import { AnnotatorFindReplaceModal } from "./AnnotatorSearchLine/AnnotatorFindReplaceModal";
 import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
+import { stepOccurenceIndex } from "./AnnotatorSearchLine/replaceUtils";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
@@ -915,6 +916,7 @@ export const TextAnnotator = ({
           // Server content is newer (e.g. another user added anchors) — update
           // the annotator's text in place, preserving scroll position.
           annotator.updateText(newContent);
+          dropHitsOnEdit();
           reuseExistingInstance(newContent);
         }
       } else {
@@ -976,6 +978,7 @@ export const TextAnnotator = ({
       // lib's warning checks (only paste/replace/anchor ops do). Re-validate
       // here so broken anchors surface immediately while editing (#2601).
       newAnnotator.checkAnchors();
+      dropHitsOnEdit();
     });
 
     // Structured warnings drive the warnings panel (#2601). onWarning carries
@@ -1402,6 +1405,9 @@ export const TextAnnotator = ({
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);
   const [isWholeWordOnlyMode, setIsWholeWordOnlyMode] = useState<boolean>(false);
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
+  // While true the active hit is not selected in the text: the hits were
+  // searched again under an edit, and Next, Previous or Replace selects it.
+  const [isOccurenceSelectionDeferred, setIsOccurenceSelectionDeferred] = useState<boolean>(false);
 
   // annotate tool
   // entities to anchor, applied together so one match can carry several anchors
@@ -1422,7 +1428,7 @@ export const TextAnnotator = ({
 
   // Handle search occurrence selection
   useEffect(() => {
-    if (searchOccurences !== null) {
+    if (searchOccurences !== null && !isOccurenceSelectionDeferred) {
       const newSelectedOccurence = searchOccurences[searchActiveOccurence];
 
       if (newSelectedOccurence) {
@@ -1433,15 +1439,12 @@ export const TextAnnotator = ({
         annotator?.clearSelection();
       }
     }
-  }, [searchActiveOccurence, searchOccurences]);
+  }, [searchActiveOccurence, searchOccurences, isOccurenceSelectionDeferred]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const [searchRefreshKey, setSearchRefreshKey] = useState<number>(0);
-  const refreshSearch = useCallback(() => setSearchRefreshKey((key) => key + 1), []);
-
-  // Execute search, react to width changes
-  useAnnotatorSearch({
+  // Execute search, react to width changes and text edits
+  const { refreshSearch, dropHitsOnEdit } = useAnnotatorSearch({
     annotator,
     debouncedSearchTerm,
     isRegexMode,
@@ -1450,10 +1453,10 @@ export const TextAnnotator = ({
     isWholeWordOnlyMode,
     isCaseSensitiveMode,
     annotatorMode,
-    searchRefreshKey,
     setSearchOccurences,
     setSearchActiveOccurence,
     setSelectedText,
+    setIsOccurenceSelectionDeferred,
   });
 
   const isSearchAllowed = useMemo<boolean>(() => {
@@ -1473,11 +1476,20 @@ export const TextAnnotator = ({
 
   const goToNextOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
-    if (searchActiveOccurence + 1 >= searchOccurences.length) {
+    // a deferred hit is shown in place, which wraps nothing
+    if (!isOccurenceSelectionDeferred && searchActiveOccurence + 1 >= searchOccurences.length) {
       notifySearchWrap("Reached the end of results. Continuing from the beginning.");
     }
-    setSearchActiveOccurence((searchActiveOccurence + 1) % searchOccurences.length);
-  }, [searchOccurences, searchActiveOccurence]);
+    setSearchActiveOccurence(
+      stepOccurenceIndex(
+        searchActiveOccurence,
+        searchOccurences.length,
+        1,
+        isOccurenceSelectionDeferred,
+      ),
+    );
+    setIsOccurenceSelectionDeferred(false);
+  }, [searchOccurences, searchActiveOccurence, isOccurenceSelectionDeferred]);
 
   const goToPreviousOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
@@ -1485,9 +1497,15 @@ export const TextAnnotator = ({
       notifySearchWrap("Reached the beginning of results. Continuing from the end.");
     }
     setSearchActiveOccurence(
-      (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length,
+      stepOccurenceIndex(
+        searchActiveOccurence,
+        searchOccurences.length,
+        -1,
+        isOccurenceSelectionDeferred,
+      ),
     );
-  }, [searchOccurences, searchActiveOccurence]);
+    setIsOccurenceSelectionDeferred(false);
+  }, [searchOccurences, searchActiveOccurence, isOccurenceSelectionDeferred]);
 
   // Bumped on every Ctrl/Cmd+F so the effect below re-runs even when the
   // keypress leaves both isFindOpen and searchTerm at their current values.
@@ -1661,6 +1679,7 @@ export const TextAnnotator = ({
           setSearchTerm={setSearchTerm}
           findInputRef={findInputRef}
           searchOccurences={searchOccurences}
+          isOccurenceSelectionDeferred={isOccurenceSelectionDeferred}
           refreshSearch={refreshSearch}
           searchActiveOccurence={searchActiveOccurence}
           setSearchActiveOccurence={setSearchActiveOccurence}
@@ -1909,6 +1928,7 @@ export const TextAnnotator = ({
               if (dataDocument?.content) {
                 annotator?.updateText(dataDocument.content);
                 setLocalTextContent(dataDocument.content);
+                dropHitsOnEdit();
               }
             }}
             onSave={() => handleSaveNewContent(false)}
