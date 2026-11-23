@@ -6,6 +6,7 @@ import { Db, storage } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { createMockTree, seedAcl } from "@modules/common.test";
 import Entity from "@models/entity/entity";
+import Audit from "@models/audit/audit";
 import User from "@models/user/user";
 import { getEntityClass } from "@models/factory";
 import treeCache from "@service/treeCache";
@@ -17,6 +18,7 @@ import {
   IPropSpec,
   IRequestBatchReplaceMetaprop,
 } from "@inkvisitor/shared/types";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
 import { ReplaceReason } from "./batch-replace-relation";
 
@@ -54,7 +56,7 @@ const prop = (type: string, value: string, extra: Record<string, unknown> = {}):
  * `replace` and `replaceAs` send a dry run: the route decides every row and
  * counts, and writes nothing, which each of them checks on the props of the
  * rows in the body and on the audits. `save` and `saveAs` send the body
- * without `dryRun`.
+ * without `dryRun`; their tests check the props and audits the save leaves.
  */
 describe("Entities batchReplaceMetaprop", () => {
   const db = new Db();
@@ -100,6 +102,13 @@ describe("Entities batchReplaceMetaprop", () => {
 
   const auditCount = async (): Promise<number> =>
     (await storage.audits.all(db.connection)).length;
+
+  // the type and changes of every audit of the entity
+  const auditsOf = async (entity: IEntity) =>
+    (await Audit.getLastNForEntity(db.connection, entity.id, 100)).map(({ type, changes }) => ({
+      type,
+      changes,
+    }));
 
   const replaceAs = async (agent: AuthAgent, body: Body) => {
     const propsBefore = await propsByIds(body.entityIds);
@@ -260,7 +269,7 @@ describe("Entities batchReplaceMetaprop", () => {
       expect(res.body.skippedIds).toEqual([row.id]);
     });
 
-    it("counts (T, X) held as a subproperty in nested and leaves it", async () => {
+    it("counts (T, X) held as a subproperty in nested", async () => {
       const { t, x, y } = await tXY();
       const other = await makeEntity(Concept);
       const a = await makeEntity(Person, {
@@ -412,39 +421,320 @@ describe("Entities batchReplaceMetaprop", () => {
     });
   });
 
+  describe("a save", () => {
+    const withValue = (p: IProp, entityId: string): IProp => ({
+      ...p,
+      value: { ...p.value, entityId },
+    });
+
+    it("rewrites (T, X) to (T, Y) in place with one audit per row, as its dry run counted", async () => {
+      const { t, x, y } = await tXY();
+      const other = await makeEntity(Concept);
+      const rows = [
+        await makeEntity(Person, {
+          props: [prop(t.id, x.id, { elvl: Elvl.Textual, children: [prop(other.id, other.id)] })],
+        }),
+        await makeEntity(Person, {
+          props: [
+            prop(other.id, x.id),
+            prop(t.id, x.id, { certainty: EntityEnums.Certainty.Probable }),
+          ],
+        }),
+        await makeEntity(Person, {
+          props: [prop(t.id, x.id), prop(t.id, x.id, { logic: Logic.Negative })],
+        }),
+      ];
+      const without = await makeEntity(Person, { props: [prop(other.id, x.id)] });
+      const notSelected = await makeEntity(Person, { props: [prop(t.id, x.id)] });
+      const body = {
+        entityIds: ids(...rows, without),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      };
+      const before: IProp[][] = [];
+      for (const row of [...rows, without, notSelected]) {
+        before.push((await propsOf(row)) as IProp[]);
+      }
+
+      const dry = await replace(body);
+      const res = await save(body);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(dry.body);
+      expect(res.body).toMatchObject({
+        selected: 4,
+        unmatched: 1,
+        changed: 3,
+        merged: 0,
+        failed: 0,
+        items: 4,
+      });
+      const expected = [
+        [withValue(before[0][0], y.id)],
+        [before[1][0], withValue(before[1][1], y.id)],
+        [withValue(before[2][0], y.id), withValue(before[2][1], y.id)],
+      ];
+      for (const [i, row] of rows.entries()) {
+        const after = await propsOf(row);
+        expect(after).toEqual(expected[i]);
+        expect(await auditsOf(row)).toEqual([
+          { type: EventType.EDIT, changes: { props: after, before: before[i] } },
+        ]);
+      }
+      expect(await propsOf(without)).toEqual(before[3]);
+      expect(await propsOf(notSelected)).toEqual(before[4]);
+      expect(await auditsOf(without)).toEqual([]);
+      expect(await auditsOf(notSelected)).toEqual([]);
+
+      const auditsBefore = await auditCount();
+      const again = await save(body);
+
+      expect(again.body).toMatchObject({
+        selected: 4,
+        unmatched: 4,
+        changed: 0,
+        items: 0,
+        result: false,
+      });
+      expect(await auditCount()).toBe(auditsBefore);
+    });
+
+    it("keeps the fields a metaprop holds beyond the model's", async () => {
+      const { t, x, y } = await tXY();
+      const row = await rawEntity(Person, [
+        { ...prop(t.id, x.id), statementOrder: 3, note: "kept" },
+      ]);
+      const before = (await propsOf(row)) as IProp[];
+
+      const res = await save({
+        entityIds: [row.id],
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, failed: 0, items: 1 });
+      const after = await propsOf(row);
+      expect(after).toEqual([withValue(before[0], y.id)]);
+      expect(after?.[0]).toMatchObject({ statementOrder: 3, note: "kept" });
+      const [audit] = await auditsOf(row);
+      expect(audit.changes).toEqual({ props: after, before });
+    });
+
+    it("leaves a merged row with its (T, Y) only, and audits both", async () => {
+      const { t, x, y } = await tXY();
+      const row = await makeEntity(Person, { props: [prop(t.id, x.id), prop(t.id, y.id)] });
+      const before = (await propsOf(row)) as IProp[];
+
+      const res = await save({
+        entityIds: [row.id],
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, merged: 1, failed: 0, items: 1 });
+      expect(await propsOf(row)).toEqual([before[1]]);
+      expect(await auditsOf(row)).toEqual([
+        { type: EventType.EDIT, changes: { props: [before[1]], before } },
+      ]);
+    });
+
+    it("leaves a skipped row as it was, without an audit", async () => {
+      const { t, x, y } = await tXY();
+      const child = await makeEntity(Concept);
+      const row = await makeEntity(Person, {
+        props: [
+          prop(t.id, x.id),
+          prop(t.id, x.id, { children: [prop(child.id, child.id)] }),
+          prop(t.id, y.id),
+        ],
+      });
+      const before = await propsOf(row);
+
+      const res = await save({
+        entityIds: [row.id],
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 1, changed: 0, skipped: 1, result: false });
+      expect(res.body.skippedIds).toEqual([row.id]);
+      expect(await propsOf(row)).toEqual(before);
+      expect(await auditsOf(row)).toEqual([]);
+    });
+
+    it("leaves (T, X) held as a subproperty, as its dry run counted", async () => {
+      const { t, x, y } = await tXY();
+      const other = await makeEntity(Concept);
+      const a = await makeEntity(Person, {
+        props: [prop(t.id, x.id, { children: [prop(t.id, x.id)] })],
+      });
+      const b = await makeEntity(Person, {
+        props: [prop(other.id, other.id, { children: [prop(t.id, x.id)] })],
+      });
+      const bBefore = await propsOf(b);
+      const body = {
+        entityIds: ids(a, b),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      };
+
+      const dry = await replace(body);
+      const res = await save(body);
+
+      expect(res.body).toEqual(dry.body);
+      expect(res.body).toMatchObject({ changed: 1, unmatched: 1, nested: 2 });
+      const [held] = (await propsOf(a)) as IProp[];
+      expect(held.value?.entityId).toBe(y.id);
+      expect(held.children.map((child) => child.value?.entityId)).toEqual([x.id]);
+      expect(await propsOf(b)).toEqual(bBefore);
+    });
+
+    it("reports the row an update left when it throws after writing the first", async () => {
+      const { t, x, y } = await tXY();
+      const [written, refused] = [
+        await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+        await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+      ];
+      const refusedBefore = await propsOf(refused);
+      const updateEach = Entity.updateEach;
+      jest.spyOn(Entity, "updateEach").mockImplementationOnce(async (conn, updates) => {
+        await updateEach(conn, updates.slice(0, 1));
+        throw new Error("update refused");
+      });
+
+      const res = await save({
+        entityIds: ids(written, refused),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, failed: 1, items: 1 });
+      expect(res.body.errors).toEqual({ [refused.id]: ReplaceReason.updateFailed });
+      expect((await propsOf(written))?.[0].value?.entityId).toBe(y.id);
+      expect(await auditsOf(written)).toHaveLength(1);
+      expect(await propsOf(refused)).toEqual(refusedBefore);
+      expect(await auditsOf(refused)).toEqual([]);
+    });
+
+    it("reports the row an update lists as failed", async () => {
+      const { t, x, y } = await tXY();
+      const [written, refused] = [
+        await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+        await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+      ];
+      const updateEach = Entity.updateEach;
+      jest.spyOn(Entity, "updateEach").mockImplementationOnce(async (conn, updates) => {
+        const kept = updates.filter(({ id }) => id === written.id);
+        return { written: (await updateEach(conn, kept)).written, failed: [refused.id] };
+      });
+
+      const res = await save({
+        entityIds: ids(written, refused),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 1, failed: 1, items: 1 });
+      expect(res.body.errors).toEqual({ [refused.id]: ReplaceReason.updateFailed });
+      expect(await auditsOf(written)).toHaveLength(1);
+      expect(await auditsOf(refused)).toEqual([]);
+    });
+
+    it.each<[string, () => void]>([
+      [
+        "throws",
+        () => jest.spyOn(Audit, "createMany").mockRejectedValueOnce(new Error("audits refused")),
+      ],
+      ["writes none", () => jest.spyOn(Audit, "createMany").mockResolvedValueOnce(0)],
+    ])(
+      "answers 500 when the audit insert %s and logs the props each row held",
+      async (_, failAudits) => {
+        const { t, x, y } = await tXY();
+        const rows = [
+          await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+          await makeEntity(Person, { props: [prop(t.id, x.id, { elvl: Elvl.Textual })] }),
+        ];
+        const before: IProp[][] = [];
+        for (const row of rows) {
+          before.push((await propsOf(row)) as IProp[]);
+        }
+        const body = {
+          entityIds: ids(...rows),
+          typeEntityId: t.id,
+          fromValueEntityId: x.id,
+          toValueEntityId: y.id,
+        };
+        failAudits();
+        const logged = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+        const res = await save(body);
+
+        expect(res.status).toBe(500);
+        for (const row of rows) {
+          expect((await propsOf(row))?.[0].value?.entityId).toBe(y.id);
+        }
+        expect(logged).toHaveBeenCalledWith(
+          "[batchReplaceMetaprop]: audits not written",
+          rows.map((row, i) => ({ modelId: row.id, before: before[i] }))
+        );
+
+        const again = await save(body);
+
+        expect(again.body).toMatchObject({ selected: 2, unmatched: 2, changed: 0 });
+      }
+    );
+  });
+
   // createMockTree empties the entities table, so this block runs last
   describe("an editor", () => {
     const rand = Math.random().toString();
+    const writableT = `T1-${rand}`;
     const readOnlyT = `T2-${rand}`;
     const editorId = `editor-brm-${rand}`;
+    const viewerId = `viewer-brm-${rand}`;
     const annotatorId = `annotator-brm-${rand}`;
     let editorAgent: AuthAgent;
+    let viewerAgent: AuthAgent;
 
     const statementIn = (territoryId: string, props: IProp[] = []) =>
       makeEntity(Statement, { data: { territory: { territoryId, order: 0 } }, props });
 
     beforeAll(async () => {
       await createMockTree(db, rand);
-      await new User({
-        id: editorId,
-        role: UserEnums.Role.Editor,
-        active: true,
-        verified: true,
-        rights: [
-          { territory: `T1-${rand}`, mode: UserEnums.RoleMode.Write },
-          { territory: readOnlyT, mode: UserEnums.RoleMode.Read },
-        ],
-      }).save(db.connection);
+      for (const [id, role] of [
+        [editorId, UserEnums.Role.Editor],
+        [viewerId, UserEnums.Role.Viewer],
+      ] as const) {
+        await new User({
+          id,
+          role,
+          active: true,
+          verified: true,
+          rights: [
+            { territory: writableT, mode: UserEnums.RoleMode.Write },
+            { territory: readOnlyT, mode: UserEnums.RoleMode.Read },
+          ],
+        }).save(db.connection);
+      }
       editorAgent = await createAgentWithUserId(editorId);
+      viewerAgent = await createAgentWithUserId(viewerId);
 
       treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
     });
 
     afterAll(async () => {
-      // PostgreSQL keeps a user that audits name
+      // the editor's save leaves audits naming the editor, and PostgreSQL keeps
+      // a user that audits name
       await deleteAudits(db);
-      await storage.users.deleteMany(db.connection, [editorId, annotatorId]);
+      await storage.users.deleteMany(db.connection, [editorId, viewerId, annotatorId]);
     });
 
     it("is refused the rows it may not edit and leaves a row without (T, X) unmatched", async () => {
@@ -529,6 +819,56 @@ describe("Entities batchReplaceMetaprop", () => {
 
       expect(res.body).toMatchObject({ selected: 1, changed: 1, failed: 0, items: 1 });
       expect(res.body.errors).toEqual({});
+    });
+
+    it("saves the rows it may edit and leaves the refused ones as they were", async () => {
+      const { t, x, y } = await tXY();
+      const writable = await statementIn(writableT, [prop(t.id, x.id)]);
+      const person = await makeEntity(Person, { props: [prop(t.id, x.id)] });
+      const readOnly = await statementIn(readOnlyT, [prop(t.id, x.id)]);
+      const resourceWithDocument = await makeEntity(Resource, {
+        data: { documentId: `doc-${rand}` },
+        props: [prop(t.id, x.id)],
+      });
+      const refusedBefore = [await propsOf(readOnly), await propsOf(resourceWithDocument)];
+
+      const res = await saveAs(editorAgent, {
+        entityIds: ids(writable, person, readOnly, resourceWithDocument),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ selected: 4, changed: 2, failed: 2, items: 2 });
+      expect(res.body.errors).toEqual({
+        [readOnly.id]: ReplaceReason.denied,
+        [resourceWithDocument.id]: ReplaceReason.denied,
+      });
+      for (const row of [writable, person]) {
+        expect((await propsOf(row))?.[0].value?.entityId).toBe(y.id);
+        expect(await auditsOf(row)).toHaveLength(1);
+      }
+      expect([await propsOf(readOnly), await propsOf(resourceWithDocument)]).toEqual(refusedBefore);
+      expect(await auditsOf(readOnly)).toEqual([]);
+      expect(await auditsOf(resourceWithDocument)).toEqual([]);
+    });
+
+    it("refuses a viewer's save and changes nothing", async () => {
+      const { t, x, y } = await tXY();
+      const row = await makeEntity(Person, { props: [prop(t.id, x.id)] });
+      const before = await propsOf(row);
+      const auditsBefore = await auditCount();
+
+      const res = await saveAs(viewerAgent, {
+        entityIds: [row.id],
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.status).toBe(403);
+      expect(await propsOf(row)).toEqual(before);
+      expect(await auditCount()).toBe(auditsBefore);
     });
   });
 });

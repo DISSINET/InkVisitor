@@ -64,6 +64,7 @@ import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import User from "@models/user/user";
 import { randomUUID } from "crypto";
+import { isDeepStrictEqual } from "node:util";
 import {
   ReplaceReason,
   canFormCycle,
@@ -1783,21 +1784,21 @@ export default Router()
 
         for (const row of rows) {
           nested += countNested(row.props, typeEntityId, fromValueEntityId);
-          const replace = replaceMetaprops(
+          const outcome = replaceMetaprops(
             row.props,
             typeEntityId,
             fromValueEntityId,
             toValueEntityId
           );
-          if (replace.outcome === "unmatched") {
+          if (outcome.outcome === "unmatched") {
             unmatched++;
             continue;
           }
-          if (replace.outcome === "skipped") {
+          if (outcome.outcome === "skipped") {
             skippedIds.push(row.id);
             continue;
           }
-          const { props, items, merged } = replace;
+          const { props, items, merged } = outcome;
           if (!merged && row.id === toValueEntityId) {
             errors[row.id] = ReplaceReason.isValue;
             continue;
@@ -1820,23 +1821,72 @@ export default Router()
           plans.push({ id: row.id, props, before: row.props, items, merged });
         }
 
-        if (!dryRun) {
-          throw new InternalServerError("not implemented");
-        }
-
-        return {
-          result: plans.length > 0,
+        const answer = (done: typeof plans): IResponseBatchReplace => ({
+          result: done.length > 0,
           selected: rows.length,
           unmatched,
-          changed: plans.length,
-          merged: plans.filter((plan) => plan.merged).length,
+          changed: done.length,
+          merged: done.filter((plan) => plan.merged).length,
           skipped: skippedIds.length,
           failed: Object.keys(errors).length,
-          items: plans.reduce((sum, plan) => sum + plan.items, 0),
+          items: done.reduce((sum, plan) => sum + plan.items, 0),
           nested,
           errors,
           skippedIds,
-        };
+        });
+
+        if (dryRun) {
+          return answer(plans);
+        }
+
+        const written = new Set<string>();
+        try {
+          const { failed } = await Entity.updateEach(
+            conn,
+            plans.map(({ id, props }) => ({ id, data: { props } }))
+          );
+          const refused = new Set(failed);
+          plans.filter(({ id }) => !refused.has(id)).forEach(({ id }) => written.add(id));
+        } catch (e) {
+          console.error("[batchReplaceMetaprop]: updating the entities failed", e);
+          // the update can throw after storing some rows, so a row stored with
+          // its planned props counts as written; a failed re-read counts none
+          try {
+            const stored = await Entity.findEntitiesByIds(conn, plans.map(({ id }) => id));
+            const storedProps = new Map(stored.map(({ id, props }) => [id, props]));
+            plans
+              .filter(({ id, props }) => isDeepStrictEqual(storedProps.get(id), props))
+              .forEach(({ id }) => written.add(id));
+          } catch (reread) {
+            console.error("[batchReplaceMetaprop]: re-reading the entities failed", reread);
+          }
+        }
+        const done = plans.filter(({ id }) => {
+          if (!written.has(id)) {
+            errors[id] = ReplaceReason.updateFailed;
+            return false;
+          }
+          return true;
+        });
+
+        // the audits are the only record of the metaprops a save rewrote or dropped
+        const audited = await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          done.map(({ id, props, before }) => ({ modelId: id, changes: { props, before } })),
+          EventType.EDIT
+        ).catch(() => 0);
+        if (audited < done.length) {
+          console.error(
+            "[batchReplaceMetaprop]: audits not written",
+            done.map(({ id, before }) => ({ modelId: id, before }))
+          );
+          throw new InternalServerError(
+            "the entities were saved, their audits could not be written"
+          );
+        }
+
+        return answer(done);
       }
     )
   )
