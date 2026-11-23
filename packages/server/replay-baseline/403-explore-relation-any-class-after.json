@@ -297,7 +297,6 @@
                 "geocoding": {
                   "context": {}
                 },
-                "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "*",
                 "searchLanguages": [],
                 "starredTemplates": [],
