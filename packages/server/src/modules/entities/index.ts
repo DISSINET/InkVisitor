@@ -1875,7 +1875,10 @@ export default Router()
           AuditScope.Entity,
           done.map(({ id, props, before }) => ({ modelId: id, changes: { props, before } })),
           EventType.EDIT
-        ).catch(() => 0);
+        ).catch((e) => {
+          console.error("[batchReplaceMetaprop]: inserting the audits failed", e);
+          return 0;
+        });
         if (audited < done.length) {
           console.error(
             "[batchReplaceMetaprop]: audits not written",
