@@ -174,6 +174,7 @@ export const BatchActionReplaceMetaprop: React.FC<BatchActionReplaceMetaprop> = 
                   inputWidth="full"
                   categoryTypes={classesPropType}
                   reuseDroppedValue
+                  disableCreate
                 />
               )}
             </StyledBatchSection>
@@ -195,6 +196,7 @@ export const BatchActionReplaceMetaprop: React.FC<BatchActionReplaceMetaprop> = 
                       inputWidth="full"
                       categoryTypes={classesAll}
                       reuseDroppedValue
+                      disableCreate
                     />
                   )}
                   <Checkbox
