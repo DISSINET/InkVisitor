@@ -240,6 +240,15 @@
       },
       {
         "controller": "entities",
+        "id": "acl-64",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": "batchReplaceMetaprop"
+      },
+      {
+        "controller": "entities",
         "id": "acl-63",
         "method": "POST",
         "roles": [
