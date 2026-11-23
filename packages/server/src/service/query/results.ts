@@ -6,7 +6,14 @@ import treeCache from "@service/treeCache";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IStatement, ITerritory, IUser, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IResponseQueryEntity,
+  IResponseQueryUser,
+  IStatement,
+  ITerritory,
+  Relation as RelationTypes,
+} from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
@@ -35,7 +42,7 @@ export interface IColumnsContext {
    */
   related: Map<string, Map<string, string[]>>;
   /** row entity id -> the user behind its first audit */
-  creators: Map<string, IUser>;
+  creators: Map<string, IResponseQueryUser>;
 }
 
 /** the territory a territory hangs under or a statement is placed in */
@@ -163,16 +170,17 @@ function propOrigins(
 }
 
 /** row id -> the user behind its first audit, for the rows whose audit and user both exist */
-async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Map<string, IUser>> {
+async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Map<string, IResponseQueryUser>> {
   const audits = await Audit.getFirstForEntities(db, rowIds);
-  const users = new Map<string, IUser | null>();
-  const out = new Map<string, IUser>();
+  const users = new Map<string, IResponseQueryUser | null>();
+  const out = new Map<string, IResponseQueryUser>();
   for (const audit of audits) {
     if (!audit.user) {
       continue;
     }
     if (!users.has(audit.user)) {
-      users.set(audit.user, await User.findUserById(db, audit.user));
+      const user = await User.findUserById(db, audit.user);
+      users.set(audit.user, user && { id: user.id, name: user.name });
     }
     const user = users.get(audit.user);
     if (user) {
@@ -472,11 +480,8 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[],
     context: IColumnsContext
-  ): Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]> {
-    const out: Record<
-      string,
-      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
-    > = {};
+  ): IResponseQueryEntity["columnData"] {
+    const out: IResponseQueryEntity["columnData"] = {};
     // input order and repeats kept, ids without an entity dropped, as findEntitiesByIds returns them
     const linkedEntities = (column: Explore.IExploreColumn): IEntity[] =>
       linkedIds(entity, column, context.related)
