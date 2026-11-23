@@ -21,9 +21,13 @@
   route with no `acl_permissions` row is auto-created with `roles: []`, so every
   non-admin gets "Endpoint not allowed". Once agreed, open it one of two ways:
   - **Read-only route open to every logged-in user** (e.g. entity tooltip,
-    detail, expansion): add a code exception in
-    `packages/server/src/middlewares/acl.ts` next to the existing ones. No
-    database change or deploy job needed.
+    detail, expansion): add its `"controller METHOD route"` key to `OPEN_ROUTES`
+    in `packages/server/src/middlewares/acl.ts`, or its whole controller to
+    `OPEN_CONTROLLERS`. The unit test `acl.test.ts` next to it pins both lists
+    (the open routes one by one, sorted and with a leading slash on the route,
+    e.g. `entities GET /:entityId/detail`; the open controllers in `whole`), so
+    add the route there too: a route opened only in `acl.ts` fails that test in
+    CI. No database change or deploy job needed.
   - **Route limited to specific roles** (e.g. editor): seed the row in
     `packages/database/datasets/{default,production}/acl_permissions.json` and
     add it to `packages/database/scripts/jobs/fix-editor-entity-acl.ts` so

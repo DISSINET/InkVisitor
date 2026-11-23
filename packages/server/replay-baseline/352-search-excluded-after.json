@@ -391,7 +391,7 @@
         "createdAt": "<datetime>",
         "data": {},
         "detail": "",
-        "id": "<uuid-20>",
+        "id": "<uuid-14>",
         "labels": [
           "page 12"
         ],
@@ -409,7 +409,7 @@
           "pos": ""
         },
         "detail": "in general - who gives advice",
-        "id": "<uuid-2>",
+        "id": "<uuid-1>",
         "labels": [
           "advisor"
         ],
@@ -421,9 +421,9 @@
         "props": [],
         "references": [
           {
-            "id": "<uuid-3>",
+            "id": "<uuid-2>",
             "resource": "dissinet-resource",
-            "value": "<uuid-2>"
+            "value": "<uuid-1>"
           }
         ],
         "right": "admin",
@@ -864,7 +864,7 @@
           "logicalType": "1"
         },
         "detail": "",
-        "id": "<uuid-38>",
+        "id": "<uuid-32>",
         "labels": [
           "replay being"
         ],
@@ -1140,7 +1140,7 @@
             "certainty": "1",
             "children": [],
             "elvl": "3",
-            "id": "<uuid-35>",
+            "id": "<uuid-29>",
             "logic": "1",
             "mood": [],
             "moodvariant": "1",
@@ -1162,7 +1162,7 @@
         ],
         "references": [
           {
-            "id": "<uuid-36>",
+            "id": "<uuid-30>",
             "resource": "dissinet-resource",
             "value": "rp-v"
           }
@@ -1287,9 +1287,9 @@
         "props": [],
         "references": [
           {
-            "id": "<uuid-19>",
+            "id": "<uuid-13>",
             "resource": "dissinet-resource",
-            "value": "<uuid-20>"
+            "value": "<uuid-14>"
           }
         ],
         "right": "admin",
@@ -1690,7 +1690,7 @@
             "certainty": "1",
             "children": [],
             "elvl": "3",
-            "id": "<uuid-17>",
+            "id": "<uuid-11>",
             "logic": "1",
             "mood": [],
             "moodvariant": "1",
@@ -1712,7 +1712,7 @@
         ],
         "references": [
           {
-            "id": "<uuid-18>",
+            "id": "<uuid-12>",
             "resource": "dissinet-resource",
             "value": "rp-v"
           }
@@ -1731,7 +1731,7 @@
           }
         },
         "detail": "",
-        "id": "<uuid-37>",
+        "id": "<uuid-31>",
         "labels": [
           "COPY OF replay territory"
         ],

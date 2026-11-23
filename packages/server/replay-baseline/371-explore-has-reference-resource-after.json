@@ -233,7 +233,7 @@
                   "pos": ""
                 },
                 "detail": "in general - who gives advice",
-                "id": "<uuid-2>",
+                "id": "<uuid-1>",
                 "isTemplate": null,
                 "labels": [
                   "advisor"
@@ -246,9 +246,9 @@
                 "props": [],
                 "references": [
                   {
-                    "id": "<uuid-3>",
+                    "id": "<uuid-2>",
                     "resource": "dissinet-resource",
-                    "value": "<uuid-2>"
+                    "value": "<uuid-1>"
                   }
                 ],
                 "status": "1"
@@ -265,7 +265,7 @@
               "pos": ""
             },
             "detail": "in general - who gives advice",
-            "id": "<uuid-2>",
+            "id": "<uuid-1>",
             "isTemplate": null,
             "labels": [
               "advisor"
@@ -278,9 +278,9 @@
             "props": [],
             "references": [
               {
-                "id": "<uuid-3>",
+                "id": "<uuid-2>",
                 "resource": "dissinet-resource",
-                "value": "<uuid-2>"
+                "value": "<uuid-1>"
               }
             ],
             "status": "1"
@@ -446,7 +446,7 @@
                 "certainty": "1",
                 "children": [],
                 "elvl": "3",
-                "id": "<uuid-17>",
+                "id": "<uuid-11>",
                 "logic": "1",
                 "mood": [],
                 "moodvariant": "1",
@@ -468,7 +468,7 @@
             ],
             "references": [
               {
-                "id": "<uuid-18>",
+                "id": "<uuid-12>",
                 "resource": "dissinet-resource",
                 "value": "rp-v"
               }
@@ -521,7 +521,7 @@
                 "createdAt": "<datetime>",
                 "data": {},
                 "detail": "",
-                "id": "<uuid-20>",
+                "id": "<uuid-14>",
                 "isTemplate": false,
                 "labels": [
                   "page 12"
@@ -553,9 +553,9 @@
             "props": [],
             "references": [
               {
-                "id": "<uuid-19>",
+                "id": "<uuid-13>",
                 "resource": "dissinet-resource",
-                "value": "<uuid-20>"
+                "value": "<uuid-14>"
               }
             ],
             "status": "1",
@@ -701,7 +701,7 @@
                 "certainty": "1",
                 "children": [],
                 "elvl": "3",
-                "id": "<uuid-35>",
+                "id": "<uuid-29>",
                 "logic": "1",
                 "mood": [],
                 "moodvariant": "1",
@@ -723,7 +723,7 @@
             ],
             "references": [
               {
-                "id": "<uuid-36>",
+                "id": "<uuid-30>",
                 "resource": "dissinet-resource",
                 "value": "rp-v"
               }
@@ -1052,7 +1052,7 @@
         }
       ],
       "entityIds": [
-        "<uuid-2>",
+        "<uuid-1>",
         "rp-c",
         "rp-l",
         "rp-p",

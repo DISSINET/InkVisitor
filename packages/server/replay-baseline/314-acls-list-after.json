@@ -19,7 +19,7 @@
       },
       {
         "controller": "acls",
-        "id": "<uuid-39>",
+        "id": "<uuid-33>",
         "method": "GET",
         "public": false,
         "roles": [],
@@ -54,14 +54,6 @@
       },
       {
         "controller": "documents",
-        "id": "<uuid-40>",
-        "method": "DELETE",
-        "public": false,
-        "roles": [],
-        "route": ":documentId"
-      },
-      {
-        "controller": "documents",
         "id": "acl-51",
         "method": "GET",
         "roles": [
@@ -86,14 +78,6 @@
           "*"
         ],
         "route": ":documentId/anchors"
-      },
-      {
-        "controller": "documents",
-        "id": "<uuid-41>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": ":documentId/audits"
       },
       {
         "controller": "documents",
@@ -130,14 +114,6 @@
           "*"
         ],
         "route": ""
-      },
-      {
-        "controller": "documents",
-        "id": "<uuid-42>",
-        "method": "PUT",
-        "public": false,
-        "roles": [],
-        "route": ":documentId"
       },
       {
         "controller": "entities",
@@ -183,14 +159,6 @@
           "*"
         ],
         "route": ":entityId/detail"
-      },
-      {
-        "controller": "entities",
-        "id": "<uuid-4>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": ":entityId/expansion"
       },
       {
         "controller": "entities",
@@ -248,7 +216,7 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-43>",
+        "id": "<uuid-34>",
         "method": "POST",
         "public": false,
         "roles": [],
@@ -256,7 +224,7 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-44>",
+        "id": "<uuid-35>",
         "method": "POST",
         "public": false,
         "roles": [],
@@ -264,7 +232,7 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-45>",
+        "id": "<uuid-36>",
         "method": "POST",
         "public": false,
         "roles": [],
@@ -272,19 +240,11 @@
       },
       {
         "controller": "entities",
-        "id": "<uuid-46>",
+        "id": "<uuid-37>",
         "method": "POST",
         "public": false,
         "roles": [],
         "route": "batchSetAttribute"
-      },
-      {
-        "controller": "entities",
-        "id": "<uuid-5>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": "query"
       },
       {
         "controller": "entities",
@@ -324,7 +284,7 @@
       },
       {
         "controller": "relations",
-        "id": "<uuid-6>",
+        "id": "<uuid-3>",
         "method": "GET",
         "public": false,
         "roles": [],
@@ -358,38 +318,6 @@
         "route": ":relationId?"
       },
       {
-        "controller": "saved-queries",
-        "id": "<uuid-47>",
-        "method": "DELETE",
-        "public": false,
-        "roles": [],
-        "route": ":id"
-      },
-      {
-        "controller": "saved-queries",
-        "id": "<uuid-7>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": ""
-      },
-      {
-        "controller": "saved-queries",
-        "id": "<uuid-48>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": ""
-      },
-      {
-        "controller": "saved-queries",
-        "id": "<uuid-49>",
-        "method": "PUT",
-        "public": false,
-        "roles": [],
-        "route": ":id"
-      },
-      {
         "controller": "settings",
         "id": "acl-60",
         "method": "GET",
@@ -401,7 +329,7 @@
       },
       {
         "controller": "settings",
-        "id": "<uuid-8>",
+        "id": "<uuid-4>",
         "method": "GET",
         "public": false,
         "roles": [],
@@ -482,30 +410,6 @@
         "route": ""
       },
       {
-        "controller": "stats",
-        "id": "<uuid-9>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": ""
-      },
-      {
-        "controller": "stats",
-        "id": "<uuid-50>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": "aggregate"
-      },
-      {
-        "controller": "stats",
-        "id": "<uuid-10>",
-        "method": "POST",
-        "public": false,
-        "roles": [],
-        "route": "materialized"
-      },
-      {
         "controller": "territories",
         "id": "acl-10",
         "method": "GET",
@@ -534,7 +438,7 @@
       },
       {
         "controller": "territories",
-        "id": "<uuid-51>",
+        "id": "<uuid-38>",
         "method": "POST",
         "public": false,
         "roles": [],
@@ -561,7 +465,7 @@
       },
       {
         "controller": "tree",
-        "id": "<uuid-52>",
+        "id": "<uuid-39>",
         "method": "PATCH",
         "public": false,
         "roles": [],
@@ -656,14 +560,6 @@
         "public": true,
         "roles": [],
         "route": "password_reset"
-      },
-      {
-        "controller": "users",
-        "id": "<uuid-1>",
-        "method": "GET",
-        "public": false,
-        "roles": [],
-        "route": "simplified"
       },
       {
         "controller": "users",

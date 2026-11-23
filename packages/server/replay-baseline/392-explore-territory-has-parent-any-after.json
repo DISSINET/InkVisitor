@@ -242,7 +242,7 @@
               }
             },
             "detail": "",
-            "id": "<uuid-37>",
+            "id": "<uuid-31>",
             "labels": [
               "COPY OF replay territory"
             ],
@@ -419,7 +419,7 @@
         }
       ],
       "entityIds": [
-        "<uuid-37>",
+        "<uuid-31>",
         "rp-t",
         "t1"
       ],
