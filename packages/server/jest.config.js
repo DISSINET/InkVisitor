@@ -86,6 +86,7 @@ const UNIT_TEST_PATHS = [
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
   "src/modules/entities/batch-replace-relation.test.ts",
+  "src/modules/entities/batch-replace-metaprop.test.ts",
   "src/modules/geocoding/geocoding.test.ts",
   // Mocks the driver (jest.mock) - evaluateEdges runs against an in-memory proxy.
   "src/service/storage/rethink/query/nesting.test.ts",

@@ -20,6 +20,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
+import { classesPropType } from "types";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
 import {
   StyledAltLabelAddInput,
@@ -568,6 +569,18 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             <EntitySuggester
               inputWidth={74}
               categoryTypes={classesAll}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
+        if (column.type === Explore.EExploreColumnType.EPT) {
+          return (
+            <EntitySuggester
+              inputWidth={74}
+              categoryTypes={classesPropType}
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity);
               }}

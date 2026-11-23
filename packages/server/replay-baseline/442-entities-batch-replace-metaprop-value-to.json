@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceMetaprop",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromValueEntityId": "c2",
+      "toValueEntityId": "rp-v",
+      "typeEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "the new value cannot be a Value",
+      "result": false
+    }
+  }
+}

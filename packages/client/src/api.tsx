@@ -7,6 +7,7 @@ import {
   IDocumentExport,
   IEntity,
   IReference,
+  IRequestBatchReplaceMetaprop,
   IRequestBatchReplaceRelation,
   IRequestQuery,
   IRequestStats,
@@ -2017,6 +2018,17 @@ class Api {
   ): Promise<AxiosResponse<IResponseBatchReplace>> {
     try {
       const response = await this.connection.post(`/entities/batchReplaceRelation`, body, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+  async batchEntityReplaceMetaprop(
+    body: IRequestBatchReplaceMetaprop,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseBatchReplace>> {
+    try {
+      const response = await this.connection.post(`/entities/batchReplaceMetaprop`, body, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

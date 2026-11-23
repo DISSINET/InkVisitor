@@ -37,6 +37,18 @@ export interface IRequestBatchReplaceRelation {
   dryRun?: boolean;
 }
 
+export interface IRequestBatchReplaceMetaprop {
+  entityIds: string[];
+  /** T: the type of the top-level metaprops to rewrite */
+  typeEntityId: string;
+  /** X: their current value; "" is the empty value */
+  fromValueEntityId: string;
+  /** Y: their value afterwards; never a Value */
+  toValueEntityId: string;
+  /** decide and count, write nothing */
+  dryRun?: boolean;
+}
+
 /**
  * Answer of every batch replace route, for a dry run and a save alike.
  * Counts are entities unless named items.
@@ -53,4 +65,5 @@ export interface IResponseBatchReplace {
   items: number; // X items rewritten or dropped; X held twice counts 2
   nested: number; // metaprops only
   errors: Record<string, string>; // entity id -> reason
+  skippedIds?: string[]; // metaprops only: the entities counted in skipped
 }

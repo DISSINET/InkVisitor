@@ -31,7 +31,7 @@ export interface ExplorerSelectionControls {
   onApplyBatchAction: () => void;
   /** When false, data-mutating batch actions (add metaprop / reference / relation) are hidden. */
   canBatchEdit?: boolean;
-  /** When false, the replace relation batch action is hidden (viewers). */
+  /** When false, the replace batch actions are hidden (viewers). */
   canBatchReplace?: boolean;
 }
 

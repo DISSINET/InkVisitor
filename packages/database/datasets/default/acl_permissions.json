@@ -384,5 +384,11 @@
     "route": "batchReplaceRelation",
     "method": "POST",
     "roles": ["editor"]
+  },
+  {
+    "controller": "entities",
+    "route": "batchReplaceMetaprop",
+    "method": "POST",
+    "roles": ["editor"]
   }
 ]

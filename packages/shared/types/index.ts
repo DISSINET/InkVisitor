@@ -71,6 +71,7 @@ import {
   IBatchAttributeChange,
   IBatchSetAttributeChanges,
   IRequestBatchReplaceRelation,
+  IRequestBatchReplaceMetaprop,
   IResponseBatchReplace,
 } from "./request-batch";
 import { IResponseQuery, IResponseQueryEntity, IResponseQueryUser } from "./response-query";
@@ -84,6 +85,7 @@ export type {
   IBatchAttributeChange,
   IBatchSetAttributeChanges,
   IRequestBatchReplaceRelation,
+  IRequestBatchReplaceMetaprop,
   IResponseBatchReplace,
   EntityOrder,
   EntityTooltip,

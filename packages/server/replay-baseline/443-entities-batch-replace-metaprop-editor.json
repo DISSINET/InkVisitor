@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceMetaprop",
+    "body": {
+      "entityIds": [
+        "rp-p"
+      ],
+      "fromValueEntityId": "c2",
+      "toValueEntityId": "l1",
+      "typeEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "changed": 1,
+      "errors": {},
+      "failed": 0,
+      "items": 1,
+      "merged": 0,
+      "nested": 0,
+      "result": true,
+      "selected": 1,
+      "skipped": 0,
+      "skippedIds": [],
+      "unmatched": 0
+    }
+  }
+}

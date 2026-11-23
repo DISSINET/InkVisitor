@@ -6,6 +6,7 @@ export enum BatchAction {
   add_reference = "add_reference",
   add_relation = "add_relation",
   replace_relation = "replace_relation",
+  replace_metaprop = "replace_metaprop",
   set_language = "set_language",
   set_pos = "set_pos",
 }
@@ -23,6 +24,7 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
   { value: BatchAction.replace_relation, label: "replace relation" },
+  { value: BatchAction.replace_metaprop, label: "replace metaproperty" },
   { value: BatchAction.set_language, label: "set label language" },
   { value: BatchAction.set_pos, label: "set part of speech" },
 ];
@@ -38,7 +40,10 @@ export const restrictedBatchActions = new Set<BatchAction>([
 ]);
 
 /** Batch actions offered to Editor, Admin and Owner. */
-export const editorBatchActions = new Set<BatchAction>([BatchAction.replace_relation]);
+export const editorBatchActions = new Set<BatchAction>([
+  BatchAction.replace_relation,
+  BatchAction.replace_metaprop,
+]);
 
 export const isBatchActionOffered = (
   action: BatchAction,

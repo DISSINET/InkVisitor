@@ -33,9 +33,13 @@ import {
   EXPANSION_RESPONSE_MAX,
   IResponseEntityRelations,
   IRequestBatchReplaceRelation,
+  IRequestBatchReplaceMetaprop,
   IResponseBatchReplace,
 } from "@inkvisitor/shared/types";
-import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
+import {
+  MAX_BATCH_REPLACE_ENTITIES,
+  MAX_BATCH_REPLACE_METAPROP_ENTITIES,
+} from "@inkvisitor/shared/constants";
 import {
   AuditDoesNotExist,
   BadParams,
@@ -62,6 +66,7 @@ import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { randomUUID } from "crypto";
+import { isDeepStrictEqual } from "node:util";
 import {
   ReplaceReason,
   canFormCycle,
@@ -70,6 +75,7 @@ import {
   replacementOf,
   rowsRelatedTo,
 } from "./batch-replace-relation";
+import { countNested, replaceMetaprops } from "./batch-replace-metaprop";
 
 export default Router()
   /**
@@ -1708,6 +1714,203 @@ export default Router()
         }
 
         return answer(withY.filter((plan) => !errors[plan.rowId]), removed.size);
+      }
+    )
+  )
+
+  /**
+   * Replaces, on each selected entity, its top-level metaprops of type T with
+   * value X by the same metaprops with value Y, or drops them where the entity
+   * already holds (T, Y) of the same settings; an entity whose (T, X) cannot be
+   * dropped next to its (T, Y) is skipped. Every row is decided in memory
+   * before anything is written, so a dry run answers with the counts a save
+   * would have.
+   */
+  .post(
+    "/batchReplaceMetaprop",
+    asyncRouteHandler<IResponseBatchReplace>(
+      async (request: IRequest<unknown, IRequestBatchReplaceMetaprop>) => {
+        const { entityIds, typeEntityId, fromValueEntityId, toValueEntityId, dryRun } =
+          request.body;
+        const ids = Array.isArray(entityIds) ? [...new Set(entityIds)] : [];
+        const isId = (value: unknown): value is string =>
+          typeof value === "string" && value.length > 0;
+
+        if (
+          !ids.length ||
+          !ids.every(isId) ||
+          !isId(typeEntityId) ||
+          typeof fromValueEntityId !== "string" ||
+          !isId(toValueEntityId)
+        ) {
+          throw new BadParams(
+            "entityIds, typeEntityId, fromValueEntityId and toValueEntityId must be provided"
+          );
+        }
+        if (fromValueEntityId === toValueEntityId) {
+          throw new BadParams("fromValueEntityId and toValueEntityId must differ");
+        }
+        if (ids.length > MAX_BATCH_REPLACE_METAPROP_ENTITIES) {
+          throw new BadParams(
+            `at most ${MAX_BATCH_REPLACE_METAPROP_ENTITIES} entities in one request`
+          );
+        }
+
+        if (!dryRun) {
+          await request.db.lock();
+        }
+
+        const conn = request.db.connection;
+        const rows = await Entity.findEntitiesByIds(conn, ids);
+        if (!rows.length) {
+          throw new EntityDoesNotExist("none of the provided entities were found", ids[0]);
+        }
+        const [to] = await Entity.findEntitiesByIds(conn, [toValueEntityId]);
+        if (!to) {
+          throw new EntityDoesNotExist("replacing value was not found", toValueEntityId);
+        }
+        if (to.class === EntityEnums.Class.Value) {
+          throw new BadParams("the new value cannot be a Value");
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        const plans: {
+          id: string;
+          props: IProp[];
+          before: IProp[];
+          items: number;
+          merged: boolean;
+        }[] = [];
+        const skippedIds: string[] = [];
+        let unmatched = 0;
+        let nested = 0;
+
+        for (const row of rows) {
+          nested += countNested(row.props, typeEntityId, fromValueEntityId);
+          const outcome = replaceMetaprops(
+            row.props,
+            typeEntityId,
+            fromValueEntityId,
+            toValueEntityId
+          );
+          if (outcome.outcome === "unmatched") {
+            unmatched++;
+            continue;
+          }
+          if (outcome.outcome === "skipped") {
+            skippedIds.push(row.id);
+            continue;
+          }
+          const { props, items, merged } = outcome;
+          if (!merged && row.id === toValueEntityId) {
+            errors[row.id] = ReplaceReason.isValue;
+            continue;
+          }
+          const model = getEntityClass({ ...row, props });
+          if (!model.canBeEditedByUser(user)) {
+            errors[row.id] = ReplaceReason.denied;
+            continue;
+          }
+          // Y is the only link a rewrite adds and a merge adds none, so this
+          // check stands for the template rule of beforeSave
+          if (!merged && to.isTemplate && !row.isTemplate) {
+            errors[row.id] = ReplaceReason.template;
+            continue;
+          }
+          if (!model.isValid()) {
+            errors[row.id] = ReplaceReason.modelNotValid;
+            continue;
+          }
+          plans.push({ id: row.id, props, before: row.props, items, merged });
+        }
+
+        const answer = (done: typeof plans): IResponseBatchReplace => ({
+          result: done.length > 0,
+          selected: rows.length,
+          unmatched,
+          changed: done.length,
+          merged: done.filter((plan) => plan.merged).length,
+          skipped: skippedIds.length,
+          failed: Object.keys(errors).length,
+          items: done.reduce((sum, plan) => sum + plan.items, 0),
+          nested,
+          errors,
+          skippedIds,
+        });
+
+        if (dryRun) {
+          return answer(plans);
+        }
+
+        // one JSON line per row: util.inspect cuts nested props short, and the
+        // container runtime splits a long log line
+        const logRows = (message: string, rows: typeof plans) =>
+          rows.forEach(({ id, before }) =>
+            console.error(
+              message,
+              JSON.stringify({
+                modelId: id,
+                typeEntityId,
+                fromValueEntityId,
+                toValueEntityId,
+                before,
+              })
+            )
+          );
+
+        const written = new Set<string>();
+        try {
+          const { failed } = await Entity.updateEach(
+            conn,
+            plans.map(({ id, props }) => ({ id, data: { props } }))
+          );
+          const refused = new Set(failed);
+          plans.filter(({ id }) => !refused.has(id)).forEach(({ id }) => written.add(id));
+        } catch (e) {
+          console.error("[batchReplaceMetaprop]: updating the entities failed", e);
+          // the update can throw after storing some rows, so a row stored with
+          // its planned props counts as written; a failed re-read counts none
+          try {
+            const stored = await Entity.findEntitiesByIds(conn, plans.map(({ id }) => id));
+            const storedProps = new Map(stored.map(({ id, props }) => [id, props]));
+            plans
+              .filter(({ id, props }) => isDeepStrictEqual(storedProps.get(id), props))
+              .forEach(({ id }) => written.add(id));
+          } catch (reread) {
+            console.error("[batchReplaceMetaprop]: re-reading the entities failed", reread);
+            logRows(
+              "[batchReplaceMetaprop]: update and re-read failed, rows may be written without audit",
+              plans
+            );
+          }
+        }
+        const done = plans.filter(({ id }) => {
+          if (!written.has(id)) {
+            errors[id] = ReplaceReason.updateFailed;
+            return false;
+          }
+          return true;
+        });
+
+        // the audits are the only record of the metaprops a save rewrote or dropped
+        const audited = await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          done.map(({ id, props, before }) => ({ modelId: id, changes: { props, before } })),
+          EventType.EDIT
+        ).catch((e) => {
+          console.error("[batchReplaceMetaprop]: inserting the audits failed", e);
+          return 0;
+        });
+        if (audited < done.length) {
+          logRows("[batchReplaceMetaprop]: audits not written", done);
+          throw new InternalServerError(
+            "the entities were saved, their audits could not be written"
+          );
+        }
+
+        return answer(done);
       }
     )
   )

@@ -50,4 +50,17 @@ describe("isBatchActionOffered", () => {
   it("replace relation is listed in the menu", () => {
     expect(batchOptions.map((o) => o.value)).toContain(BatchAction.replace_relation);
   });
+
+  it("replace metaproperty is offered to editors and admins, listed right after replace relation", () => {
+    expect(isBatchActionOffered(BatchAction.replace_metaprop, none)).toBe(false);
+    expect(isBatchActionOffered(BatchAction.replace_metaprop, editor)).toBe(true);
+    expect(isBatchActionOffered(BatchAction.replace_metaprop, admin)).toBe(true);
+    const values = batchOptions.map((o) => o.value);
+    expect(values.indexOf(BatchAction.replace_metaprop)).toBe(
+      values.indexOf(BatchAction.replace_relation) + 1
+    );
+    expect(batchOptions.find((o) => o.value === BatchAction.replace_metaprop)?.label).toBe(
+      "replace metaproperty"
+    );
+  });
 });

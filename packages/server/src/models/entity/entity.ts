@@ -207,13 +207,17 @@ export default class Entity implements IEntity, IDbModel {
     const updatedAt = new Date();
     const written = new Set<string>();
     for (const chunk of chunksOf(updates)) {
-      const result = await storage.entities.updateEach(
-        db as Conn,
-        chunk.map(({ id, data }) => ({ id, patch: allowedEntityData({ ...data, updatedAt }) })),
-        { returnChanges: true }
-      );
-      chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
-      writtenIds(result).forEach((id) => written.add(id));
+      try {
+        const result = await storage.entities.updateEach(
+          db as Conn,
+          chunk.map(({ id, data }) => ({ id, patch: allowedEntityData({ ...data, updatedAt }) })),
+          { returnChanges: true }
+        );
+        writtenIds(result).forEach((id) => written.add(id));
+      } finally {
+        // a write that throws may have stored part of the chunk
+        chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
+      }
     }
     return {
       written: updates.filter(({ id }) => written.has(id)).map(({ id }) => id),

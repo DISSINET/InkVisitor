@@ -20,6 +20,8 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - The Entity open in Detail refreshes after an Explorer batch action
 - Batch action **replace relation**: the selected entities related to X become related to Y, with a confirmation that counts what will change; open to editors (#2938)
 - Batch actions and the counter beside them take the selected rows of the current result only; rows ticked under an earlier query are left out, and "copy UUIDs" follows the order of the result (#3474)
+- Batch action **replace metaproperty**: the selected entities' metaprops of type T with value X get value Y, with a confirmation that counts what will change. Where an entity already holds (T, Y), a (T, X) that differs from it in the value alone is removed; one with other settings or subproperties is left, and those entities stay selected. A Value cannot be the new value. Open to editors (#2938)
+- The Explorer cell of Entity Property types adds a type; a type the entity already shows is refused (#2938)
 
 ## Annotator
 
@@ -92,7 +94,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - docker-compose: the `database` service is renamed `rethinkdb` (container `inkvisitor-rethinkdb`), and a `postgres` service is added
 - After the deploy, run `cancelPasswordResetLinksJob` once on every environment (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is covered too
 - After the deploy, on every environment, rebuild the stored anchor trees: `ENV_FILE=<env> pnpm -C packages/server rebuild-anchors --dry-run`, then the same without `--dry-run` (#2033, #3451)
-- After the deploy, on every environment, run `fixEditorEntityAclJob`: it opens `POST /entities/batchReplaceRelation` to editors, who get "Endpoint not allowed" until then. The job gives "editor" back to every route it lists, so a route an admin closed by hand is open again after the run (#2938)
+- After the deploy, on every environment, run `fixEditorEntityAclJob`: it opens `POST /entities/batchReplaceRelation` and `POST /entities/batchReplaceMetaprop` to editors, who get "Endpoint not allowed" until then. The job gives "editor" back to every route it lists, so a route an admin closed by hand is open again after the run (#2938)
 - Once an instance runs a server with #3399, run `removeDeadUserOptionsJob` on it (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is cleaned too. An older server writes `hideStatementElementsOrderTable` again on every user it creates (#3399)
 - Switching an instance to PostgreSQL: run `fixDuplicateRowsJob` ahead of time, stop the API, run `pnpm -C packages/database migrate --db=<name> <env>` and check for `databases match`, then set `DB_ADAPTER=postgres` and the `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASS` block in the server env and start the API. RethinkDB is left untouched for a rollback.
 - `migrate --drop` is renamed `--replace`; the replaced database is kept as `<pg>_replaced_<timestamp>` until dropped by hand (#3402)

@@ -77,3 +77,93 @@ test("replacing a relation in a batch asks for a confirmation and saves", async 
   expect(relations).toHaveLength(1);
   expect(relations[0].entityIds).toEqual([personId, "c3"]);
 });
+
+const propSpec = (entityId: string) => ({
+  entityId,
+  elvl: "3",
+  logic: "1",
+  virtuality: "1",
+  partitivity: "1",
+});
+
+test("replacing a metaprop value in a batch asks for a confirmation and saves", async ({ page }) => {
+  // seeded Concepts: c2 "priest", c3 "occupation"
+  const label = `batch metaprop ${Date.now()}`;
+  const personId = `e2e-metaprop-${Date.now()}`;
+  const created = await page.request.post(`${API}/entities`, {
+    headers: API_HEADERS,
+    data: {
+      id: personId,
+      class: "P",
+      labels: [label],
+      detail: "",
+      status: "1",
+      language: "eng",
+      notes: [],
+      props: [
+        {
+          id: `${personId}-occupation`,
+          elvl: "3",
+          certainty: "0",
+          logic: "1",
+          mood: ["1"],
+          moodvariant: "1",
+          bundleOperator: "a",
+          bundleStart: false,
+          bundleEnd: false,
+          children: [],
+          type: propSpec("c3"),
+          value: propSpec(""),
+        },
+      ],
+      references: [],
+      data: { logicalType: "1" },
+    },
+  });
+  expect(created.ok()).toBeTruthy();
+  const before = await (await page.request.get(`${API}/entities/${personId}`, { headers: API_HEADERS })).json();
+  expect(before.props).toHaveLength(1);
+  const propId = before.props[0].id;
+
+  await page.goto("/explorer");
+  await page.getByPlaceholder("Filter by entity label").fill(label);
+  await page.getByRole("button", { name: "search", exact: true }).click();
+  const rows = page.locator(".qt-row");
+  await expect(rows).toHaveCount(1);
+  await rows.first().locator('[class*="StyledCheckbox"]').first().click();
+
+  // the batch dropdown sits right before the apply button, after the row checkboxes
+  const applyButton = page.getByRole("button", { name: "apply", exact: true });
+  await applyButton.locator("xpath=preceding-sibling::*[1]").getByRole("combobox").click();
+  await page.locator('[role=listbox] [class*="StyledOption"]', { hasText: "replace metaproperty" }).click();
+  await applyButton.click();
+
+  await expect(page.getByText("Replace metaproperty (1 entities)")).toBeVisible();
+  // other seeded labels contain "priest", so the suggestion is picked by its exact label
+  const pick = async (placeholder: string, entityLabel: string) => {
+    await page.getByPlaceholder(placeholder).fill(entityLabel);
+    await page
+      .locator('[class*="StyledSuggestionRow"]')
+      .filter({ has: page.getByText(entityLabel, { exact: true }) })
+      .locator('[class*="StyledSuggestionLineActions"] button')
+      .click();
+  };
+  await pick("select property type", "occupation");
+  await page.getByRole("checkbox", { name: "(empty)" }).click();
+  await pick("select new value", "priest");
+  await page.getByRole("button", { name: "Apply", exact: true }).click();
+
+  await expect(
+    page.getByText(
+      'Fill the empty value of 1 metaprop of type "occupation" with "priest" on 1 of 1 selected entity.'
+    )
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Replace", exact: true }).click();
+  await expect(page.getByText("Replaced on 1 of 1 entities")).toBeVisible();
+
+  const after = await (await page.request.get(`${API}/entities/${personId}`, { headers: API_HEADERS })).json();
+  expect(after.props).toHaveLength(1);
+  expect(after.props[0].id).toBe(propId);
+  expect(after.props[0].type.entityId).toBe("c3");
+  expect(after.props[0].value.entityId).toBe("c2");
+});

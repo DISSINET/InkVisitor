@@ -40,7 +40,7 @@ interface ExplorerBoxProps {
 
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
-  /** When false the replace relation batch action is not offered. */
+  /** When false the replace batch actions are not offered. */
   canBatchReplace?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
@@ -172,6 +172,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
             controls.setIsBatchModalOpen(false);
           }}
           onClearSelection={controls.clearSelection}
+          onSelectOnly={controls.setSelectedEntityIds}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);
             queryClient.invalidateQueries({ queryKey: ["entity"] });
