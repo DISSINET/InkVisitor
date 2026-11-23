@@ -123,8 +123,10 @@ export const BatchActionReplaceMetaprop: React.FC<BatchActionReplaceMetaprop> = 
     if (!confirmedRun) return;
     setPending(true);
     const outcome = await confirmedRun.run.run(call(confirmedRun));
-    setPending(false);
+    // the run answers null while another run of it is pending, and that run
+    // still owns `pending`
     if (!outcome) return;
+    setPending(false);
     const message = batchReplaceToast(outcome, confirmedRun.selectedCount);
     if (outcome.error === undefined && outcome.total.skipped === 0 && outcome.total.failed === 0) {
       toast.success(message);
