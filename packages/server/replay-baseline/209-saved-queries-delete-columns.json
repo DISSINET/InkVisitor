@@ -2,7 +2,7 @@
   "request": {
     "as": "editor",
     "method": "DELETE",
-    "path": "/api/saved-queries/<uuid-14>"
+    "path": "/api/saved-queries/<uuid-8>"
   },
   "response": {
     "status": 200,

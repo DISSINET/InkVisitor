@@ -23,9 +23,9 @@
       "props": [],
       "references": [
         {
-          "id": "<uuid-19>",
+          "id": "<uuid-13>",
           "resource": "dissinet-resource",
-          "value": "<uuid-20>"
+          "value": "<uuid-14>"
         }
       ],
       "right": "admin",

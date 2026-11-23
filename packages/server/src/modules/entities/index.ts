@@ -26,7 +26,7 @@ import {
   IResponseEntityExpansion,
   IResponseGeneric,
   ITerritory,
-  IUser,
+  IResponseQueryUser,
   Relation as RelationType,
   RequestSearch,
   AuditScope,
@@ -61,7 +61,6 @@ import { storage } from "@service/storage";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
-import User from "@models/user/user";
 import { randomUUID } from "crypto";
 import {
   ReplaceReason,
@@ -1927,7 +1926,7 @@ export default Router()
     })
   );
 
-const parseColumnValue = (columnValue: string | IEntity | number | string | IUser) => {
+const parseColumnValue = (columnValue: string | number | IEntity | IResponseQueryUser) => {
   if (typeof columnValue === "string") {
     return columnValue;
   }
@@ -1937,9 +1936,8 @@ const parseColumnValue = (columnValue: string | IEntity | number | string | IUse
   if ("class" in columnValue && "labels" in columnValue) {
     return `(${columnValue.class}):${columnValue.labels[0]}[${columnValue.id}]`;
   }
-  if (columnValue instanceof User) {
+  if ("name" in columnValue) {
     return columnValue.name;
-  } else {
-    return "unknown value";
   }
+  return "unknown value";
 };

@@ -106,7 +106,7 @@
     "status": 200,
     "contentType": "application/json",
     "body": {
-      "tsvText": "result\tcol-edits\tcol-created\tcol-status\tcol-language\tcol-alt-labels\tcol-pos\tcol-detail\tcol-parent-territory\tcol-logical-type\tcol-class\n(P):Minda, the priest[p1]\tapproved\tEnglish\t\t\t\tdefinite\tPerson\n(P):saint Tiger[p11]\tapproved\tEnglish\t\t\t\tdefinite\tPerson\n(P):another priest, mentioned in a different T[p12]\tapproved\tEnglish\t\t\t\tdefinite\tPerson"
+      "tsvText": "result\tcol-edits\tcol-created\tcol-status\tcol-language\tcol-alt-labels\tcol-pos\tcol-detail\tcol-parent-territory\tcol-logical-type\tcol-class\n(P):Minda, the priest[p1]\t\t\tapproved\tEnglish\t\t\t\t\tdefinite\tPerson\n(P):saint Tiger[p11]\t\t\tapproved\tEnglish\t\t\t\t\tdefinite\tPerson\n(P):another priest, mentioned in a different T[p12]\t\t\tapproved\tEnglish\t\t\t\t\tdefinite\tPerson"
     }
   }
 }
