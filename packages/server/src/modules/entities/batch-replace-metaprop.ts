@@ -21,7 +21,9 @@ const settingsOf = (prop: IProp) => ({
 });
 
 /** What replacing (T, X) with (T, Y) among the top-level metaprops of one entity
- * gives. `fromId` "" is the empty value. `props` is read, never changed. */
+ * gives. `fromId` "" is the empty value. `props` is read, never changed.
+ * `fromId` and `toId` differ, which the caller enforces: with them equal, every
+ * childless match would merge with itself and be dropped. */
 export function replaceMetaprops(
   props: IProp[] | undefined,
   typeId: string,

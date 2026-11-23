@@ -21,7 +21,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - Batch action **replace relation**: the selected entities related to X become related to Y, with a confirmation that counts what will change; open to editors (#2938)
 - Batch actions and the counter beside them take the selected rows of the current result only; rows ticked under an earlier query are left out, and "copy UUIDs" follows the order of the result (#3474)
 - Batch action **replace metaproperty**: the selected entities' metaprops of type T with value X get value Y, with a confirmation that counts what will change. Where an entity already holds (T, Y), a (T, X) that differs from it in the value alone is removed; one with other settings or subproperties is left, and those entities stay selected. A Value cannot be the new value. Open to editors (#2938)
-- The Explorer cell of Entity Property types adds a type again; a type the entity already shows is refused (#2938)
+- The Explorer cell of Entity Property types adds a type; a type the entity already shows is refused (#2938)
 
 ## Annotator
 

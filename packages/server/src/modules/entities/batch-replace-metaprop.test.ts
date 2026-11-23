@@ -127,7 +127,7 @@ describe("replaceMetaprops", () => {
       });
     });
 
-    test("Review Focus 2: (T, X) and (U, Z) sharing one id, (U, Z) stays", () => {
+    test("(T, X) and (U, Z) sharing one id, (U, Z) stays", () => {
       const tX = prop(T, X);
       const uZ = prop(U, Z, { id: tX.id });
       const r = changed(replaceMetaprops([tX, uZ], T, X, Y));
@@ -178,7 +178,7 @@ describe("replaceMetaprops", () => {
       });
     });
 
-    test("Review Focus 2: (T, X) and (T, Y) sharing one id, only (T, X) dropped", () => {
+    test("(T, X) and (T, Y) sharing one id, only (T, X) dropped", () => {
       const tX = prop(T, X);
       const tY = prop(T, Y, { id: tX.id });
       expect(changed(replaceMetaprops([tX, tY], T, X, Y)).props).toEqual([tY]);
@@ -220,7 +220,7 @@ describe("replaceMetaprops", () => {
   });
 
   describe("skip, against a (T, Y) of the defaults", () => {
-    test("Review Focus 1: (T, X) with elvl Textual", () => {
+    test("(T, X) with elvl Textual", () => {
       expect(replaceMetaprops([prop(T, X, { elvl: Elvl.Textual }), prop(T, Y)], T, X, Y)).toEqual({
         outcome: "skipped",
       });
@@ -248,7 +248,7 @@ describe("replaceMetaprops", () => {
       expect(replaceMetaprops([tX, prop(T, Y)], T, X, Y)).toEqual({ outcome: "skipped" });
     });
 
-    test("Review Focus 3: one (T, X) droppable, the other with a subproperty", () => {
+    test("one (T, X) droppable, the other with a subproperty", () => {
       const props = [prop(T, X), prop(T, X, { children: [prop(U, Z)] }), prop(T, Y)];
       expect(replaceMetaprops(props, T, X, Y)).toEqual({ outcome: "skipped" });
     });

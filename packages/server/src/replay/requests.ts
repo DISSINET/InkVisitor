@@ -758,7 +758,7 @@ const writes: Step[] = [
   get("admin", "health-after-writes", "/health", health),
 ];
 
-// ---- batch replace relation -----------------------------------------------
+// ---- batch replace relation and metaprop ----------------------------------
 
 // rp-p holds the CLA to c3 that entities-batch-add-relation gave it; rp-c, a
 // Concept, holds none, so the dry run counts changed: 1, unmatched: 1

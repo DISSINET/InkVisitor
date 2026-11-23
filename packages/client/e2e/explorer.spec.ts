@@ -139,7 +139,7 @@ test("replacing a metaprop value in a batch asks for a confirmation and saves", 
   await applyButton.click();
 
   await expect(page.getByText("Replace metaproperty (1 entities)")).toBeVisible();
-  // other seeded labels contain both words, so the suggestion is picked by its exact label
+  // other seeded labels contain "priest", so the suggestion is picked by its exact label
   const pick = async (placeholder: string, entityLabel: string) => {
     await page.getByPlaceholder(placeholder).fill(entityLabel);
     await page
