@@ -1,5 +1,6 @@
 import "ts-jest";
 import { randomUUID } from "crypto";
+import { format } from "util";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId, getAuthenticatedAgent } from "../../test/testAuth";
 import { Db, storage } from "@service/storage";
@@ -658,6 +659,27 @@ describe("Entities batchReplaceMetaprop", () => {
       expect(await auditsOf(refused)).toEqual([]);
     });
 
+    // the text console.error prints for each call whose message is `message`
+    const printed = (logged: jest.SpyInstance, message: string): string[] =>
+      logged.mock.calls.filter(([first]) => first === message).map((call) => format(...call));
+
+    // the line logged for each stored row, in the order of the rows
+    const rowLines = (
+      message: string,
+      { t, x, y }: { t: IEntity; x: IEntity; y: IEntity },
+      stored: [string, IProp[]][]
+    ): string[] =>
+      stored.map(
+        ([modelId, before]) =>
+          `${message} ${JSON.stringify({
+            modelId,
+            typeEntityId: t.id,
+            fromValueEntityId: x.id,
+            toValueEntityId: y.id,
+            before,
+          })}`
+      );
+
     it.each<[string, () => void]>([
       [
         "throws",
@@ -668,14 +690,14 @@ describe("Entities batchReplaceMetaprop", () => {
       "answers 500 when the audit insert %s and logs the props each row held",
       async (_, failAudits) => {
         const { t, x, y } = await tXY();
+        const deep = await makeEntity(Concept);
         const rows = [
-          await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+          await makeEntity(Person, {
+            props: [prop(t.id, x.id, { children: [prop(t.id, deep.id)] })],
+          }),
           await makeEntity(Person, { props: [prop(t.id, x.id, { elvl: Elvl.Textual })] }),
         ];
-        const before: IProp[][] = [];
-        for (const row of rows) {
-          before.push((await propsOf(row)) as IProp[]);
-        }
+        const stored = await propsByIds(ids(...rows));
         const body = {
           entityIds: ids(...rows),
           typeEntityId: t.id,
@@ -691,16 +713,51 @@ describe("Entities batchReplaceMetaprop", () => {
         for (const row of rows) {
           expect((await propsOf(row))?.[0].value?.entityId).toBe(y.id);
         }
-        expect(logged).toHaveBeenCalledWith(
-          "[batchReplaceMetaprop]: audits not written",
-          rows.map((row, i) => ({ modelId: row.id, before: before[i] }))
-        );
+        const message = "[batchReplaceMetaprop]: audits not written";
+        const lines = printed(logged, message);
+        expect(lines).toEqual(rowLines(message, { t, x, y }, stored));
+        // the value of a subproperty, past the depth util.inspect prints
+        expect(lines[0]).toContain(deep.id);
 
         const again = await save(body);
 
         expect(again.body).toMatchObject({ selected: 2, unmatched: 2, changed: 0 });
       }
     );
+
+    it("logs the props each planned row held when the update and its re-read both throw", async () => {
+      const { t, x, y } = await tXY();
+      const rows = [
+        await makeEntity(Person, { props: [prop(t.id, x.id)] }),
+        await makeEntity(Person, { props: [prop(t.id, x.id, { elvl: Elvl.Textual })] }),
+      ];
+      const stored = await propsByIds(ids(...rows));
+      jest.spyOn(Entity, "updateEach").mockImplementationOnce(async () => {
+        // the next read is the route's re-read of the rows it meant to write
+        jest.spyOn(Entity, "findEntitiesByIds").mockRejectedValueOnce(new Error("re-read refused"));
+        throw new Error("update refused");
+      });
+      const logged = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+      const res = await save({
+        entityIds: ids(...rows),
+        typeEntityId: t.id,
+        fromValueEntityId: x.id,
+        toValueEntityId: y.id,
+      });
+
+      expect(res.body).toMatchObject({ changed: 0, failed: 2 });
+      expect(res.body.errors).toEqual({
+        [rows[0].id]: ReplaceReason.updateFailed,
+        [rows[1].id]: ReplaceReason.updateFailed,
+      });
+      for (const row of rows) {
+        expect(await auditsOf(row)).toEqual([]);
+      }
+      const message =
+        "[batchReplaceMetaprop]: update and re-read failed, rows may be written without audit";
+      expect(printed(logged, message)).toEqual(rowLines(message, { t, x, y }, stored));
+    });
   });
 
   // createMockTree empties the entities table, so this block runs last

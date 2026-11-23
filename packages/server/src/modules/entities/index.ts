@@ -1844,6 +1844,22 @@ export default Router()
           return answer(plans);
         }
 
+        // one JSON line per row: util.inspect cuts nested props short, and the
+        // container runtime splits a long log line
+        const logRows = (message: string, rows: typeof plans) =>
+          rows.forEach(({ id, before }) =>
+            console.error(
+              message,
+              JSON.stringify({
+                modelId: id,
+                typeEntityId,
+                fromValueEntityId,
+                toValueEntityId,
+                before,
+              })
+            )
+          );
+
         const written = new Set<string>();
         try {
           const { failed } = await Entity.updateEach(
@@ -1864,6 +1880,10 @@ export default Router()
               .forEach(({ id }) => written.add(id));
           } catch (reread) {
             console.error("[batchReplaceMetaprop]: re-reading the entities failed", reread);
+            logRows(
+              "[batchReplaceMetaprop]: update and re-read failed, rows may be written without audit",
+              plans
+            );
           }
         }
         const done = plans.filter(({ id }) => {
@@ -1885,10 +1905,7 @@ export default Router()
           return 0;
         });
         if (audited < done.length) {
-          console.error(
-            "[batchReplaceMetaprop]: audits not written",
-            done.map(({ id, before }) => ({ modelId: id, before }))
-          );
+          logRows("[batchReplaceMetaprop]: audits not written", done);
           throw new InternalServerError(
             "the entities were saved, their audits could not be written"
           );
