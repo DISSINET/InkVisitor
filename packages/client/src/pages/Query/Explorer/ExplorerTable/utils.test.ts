@@ -5,6 +5,7 @@ import {
   fillColumnWidths,
   getTagLabelMaxWidth,
   hasPropPair,
+  hasPropType,
   hasReferencePair,
   withoutNthPropPair,
   withoutNthReferencePair,
@@ -86,6 +87,25 @@ describe("value column props", () => {
     // no third prop of the pair, so nothing goes
     expect(ids(2)).toEqual(["p1", "p2", "p3", "p4"]);
     expect(withoutNthPropPair(props, "represents", "r1", 0)[2].children).toHaveLength(1);
+  });
+});
+
+describe("prop types column props", () => {
+  it("finds a type among the top-level props", () => {
+    expect(hasPropType([prop("p1", "represents", "r1")], "represents")).toBe(true);
+  });
+
+  it("finds a type among the subproperties, at the 2nd and the 3rd level", () => {
+    const second = [prop("p2", "represents", "r1")];
+    const third = [prop("p2", "mentions", "r1", [prop("p3", "represents", "r1")])];
+    expect(hasPropType([prop("p1", "mentions", "r1", second)], "represents")).toBe(true);
+    expect(hasPropType([prop("p1", "mentions", "r1", third)], "represents")).toBe(true);
+  });
+
+  it("does not count the id as a value or another type", () => {
+    const props = [prop("p1", "mentions", "represents", [prop("p2", "other", "represents")])];
+    expect(hasPropType(props, "represents")).toBe(false);
+    expect(hasPropType([], "represents")).toBe(false);
   });
 });
 

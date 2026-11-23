@@ -176,6 +176,11 @@ const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
 export const hasPropPair = (props: IProp[], typeId: string, valueId: string): boolean =>
   props.some((prop) => isPropPair(prop, typeId, valueId));
 
+/** whether a metaprop of `typeId` sits anywhere in `props`, subproperties included,
+ * as the Entity Property types column lists them */
+export const hasPropType = (props: IProp[], typeId: string): boolean =>
+  props.some((prop) => prop.type?.entityId === typeId || hasPropType(prop.children, typeId));
+
 /** `props` without the `occurrence`-th top-level metaprop of `typeId` whose value is `valueId` */
 export const withoutNthPropPair = (
   props: IProp[],

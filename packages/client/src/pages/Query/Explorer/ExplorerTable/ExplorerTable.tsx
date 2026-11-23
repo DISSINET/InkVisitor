@@ -38,6 +38,7 @@ import {
   fillColumnWidths,
   getColumnWidth,
   hasPropPair,
+  hasPropType,
   hasReferencePair,
 } from "./utils";
 
@@ -232,6 +233,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           case Explore.EExploreColumnType.EPT: {
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPT>;
+
+            if (hasPropType(rowEntity.props, newEntity.id)) {
+              toastAlreadyInColumn(rowEntity, newEntity, column);
+              break;
+            }
 
             const newProp: IProp = CMetaProp({
               typeEntityId: newEntity.id,

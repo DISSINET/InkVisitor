@@ -41,10 +41,12 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   const { data: users } = useUsersSimplifiedQuery();
   const userName = users?.find((u) => u.id === user)?.name;
 
+  // `before` holds the stored value an edit replaced, not a field it changed
+  const keys = Object.keys(changes).filter((key) => key !== "before");
   const changedKeys =
-    Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
+    keys.length === 1 && keys[0] === "data"
       ? Object.keys((changes as { data: object }).data)
-      : Object.keys(changes);
+      : keys;
 
   const today = new Date().setHours(0, 0, 0, 0);
 
