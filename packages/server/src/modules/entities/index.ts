@@ -36,7 +36,10 @@ import {
   IRequestBatchReplaceMetaprop,
   IResponseBatchReplace,
 } from "@inkvisitor/shared/types";
-import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
+import {
+  MAX_BATCH_REPLACE_ENTITIES,
+  MAX_BATCH_REPLACE_METAPROP_ENTITIES,
+} from "@inkvisitor/shared/constants";
 import {
   AuditDoesNotExist,
   BadParams,
@@ -1748,8 +1751,10 @@ export default Router()
         if (fromValueEntityId === toValueEntityId) {
           throw new BadParams("fromValueEntityId and toValueEntityId must differ");
         }
-        if (ids.length > MAX_BATCH_REPLACE_ENTITIES) {
-          throw new BadParams(`at most ${MAX_BATCH_REPLACE_ENTITIES} entities in one request`);
+        if (ids.length > MAX_BATCH_REPLACE_METAPROP_ENTITIES) {
+          throw new BadParams(
+            `at most ${MAX_BATCH_REPLACE_METAPROP_ENTITIES} entities in one request`
+          );
         }
 
         if (!dryRun) {

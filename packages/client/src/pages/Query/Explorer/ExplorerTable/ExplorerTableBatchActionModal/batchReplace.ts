@@ -57,10 +57,13 @@ export interface BatchReplaceRun {
   run(call: (ids: string[]) => Promise<IResponseBatchReplace>): Promise<BatchReplaceOutcome | null>;
 }
 
-/** One selection, fixed at creation, sent in order. A call made while another
- * is pending resolves to null and sends nothing. */
-export const createBatchReplaceRun = (ids: string[]): BatchReplaceRun => {
-  const chunks = chunkIds([...ids]);
+/** One selection, fixed at creation, sent in order in requests of `size` ids. A
+ * call made while another is pending resolves to null and sends nothing. */
+export const createBatchReplaceRun = (
+  ids: string[],
+  size: number = MAX_BATCH_REPLACE_ENTITIES
+): BatchReplaceRun => {
+  const chunks = chunkIds([...ids], size);
   let pending = false;
   return {
     chunks,

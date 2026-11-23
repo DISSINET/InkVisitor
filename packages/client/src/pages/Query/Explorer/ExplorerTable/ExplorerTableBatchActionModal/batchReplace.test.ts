@@ -75,6 +75,16 @@ describe("sumBatchReplace", () => {
 });
 
 describe("createBatchReplaceRun", () => {
+  it("splits at the request limit", () => {
+    expect(createBatchReplaceRun(ids(2500)).chunks.map((c) => c.length)).toEqual([1000, 1000, 500]);
+  });
+
+  it("splits at a given size", () => {
+    expect(createBatchReplaceRun(ids(450), 200).chunks.map((c) => c.length)).toEqual([
+      200, 200, 50,
+    ]);
+  });
+
   it("keeps the chunks fixed when the source array changes", () => {
     const source = ids(1500);
     const run = createBatchReplaceRun(source);

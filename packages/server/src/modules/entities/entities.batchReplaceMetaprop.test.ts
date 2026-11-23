@@ -19,7 +19,7 @@ import {
   IRequestBatchReplaceMetaprop,
 } from "@inkvisitor/shared/types";
 import { EventType } from "@inkvisitor/shared/types/stats";
-import { MAX_BATCH_REPLACE_ENTITIES } from "@inkvisitor/shared/constants";
+import { MAX_BATCH_REPLACE_METAPROP_ENTITIES } from "@inkvisitor/shared/constants";
 import { ReplaceReason } from "./batch-replace-relation";
 
 const { Concept, Person, Resource, Statement, Value } = EntityEnums.Class;
@@ -385,9 +385,11 @@ describe("Entities batchReplaceMetaprop", () => {
       ["X equal to Y", () => ({ toValueEntityId: x.id })],
       ["an entity id that is not a string", () => ({ entityIds: ["a", 5] as unknown as string[] })],
       [
-        `${MAX_BATCH_REPLACE_ENTITIES + 1} ids`,
+        `${MAX_BATCH_REPLACE_METAPROP_ENTITIES + 1} ids`,
         () => ({
-          entityIds: Array.from({ length: MAX_BATCH_REPLACE_ENTITIES + 1 }, () => randomUUID()),
+          entityIds: Array.from({ length: MAX_BATCH_REPLACE_METAPROP_ENTITIES + 1 }, () =>
+            randomUUID()
+          ),
         }),
       ],
       ["a Value as Y", () => ({ toValueEntityId: value.id })],
@@ -406,6 +408,15 @@ describe("Entities batchReplaceMetaprop", () => {
 
     it.each<[string, () => Body]>([
       ["every row", () => ({ entityIds: [`brm-missing-${randomUUID()}`] })],
+      [
+        `every row of ${MAX_BATCH_REPLACE_METAPROP_ENTITIES} ids`,
+        () => ({
+          entityIds: Array.from(
+            { length: MAX_BATCH_REPLACE_METAPROP_ENTITIES },
+            () => `brm-missing-${randomUUID()}`
+          ),
+        }),
+      ],
       ["a Y", () => ({ toValueEntityId: `brm-missing-${randomUUID()}` })],
     ])("refuses %s that does not exist as not found", async (_, override) => {
       const res = await replace({

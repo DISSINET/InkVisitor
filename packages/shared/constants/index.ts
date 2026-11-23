@@ -13,6 +13,15 @@ export const MAX_DOCUMENTS_EXPORT_BATCH = 50;
 export const MAX_BATCH_REPLACE_ENTITIES = 1000;
 
 /**
+ * Upper bound on entity ids in one batch metaprop replace request. The server
+ * refuses a longer list and the client splits a larger selection into requests
+ * of this size. RethinkDB rewrites every index of an entity row on update,
+ * about 8 ms a row, so 200 rows and their audits fit well inside the 15 s the
+ * client waits.
+ */
+export const MAX_BATCH_REPLACE_METAPROP_ENTITIES = 200;
+
+/**
  * Bounds on a saved query's stored tree, checked in SavedQuery.isValid. The
  * tree is client-supplied JSON that any logged-in user may POST and that a
  * shared query then serves to everyone, and the request body limit is 150mb -
