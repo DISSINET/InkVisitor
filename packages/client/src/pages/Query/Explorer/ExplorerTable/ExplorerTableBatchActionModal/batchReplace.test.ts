@@ -307,7 +307,7 @@ describe("metaprop replace", () => {
           'Fill the empty value of 340 metaprops of type "office" with "archbishop" on 290 of 300 selected entities.',
         notes: [
           '4 of them already have "office" "archbishop". Their "office" without a value is removed there.',
-          '3 selected entities already have "office" "archbishop", but their "office" without a value has other settings (such as elvl or certainty) or subproperties. They stay as they are and stay selected; remove it there in Detail.',
+          '3 selected entities already have "office" "archbishop", but their "office" without a value has other settings (such as elvl or certainty) or subproperties. They stay as they are and stay selected; remove "office" without a value there in Detail.',
           '5 selected entities have no "office" without a value and stay as they are.',
           '7 subproperties of type "office" without a value stay empty; they are not replaced.',
           "2 cannot change: 1x cannot use template in entity instance, 1x permission denied.",
@@ -360,7 +360,7 @@ describe("metaprop replace", () => {
           'Fill the empty value of 1 metaprop of type "office" with "archbishop" on 1 of 3 selected entities.',
         notes: [
           '1 of them already has "office" "archbishop". Its "office" without a value is removed there.',
-          '1 selected entity already has "office" "archbishop", but its "office" without a value has other settings (such as elvl or certainty) or subproperties. It stays as it is and stays selected; remove it there in Detail.',
+          '1 selected entity already has "office" "archbishop", but its "office" without a value has other settings (such as elvl or certainty) or subproperties. It stays as it is and stays selected; remove "office" without a value there in Detail.',
           '1 selected entity has no "office" without a value and stays as it is.',
           '1 subproperty of type "office" without a value stays empty; it is not replaced.',
         ],

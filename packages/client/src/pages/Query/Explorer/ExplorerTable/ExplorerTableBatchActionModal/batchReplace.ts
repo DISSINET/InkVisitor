@@ -170,11 +170,10 @@ export const metapropReplaceLines = (
   }
   if (skipped > 0) {
     const held = from === null ? `"${type}" without a value` : `"${from}"`;
-    const remove = from === null ? "it" : `"${from}"`;
     notes.push(
       skipped === 1
-        ? `1 selected entity already has "${type}" "${to}", but its ${held} has other settings (such as elvl or certainty) or subproperties. It stays as it is and stays selected; remove ${remove} there in Detail.`
-        : `${skipped} selected entities already have "${type}" "${to}", but their ${held} has other settings (such as elvl or certainty) or subproperties. They stay as they are and stay selected; remove ${remove} there in Detail.`
+        ? `1 selected entity already has "${type}" "${to}", but its ${held} has other settings (such as elvl or certainty) or subproperties. It stays as it is and stays selected; remove ${held} there in Detail.`
+        : `${skipped} selected entities already have "${type}" "${to}", but their ${held} has other settings (such as elvl or certainty) or subproperties. They stay as they are and stay selected; remove ${held} there in Detail.`
     );
   }
   if (unmatched > 0) {
