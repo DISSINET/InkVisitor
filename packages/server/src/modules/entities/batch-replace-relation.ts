@@ -3,9 +3,9 @@ import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 
 type Rel = RelationTypes.IRelation;
 
-/** Why a matched row is counted as failed, as the batch replace answer lists it
- * per entity id: refused before any write, or left with its old relation by a
- * write that did not go through. */
+/** Why a matched row is counted as failed, as the relation or metaprop replace
+ * answer lists it per entity id: refused before any write, or left with its old
+ * relation or metaprops by a write that did not go through. */
 export const ReplaceReason = {
   denied: "permission denied",
   isTarget: "is the new target itself",
@@ -13,6 +13,10 @@ export const ReplaceReason = {
   cycle: "would create a cycle",
   insertFailed: "update failed",
   bothKept: "the new relation is in place, removing the old one failed",
+  isValue: "is the new value itself",
+  template: "cannot use template in entity instance",
+  modelNotValid: "model not valid",
+  updateFailed: "update failed",
 } as const;
 
 const isAsymmetrical = (type: RelationEnums.Type): boolean =>
