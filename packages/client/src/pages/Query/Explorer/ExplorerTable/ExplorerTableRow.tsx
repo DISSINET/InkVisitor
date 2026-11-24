@@ -8,12 +8,12 @@ import {
   actionPartOfSpeechDict,
   actantLogicalTypeDict,
 } from "@inkvisitor/shared/dictionaries";
-import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQueryEntity, IResponseQueryUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
-import { deleteProp, deleteRef } from "constructors";
+import { deleteProp } from "constructors";
 import { useOrderedLanguageDict } from "hooks/react-query";
 
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -39,7 +39,13 @@ import {
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { isReadOnlyColumn, wideColumnTypes } from "./types";
-import { getColumnWidth } from "./utils";
+import {
+  getColumnWidth,
+  getTagLabelMaxWidth,
+  withoutNthPropPair,
+  withoutNthReferencePair,
+  withoutNthReferenceTo,
+} from "./utils";
 
 const EditableCellValue: React.FC<{
   value: string;
@@ -207,6 +213,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -256,7 +263,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   };
 
   const handleUnlinkEntity = React.useCallback(
-    async (sourceEntity: IEntity, entityToRemove: IEntity, columnId: string) => {
+    async (
+      sourceEntity: IEntity,
+      entityToRemove: IEntity,
+      columnId: string,
+      occurrence: number,
+    ) => {
       const column = columns.find((column) => column.id === columnId);
 
       if (column?.type === Explore.EExploreColumnType.EPT) {
@@ -273,40 +285,44 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
 
       if (column?.type === Explore.EExploreColumnType.EPV) {
-        const newEntity = deleteProp(sourceEntity, {
-          valueEntityId: entityToRemove.id,
-        });
-
+        const { propertyType } = column.params as Explore.IExploreColumnParamsEPV;
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            props: newEntity.props,
+            props: withoutNthPropPair(
+              sourceEntity.props,
+              propertyType,
+              entityToRemove.id,
+              occurrence,
+            ),
           },
         });
       }
 
       if (column?.type === Explore.EExploreColumnType.ERV) {
-        const newEntity = deleteRef(sourceEntity, {
-          valueId: entityToRemove.id,
-        });
-
+        const { resource } = column.params as Explore.IExploreColumnParamsERV;
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            references: newEntity.references,
+            references: withoutNthReferencePair(
+              sourceEntity.references,
+              resource,
+              entityToRemove.id,
+              occurrence,
+            ),
           },
         });
       }
 
       if (column?.type === Explore.EExploreColumnType.ERR) {
-        const newEntity = deleteRef(sourceEntity, {
-          resourceId: entityToRemove.id,
-        });
-
         updateEntityMutation.mutate({
           entityId: sourceEntity.id,
           changes: {
-            references: newEntity.references,
+            references: withoutNthReferenceTo(
+              sourceEntity.references,
+              entityToRemove.id,
+              occurrence,
+            ),
           },
         });
       }
@@ -337,9 +353,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const renderCellValue = React.useCallback(
     (
-      cellValue: IEntity | number | string | IUser,
+      cellValue: IEntity | number | string | IResponseQueryUser,
       recordEntity: IEntity,
-      column: Explore.IExploreColumn
+      column: Explore.IExploreColumn,
+      // how many tags of the same entity come before this one in the cell
+      occurrence = 0
     ): React.ReactElement => {
       if (typeof (cellValue as IEntity)?.class !== "undefined") {
         return (
@@ -347,20 +365,28 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             <EntityTag
               entity={cellValue as IEntity}
               fullWidth={wideColumnTypes.has(column.type)}
+              tagMaxWidth={
+                wideColumnTypes.has(column.type)
+                  ? undefined
+                  : getTagLabelMaxWidth(
+                      column,
+                      columnWidths[column.id] ?? getColumnWidth(column.type),
+                      CELL_DISPLAY_LIMIT,
+                    )
+              }
               onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
               unlinkButton={
                 isColumnEditable(column) && {
                   onClick: () => {
-                    handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id);
+                    handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id, occurrence);
                   },
                 }
               }
             />
           </span>
         );
-      } else if (typeof (cellValue as IUser)?.email !== "undefined") {
-        // is type IUser[]
-        return <UserTag userId={(cellValue as IUser).id} />;
+      } else if (column.type === Explore.EExploreColumnType.EUC && cellValue) {
+        return <UserTag userId={(cellValue as IResponseQueryUser).id} />;
       } else {
         if (isColumnEditable(column)) {
           if (column.type === Explore.EExploreColumnType.ELI) {
@@ -493,13 +519,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       updateEntityMutation,
       orderedLanguageDict,
       isColumnEditable,
+      columnWidths,
     ]
   );
 
   const renderCell = React.useCallback(
     (
       recordEntity: IEntity,
-      cellData: IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[],
+      cellData: IResponseQueryEntity["columnData"][string],
       column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
@@ -508,11 +535,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
+                const id = (cellEntity as IEntity)?.id;
+                const occurrence = id
+                  ? cellData.slice(0, key).filter((item) => (item as IEntity)?.id === id).length
+                  : 0;
                 return (
-                  <React.Fragment
-                    key={(cellEntity as IEntity)?.id ? (cellEntity as IEntity).id : key}
-                  >
-                    {renderCellValue(cellEntity, recordEntity, column)}
+                  <React.Fragment key={id ? `${id}-${occurrence}` : key}>
+                    {renderCellValue(cellEntity, recordEntity, column, occurrence)}
                   </React.Fragment>
                 );
               })}

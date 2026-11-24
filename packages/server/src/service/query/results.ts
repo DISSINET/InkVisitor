@@ -5,8 +5,15 @@ import Statement from "@models/statement/statement";
 import treeCache from "@service/treeCache";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
-import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IStatement, ITerritory, IUser, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import {
+  IEntity,
+  IResponseQueryEntity,
+  IResponseQueryUser,
+  IStatement,
+  ITerritory,
+  Relation as RelationTypes,
+} from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Conn, storage } from "@service/storage";
@@ -29,10 +36,13 @@ export interface IColumnsContext {
   usedInTerritories: Record<string, IEntity[]>;
   /** every entity a column of the page points at, by id */
   entities: Map<string, IEntity>;
-  /** ER column id -> row entity id -> ids linked in the column's direction, in relation order */
+  /**
+   * ER and EPO column id -> row entity id -> the ids the column links the row to: in the
+   * relation's direction and relation order (ER), or the prop origins in storage order (EPO)
+   */
   related: Map<string, Map<string, string[]>>;
   /** row entity id -> the user behind its first audit */
-  creators: Map<string, IUser>;
+  creators: Map<string, IResponseQueryUser>;
 }
 
 /** the territory a territory hangs under or a statement is placed in */
@@ -57,13 +67,15 @@ function linkedIds(
     // Entity Property value
     case Explore.EExploreColumnType.EPV: {
       const { propertyType } = column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
-      const ids = new Set<string>();
+      // one id per prop, in props order and with repeats, so the client can tell which
+      // prop a tag stands for by counting the tags with the same id before it
+      const ids: string[] = [];
       for (const prop of entity.props) {
         if (prop.type.entityId === propertyType && prop.value && prop.value.entityId) {
-          ids.add(prop.value.entityId);
+          ids.push(prop.value.entityId);
         }
       }
-      return [...ids];
+      return ids;
     }
     // Entity Reference Resources
     case Explore.EExploreColumnType.ERR:
@@ -71,19 +83,21 @@ function linkedIds(
     // Entity Reference Values
     case Explore.EExploreColumnType.ERV: {
       const { resource } = column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
-      const ids = new Set<string>();
+      // one id per reference, in references order and with repeats, as for EPV
+      const ids: string[] = [];
       for (const reference of entity.references) {
         if (reference.resource === resource && reference.value) {
-          ids.add(reference.value);
+          ids.push(reference.value);
         }
       }
-      return [...ids];
+      return ids;
     }
     // Entity Property types
     case Explore.EExploreColumnType.EPT:
       return Entity.extractIdsFromProps(entity.props, [PropSpecKind.TYPE]);
-    // Entity Relations
+    // Entity Relations, Entity Property origins
     case Explore.EExploreColumnType.ER:
+    case Explore.EExploreColumnType.EPO:
       return related.get(column.id)?.get(entity.id) ?? [];
     // Entity Parent Territory
     case Explore.EExploreColumnType.EPRT: {
@@ -126,17 +140,47 @@ function relatedIds(
   return out;
 }
 
+/**
+ * row id -> the entities among `holders` with a top-level prop of `propertyType` whose value is
+ * the row, each once in holders order
+ */
+function propOrigins(
+  rowIds: string[],
+  holders: IEntity[],
+  propertyType: string
+): Map<string, string[]> {
+  const rows = new Set(rowIds);
+  const linked = new Map<string, Set<string>>();
+  for (const holder of holders) {
+    for (const prop of holder.props) {
+      const valueId = prop.value?.entityId;
+      if (prop.type?.entityId !== propertyType || !valueId || !rows.has(valueId)) {
+        continue;
+      }
+      const ids = linked.get(valueId) ?? new Set<string>();
+      linked.set(valueId, ids);
+      ids.add(holder.id);
+    }
+  }
+  const out = new Map<string, string[]>();
+  for (const [rowId, ids] of linked) {
+    out.set(rowId, [...ids]);
+  }
+  return out;
+}
+
 /** row id -> the user behind its first audit, for the rows whose audit and user both exist */
-async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Map<string, IUser>> {
+async function firstAuditUsers(db: Conn, rowIds: string[]): Promise<Map<string, IResponseQueryUser>> {
   const audits = await Audit.getFirstForEntities(db, rowIds);
-  const users = new Map<string, IUser | null>();
-  const out = new Map<string, IUser>();
+  const users = new Map<string, IResponseQueryUser | null>();
+  const out = new Map<string, IResponseQueryUser>();
   for (const audit of audits) {
     if (!audit.user) {
       continue;
     }
     if (!users.has(audit.user)) {
-      users.set(audit.user, await User.findUserById(db, audit.user));
+      const user = await User.findUserById(db, audit.user);
+      users.set(audit.user, user && { id: user.id, name: user.name });
     }
     const user = users.get(audit.user);
     if (user) {
@@ -344,6 +388,27 @@ export default class Results<T extends { id: string }> {
       }
     }
 
+    const originColumns = columnsData.filter(
+      (column) => column.type === Explore.EExploreColumnType.EPO
+    );
+    if (originColumns.length) {
+      // the index holds every id in an entity's props at any level, so one read finds the
+      // holders for every EPO column; propOrigins keeps only the matching top-level props
+      const holders: IEntity[] = await storage.entities.byIndex(
+        db,
+        DbEnums.Indexes.PropsRecursive,
+        rowIds
+      );
+      for (const column of originColumns) {
+        const { propertyType } =
+          column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPO>;
+        context.related.set(column.id, propOrigins(rowIds, holders, propertyType));
+      }
+      for (const holder of holders) {
+        context.entities.set(holder.id, holder);
+      }
+    }
+
     const linked = new Set<string>();
     for (const entity of entities) {
       for (const column of columnsData) {
@@ -354,7 +419,8 @@ export default class Results<T extends { id: string }> {
         }
       }
     }
-    for (const entity of await Entity.findEntitiesByIds(db, [...linked])) {
+    const missing = [...linked].filter((id) => !context.entities.has(id));
+    for (const entity of await Entity.findEntitiesByIds(db, missing)) {
       context.entities.set(entity.id, entity);
     }
 
@@ -414,11 +480,8 @@ export default class Results<T extends { id: string }> {
     entity: IEntity,
     columnsData: Explore.IExploreColumn[],
     context: IColumnsContext
-  ): Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]> {
-    const out: Record<
-      string,
-      IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
-    > = {};
+  ): IResponseQueryEntity["columnData"] {
+    const out: IResponseQueryEntity["columnData"] = {};
     // input order and repeats kept, ids without an entity dropped, as findEntitiesByIds returns them
     const linkedEntities = (column: Explore.IExploreColumn): IEntity[] =>
       linkedIds(entity, column, context.related)
@@ -431,6 +494,7 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ERR:
         case Explore.EExploreColumnType.ERV:
         case Explore.EExploreColumnType.EPT:
+        case Explore.EExploreColumnType.EPO:
         case Explore.EExploreColumnType.ER: {
           out[column.id] = linkedEntities(column);
           break;

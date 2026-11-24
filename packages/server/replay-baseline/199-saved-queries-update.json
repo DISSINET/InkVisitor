@@ -2,7 +2,7 @@
   "request": {
     "as": "editor",
     "method": "PUT",
-    "path": "/api/saved-queries/<uuid-12>",
+    "path": "/api/saved-queries/<uuid-6>",
     "body": {
       "name": "Replay private renamed",
       "shared": true
@@ -51,7 +51,7 @@
             "type": "Entity"
           }
         },
-        "id": "<uuid-12>",
+        "id": "<uuid-6>",
         "name": "Replay private renamed",
         "ownerId": "3",
         "shared": true

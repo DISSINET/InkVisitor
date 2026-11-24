@@ -25,7 +25,7 @@
           ]
         },
         "date": "<datetime>",
-        "id": "<uuid-11>",
+        "id": "<uuid-5>",
         "modelId": "doc-replay",
         "type": "anchor_delete",
         "user": "1"

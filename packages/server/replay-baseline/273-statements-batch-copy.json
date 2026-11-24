@@ -12,8 +12,8 @@
     "contentType": "application/json",
     "body": {
       "data": [
-        "<uuid-21>",
-        "<uuid-22>"
+        "<uuid-15>",
+        "<uuid-16>"
       ],
       "message": "2 statements have been copied under 'replay territory'",
       "result": true

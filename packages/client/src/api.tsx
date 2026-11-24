@@ -43,7 +43,14 @@ import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { defaultPing } from "Theme/constants";
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
@@ -72,6 +79,11 @@ import {
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
+}
+
+// marks the single retry of a GET that came back as HTML, so it is never retried again
+interface HtmlRetryConfig extends InternalAxiosRequestConfig {
+  htmlRetried?: boolean;
 }
 
 // Mirrors @service/dbStats.IDbStats on the server side.
@@ -239,13 +251,13 @@ class Api {
         config.headers["x-inkvisitor-request-id"] = uuidv4();
       }
 
-      // Bust browser/proxy cache for URLs that previously returned HTML
+      // A proxy error page sent as a cacheable 200 stays in the browser cache under
+      // the request URL. no-cache on that same URL skips the stored copy and stores
+      // the fresh response over it; a cache-busting query param would leave it there.
       const path = config.url || "";
       if (this.poisonedPaths.has(path)) {
         config.headers["Cache-Control"] = "no-cache";
         config.headers["Pragma"] = "no-cache";
-        const separator = path.includes("?") ? "&" : "?";
-        config.url = `${path}${separator}_cb=${Date.now()}`;
       }
 
       return config;
@@ -317,7 +329,7 @@ class Api {
    * Axios then leaves the raw string in response.data (silent JSON parse). Callers assume
    * objects and crash — coerce that to a failed request instead.
    */
-  private rejectIfNonJsonApiBody(response: AxiosResponse): AxiosResponse | Promise<never> {
+  private rejectIfNonJsonApiBody(response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> {
     const rt = response.config?.responseType;
     if (rt === "blob" || rt === "arraybuffer" || rt === "document" || rt === "stream") {
       return response;
@@ -342,6 +354,18 @@ class Api {
     ) {
       this.captureHtmlResponse(response);
       this.poisonedPaths.add(response.config?.url || "");
+
+      // The HTML may be a stale copy from the browser cache. One immediate GET retry
+      // goes out with no-cache (see the request interceptor), so a healthy server
+      // answers it and its response replaces the cached copy for later page loads.
+      const config = response.config as HtmlRetryConfig | undefined;
+      if (config && config.method === "get" && !config.htmlRetried) {
+        const headers = new AxiosHeaders(config.headers);
+        // the retry is a separate request in proxy and server logs, so it gets its own id
+        headers.delete("x-inkvisitor-request-id");
+        return this.connection.request({ ...config, headers, htmlRetried: true } as HtmlRetryConfig);
+      }
+
       toast.error(
         <ErrorToast
           title={errors.HtmlResponseError.title}

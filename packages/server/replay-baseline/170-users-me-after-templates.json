@@ -62,7 +62,6 @@
         "geocoding": {
           "context": {}
         },
-        "hideStatementElementsOrderTable": false,
         "promotedTemplateClass": "C",
         "searchLanguages": [
           "eng"

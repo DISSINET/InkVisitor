@@ -998,35 +998,8 @@
             "col-cla-inverse": [],
             "col-class": "Location",
             "col-created-by": {
-              "active": true,
-              "bookmarks": [],
-              "email": "admin@admin.com",
-              "hash": "",
               "id": "1",
-              "name": "admin",
-              "options": {
-                "askBeforePropDelete": true,
-                "defaultLanguage": "",
-                "defaultStatementLanguage": "",
-                "defaultTerritory": "",
-                "geocoding": {
-                  "context": {}
-                },
-                "hideStatementElementsOrderTable": false,
-                "promotedTemplateClass": "*",
-                "searchLanguages": [],
-                "starredTemplates": [],
-                "workingLanguages": []
-              },
-              "rights": [
-                {
-                  "mode": "admin",
-                  "territory": "T0"
-                }
-              ],
-              "role": "admin",
-              "storedTerritories": [],
-              "verified": true
+              "name": "admin"
             },
             "col-detail": "",
             "col-language": "Latin",
@@ -1061,7 +1034,7 @@
                 "createdAt": "<datetime>",
                 "data": {},
                 "detail": "",
-                "id": "<uuid-20>",
+                "id": "<uuid-14>",
                 "isTemplate": false,
                 "labels": [
                   "page 12"
@@ -1093,9 +1066,9 @@
             "props": [],
             "references": [
               {
-                "id": "<uuid-19>",
+                "id": "<uuid-13>",
                 "resource": "dissinet-resource",
-                "value": "<uuid-20>"
+                "value": "<uuid-14>"
               }
             ],
             "status": "1",

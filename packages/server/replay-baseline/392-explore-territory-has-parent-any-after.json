@@ -242,7 +242,7 @@
               }
             },
             "detail": "",
-            "id": "<uuid-37>",
+            "id": "<uuid-31>",
             "labels": [
               "COPY OF replay territory"
             ],
@@ -261,35 +261,8 @@
             "col-cla-inverse": [],
             "col-class": "Territory",
             "col-created-by": {
-              "active": true,
-              "bookmarks": [],
-              "email": "admin@admin.com",
-              "hash": "",
               "id": "1",
-              "name": "admin",
-              "options": {
-                "askBeforePropDelete": true,
-                "defaultLanguage": "",
-                "defaultStatementLanguage": "",
-                "defaultTerritory": "",
-                "geocoding": {
-                  "context": {}
-                },
-                "hideStatementElementsOrderTable": false,
-                "promotedTemplateClass": "*",
-                "searchLanguages": [],
-                "starredTemplates": [],
-                "workingLanguages": []
-              },
-              "rights": [
-                {
-                  "mode": "admin",
-                  "territory": "T0"
-                }
-              ],
-              "role": "admin",
-              "storedTerritories": [],
-              "verified": true
+              "name": "admin"
             },
             "col-detail": "",
             "col-language": "English",
@@ -446,7 +419,7 @@
         }
       ],
       "entityIds": [
-        "<uuid-37>",
+        "<uuid-31>",
         "rp-t",
         "t1"
       ],

@@ -5,6 +5,9 @@ import { IUser } from "./user";
 import { IAudit } from "./audit";
 import { Relation } from "./relation";
 
+/** a user in a query cell: its id and name */
+export type IResponseQueryUser = Pick<IUser, "id" | "name">;
+
 export interface IResponseQueryEntity {
   rowI?: number;
   entity: IEntity; // the actual passing entity model
@@ -20,7 +23,14 @@ export interface IResponseQueryEntity {
   isSubordinate?: boolean;
   columnData: Record<
     string,
-    IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
+    | IEntity
+    | IEntity[]
+    | number
+    | number[]
+    | string
+    | string[]
+    | IResponseQueryUser
+    | IResponseQueryUser[]
   >;
 }
 

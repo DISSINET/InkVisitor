@@ -1,4 +1,10 @@
-import { IEntity, IResponseQueryEntity, IUser } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IReference,
+  IResponseQueryEntity,
+  IResponseQueryUser,
+} from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import {
   WIDTH_COLUMN_DEFAULT,
@@ -47,7 +53,7 @@ const SUGGESTER_PX = 110;
 
 const getItemLabel = (item: unknown): string => {
   if (item && typeof item === "object") {
-    const it = item as Partial<IEntity> & Partial<IUser>;
+    const it = item as Partial<IEntity> & Partial<IResponseQueryUser>;
     return it.labels?.[0] ?? it.name ?? "";
   }
   return String(item ?? "");
@@ -104,3 +110,107 @@ export const estimateColumnWidth = (
   // columns; cap stops a single long row from blowing up the table.
   return Math.min(Math.max(width, WIDTH_COLUMN_MIN), WIDTH_COLUMN_MAX);
 };
+
+/**
+ * The width of every column once the columns share the space the table leaves
+ * free in `available` (px, the entity column included) in equal parts. Each
+ * keeps its own width (`baseWidths`, else its type's width) as the minimum, so
+ * a table wider than `available` keeps its widths and scrolls.
+ */
+export const fillColumnWidths = (
+  columns: Explore.IExploreColumn[],
+  baseWidths: Record<string, number>,
+  available: number,
+  firstColumnWidth: number,
+): Record<string, number> => {
+  const widths: Record<string, number> = {};
+  let used = firstColumnWidth;
+  for (const column of columns) {
+    widths[column.id] = baseWidths[column.id] ?? getColumnWidth(column.type);
+    used += widths[column.id];
+  }
+  const share = columns.length ? Math.floor((available - used) / columns.length) : 0;
+  if (share > 0) {
+    for (const column of columns) {
+      widths[column.id] += share;
+    }
+  }
+  return widths;
+};
+
+/**
+ * The label width (px) that lets a cell of `width` show `displayLimit` tags
+ * side by side, with the overflow chip and, in an editable column, the
+ * suggester and the unlink buttons; undefined while that is no more than the
+ * tag's default label width, which then applies.
+ */
+export const getTagLabelMaxWidth = (
+  column: Explore.IExploreColumn,
+  width: number,
+  displayLimit: number,
+): number | undefined => {
+  const free =
+    width -
+    CELL_PADDING_PX -
+    OVERFLOW_CHIP_PX -
+    (column.editable ? SUGGESTER_PX + CELL_GAP_PX : 0);
+  const perTag = Math.floor(free / displayLimit) - CELL_GAP_PX;
+  const label = perTag - TAG_MARKER_PX - (column.editable ? TAG_BUTTON_PX : 0);
+  return label > TAG_LABEL_MAX_PX ? label : undefined;
+};
+
+// The value (EPV), reference resource (ERR) and reference value (ERV) columns show
+// one tag per metaprop or reference, in the row's order, so the n-th tag of an
+// entity stands for the n-th metaprop or reference that holds it.
+
+/** `items` without the `occurrence`-th (counted from 0) item that `matches` */
+const withoutNth = <T>(items: T[], matches: (item: T) => boolean, occurrence: number): T[] => {
+  let seen = -1;
+  return items.filter((item) => !(matches(item) && ++seen === occurrence));
+};
+
+const isPropPair = (prop: IProp, typeId: string, valueId: string): boolean =>
+  prop.type?.entityId === typeId && prop.value?.entityId === valueId;
+
+/** whether `props` hold a top-level metaprop of `typeId` whose value is `valueId` */
+export const hasPropPair = (props: IProp[], typeId: string, valueId: string): boolean =>
+  props.some((prop) => isPropPair(prop, typeId, valueId));
+
+/** `props` without the `occurrence`-th top-level metaprop of `typeId` whose value is `valueId` */
+export const withoutNthPropPair = (
+  props: IProp[],
+  typeId: string,
+  valueId: string,
+  occurrence: number,
+): IProp[] => withoutNth(props, (prop) => isPropPair(prop, typeId, valueId), occurrence);
+
+const isReferencePair = (reference: IReference, resourceId: string, valueId: string): boolean =>
+  reference.resource === resourceId && reference.value === valueId;
+
+/** whether `references` hold one to `resourceId` whose value is `valueId` */
+export const hasReferencePair = (
+  references: IReference[],
+  resourceId: string,
+  valueId: string,
+): boolean => references.some((reference) => isReferencePair(reference, resourceId, valueId));
+
+/** `references` without the `occurrence`-th one to `resourceId` whose value is `valueId` */
+export const withoutNthReferencePair = (
+  references: IReference[],
+  resourceId: string,
+  valueId: string,
+  occurrence: number,
+): IReference[] =>
+  withoutNth(
+    references,
+    (reference) => isReferencePair(reference, resourceId, valueId),
+    occurrence,
+  );
+
+/** `references` without the `occurrence`-th one to `resourceId`, whatever its value */
+export const withoutNthReferenceTo = (
+  references: IReference[],
+  resourceId: string,
+  occurrence: number,
+): IReference[] =>
+  withoutNth(references, (reference) => reference.resource === resourceId, occurrence);

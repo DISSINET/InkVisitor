@@ -393,7 +393,7 @@
           "pos": ""
         },
         "detail": "in general - who gives advice",
-        "id": "<uuid-2>",
+        "id": "<uuid-1>",
         "labels": [
           "advisor"
         ],
@@ -405,9 +405,9 @@
         "props": [],
         "references": [
           {
-            "id": "<uuid-3>",
+            "id": "<uuid-2>",
             "resource": "dissinet-resource",
-            "value": "<uuid-2>"
+            "value": "<uuid-1>"
           }
         ],
         "right": "admin",
