@@ -18,6 +18,8 @@ interface EntityImportIssueList {
   collapsible?: boolean;
   // given, an issue about one draft opens that draft
   onSelectEntity?: (entityId: string) => void;
+  // given, an issue with a place in the input text jumps to it
+  onSelectOffset?: (offset: number) => void;
 }
 
 export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
@@ -26,6 +28,7 @@ export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
   isError = false,
   collapsible = false,
   onSelectEntity,
+  onSelectOffset,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -52,6 +55,10 @@ export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
                   type="button"
                   onClick={() => onSelectEntity(issue.entityId!)}
                 >
+                  {formatIssue(issue)}
+                </StyledIssueLink>
+              ) : issue.offset !== undefined && onSelectOffset ? (
+                <StyledIssueLink type="button" onClick={() => onSelectOffset(issue.offset!)}>
                   {formatIssue(issue)}
                 </StyledIssueLink>
               ) : (

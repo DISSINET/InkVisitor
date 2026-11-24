@@ -34,6 +34,24 @@ const removeTrailingCommas = (text: string): string => {
  * array of 1 to `maxEntities` objects. Trailing commas, which language
  * models often leave, are accepted.
  */
+/**
+ * Where JSON.parse stopped, from its message: Chrome names the position,
+ * Firefox the line and column; Safari names neither.
+ */
+export const jsonErrorOffset = (message: string, text: string): number | undefined => {
+  const position = message.match(/position (\d+)/);
+  if (position) {
+    return Math.min(Number(position[1]), text.length);
+  }
+  const lineColumn = message.match(/line (\d+) column (\d+)/);
+  if (lineColumn) {
+    const lines = text.split("\n").slice(0, Number(lineColumn[1]) - 1);
+    const lineStart = lines.reduce((sum, line) => sum + line.length + 1, 0);
+    return Math.min(lineStart + Number(lineColumn[2]) - 1, text.length);
+  }
+  return undefined;
+};
+
 export const parseImportInput = (
   text: string,
   maxEntities: number,
@@ -55,7 +73,12 @@ export const parseImportInput = (
     } catch {
       return {
         items: [],
-        errors: [{ message: `Invalid JSON: ${(error as Error).message}` }],
+        errors: [
+          {
+            message: `Invalid JSON: ${(error as Error).message}`,
+            offset: jsonErrorOffset((error as Error).message, text),
+          },
+        ],
       };
     }
   }

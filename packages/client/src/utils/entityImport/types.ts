@@ -23,6 +23,8 @@ export interface ImportIssue {
   // the appended draft's stored entity or stored relations changed in the
   // database since the drafts loaded them; see rebaseAppend
   stale?: boolean;
+  // where in the input text the JSON broke, as a character offset
+  offset?: number;
 }
 
 /** A relation as written in the input, with where it was written. */

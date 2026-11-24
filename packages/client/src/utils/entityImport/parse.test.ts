@@ -1,4 +1,4 @@
-import { parseImportInput } from "./parse";
+import { jsonErrorOffset, parseImportInput } from "./parse";
 
 describe("parseImportInput", () => {
   it("rejects empty input", () => {
@@ -11,6 +11,16 @@ describe("parseImportInput", () => {
     const { errors } = parseImportInput("{ labels: ", 10);
     expect(errors).toHaveLength(1);
     expect(errors[0].message).toMatch(/^Invalid JSON: /);
+  });
+
+  it("finds where the JSON broke from the parser message", () => {
+    const text = '[\n  {"a": 1}\n  {"b": 2}\n]';
+    // Chrome
+    expect(jsonErrorOffset("Expected ',' or ']' at position 15 (line 3 column 3)", text)).toBe(15);
+    // Firefox
+    expect(jsonErrorOffset("expected ',' at line 3 column 3 of the JSON data", text)).toBe(15);
+    // Safari
+    expect(jsonErrorOffset("JSON Parse error: Expected ']'", text)).toBeUndefined();
   });
 
   it("accepts trailing commas and keeps commas inside texts", () => {

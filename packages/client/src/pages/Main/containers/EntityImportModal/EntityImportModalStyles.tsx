@@ -19,7 +19,7 @@ export const StyledHint = styled.p`
 // when a long error list sits below it) and scrolls from there. The editor
 // lays a highlighted <pre> under a transparent textarea; both take their font
 // from this wrapper, so they stay aligned.
-export const StyledJsonEditor = styled.div`
+export const StyledJsonEditor = styled.div<{ $digits: number }>`
   flex: 1;
   width: 100%;
   min-height: ${({ theme }) => theme.space[48]};
@@ -52,6 +52,16 @@ export const StyledJsonEditor = styled.div`
   }
   textarea::placeholder {
     color: ${({ theme }) => theme.color["gray"][500]};
+  }
+  /* in the editor's left padding, which leaves room for the widest number
+     and a gap on either side */
+  .line-number {
+    position: absolute;
+    left: 0;
+    width: ${({ $digits }) => $digits + 1}ch;
+    text-align: right;
+    color: ${({ theme }) => theme.color["gray"][500]};
+    user-select: none;
   }
 
   /* the Annotator XML view palette: keys and values sit in hue families far

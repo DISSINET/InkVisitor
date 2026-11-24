@@ -52,7 +52,7 @@ import {
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityImportDrafts } from "./EntityImportDrafts";
 import { EntityImportIssueList } from "./EntityImportIssueList";
-import { EntityImportJsonEditor } from "./EntityImportJsonEditor";
+import { EntityImportJsonEditor, EntityImportJsonEditorHandle } from "./EntityImportJsonEditor";
 import {
   StyledDraftModeHint,
   StyledHiddenFileInput,
@@ -132,6 +132,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [outcome, setOutcome] = useState<ImportWriteOutcome | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<EntityImportJsonEditorHandle>(null);
 
   // a write in progress must finish or roll back before the modal can close
   const isWriting = step === "writing";
@@ -570,6 +571,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               {"Load a .json file"}
             </StyledLoadArea>
             <EntityImportJsonEditor
+              ref={editorRef}
               value={text}
               onChange={setText}
               placeholder={INPUT_PLACEHOLDER}
@@ -585,6 +587,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               title="Invalid input, nothing was created"
               issues={inputErrors}
               isError
+              onSelectOffset={(offset) => editorRef.current?.reveal(offset)}
             />
           </StyledStep>
         )}
