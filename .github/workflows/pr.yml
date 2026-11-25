@@ -44,3 +44,54 @@ jobs:
         run: |
           echo "DB_NAME=inkvisitor_test" > packages/server/env/.env.test
           pnpm --filter inkvisitor-server test:unit
+
+  server-postgres:
+    name: Server integration tests (PostgreSQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      # same image as the postgres service in docker-compose.yml
+      postgres:
+        image: timescale/timescaledb:2.30.1-pg17
+        env:
+          POSTGRES_USER: inkvisitor
+          POSTGRES_PASSWORD: inkvisitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U inkvisitor"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # the user emails build their links from DOMAIN
+      DOMAIN: localhost
+      DB_ADAPTER: postgres
+      DB_NAME: inkvisitor_test
+      PG_HOST: localhost
+      PG_PORT: 5432
+      PG_USER: inkvisitor
+      PG_PASS: inkvisitor
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # the server tests load @inkvisitor/shared from its dist build
+      - name: Build shared
+        run: pnpm exec turbo run build --filter=@inkvisitor/shared
+
+      # jest.config.js refuses to start without env/.env.test; the job env above
+      # wins over it because dotenv never overwrites a set variable
+      - name: Test
+        run: |
+          echo "DB_NAME=inkvisitor_test" > packages/server/env/.env.test
+          pnpm --filter inkvisitor-server test:integration

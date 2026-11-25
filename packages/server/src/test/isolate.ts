@@ -34,6 +34,8 @@ const MUTABLE_TABLES = [
   storage.savedQueries,
   storage.documents,
   storage.settings,
+  // materialized stats queries such as latestUpdate scan the whole table
+  ...["day", "week", "month", "year"].map((unit) => storage.stats(unit)),
 ];
 
 beforeAll(async () => {
