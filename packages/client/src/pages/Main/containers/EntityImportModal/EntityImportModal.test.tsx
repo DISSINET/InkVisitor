@@ -39,9 +39,25 @@ globalThis.ResizeObserver ??= class {
   unobserve() {}
   disconnect() {}
 } as unknown as typeof ResizeObserver;
+// the modal waits for a paint before it validates; a frame comes at once here
+globalThis.requestAnimationFrame = (callback) => {
+  callback(performance.now());
+  return 0;
+};
 
 const buttonNamed = (label: string) =>
   [...document.querySelectorAll("button")].find((button) => button.textContent === label)!;
+
+// the next task, by which the wait for a paint is over
+const afterPaint = () => new Promise((resolve) => setTimeout(resolve));
+
+// a click on a button that validates, and the validation up to its first
+// unanswered server call
+const clickValidating = (label: string) =>
+  act(async () => {
+    buttonNamed(label).click();
+    await afterPaint();
+  });
 
 const pasteAndValidate = async (input: unknown) => {
   const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
@@ -50,7 +66,7 @@ const pasteAndValidate = async (input: unknown) => {
     setValue.call(textarea, JSON.stringify(input));
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   });
-  await act(async () => buttonNamed("Validate").click());
+  await clickValidating("Validate");
 };
 
 describe("EntityImportModal", () => {
@@ -96,7 +112,7 @@ describe("EntityImportModal", () => {
     // Create: the check waits on the server, and the modal is closed meanwhile
     let answerCheck: (value: { data: never[] }) => void = () => {};
     entitiesGet.mockImplementationOnce(() => new Promise((resolve) => (answerCheck = resolve)));
-    await act(async () => buttonNamed("Import 1 entity").click());
+    await clickValidating("Import 1 entity");
     await act(async () => buttonNamed("Cancel").click());
     expect(closeModal).toHaveBeenCalled();
 
@@ -119,6 +135,7 @@ describe("EntityImportModal", () => {
       textarea.dispatchEvent(
         new KeyboardEvent("keydown", { key: "Enter", metaKey: true, bubbles: true })
       );
+      await afterPaint();
     });
 
     expect(buttonNamed("Import 1 entity")).toBeDefined();
@@ -156,7 +173,7 @@ describe("EntityImportModal", () => {
     }));
 
     await pasteAndValidate({ class: "C", labels: ["TEST dog"], detail: "canine" });
-    await act(async () => buttonNamed("append to it").click());
+    await clickValidating("append to it");
     expect(buttonNamed("undo append")).toBeDefined();
 
     await act(async () => buttonNamed("undo append").click());

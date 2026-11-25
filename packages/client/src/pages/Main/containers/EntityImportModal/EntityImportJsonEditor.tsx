@@ -1,6 +1,6 @@
 import Prism from "./prism";
 import "prismjs/components/prism-json";
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import Editor from "react-simple-code-editor";
 import { StyledJsonEditor } from "./EntityImportModalStyles";
 
@@ -36,6 +36,9 @@ export const EntityImportJsonEditor = forwardRef<
 >(({ value, onChange, placeholder, onSubmit }, ref) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const digits = String(value.split("\n").length).length;
+  // the editor highlights on each of its renders, and Prism over a long JSON
+  // takes a visible moment, so a render with the same text reuses the result
+  const highlighted = useMemo(() => highlightJson(value), [value]);
 
   useImperativeHandle(
     ref,
@@ -80,7 +83,7 @@ export const EntityImportJsonEditor = forwardRef<
             onChange(placeholder);
           }
         }}
-        highlight={highlightJson}
+        highlight={() => highlighted}
         placeholder={placeholder}
         padding={{ top: 8, right: 8, bottom: 8, left: `${digits + 2}ch` }}
         tabSize={2}

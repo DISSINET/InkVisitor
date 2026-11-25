@@ -88,6 +88,11 @@ const draftSnapshot = (draft: ImportDraft) =>
 
 const entityCount = (amount: number) => count(amount, "entity", "entities");
 
+// resolves once the browser has painted, so a loader set just before shows
+// while the synchronous part of a validation runs
+const afterPaint = () =>
+  new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+
 // one "append to it", with what undoing it needs
 interface AppendRecord {
   undo: AppendUndo;
@@ -257,6 +262,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
     setIsValidating(true);
     try {
+      await afterPaint();
       const result = await validateImport(text, validationContext());
       setInputErrors(result.errors);
       setRefusedText(result.plan ? null : text);
@@ -324,10 +330,11 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     const label = draft.entities.find((entity) => entity.id === entityId)?.labels[0];
     // the left-out drafts skip the validation, so an error in them blocks
     // nothing; draftAfterAppend brings them back unchanged
-    const replaced = replaceEntityId(draft, entityId, storedId);
-    const json = JSON.stringify(draftToImportJson(replaced));
     setIsValidating(true);
     try {
+      await afterPaint();
+      const replaced = replaceEntityId(draft, entityId, storedId);
+      const json = JSON.stringify(draftToImportJson(replaced));
       const { errors, plan } = await validateImport(json, {
         ...validationContext(),
         appendTargets: appendTargetsOf(draft),
@@ -404,6 +411,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       issues.filter((issue) => !(issue.stale && issue.entityId === entityId));
     setIsValidating(true);
     try {
+      await afterPaint();
       const [[current], relations] = await Promise.all([
         importDataSource.getEntities([entityId]),
         storedRelationsOf(entityId),
@@ -459,6 +467,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setIsValidating(true);
     let plan;
     try {
+      await afterPaint();
       const result = await validateImport(JSON.stringify(draftToImportJson(draft)), {
         ...validationContext(),
         appendTargets: appendTargetsOf(draft),
