@@ -51,7 +51,9 @@ interface MountedRoute {
 }
 
 // Every route under the api router, once: the router is mounted on two paths.
-// Express keeps a mount path only as a pattern, ^\/users\/?(?=\/|$).
+// Express keeps a mount path only as a pattern, ^\/users\/?(?=\/|$). A router
+// mounted with no path (the GitHub routes inside documents) belongs to the
+// controller it is mounted in.
 const mountedRoutes = (): MountedRoute[] => {
   const seen = new Set<unknown>();
   const routes: MountedRoute[] = [];
@@ -59,7 +61,7 @@ const mountedRoutes = (): MountedRoute[] => {
     for (const layer of stack) {
       if (layer.name === "router") {
         const mount = layer.regexp.source.match(/^\^\\\/([\w-]+)/);
-        walk(layer.handle.stack, mount ? mount[1] : "");
+        walk(layer.handle.stack, mount ? mount[1] : controller);
       } else if (layer.route && controller && !seen.has(layer.route)) {
         seen.add(layer.route);
         for (const verb of Object.keys(layer.route.methods)) {
@@ -126,7 +128,8 @@ describe("Acl.validate", () => {
   afterEach(() => jest.restoreAllMocks());
 
   // documents, stats, saved-queries and geocoding are open as whole
-  // controllers; anywhere else a route is open one by one
+  // controllers, except the documents routes of committing to GitHub;
+  // anywhere else a route is open one by one
   it("allows a logged-in user on the open routes, and on no other, without reading or creating a row", async () => {
     const whole = ["documents", "stats", "saved-queries", "geocoding"];
     const open: string[] = [];
@@ -146,7 +149,15 @@ describe("Acl.validate", () => {
       routes
         .filter((route) => whole.includes(route.controller))
         .filter((route) => !open.includes(route.label))
-    ).toEqual([]);
+        .map((route) => route.label)
+        .sort()
+    ).toEqual([
+      "documents GET /:documentId/github",
+      "documents POST /:documentId/github/commit",
+      "documents POST /github/device",
+      "documents POST /github/device/poll",
+      "documents PUT /:documentId/repository",
+    ]);
     expect(
       open.filter((label) => !whole.includes(label.split(" ")[0])).sort()
     ).toEqual([

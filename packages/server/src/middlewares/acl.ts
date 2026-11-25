@@ -15,7 +15,8 @@ const OPEN_CONTROLLERS = new Set([
   "stats",
   // any logged-in user may view any document; update, delete, export and
   // removeAnchor are gated per resource inside the handlers
-  // (userCanManageDocument)
+  // (userCanManageDocument). The GitHub routes are left to their rows, see
+  // ROW_ROUTES.
   "documents",
   // their per-resource rules are beyond the ACL table and are applied inside
   // the handlers
@@ -40,6 +41,18 @@ const OPEN_ROUTES = new Set([
   "entities GET :entityId/detail",
   "entities GET :entityId/used-relations",
   "entities GET :entityId/expansion",
+]);
+
+// Routes of an open controller that are left to their acl_permissions rows.
+// Committing a document to GitHub is limited by role (the rows are seeded in
+// the datasets and by fixEditorEntityAclJob); the handlers add the
+// per-document check on top.
+const ROW_ROUTES = new Set([
+  "documents POST github/device",
+  "documents POST github/device/poll",
+  "documents PUT :documentId/repository",
+  "documents GET :documentId/github",
+  "documents POST :documentId/github/commit",
 ]);
 
 class Acl {
@@ -104,13 +117,14 @@ class Acl {
       .filter((part) => !!part)
       .join("/");
     const method = req.method as HttpMethods;
+    const key = `${controller} ${method} ${route}`;
 
     // decided before the read, so a logged-in user costs these routes no
     // lookup and no row
     if (
       req.user &&
-      (OPEN_CONTROLLERS.has(controller) ||
-        OPEN_ROUTES.has(`${controller} ${method} ${route}`))
+      ((OPEN_CONTROLLERS.has(controller) && !ROW_ROUTES.has(key)) ||
+        OPEN_ROUTES.has(key))
     ) {
       // throws for a session of a deleted user, which resolves to no user
       req.getUserOrFail();

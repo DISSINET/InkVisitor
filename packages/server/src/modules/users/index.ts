@@ -21,6 +21,7 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { checkPassword, hashPassword } from "@common/auth";
 import { createSessionUserId, destroySession } from "@common/session";
+import { githubSignIns } from "@modules/documents/githubSignIns";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -432,6 +433,9 @@ export default Router()
   .post(
     "/signout",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      if (request.sessionID) {
+        githubSignIns.drop(request.sessionID);
+      }
       await destroySession(request as Request);
       return { result: true };
     })

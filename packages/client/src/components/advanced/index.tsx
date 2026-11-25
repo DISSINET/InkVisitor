@@ -7,6 +7,7 @@ import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import { CopyUuidsButton } from "./CopyUuidsButton/CopyUuidsButton";
 import DocumentModalView from "./DocumentModal/DocumentModalView";
 import DocumentModalExport from "./DocumentModal/DocumentModalExport";
+import { DocumentGithubModal } from "./DocumentGithubModal/DocumentGithubModal";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { BasicMultiDropdown } from "./Dropdowns/BasicMultiDropdown";
@@ -70,6 +71,7 @@ export {
   DocumentTitle,
   DocumentModalView,
   DocumentModalExport,
+  DocumentGithubModal,
   ElvlButtonGroup,
   EmptyEntityTag,
   EntityCreateModal,

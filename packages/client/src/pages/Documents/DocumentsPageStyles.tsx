@@ -49,9 +49,12 @@ export const StyledGridScrollArea = styled.div`
   overflow: auto;
 `;
 
-/** Shared by header + body so column tracks align in one grid */
-export const documentsGridColumns =
-  "max-content minmax(18rem, 1fr) auto minmax(10rem, 17.4rem) max-content";
+/**
+ * Shared by header + body so column tracks align in one grid. The GitHub
+ * track exists only for the users that feature is offered to.
+ */
+export const documentsGridColumns = (withGithub: boolean): string =>
+  `max-content minmax(18rem, 1fr) auto minmax(10rem, 17.4rem)${withGithub ? " max-content" : ""} max-content`;
 
 const stickyHeaderCell = css`
   position: sticky;
@@ -67,9 +70,9 @@ const stickyHeaderCell = css`
  * Cells stretch to the full row height so a row-wide fill has no gaps; each
  * cell centers its own content vertically.
  */
-export const StyledGrid = styled.div`
+export const StyledGrid = styled.div<{ $withGithub: boolean }>`
   display: grid;
-  grid-template-columns: ${documentsGridColumns};
+  grid-template-columns: ${({ $withGithub }) => documentsGridColumns($withGithub)};
   align-items: stretch;
   min-width: min-content;
   margin-bottom: 0.5rem;
@@ -229,6 +232,50 @@ export const StyledReference = styled.div`
   position: relative;
   padding: 0.2rem 1rem;
 `;
+/** Plain (unsortable) header cell with the typography of the sortable ones */
+export const StyledGithubHeaderCell = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  color: ${({ theme }) => theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  white-space: nowrap;
+  ${stickyHeaderCell}
+`;
+
+/** Link to the repository file, the date of the last commit from InkVisitor, and the saved-since hint */
+export const StyledGithubCell = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  padding: 0.5rem 1rem;
+`;
+
+export const StyledGithubCellLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+`;
+
+export const StyledGithubCellNote = styled.span`
+  color: ${({ theme }) => theme.color["gray"][700]};
+`;
+
+export const StyledSavedSinceTag = styled.span`
+  padding: 2px 6px;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  border: 1px solid ${({ theme }) => theme.color["warning"]};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["warning"]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: default;
+`;
+
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};

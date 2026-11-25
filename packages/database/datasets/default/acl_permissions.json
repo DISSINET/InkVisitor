@@ -378,5 +378,40 @@
     "method": "PUT",
     "roles": ["admin"],
     "public": false
+  },
+  {
+    "controller": "documents",
+    "route": "github/device",
+    "method": "POST",
+    "roles": ["editor"],
+    "public": false
+  },
+  {
+    "controller": "documents",
+    "route": "github/device/poll",
+    "method": "POST",
+    "roles": ["editor"],
+    "public": false
+  },
+  {
+    "controller": "documents",
+    "route": ":documentId/repository",
+    "method": "PUT",
+    "roles": ["editor"],
+    "public": false
+  },
+  {
+    "controller": "documents",
+    "route": ":documentId/github",
+    "method": "GET",
+    "roles": ["editor"],
+    "public": false
+  },
+  {
+    "controller": "documents",
+    "route": ":documentId/github/commit",
+    "method": "POST",
+    "roles": ["editor"],
+    "public": false
   }
 ]

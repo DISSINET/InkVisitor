@@ -1,6 +1,6 @@
 import { IDbModel } from "@models/common";
 import { Conn, WriteResult, storage } from "@service/storage";
-import { IDocument, IDocumentMeta } from "@inkvisitor/shared/types";
+import { IDocument, IDocumentGithubSync, IDocumentMeta } from "@inkvisitor/shared/types";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
@@ -16,6 +16,8 @@ export default class Document implements IDocument, IDbModel {
   content: string;
   createdAt?: Date;
   updatedAt?: Date;
+  repositoryUrl?: string;
+  githubSync?: IDocumentGithubSync | null;
 
   // following fields are populated in preprocess method (before save)
   anchors: AnchorsNode[];
@@ -31,6 +33,12 @@ export default class Document implements IDocument, IDbModel {
     this.createdAt = data.createdAt || new Date();
     if (data.updatedAt !== undefined) {
       this.updatedAt = data.updatedAt;
+    }
+    if (data.repositoryUrl !== undefined) {
+      this.repositoryUrl = data.repositoryUrl;
+    }
+    if (data.githubSync !== undefined) {
+      this.githubSync = data.githubSync;
     }
   }
 
@@ -170,6 +178,18 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
+   * A copy without the repository address and the last GitHub commit. Those two
+   * fields are written only by the repository and commit routes, and are not
+   * shown to viewers.
+   */
+  static withoutGithubFields<T extends object>(document: T): T {
+    const copy = { ...document } as T & Partial<Pick<IDocument, "repositoryUrl" | "githubSync">>;
+    delete copy.repositoryUrl;
+    delete copy.githubSync;
+    return copy;
+  }
+
+  /**
    * Stores the document in the db
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
@@ -178,7 +198,7 @@ export default class Document implements IDocument, IDbModel {
     this.createdAt = new Date();
 
     const result = await storage.documents.insert(db as Conn, {
-      ...this,
+      ...Document.withoutGithubFields(this),
       id: this.id || undefined,
     });
 
@@ -204,7 +224,9 @@ export default class Document implements IDocument, IDbModel {
   ): Promise<WriteResult> {
     this.updatedAt = updateData.updatedAt = new Date();
     delete updateData.createdAt;
-    return storage.documents.update(db as Conn, this.id, updateData);
+    // a save carries the GitHub fields as they were read at the start of its
+    // request, and a commit may have replaced them since
+    return storage.documents.update(db as Conn, this.id, Document.withoutGithubFields(updateData));
   }
 
   /**

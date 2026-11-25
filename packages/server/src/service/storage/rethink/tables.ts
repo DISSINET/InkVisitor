@@ -555,11 +555,12 @@ export const documents: DocumentStore = {
   async byEntityId(conn, entityId) {
     // getAll on a multi-index yields one row per matching index key, so a
     // document listing the same id more than once comes back once thanks to
-    // distinct(). Content is dropped: no caller needs the blob.
+    // distinct(). Content is dropped: no caller needs the blob. The GitHub
+    // fields are dropped: these rows reach every logged-in user.
     const entries = await r
       .table(TABLE.documents)
       .getAll(entityId, { index: DbEnums.Indexes.DocumentEntityIds })
-      .without("content")
+      .without("content", "repositoryUrl", "githubSync")
       .distinct()
       .run(unwrap(conn));
     return entries && entries.length ? (entries as IDocumentMeta[]) : [];
@@ -569,7 +570,7 @@ export const documents: DocumentStore = {
     const entries = await r
       .table(TABLE.documents)
       .getAll(r.args(entityIds), { index: DbEnums.Indexes.DocumentEntityIds })
-      .without("content")
+      .without("content", "repositoryUrl", "githubSync")
       .distinct()
       .run(unwrap(conn));
     return entries && entries.length ? (entries as IDocumentMeta[]) : [];
