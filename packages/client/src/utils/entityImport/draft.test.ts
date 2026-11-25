@@ -580,6 +580,34 @@ describe("undoAppend", () => {
       { before: cloud, changes: { entityIds: ["stored-dog", "cat"] } },
     ]);
   });
+
+  it("keeps once a relation of the draft edited after the append, linking the draft again", () => {
+    const { Synonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      relations: [relation("r1", Synonym, "dog", "puppy")],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    const replaced = replaceEntityId(before, "dog", "stored-dog");
+    // the validation of the append returns every relation under a new id
+    let draft = draftAfterAppend(replaced, {
+      entities: replaced.entities,
+      relations: [relation("new", Synonym, "stored-dog", "puppy")],
+      existingEntities: {},
+      valueCopyIds: [],
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    });
+    // an edit made after the append
+    draft = updateDraftRelation(draft, draft.relations[0].id, {
+      entityIds: ["stored-dog", "puppy", "hound"],
+    });
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.relations).toEqual([relation("r1", Synonym, "dog", "puppy", "hound")]);
+  });
 });
 
 describe("withLoadedSince", () => {

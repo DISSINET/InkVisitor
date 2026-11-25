@@ -197,7 +197,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       return;
     }
     searchFor(selected);
-  }, [selected, draft.appends, draftEntityIds, failedSearchIds]);
+  }, [selected, draft.appends, failedSearchIds]);
 
   // the draft takes the id of the stored entity, so its row stays selected
   const handleAppendTo = async (entityId: string, storedId: string) => {

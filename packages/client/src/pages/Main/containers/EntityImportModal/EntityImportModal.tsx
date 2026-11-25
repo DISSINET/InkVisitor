@@ -349,7 +349,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       const next = draftAfterAppend(replaced, plan);
       const storedLabel = plan.appends[storedId]?.stored.labels[0];
       // next comes from the draft before the check; what loaded meanwhile joins it
-      setDraft((current) => (current ? withLoadedSince(next, draft, current) : next));
+      setDraft((current) => current && withLoadedSince(next, draft, current));
       // the earlier appends' undos follow the draft to its stored id
       setAppendRecords((records) => ({
         ...Object.fromEntries(
@@ -430,8 +430,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         return;
       }
       const rebased = rebaseAppend(draft, entityId, current, relations, labelOf);
-      setDraft((currentDraft) =>
-        currentDraft ? withLoadedSince(rebased.draft, draft, currentDraft, entityId) : rebased.draft
+      setDraft(
+        (currentDraft) =>
+          currentDraft && withLoadedSince(rebased.draft, draft, currentDraft, entityId)
       );
       setDraftErrors(withoutStale);
       setDraftNotes((notes) => [

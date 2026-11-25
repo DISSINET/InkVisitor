@@ -39,7 +39,7 @@ const SUPERCLASS_FOLLOWED_TYPES = [
 const ruleOf = (type: RelationEnums.Type) => Relation.RelationRules[type]!;
 
 /** Equal for two relations of one type that link the same entities. */
-const relationKey = ({ type, entityIds }: Pick<Relation.IRelation, "type" | "entityIds">) =>
+export const relationKey = ({ type, entityIds }: Pick<Relation.IRelation, "type" | "entityIds">) =>
   `${type}:${ruleOf(type).asymmetrical ? entityIds.join(">") : [...entityIds].sort().join("|")}`;
 
 /**

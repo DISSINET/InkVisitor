@@ -7,6 +7,7 @@ import { buildEntityJson } from "./entityJson";
 import { count, getAtPath, isPlainObject, setAtPath, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { collectEntityRefs } from "./references";
+import { relationKey } from "./relations";
 import { ImportIssue, ImportPlan, StoredRelationChanges } from "./types";
 
 /**
@@ -144,15 +145,24 @@ export const draftAfterAppend = (previous: ImportDraft, plan: ImportPlan): Impor
   );
   const sentAs = (relation: Relation.IRelation) =>
     sentRelation(previous, leftOut, relation)?.entityIds ?? [];
-  const relations = plan.relations.filter(
-    (relation) =>
-      !leftOutRelations.some(
-        (original) =>
-          original.type === relation.type &&
-          sentAs(original).length === relation.entityIds.length &&
-          sentAs(original).every((id) => relation.entityIds.includes(id))
-      )
+  // a relation the validation returns as it was sent keeps its id, so the
+  // undo of an append finds it even once Detail has changed its members
+  const sentIds = new Map(
+    previous.relations
+      .filter((relation) => sentRelation(previous, leftOut, relation) === relation)
+      .map((relation): [string, string] => [relationKey(relation), relation.id])
   );
+  const relations = plan.relations
+    .filter(
+      (relation) =>
+        !leftOutRelations.some(
+          (original) =>
+            original.type === relation.type &&
+            sentAs(original).length === relation.entityIds.length &&
+            sentAs(original).every((id) => relation.entityIds.includes(id))
+        )
+    )
+    .map((relation) => ({ ...relation, id: sentIds.get(relationKey(relation)) ?? relation.id }));
 
   const keptAppends = Object.entries(previous.appends ?? {}).filter(
     ([id]) => id in plan.appends || leftOut.has(id)
@@ -411,7 +421,9 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
   // draft still shows it. Its stored and its edited copy decide together, so
   // both lists keep it or both drop it, and no edit reads as an unlink.
   const otherAppendIds = new Set(Object.keys(draft.appends ?? {}).filter((id) => id !== storedId));
-  const storedById = new Map((draft.storedRelations ?? []).map((relation) => [relation.id, relation]));
+  const storedById = new Map(
+    (draft.storedRelations ?? []).map((relation) => [relation.id, relation])
+  );
   const currentById = new Map(draft.relations.map((relation) => [relation.id, relation]));
   const goes = (relationId: string) => {
     const copies = [storedById.get(relationId), currentById.get(relationId)].flatMap(
