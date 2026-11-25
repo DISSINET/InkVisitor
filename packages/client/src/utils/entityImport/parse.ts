@@ -83,7 +83,15 @@ export const parseImportInput = (
     }
   }
 
-  const items = Array.isArray(parsed) ? parsed : [parsed];
+  // an Explorer JSON export holds the entities under `entities`, beside the
+  // query and the audits; an entity itself always has a class
+  const isExport =
+    isPlainObject(parsed) && Array.isArray(parsed.entities) && !("class" in parsed);
+  const items = isExport
+    ? (parsed as { entities: unknown[] }).entities
+    : Array.isArray(parsed)
+      ? parsed
+      : [parsed];
 
   if (items.length === 0) {
     return { items: [], errors: [{ message: "The input holds no entity" }] };

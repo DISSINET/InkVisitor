@@ -13,6 +13,19 @@ describe("parseImportInput", () => {
     expect(errors[0].message).toMatch(/^Invalid JSON: /);
   });
 
+  it("reads the entities of an Explorer JSON export", () => {
+    const text = JSON.stringify({
+      exportedAt: "2026-11-22T10:00:00Z",
+      version: "1.7.0",
+      query: { type: "e" },
+      entities: [{ class: "C", labels: ["dog"] }],
+      audits: [{ id: "a1" }],
+    });
+    const { items, errors } = parseImportInput(text, 10);
+    expect(errors).toEqual([]);
+    expect(items).toEqual([{ class: "C", labels: ["dog"] }]);
+  });
+
   it("finds where the JSON broke from the parser message", () => {
     const text = '[\n  {"a": 1}\n  {"b": 2}\n]';
     // Chrome
