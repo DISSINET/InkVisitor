@@ -34,13 +34,9 @@ const blankTrailingCommas = (text: string): string => {
 };
 
 /**
- * Reads the pasted text into a list of entity objects: a single object or an
- * array of 1 to `maxEntities` objects. Trailing commas, which language
- * models often leave, are accepted.
- */
-/**
- * Where JSON.parse stopped, from its message: Chrome names the position,
- * Firefox the line and column; Safari names neither.
+ * Where JSON.parse stopped, from its message: Chrome names the position or
+ * quotes the text around it, Firefox names the line and column; Safari names
+ * neither.
  */
 export const jsonErrorOffset = (message: string, text: string): number | undefined => {
   const position = message.match(/position (\d+)/);
@@ -53,9 +49,36 @@ export const jsonErrorOffset = (message: string, text: string): number | undefin
     const lineStart = lines.reduce((sum, line) => sum + line.length + 1, 0);
     return Math.min(lineStart + Number(lineColumn[2]) - 1, text.length);
   }
+  // Chrome names no place for an unexpected token, but quotes the text around
+  // it: up to 10 characters on either side, with "..." where it cut the text
+  const excerpt = message.match(/, (\.\.\.)?"([\s\S]*)"(\.\.\.)? is not valid JSON/);
+  if (excerpt) {
+    const [, cutBefore, quoted, cutAfter] = excerpt;
+    if (cutBefore && cutAfter) {
+      const start = text.indexOf(quoted);
+      return start === -1 ? undefined : start + 10;
+    }
+    if (cutAfter) {
+      return Math.max(quoted.length - 10, 0);
+    }
+    if (cutBefore) {
+      return text.length - quoted.length + 10;
+    }
+    // the whole text is quoted, short enough to need no jump
+    return undefined;
+  }
+  if (message.includes("end of JSON input")) {
+    return text.length;
+  }
   return undefined;
 };
 
+/**
+ * Reads the pasted text into a list of entity objects: a single object, an
+ * array of 1 to `maxEntities` objects, or an Explorer JSON export, whose
+ * `entities` are read. Trailing commas, which language models often leave,
+ * are accepted.
+ */
 export const parseImportInput = (
   text: string,
   maxEntities: number,

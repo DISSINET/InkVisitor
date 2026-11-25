@@ -1,5 +1,13 @@
 import { IEntity, IProp, IReference, Relation } from "@inkvisitor/shared/types";
-import { AppendConflict, conflictOf, SKIPPED_DATA_KEYS } from "./appendMerge";
+import {
+  AppendConflict,
+  AppendSkips,
+  conflictOf,
+  labelsDiffer,
+  SameEntity,
+  sameEntityBy,
+  SKIPPED_DATA_KEYS,
+} from "./appendMerge";
 import { ImportDraft } from "./draft";
 import { isPlainObject, quote, sameJson, unique } from "./helpers";
 
@@ -15,6 +23,8 @@ interface Rebase {
   previous: AppendConflict[];
   conflicts: AppendConflict[];
   notes: string[];
+  // what the draft adds that the database gained meanwhile, so it is skipped
+  skipped: Pick<AppendSkips, "labels" | "notes" | "props" | "references">;
 }
 
 /**
@@ -75,11 +85,16 @@ const rebaseData = (
   for (const key of unique([...Object.keys(theirs), ...Object.keys(ours), ...Object.keys(base)])) {
     const keyPath = `${path}.${key}`;
     const [before, own, stored] = [base[key], ours[key], theirs[key]];
+    // a key the draft has a conflict on keeps it whole, whichever side the
+    // conflict is set to, so its value is not merged into
+    const hadConflict = rebase.previous.some((conflict) => conflict.path === keyPath);
     // an append never writes these, so they stay as stored
     const value =
       path === "data" && SKIPPED_DATA_KEYS.includes(key)
         ? stored
-        : isPlainObject(own) && isPlainObject(stored)
+        : hadConflict
+          ? resolve(keyPath, before, own, stored, rebase)
+          : isPlainObject(own) && isPlainObject(stored)
           ? rebaseData(isPlainObject(before) ? before : {}, own, stored, keyPath, rebase)
           : Array.isArray(own) && Array.isArray(stored)
             ? mergeList(Array.isArray(before) ? before : [], own, stored)
@@ -104,8 +119,13 @@ const rebaseById = <T extends { id: string }>(
   describe: (item: T) => string,
   // the fields compared, without nested items
   fieldsOf: (item: T) => object = (item) => item,
-  // merges the nested items into the merged item
-  nest: (merged: T, before: T, own: T, stored: T) => T = (merged) => merged
+  // merges the nested items into the merged item; no `before` for an item
+  // both sides added
+  nest: (merged: T, before: T | undefined, own: T, stored: T) => T = (merged) => merged,
+  // whether two items are the same metaprop or reference, whatever their ids
+  isSame: (stored: T, own: T) => boolean = () => false,
+  // counts a draft item merged into the same one the database added
+  onSkip: () => void = () => {}
 ): T[] => {
   const byId = (items: T[]) => new Map(items.map((item) => [item.id, item]));
   const [baseById, oursById, theirsById] = [byId(base), byId(ours), byId(theirs)];
@@ -143,7 +163,16 @@ const rebaseById = <T extends { id: string }>(
   for (const own of ours) {
     const before = baseById.get(own.id);
     if (!before && !theirsById.has(own.id)) {
-      out.push(own);
+      // the database gained the same item meanwhile, which the draft's merges into
+      const twinIndex = out.findIndex(
+        (item) => !baseById.has(item.id) && theirsById.has(item.id) && isSame(item, own)
+      );
+      if (twinIndex === -1) {
+        out.push(own);
+      } else {
+        out[twinIndex] = nest(out[twinIndex], undefined, own, out[twinIndex]);
+        onSkip();
+      }
     } else if (before && !theirsById.has(own.id) && !sameJson(own, before)) {
       rebase.notes.push(`${describe(own)}: changed here but removed in the database, so it goes`);
     }
@@ -156,7 +185,8 @@ const rebaseProps = (
   ours: IProp[],
   theirs: IProp[],
   rebase: Rebase,
-  labelOf: (entityId: string) => string
+  labelOf: (entityId: string) => string,
+  same: SameEntity
 ): IProp[] =>
   rebaseById(
     base,
@@ -164,11 +194,22 @@ const rebaseProps = (
     theirs,
     rebase,
     (prop) => `metaprop ${quote(labelOf(prop.type.entityId))}`,
-    ({ children, ...fields }) => fields,
+    ({ children: _children, ...fields }) => fields,
     (merged, before, own, stored) => ({
       ...merged,
-      children: rebaseProps(before.children, own.children, stored.children, rebase, labelOf),
-    })
+      children: rebaseProps(
+        before?.children ?? [],
+        own.children,
+        stored.children,
+        rebase,
+        labelOf,
+        same
+      ),
+    }),
+    (stored, own) =>
+      same(stored.type.entityId, own.type.entityId) &&
+      same(stored.value.entityId, own.value.entityId),
+    () => rebase.skipped.props++
   );
 
 /**
@@ -180,9 +221,26 @@ export const rebaseEntity = (
   ours: IEntity,
   theirs: IEntity,
   previous: AppendConflict[],
-  labelOf: (entityId: string) => string
-): { entity: IEntity; conflicts: AppendConflict[]; notes: string[] } => {
-  const rebase: Rebase = { previous, conflicts: [], notes: [] };
+  labelOf: (entityId: string) => string,
+  // a Value copy of the draft and a stored Value with its text are the same
+  same: SameEntity = (storedId, importedId) => storedId === importedId
+): {
+  entity: IEntity;
+  conflicts: AppendConflict[];
+  notes: string[];
+  skipped: Rebase["skipped"];
+} => {
+  const rebase: Rebase = {
+    previous,
+    conflicts: [],
+    notes: [],
+    skipped: { labels: 0, notes: 0, props: 0, references: 0 },
+  };
+  // a label or note both sides added is in the database now
+  const bothAdded = (before: string[], own: string[], stored: string[]) =>
+    own.filter((item) => !before.includes(item) && stored.includes(item)).length;
+  rebase.skipped.labels = bothAdded(base.labels, ours.labels, theirs.labels);
+  rebase.skipped.notes = bothAdded(base.notes, ours.notes, theirs.notes);
   const entity: IEntity = { ...theirs };
   entity.labels = rebaseLabels(base.labels, ours.labels, theirs.labels, rebase);
   entity.notes = mergeList(base.notes, ours.notes, theirs.notes);
@@ -196,15 +254,19 @@ export const rebaseEntity = (
     );
   }
   entity.data = rebaseData(base.data ?? {}, ours.data ?? {}, theirs.data ?? {}, "data", rebase);
-  entity.props = rebaseProps(base.props, ours.props, theirs.props, rebase, labelOf);
+  entity.props = rebaseProps(base.props, ours.props, theirs.props, rebase, labelOf, same);
   entity.references = rebaseById<IReference>(
     base.references,
     ours.references,
     theirs.references,
     rebase,
-    (reference) => `reference ${quote(labelOf(reference.resource))}`
+    (reference) => `reference ${quote(labelOf(reference.resource))}`,
+    undefined,
+    undefined,
+    (stored, own) => stored.resource === own.resource && stored.value === own.value,
+    () => rebase.skipped.references++
   );
-  return { entity, conflicts: rebase.conflicts, notes: rebase.notes };
+  return { entity, conflicts: rebase.conflicts, notes: rebase.notes, skipped: rebase.skipped };
 };
 
 /**
@@ -308,17 +370,42 @@ export const rebaseAppend = (
   if (!append || !ours) {
     return { draft, notes: [] };
   }
-  const { entity, conflicts, notes } = rebaseEntity(
+  const { entity, conflicts, notes, skipped } = rebaseEntity(
     append.stored,
     ours,
     current,
     append.conflicts,
-    labelOf
+    labelOf,
+    sameEntityBy(
+      (id) => draft.entities.find((candidate) => candidate.id === id) ?? draft.existing[id]
+    )
   );
   const rebased: ImportDraft = {
     ...draft,
     entities: draft.entities.map((candidate) => (candidate.id === entityId ? entity : candidate)),
-    appends: { ...draft.appends, [entityId]: { ...append, stored: current, conflicts } },
+    appends: {
+      ...draft.appends,
+      [entityId]: {
+        ...append,
+        stored: current,
+        conflicts,
+        skipped: {
+          ...append.skipped,
+          labels: append.skipped.labels + skipped.labels,
+          notes: append.skipped.notes + skipped.notes,
+          props: append.skipped.props + skipped.props,
+          references: append.skipped.references + skipped.references,
+        },
+        // the input's labels are those the draft holds beyond the stored ones
+        // it was merged with; a mismatch ends when the database gains one
+        labelMismatch:
+          append.labelMismatch &&
+          labelsDiffer(
+            current.labels,
+            ours.labels.filter((label) => !append.stored.labels.includes(label))
+          ),
+      },
+    },
   };
   const relations = rebaseStoredRelations(rebased, entityId, currentRelations, labelOf);
   return { draft: relations.draft, notes: [...notes, ...relations.notes] };

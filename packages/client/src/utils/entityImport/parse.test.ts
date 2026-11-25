@@ -36,6 +36,30 @@ describe("parseImportInput", () => {
     expect(jsonErrorOffset("JSON Parse error: Expected ']'", text)).toBeUndefined();
   });
 
+  it("finds an unexpected token from the text Chrome quotes around it", () => {
+    const offsetOf = (text: string) => {
+      try {
+        JSON.parse(text);
+      } catch (error) {
+        return jsonErrorOffset((error as Error).message, text);
+      }
+    };
+    const numbers = Array.from({ length: 12 }, (_, index) => index + 1).join(", ");
+    // cut on both sides
+    const middle = `[${numbers}, @, ${numbers}]`;
+    expect(offsetOf(middle)).toBe(middle.indexOf("@"));
+    // cut after only
+    const start = `@[${numbers}]`;
+    expect(offsetOf(start)).toBe(0);
+    // cut before only
+    const end = `[${numbers}, @]`;
+    expect(offsetOf(end)).toBe(end.indexOf("@"));
+    // the whole text quoted
+    expect(offsetOf('{"a": x}')).toBeUndefined();
+    // the text ends early
+    expect(offsetOf(`[${numbers},`)).toBe(`[${numbers},`.length);
+  });
+
   it("reports the error past an accepted trailing comma", () => {
     const text = '[\n  {"a": 1,},\n  {"b": 2}\n  {"c": 3}\n]';
     const { errors } = parseImportInput(text, 10);

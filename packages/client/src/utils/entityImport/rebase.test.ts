@@ -121,6 +121,46 @@ describe("rebaseEntity", () => {
     expect(resolved.conflicts).toEqual([]);
   });
 
+  it("keeps a type conflict in data that is set to the stored object", () => {
+    const storedValue = { from: "1900", to: "1950" };
+    const base = entity({ data: { period: storedValue } });
+    const settled = {
+      path: "data.period",
+      label: "period",
+      stored: "",
+      imported: "",
+      storedValue,
+      importedValue: "1900-1950",
+      useImported: false,
+    } as AppendConflict;
+    const theirs = entity({ data: { period: { from: "1901", to: "1950" } } });
+
+    const { entity: rebased, conflicts } = rebaseEntity(base, base, theirs, [settled], labelOf);
+
+    expect(rebased.data).toEqual({ period: { from: "1901", to: "1950" } });
+    expect(conflicts).toMatchObject([
+      { path: "data.period", importedValue: "1900-1950", useImported: false },
+    ]);
+  });
+
+  it("merges a metaprop or reference the draft and the database both added", () => {
+    const base = entity();
+    const ours = entity({
+      props: [prop("p-draft", "colour", "grey", [prop("p-child", "shade", "dark")])],
+      references: [reference("r-draft", "book", "p. 1")],
+    });
+    const theirs = entity({
+      props: [prop("p-db", "colour", "grey")],
+      references: [reference("r-db", "book", "p. 1")],
+    });
+
+    const { entity: rebased } = rebaseEntity(base, ours, theirs, [], labelOf);
+
+    expect(rebased.props.map((item) => item.id)).toEqual(["p-db"]);
+    expect(rebased.props[0].children.map((item) => item.id)).toEqual(["p-child"]);
+    expect(rebased.references.map((item) => item.id)).toEqual(["r-db"]);
+  });
+
   it("keeps the database version of a metaprop changed on both sides, and says so", () => {
     const base = entity({ props: [prop("p1", "colour", "grey")] });
     const ours = entity({ props: [prop("p1", "colour", "white")] });
@@ -153,6 +193,22 @@ describe("rebaseAppend", () => {
       appends: { wolf: { stored, conflicts: [], skipped: emptySkips() } },
       storedRelations,
     }) as ImportDraft;
+
+  it("counts what the database gained as skipped and ends a label mismatch it settles", () => {
+    const draft = {
+      entities: [entity({ labels: ["wolf", "Canis"], notes: ["import note"] })],
+      relations: [],
+      existing: {},
+      appends: { wolf: { stored, conflicts: [], skipped: emptySkips(), labelMismatch: true } },
+      storedRelations: [],
+    } as unknown as ImportDraft;
+    const current = entity({ labels: ["wolf", "canis"], notes: ["import note"] });
+
+    const { draft: rebased } = rebaseAppend(draft, "wolf", current, [], labelOf);
+
+    expect(rebased.appends!.wolf.skipped).toMatchObject({ labels: 0, notes: 1 });
+    expect(rebased.appends!.wolf.labelMismatch).toBe(false);
+  });
 
   it("moves the draft onto the stored entity and stored relations as they are now", () => {
     const scl = relation("s1", RelationEnums.Type.Superclass, "wolf", "animal");
