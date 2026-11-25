@@ -1,3 +1,4 @@
+import { TimeUnit } from "@inkvisitor/shared/types/stats";
 import { storage } from "../service/storage";
 import { closeTestDb, openTestDb } from "./db";
 import { adminSeed } from "./fixtures";
@@ -35,7 +36,7 @@ const MUTABLE_TABLES = [
   storage.documents,
   storage.settings,
   // materialized stats queries such as latestUpdate scan the whole table
-  ...["day", "week", "month", "year"].map((unit) => storage.stats(unit)),
+  ...Object.values(TimeUnit).map((unit) => storage.stats(unit)),
 ];
 
 beforeAll(async () => {

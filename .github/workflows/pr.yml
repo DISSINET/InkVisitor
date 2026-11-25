@@ -33,8 +33,8 @@ jobs:
       - name: Typecheck
         run: pnpm exec turbo run typecheck --continue
 
-      # server integration tests need a running database, so the server runs
-      # only its DB-free unit project below
+      # server integration tests need a running database, so they run in the
+      # server-postgres job; this job runs only the server's DB-free unit project below
       - name: Test
         run: pnpm exec turbo run test --continue --filter=!inkvisitor-server
 
