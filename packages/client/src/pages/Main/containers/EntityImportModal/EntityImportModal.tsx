@@ -240,7 +240,15 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     ids.forEach((id) => requestedRelationIds.current.add(id));
     Promise.all(ids.map(storedRelationsOf))
       .then((found) =>
-        setDraft((current) => current && addStoredRelations(current, found.flat())),
+        setDraft(
+          (current) =>
+            current &&
+            addStoredRelations(
+              current,
+              // an append undone while its relations loaded takes none of them
+              found.filter((_, index) => ids[index] in (current.appends ?? {})).flat(),
+            ),
+        ),
       )
       .catch(() => ids.forEach((id) => requestedRelationIds.current.delete(id)));
   }, [draft]);
@@ -358,7 +366,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             { ...record, undo: replaceUndoEntityId(record.undo, entityId, storedId) },
           ])
         ),
-        [storedId]: { undo: appendUndoOf(draft, entityId, storedId), storedLabel },
+        [storedId]: { undo: appendUndoOf(draft, entityId, storedId, next), storedLabel },
       }));
       setDraftErrors([]);
       setDraftNotes((notes) => [
