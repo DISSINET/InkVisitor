@@ -123,6 +123,13 @@ export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
 // burst to a single toast while it is on screen
 const HTML_RESPONSE_TOAST_ID = "html-response";
 
+/** Local time as 2026-11-24_17-02-03: no spaces, commas or slashes, and file names sort by date. */
+const fileNameTimestamp = (date: Date) => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${day}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+};
+
 const triggerDownload = (blob: Blob, fileName: string) => {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1026,7 +1033,7 @@ class Api {
 
       const tsvText = response.data.tsvText;
 
-      const dateStamp = new Date().toLocaleString();
+      const dateStamp = fileNameTimestamp(new Date());
       let fileName = `query-${dateStamp}`;
 
       const blob = new Blob([tsvText], { type: "text/tab-separated-values" });
@@ -1078,7 +1085,7 @@ class Api {
 
       triggerDownload(
         new Blob([JSON.stringify(file, null, 2)], { type: "application/json" }),
-        `query-${exportedAt.toLocaleString()}.json`,
+        `query-${fileNameTimestamp(exportedAt)}.json`,
       );
     } catch (err) {
       // the response interceptor toasts failed requests only, not a failure building the file
