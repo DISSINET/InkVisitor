@@ -13,7 +13,7 @@ import { getAuditByEntityId } from "@modules/audits";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -45,13 +45,20 @@ import {
   PermissionDeniedError,
   TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
-import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import {
+  IRequestQuery,
+  IRequestQueryExport,
+  IRequestQueryExportJson,
+} from "@inkvisitor/shared/types/request-query";
 import { IBatchSetAttributeChanges } from "@inkvisitor/shared/types/request-batch";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import Territory from "@models/territory/territory";
-import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
+import {
+  IResponseQuery,
+  IResponseQueryExportJson,
+} from "@inkvisitor/shared/types/response-query";
 
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { storage } from "@service/storage";
@@ -1106,6 +1113,45 @@ export default Router()
 
       return { tsvText: tsvHeader + "\n" + tsvBodyRows };
     })
+  )
+
+  .post(
+    "/query-export-json",
+    asyncRouteHandler<IResponseQueryExportJson>(
+      async (request: IRequest<undefined, IRequestQueryExportJson>) => {
+        // admins pass the ACL on every route, so owner-only is decided here
+        if (!request.getUserOrFail().hasRole([UserEnums.Role.Owner])) {
+          throw new PermissionDeniedError("the JSON export is for the owner only");
+        }
+        const { entityIds } = request.body;
+        if (!Array.isArray(entityIds) || entityIds.length === 0) {
+          throw new BadParams("entityIds array must be provided");
+        }
+
+        const conn = request.db.connection;
+        const entities = await Entity.findEntitiesByIds(conn, entityIds);
+        const ids = entities.map((entity) => entity.id);
+        // two Resources may share a document
+        const documentIds = new Set<string>();
+        for (const entity of entities) {
+          const documentId =
+            entity.class === EntityEnums.Class.Resource
+              ? (entity.data as IResourceData).documentId
+              : undefined;
+          if (documentId) {
+            documentIds.add(documentId);
+          }
+        }
+
+        const relations = await Relation.findForEntities(conn, ids);
+        const audits = (await Audit.getAllForMany(conn, AuditScope.Entity, ids)).concat(
+          await Audit.getAllRelationAuditsForEntities(conn, ids),
+          await Audit.getAllForMany(conn, AuditScope.Document, [...documentIds])
+        );
+
+        return { entities, relations, audits };
+      }
+    )
   )
 
   .post(

@@ -303,6 +303,28 @@ export default class Audit implements IAudit, IDbModel {
     return result.map((r) => new Audit(r));
   }
 
+  /**
+   * Every audit of the listed models, as stored, in no promised order
+   * @param db Conn
+   * @param scope AuditScope
+   * @param modelIds string[]
+   * @returns Promise<IAudit[]>
+   */
+  static async getAllForMany(db: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]> {
+    return storage.audits.allForMany(db, scope, modelIds);
+  }
+
+  /**
+   * Every relation audit whose snapshot lists any of the entities, deleted
+   * relations included, as stored and each once
+   * @param db Conn
+   * @param entityIds string[]
+   * @returns Promise<IAudit[]>
+   */
+  static async getAllRelationAuditsForEntities(db: Conn, entityIds: string[]): Promise<IAudit[]> {
+    return storage.audits.relationAuditsForEntities(db, entityIds);
+  }
+
   static async getLastNForDocument(
     dbConn: Conn,
     documentId: string,

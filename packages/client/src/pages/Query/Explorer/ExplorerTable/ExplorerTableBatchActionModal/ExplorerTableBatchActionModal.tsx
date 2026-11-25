@@ -14,6 +14,7 @@ interface ExplorerTableBatchActionModalProps {
   columns: Explore.IExploreColumn[];
   onClose: () => void;
   onExport: (selectedColumnIds: string[]) => void;
+  isExporting: boolean;
   onApplyAction: () => void;
 }
 
@@ -23,6 +24,7 @@ export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionMod
   columns,
   onClose,
   onExport,
+  isExporting,
   onApplyAction,
 }) => {
   const renderContent = () => {
@@ -33,6 +35,7 @@ export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionMod
             selectedEntityIds={selectedEntityIds}
             columns={columns}
             onExport={onExport}
+            isExporting={isExporting}
             onClose={onClose}
           />
         );

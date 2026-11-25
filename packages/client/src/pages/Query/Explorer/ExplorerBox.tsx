@@ -26,11 +26,12 @@ interface ExplorerBoxProps {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   queryError: Error | null;
-  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => Promise<void>;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+  onExportJson?: (entityIds: string[]) => Promise<void>;
 
   /** Page-level result expansion (#2969), announced above the results. */
   includeEquivalents?: boolean;
@@ -40,6 +41,8 @@ interface ExplorerBoxProps {
 
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
+  /** When false the owner-only batch actions are hidden too. */
+  isOwner?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -54,11 +57,13 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   onOpenEntitiesInDetail,
+  onExportJson,
   includeEquivalents = false,
   includeSubordinates = false,
   onToggleIncludeEquivalents = () => {},
   onToggleIncludeSubordinates = () => {},
   canBatchEdit = false,
+  isOwner = false,
 }) => {
   const isStats = state.view.mode === Explore.EViewMode.Stats;
   // Stats view with no search criteria: show only the prompt, hiding the control
@@ -71,6 +76,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     getCachedEntity,
     onExport,
     onOpenEntitiesInDetail,
+    onExportJson,
     stableSignature,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
@@ -99,7 +105,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                     batchActionSelected: controls.batchActionSelected,
                     setBatchActionSelected: controls.setBatchActionSelected,
                     onApplyBatchAction: controls.handleApplyBatchAction,
+                    isExporting: controls.isExporting,
                     canBatchEdit,
+                    isOwner,
                   }
             }
             newColumn={
@@ -163,9 +171,11 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           selectedEntityIds={controls.selectedEntityIds}
           columns={columns}
           onClose={() => controls.setIsBatchModalOpen(false)}
-          onExport={(selectedColumnIds) => {
-            controls.handleExport(selectedColumnIds);
-            controls.setIsBatchModalOpen(false);
+          isExporting={controls.isExporting}
+          onExport={async (selectedColumnIds) => {
+            if (await controls.handleExport(selectedColumnIds)) {
+              controls.setIsBatchModalOpen(false);
+            }
           }}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);

@@ -88,8 +88,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
   const { data: userData } = useUserQuery(true);
-  const canBatchEdit =
-    userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
+  const isOwner = userData?.role === UserEnums.Role.Owner;
+  const canBatchEdit = isOwner || userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -303,7 +303,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
 
   const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
-    toast.success("Exporting data...");
     const exportExplore =
       selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
         ? {
@@ -318,12 +317,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         : exploreState;
     // export must run the same (resolved) query as the displayed results -
     // rowIndices are positional against the server-side result order
-    api.queryExport(
+    return api.queryExport(
       buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
       exportExplore,
       rowIndices,
     );
   };
+
+  const handleExportJson = (entityIds: string[]) =>
+    api.queryExportJson(
+      entityIds,
+      buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
+    );
 
   const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
   const explorerBoxMinimizedStorageKey = "queryExplorerBoxMinimized";
@@ -1212,11 +1217,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
+                onExportJson={handleExportJson}
                 includeEquivalents={committedExpansion.equivalents}
                 includeSubordinates={committedExpansion.subordinates}
                 onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
                 onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
+                isOwner={isOwner}
               />
             </Box>
           </>

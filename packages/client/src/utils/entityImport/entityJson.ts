@@ -50,35 +50,27 @@ const dataJson = (entity: IEntity): object => {
 /**
  * The relations this entity states itself: the symmetrical ones and, for the
  * asymmetrical ones, those it is the source (entityIds[0]) of - the ones Detail
- * lets it set. Tree relations come as their first level only.
+ * lets it set. `relations` must all include the entity.
  */
-const ownRelations = (
-  entityId: string,
-  relations: Relation.IUsedRelations | undefined
-): Relation.IRelation[] => {
-  const out: Relation.IRelation[] = [];
-  for (const [type, detailType] of Object.entries(relations ?? {})) {
-    const rule = Relation.RelationRules[type as RelationEnums.Type];
-    if (!rule || !detailType) {
-      continue;
-    }
-    for (const connection of detailType.connections) {
-      if (!rule.asymmetrical || connection.entityIds[0] === entityId) {
-        out.push(connection);
-      }
-    }
-  }
-  return out;
-};
+const ownRelations = (entityId: string, relations: Relation.IRelation[]): Relation.IRelation[] =>
+  relations.filter((relation) => {
+    const rule = Relation.RelationRules[relation.type];
+    return !!rule && (!rule.asymmetrical || relation.entityIds[0] === entityId);
+  });
+
+/** The relations Detail lists for the entity; tree relations as their first level only. */
+const detailConnections = (relations: Relation.IUsedRelations | undefined): Relation.IRelation[] =>
+  Object.values(relations ?? {}).flatMap(
+    (detailType) => (detailType?.connections ?? []) as Relation.IRelation[]
+  );
 
 /**
- * The entity as the JSON section of Detail shows it: only what Detail lets the
- * user edit, in the format the JSON import reads. Copied, edited (with a new
- * id) and imported, it creates the edited entity.
+ * buildEntityJson from the stored relations the entity is in, rather than from
+ * the relations of its Detail.
  */
-export const buildEntityJson = (
+export const buildEntityJsonFromRelations = (
   entity: IEntity,
-  relations: Relation.IUsedRelations | undefined
+  relations: Relation.IRelation[]
 ): EntityJson => ({
   id: entity.id,
   ...(entity.legacyId ? { legacyId: entity.legacyId } : {}),
@@ -99,3 +91,13 @@ export const buildEntityJson = (
       : {}),
   })),
 });
+
+/**
+ * The entity as the JSON section of Detail shows it: only what Detail lets the
+ * user edit, in the format the JSON import reads. Copied, edited (with a new
+ * id) and imported, it creates the edited entity.
+ */
+export const buildEntityJson = (
+  entity: IEntity,
+  relations: Relation.IUsedRelations | undefined
+): EntityJson => buildEntityJsonFromRelations(entity, detailConnections(relations));

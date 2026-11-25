@@ -37,6 +37,7 @@ import {
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { IResponseQueryExportJson } from "@inkvisitor/shared/types/response-query";
 import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
@@ -55,6 +56,8 @@ import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { ErrorToast } from "components/basic/Toast/ErrorToast";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import { buildExplorerJsonExport } from "utils/explorerJsonExport";
+import packageJson from "../package.json";
 import {
   formatRequestErrorDetails,
   readApiErrorPayload,
@@ -119,6 +122,13 @@ export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
 // parallel requests all receive the same proxy page, so one shared id keeps the
 // burst to a single toast while it is on screen
 const HTML_RESPONSE_TOAST_ID = "html-response";
+
+/** Local time as 2026-11-24_17-02-03: no spaces, commas or slashes, and file names sort by date. */
+const fileNameTimestamp = (date: Date) => {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${day}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+};
 
 const triggerDownload = (blob: Blob, fileName: string) => {
   const url = window.URL.createObjectURL(blob);
@@ -1023,7 +1033,7 @@ class Api {
 
       const tsvText = response.data.tsvText;
 
-      const dateStamp = new Date().toLocaleString();
+      const dateStamp = fileNameTimestamp(new Date());
       let fileName = `query-${dateStamp}`;
 
       const blob = new Blob([tsvText], { type: "text/tab-separated-values" });
@@ -1041,6 +1051,45 @@ class Api {
       document.body.removeChild(a);
     } catch (err) {
       console.log("err export", err);
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Downloads the selected entities with their relations and audits as JSON
+   * (owner only).
+   * @param query the query the entities were selected from, saved in the file
+   */
+  async queryExportJson(
+    entityIds: string[],
+    query: Query.INode,
+    options?: IApiOptions,
+  ): Promise<void> {
+    const exportedAt = new Date();
+    let response: AxiosResponse<IResponseQueryExportJson>;
+    try {
+      response = await this.connection.post<IResponseQueryExportJson>(
+        `/entities/query-export-json`,
+        { entityIds },
+        options,
+      );
+    } catch (err) {
+      throw this.handleError(err);
+    }
+    try {
+      const file = buildExplorerJsonExport(response.data, entityIds, {
+        exportedAt: exportedAt.toISOString(),
+        version: packageJson.version,
+        query,
+      });
+
+      triggerDownload(
+        new Blob([JSON.stringify(file, null, 2)], { type: "application/json" }),
+        `query-${fileNameTimestamp(exportedAt)}.json`,
+      );
+    } catch (err) {
+      // the response interceptor toasts failed requests only, not a failure building the file
+      this.showErrorToast(err);
       throw this.handleError(err);
     }
   }

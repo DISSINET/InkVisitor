@@ -1,5 +1,5 @@
 export { importDataSource, importWriteApi } from "./apiAdapters";
-export { buildEntityJson } from "./entityJson";
+export { buildEntityJson, buildEntityJsonFromRelations } from "./entityJson";
 export { errorMessage, formatIssue } from "./helpers";
 export { MAX_IMPORT_ENTITIES } from "./types";
 export type { ImportIssue, ImportPlan, ImportValidation } from "./types";
