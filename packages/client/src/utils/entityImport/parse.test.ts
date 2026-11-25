@@ -36,6 +36,13 @@ describe("parseImportInput", () => {
     expect(jsonErrorOffset("JSON Parse error: Expected ']'", text)).toBeUndefined();
   });
 
+  it("reports the error past an accepted trailing comma", () => {
+    const text = '[\n  {"a": 1,},\n  {"b": 2}\n  {"c": 3}\n]';
+    const { errors } = parseImportInput(text, 10);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].offset).toBe(text.indexOf('{"c"'));
+  });
+
   it("accepts trailing commas and keeps commas inside texts", () => {
     const text = '[{"class": "C", "labels": ["a,]", "b\\",}",], },\n]';
     const { items, errors } = parseImportInput(text, 10);

@@ -1,8 +1,11 @@
 import { isPlainObject } from "./helpers";
 import { ImportIssue } from "./types";
 
-/** The text without commas that close a list or an object, as in `[1, 2,]`. */
-const removeTrailingCommas = (text: string): string => {
+/**
+ * The text with a space for each comma that closes a list or an object, as in
+ * `[1, 2,]`; every other character keeps its offset.
+ */
+const blankTrailingCommas = (text: string): string => {
   let result = "";
   let inString = false;
   for (let i = 0; i < text.length; i++) {
@@ -21,6 +24,7 @@ const removeTrailingCommas = (text: string): string => {
     } else if (char === ",") {
       const next = text.slice(i + 1).match(/^\s*(\S)/)?.[1];
       if (next === "}" || next === "]") {
+        result += " ";
         continue;
       }
     }
@@ -65,12 +69,12 @@ export const parseImportInput = (
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
-  } catch (error) {
-    // the error reported is the one of the text as pasted, so its position
-    // points into the input
+  } catch {
+    // the error of the text without its trailing commas, which the import
+    // accepts; their blanks keep its position pointing into the input
     try {
-      parsed = JSON.parse(removeTrailingCommas(text));
-    } catch {
+      parsed = JSON.parse(blankTrailingCommas(text));
+    } catch (error) {
       return {
         items: [],
         errors: [
