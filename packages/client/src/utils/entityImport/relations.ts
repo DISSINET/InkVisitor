@@ -12,7 +12,13 @@ import {
   unique,
 } from "./helpers";
 import { EdgeGraph, addForwardEdges, loadForwardClosure } from "./relationGraph";
-import { ImportDataSource, ImportEntity, ImportIssue, ImportRelationItem } from "./types";
+import {
+  ImportDataSource,
+  ImportEntity,
+  ImportIssue,
+  ImportRelationItem,
+  StoredRelationChanges,
+} from "./types";
 
 const RELATION_KEYS = ["type", "entityIds", "id", "order", "certainty", "subtrees"];
 
@@ -202,7 +208,9 @@ export const validateRelations = async (
   existing: Map<string, IEntity>,
   source: Pick<ImportDataSource, "getForwardRelations">,
   // input entities appended to stored ones: in the input and in the database
-  appendIds: Set<string> = new Set()
+  appendIds: Set<string> = new Set(),
+  // the stored relations the drafts unlink or edit, which Import writes first
+  storedChanges: StoredRelationChanges = { deleted: [], updated: [] }
 ): Promise<{
   relations: Relation.IRelation[];
   errors: ImportIssue[];
@@ -221,12 +229,41 @@ export const validateRelations = async (
   const entityOf = (entityId: string) => batch.get(entityId)?.entity ?? existing.get(entityId);
   const labelOf = (entityId: string) => quote(entityOf(entityId)?.labels[0] ?? entityId);
 
+  // The stored relations as they are once Import has written the drafts'
+  // changes to them: an unlinked one is gone, an edited one is in its edited
+  // form. Every check against the database reads them through fetchForward.
+  const deletedIds = new Set(storedChanges.deleted.map((relation) => relation.id));
+  const edited = storedChanges.updated.map(
+    ({ before, changes }) => ({ ...before, ...changes }) as Relation.IRelation
+  );
+  const editedById = new Map(edited.map((relation) => [relation.id, relation]));
+
   // several steps ask for the stored relations of one entity and type
   const forwardRequests = new Map<string, Promise<Relation.IRelation[]>>();
   const fetchForward = (entityId: string, type: RelationEnums.Type) => {
     const key = `${type}:${entityId}`;
     if (!forwardRequests.has(key)) {
-      forwardRequests.set(key, source.getForwardRelations(entityId, type));
+      // forward: an asymmetrical relation starts at the entity, any other
+      // relation holds it
+      const isForward = (relation: Relation.IRelation) =>
+        relation.type === type &&
+        (ruleOf(type).asymmetrical
+          ? relation.entityIds[0] === entityId
+          : relation.entityIds.includes(entityId));
+      forwardRequests.set(
+        key,
+        source.getForwardRelations(entityId, type).then((stored) => {
+          const kept = stored
+            .filter((relation) => !deletedIds.has(relation.id))
+            .map((relation) => editedById.get(relation.id) ?? relation)
+            .filter(isForward);
+          const keptIds = new Set(kept.map((relation) => relation.id));
+          return [
+            ...kept,
+            ...edited.filter((relation) => isForward(relation) && !keptIds.has(relation.id)),
+          ];
+        })
+      );
     }
     return forwardRequests.get(key)!;
   };

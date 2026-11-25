@@ -47,6 +47,7 @@ import {
   undoAppend,
   tabEntities,
   validateImport,
+  withLoadedSince,
   writeImport,
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
@@ -339,6 +340,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         appendTargets: appendTargetsOf(draft),
         fromDrafts: true,
         valueCopyIds: draft.valueCopyIds,
+        storedRelationChanges: storedRelationChanges(replaced),
       });
       if (!plan) {
         setDraftErrors(issuesWithEntityIds(replaced, errors));
@@ -346,7 +348,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       }
       const next = draftAfterAppend(replaced, plan);
       const storedLabel = plan.appends[storedId]?.stored.labels[0];
-      setDraft(next);
+      // next comes from the draft before the check; what loaded meanwhile joins it
+      setDraft((current) => (current ? withLoadedSince(next, draft, current) : next));
       // the earlier appends' undos follow the draft to its stored id
       setAppendRecords((records) => ({
         ...Object.fromEntries(
@@ -427,7 +430,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         return;
       }
       const rebased = rebaseAppend(draft, entityId, current, relations, labelOf);
-      setDraft(rebased.draft);
+      setDraft((currentDraft) =>
+        currentDraft ? withLoadedSince(rebased.draft, draft, currentDraft, entityId) : rebased.draft
+      );
       setDraftErrors(withoutStale);
       setDraftNotes((notes) => [
         ...notes,
@@ -472,9 +477,10 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         appendTargets: appendTargetsOf(draft),
         allowAppend: false,
         valueCopyIds: draft.valueCopyIds,
+        storedRelationChanges: relationChanges,
       });
       setDraftErrors(issuesWithEntityIds(draft, result.errors));
-      plan = result.plan && { ...result.plan, storedRelationChanges: storedRelationChanges(draft) };
+      plan = result.plan && { ...result.plan, storedRelationChanges: relationChanges };
     } catch (error) {
       setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
     } finally {

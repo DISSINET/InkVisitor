@@ -60,6 +60,13 @@ describe("parseImportInput", () => {
     expect(offsetOf(`[${numbers},`)).toBe(`[${numbers},`.length);
   });
 
+  it("finds an unexpected token next to an accepted trailing comma", () => {
+    const numbers = Array.from({ length: 12 }, (_, index) => index + 1).join(", ");
+    const text = `[${numbers}, [1,], @, ${numbers}]`;
+    const { errors } = parseImportInput(text, 10);
+    expect(errors[0].offset).toBe(text.indexOf("@"));
+  });
+
   it("reports the error past an accepted trailing comma", () => {
     const text = '[\n  {"a": 1,},\n  {"b": 2}\n  {"c": 3}\n]';
     const { errors } = parseImportInput(text, 10);

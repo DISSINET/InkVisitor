@@ -94,16 +94,18 @@ export const parseImportInput = (
     parsed = JSON.parse(text);
   } catch {
     // the error of the text without its trailing commas, which the import
-    // accepts; their blanks keep its position pointing into the input
+    // accepts; their blanks keep its position pointing into the input, and
+    // the text Chrome quotes is found in the blanked text
+    const blanked = blankTrailingCommas(text);
     try {
-      parsed = JSON.parse(blankTrailingCommas(text));
+      parsed = JSON.parse(blanked);
     } catch (error) {
       return {
         items: [],
         errors: [
           {
             message: `Invalid JSON: ${(error as Error).message}`,
-            offset: jsonErrorOffset((error as Error).message, text),
+            offset: jsonErrorOffset((error as Error).message, blanked),
           },
         ],
       };

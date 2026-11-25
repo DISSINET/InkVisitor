@@ -42,6 +42,7 @@ export {
   undoAppend,
   tabEntities,
   updateDraftEntity,
+  withLoadedSince,
   updateDraftRelation,
 } from "./draft";
 export type { AppendUndo, ImportDraft } from "./draft";

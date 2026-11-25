@@ -21,7 +21,13 @@ import {
 } from "./references";
 import { normalizeRelationItems, validateRelations } from "./relations";
 import { validateTerritories } from "./territories";
-import { ImportDataSource, ImportIssue, ImportValidation, maxImportEntities } from "./types";
+import {
+  ImportDataSource,
+  ImportIssue,
+  ImportValidation,
+  maxImportEntities,
+  StoredRelationChanges,
+} from "./types";
 
 /** Issues grouped by entity in input order; issues of no single entity last. */
 const byEntity = (issues: ImportIssue[]): ImportIssue[] =>
@@ -44,6 +50,9 @@ export interface ImportValidationContext {
   // Values the drafts made for slots naming a stored Value; they stand in for
   // the stored Value and don't count toward the entity limit
   valueCopyIds?: string[];
+  // the stored relations the drafts unlink or edit; the relation checks see
+  // the database as Import leaves it
+  storedRelationChanges?: StoredRelationChanges;
 }
 
 /** Ids of every entity the stored version of an entity points at. */
@@ -313,7 +322,8 @@ export const validateImport = async (
     entities,
     existing,
     context.source,
-    appendIds
+    appendIds,
+    context.storedRelationChanges
   );
   errors.push(...relations.errors);
   notes.push(...relations.notes);

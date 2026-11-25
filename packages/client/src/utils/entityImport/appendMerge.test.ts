@@ -219,6 +219,9 @@ describe("applyConflictChoice", () => {
       "caritas",
       "amor",
     ]);
+    // the label not picked, deleted in Detail, stays deleted
+    const deleted = concept({ labels: ["love", "caritas"] });
+    expect(applyConflictChoice(deleted, conflict, false).labels).toEqual(["love", "caritas"]);
   });
 
   it("sets a data field", () => {
@@ -273,6 +276,12 @@ describe("appendChanges and storedFields", () => {
     const changes = appendChanges(stored, appended);
     expect(changes).toEqual({ notes: ["bishop", "saint"], data: { logicalType: "1" } });
     expect(storedFields(stored, changes)).toEqual({ notes: ["bishop"], data: { logicalType: null } });
+  });
+
+  it("sends nothing for fields stored with their keys in another order", () => {
+    const stored = concept({ data: { logicalType: "1", pos: "n" } });
+    const reordered = { ...stored, data: { pos: "n", logicalType: "1" } };
+    expect(appendChanges(stored, reordered)).toEqual({});
   });
 
   it("sends a status changed in Detail", () => {

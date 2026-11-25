@@ -174,7 +174,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
         if (isMounted.current) {
           setCandidates((current) => ({
             ...current,
-            [entity.id]: found.filter((candidate) => !draftEntityIds.has(candidate.id)),
+            [entity.id]: found,
           }));
         }
       },
@@ -269,7 +269,11 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
             <EntityImportAppendPanel
               draft={draft}
               entity={selected}
-              candidates={candidates[selected.id]}
+              // a stored entity another draft was appended to since the
+              // search is a draft now, and no candidate
+              candidates={candidates[selected.id]?.filter(
+                (candidate) => !draftEntityIds.has(candidate.id)
+              )}
               searchFailed={failedSearchIds.has(selected.id)}
               onSearchAgain={() => searchFor(selected)}
               onConflictChoice={(conflictIndex, useImported) =>

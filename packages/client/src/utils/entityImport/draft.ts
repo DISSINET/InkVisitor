@@ -179,14 +179,16 @@ const isStoredRelation = (draft: ImportDraft, relationId: string) =>
 
 /**
  * Adds the stored relations of an appended draft, loaded once it is appended,
- * so Detail shows and edits them; a relation already in the drafts stays as
- * it is.
+ * so Detail shows and edits them. A relation loaded before stays as it is,
+ * edited or unlinked: two appended drafts can share one.
  */
 export const addStoredRelations = (
   draft: ImportDraft,
   relations: Relation.IRelation[]
 ): ImportDraft => {
-  const known = new Set(draft.relations.map((relation) => relation.id));
+  const known = new Set(
+    [...(draft.storedRelations ?? []), ...draft.relations].map((relation) => relation.id)
+  );
   const added = relations.filter(
     (relation, index) =>
       !known.has(relation.id) && relations.findIndex((other) => other.id === relation.id) === index
@@ -198,6 +200,38 @@ export const addStoredRelations = (
         storedRelations: [...(draft.storedRelations ?? []), ...added],
       }
     : draft;
+};
+
+/**
+ * The draft that a step waiting on the server computed from `base`, with what
+ * loaded into the drafts while it waited: entities, synonym groups and stored
+ * relations, which the step itself never removes. The relations of
+ * `reloadedId` are left out, as the step loaded them again itself.
+ */
+export const withLoadedSince = (
+  next: ImportDraft,
+  base: ImportDraft,
+  current: ImportDraft,
+  reloadedId?: string
+): ImportDraft => {
+  const addedKeys = <T>(now: Record<string, T> = {}, before: Record<string, T> = {}) =>
+    Object.fromEntries(Object.entries(now).filter(([key]) => !(key in before)));
+  const baseStoredIds = new Set((base.storedRelations ?? []).map((relation) => relation.id));
+  const loadedRelations = (current.storedRelations ?? []).filter(
+    (relation) =>
+      !baseStoredIds.has(relation.id) && !(reloadedId && relation.entityIds.includes(reloadedId))
+  );
+  return addStoredRelations(
+    {
+      ...next,
+      existing: { ...addedKeys(current.existing, base.existing), ...next.existing },
+      storedSynonyms: {
+        ...addedKeys(current.storedSynonyms, base.storedSynonyms),
+        ...next.storedSynonyms,
+      },
+    },
+    loadedRelations
+  );
 };
 
 /**
@@ -372,25 +406,47 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
     relation.type === original.type &&
     relation.entityIds.length === original.entityIds.length &&
     relation.entityIds.every((id) => original.entityIds.includes(swapBack(id)));
-  // the stored relations of the stored entity, loaded for the append, go
-  const ofStored = (relation: Relation.IRelation) =>
-    isStoredRelation(draft, relation.id) && relation.entityIds.includes(storedId);
-  const relations = draft.relations.filter(
-    (relation) =>
-      !ofStored(relation) &&
-      (!relation.entityIds.includes(storedId) ||
-        !undo.relations.some((original) => sameMembers(relation, original)))
-  );
+  // the stored relations of the stored entity, loaded for the append, go;
+  // one that also links another appended draft stays, edits and all, as that
+  // draft still shows it. Its stored and its edited copy decide together, so
+  // both lists keep it or both drop it, and no edit reads as an unlink.
+  const otherAppendIds = new Set(Object.keys(draft.appends ?? {}).filter((id) => id !== storedId));
+  const storedById = new Map((draft.storedRelations ?? []).map((relation) => [relation.id, relation]));
+  const currentById = new Map(draft.relations.map((relation) => [relation.id, relation]));
+  const goes = (relationId: string) => {
+    const copies = [storedById.get(relationId), currentById.get(relationId)].flatMap(
+      (relation) => relation ?? []
+    );
+    return (
+      copies.some((relation) => relation.entityIds.includes(storedId)) &&
+      !copies.some((relation) => relation.entityIds.some((id) => otherAppendIds.has(id)))
+    );
+  };
+  const undoIds = new Set(undo.relations.map((relation) => relation.id));
+  const relations = draft.relations
+    .filter((relation) =>
+      isStoredRelation(draft, relation.id)
+        ? !goes(relation.id)
+        : !relation.entityIds.includes(storedId) ||
+          !undo.relations.some((original) => sameMembers(relation, original))
+    )
+    // a relation the draft was in that is still here under its id, such as a
+    // stored one it was added to, stays one relation: this copy, with the
+    // edits made since, links the draft again
+    .map((relation) =>
+      undoIds.has(relation.id)
+        ? { ...relation, entityIds: relation.entityIds.map(swapBack) }
+        : relation
+    );
+  const keptIds = new Set(relations.map((relation) => relation.id));
 
   const appends = { ...draft.appends };
   delete appends[storedId];
   return {
     ...draft,
     entities: [...entities, ...restored],
-    relations: [...relations, ...undo.relations],
-    storedRelations: draft.storedRelations?.filter(
-      (relation) => !relation.entityIds.includes(storedId)
-    ),
+    relations: [...relations, ...undo.relations.filter((relation) => !keptIds.has(relation.id))],
+    storedRelations: draft.storedRelations?.filter((relation) => !goes(relation.id)),
     appends,
     valueCopyIds: [
       ...(draft.valueCopyIds ?? []),
@@ -864,12 +920,13 @@ const sentRelation = (
   if (isStoredRelation(draft, relation.id)) {
     return undefined;
   }
-  const sent = Relation.RelationRules[relation.type]?.cloudType
-    ? {
-        ...relation,
-        entityIds: relation.entityIds.filter((id) => !isRemoved(draft, leftOut, id)),
-      }
-    : relation;
+  // a cloud loses its removed members; one that loses none is sent as it is,
+  // which tells draftAfterAppend that the validation saw it unchanged
+  const kept = relation.entityIds.filter((id) => !isRemoved(draft, leftOut, id));
+  const sent =
+    Relation.RelationRules[relation.type]?.cloudType && kept.length < relation.entityIds.length
+      ? { ...relation, entityIds: kept }
+      : relation;
   const owner = relationOwner(draft, sent, leftOut);
   return sent.entityIds.length >= 2 &&
     sent.entityIds.every((id) => !isRemoved(draft, leftOut, id)) &&

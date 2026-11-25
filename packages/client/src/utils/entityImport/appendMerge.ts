@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
 import { isDuplicateLabel } from "utils/entityLabels";
-import { count, isPlainObject, setAtPath } from "./helpers";
+import { count, isPlainObject, sameJson, setAtPath } from "./helpers";
 
 /**
  * A field that holds one value, set differently in the database and in the
@@ -410,7 +410,7 @@ export const mergeIntoStored = (
 
 /**
  * The entity with one conflict settled. Both main labels stay: the one not
- * picked becomes an alternative label.
+ * picked becomes an alternative label, unless it was deleted in Detail.
  */
 export const applyConflictChoice = (
   entity: IEntity,
@@ -421,7 +421,8 @@ export const applyConflictChoice = (
   if (conflict.path === "labels[0]") {
     const other = useImported ? conflict.stored : conflict.imported;
     const rest = entity.labels.filter((label) => label !== value && label !== other);
-    return { ...entity, labels: [value, ...rest, other] };
+    const kept = entity.labels.includes(other) ? [other] : [];
+    return { ...entity, labels: [value, ...rest, ...kept] };
   }
   // conflicts sit on top-level fields or in data, so copying data keeps the
   // entity given unchanged
@@ -491,7 +492,11 @@ const withoutSkippedData = (data: object | undefined) =>
     Object.entries(data ?? {}).filter(([key]) => !SKIPPED_DATA_KEYS.includes(key))
   );
 
-/** The fields of the appended entity that differ from the stored entity. */
+/**
+ * The fields of the appended entity that differ from the stored entity. The
+ * database and the import order object keys differently, so key order is no
+ * difference.
+ */
 export const appendChanges = (stored: IEntity, entity: IEntity): Partial<IEntity> => {
   const changes: Partial<IEntity> = {};
   for (const field of APPEND_FIELDS) {
@@ -499,7 +504,7 @@ export const appendChanges = (stored: IEntity, entity: IEntity): Partial<IEntity
       field === "data"
         ? [withoutSkippedData(stored.data), withoutSkippedData(entity.data)]
         : [stored[field], entity[field]];
-    if (JSON.stringify(storedValue) !== JSON.stringify(value)) {
+    if (!sameJson(storedValue, value)) {
       (changes as Record<string, unknown>)[field] = value;
     }
   }

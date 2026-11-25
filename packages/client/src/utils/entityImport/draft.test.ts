@@ -27,8 +27,10 @@ import {
   undoAppend,
   updateDraftEntity,
   updateDraftRelation,
+  withLoadedSince,
 } from "./draft";
 import { normalizeEntities } from "./normalizeEntities";
+import { ImportPlan } from "./types";
 import { validateImport } from "./validateImport";
 
 const newEntity = (id: string, extra: Record<string, unknown> = {}) =>
@@ -489,6 +491,129 @@ describe("undoAppend", () => {
     expect(undone.entities[2].props[0].value.entityId).toBe("dog");
     expect(Object.keys(undone.appends!).sort()).toEqual(["stored-kennel", "stored-puppy"]);
   });
+
+  it("keeps, with its edit, a stored relation that also links another appended draft", () => {
+    const { Antonym } = RelationEnums.Type;
+    const shared = { id: "s1", type: Antonym, entityIds: ["stored-dog", "stored-cat"] };
+    const ownOnly = { id: "s2", type: Antonym, entityIds: ["stored-dog", "wolf"] };
+    const edited = { ...shared, entityIds: ["stored-cat", "stored-dog"] };
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(replaceEntityId(before, "dog", "stored-dog"), "cat", "stored-cat");
+    undoDog = replaceUndoEntityId(undoDog, "cat", "stored-cat");
+    draft = {
+      ...draft,
+      appends: { "stored-dog": stored("stored-dog"), "stored-cat": stored("stored-cat") },
+      // the shared relation was edited in the drafts
+      relations: [edited, ownOnly],
+      storedRelations: [shared, ownOnly],
+    };
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.storedRelations).toEqual([shared]);
+    expect(undone.relations).toEqual([edited]);
+    expect(storedRelationChanges(undone).updated).toEqual([
+      { before: shared, changes: { entityIds: ["stored-cat", "stored-dog"] } },
+    ]);
+  });
+
+  it("keeps an edit that moves a stored relation to or from another appended draft", () => {
+    const { Antonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(replaceEntityId(before, "dog", "stored-dog"), "cat", "stored-cat");
+    undoDog = replaceUndoEntityId(undoDog, "cat", "stored-cat");
+    // one edit takes the other appended draft out, the other puts it in
+    const away = { id: "s1", type: Antonym, entityIds: ["stored-dog", "stored-cat"] };
+    const toward = { id: "s2", type: Antonym, entityIds: ["stored-dog", "wolf"] };
+    draft = {
+      ...draft,
+      appends: { "stored-dog": stored("stored-dog"), "stored-cat": stored("stored-cat") },
+      relations: [
+        { ...away, entityIds: ["stored-dog", "wolf"] },
+        { ...toward, entityIds: ["stored-dog", "stored-cat"] },
+      ],
+      storedRelations: [away, toward],
+    };
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.storedRelations!.map((relation) => relation.id)).toEqual(["s1", "s2"]);
+    expect(undone.relations.map((relation) => relation.id)).toEqual(["s1", "s2"]);
+    const changes = storedRelationChanges(undone);
+    expect(changes.deleted).toEqual([]);
+    expect(changes.updated.map(({ before: original }) => original.id)).toEqual(["s1", "s2"]);
+  });
+
+  it("keeps once a stored relation the draft was added to, with its later edits", () => {
+    const cloud = { id: "s1", type: RelationEnums.Type.Synonym, entityIds: ["stored-dog", "x"] };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    // dog is appended, and cat was added to the stored synonyms of dog
+    let draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("stored-dog"), newEntity("cat")],
+      relations: [{ ...cloud, entityIds: ["stored-dog", "x", "cat"] }],
+      storedRelations: [cloud],
+      appends: { "stored-dog": stored("stored-dog") },
+    };
+    const undoCat = appendUndoOf(draft, "cat", "stored-cat");
+    draft = replaceEntityId(draft, "cat", "stored-cat");
+    draft = { ...draft, appends: { ...draft.appends, "stored-cat": stored("stored-cat") } };
+    // an edit made after the append
+    draft = updateDraftRelation(draft, "s1", { entityIds: ["stored-dog", "stored-cat"] });
+
+    const undone = undoAppend(draft, undoCat);
+
+    expect(undone.relations).toEqual([{ ...cloud, entityIds: ["stored-dog", "cat"] }]);
+    expect(storedRelationChanges(undone).updated).toEqual([
+      { before: cloud, changes: { entityIds: ["stored-dog", "cat"] } },
+    ]);
+  });
+});
+
+describe("withLoadedSince", () => {
+  it("adds to a step's result what loaded while the step waited", () => {
+    const { Antonym } = RelationEnums.Type;
+    const earlier = { id: "s1", type: Antonym, entityIds: ["stored-dog", "cat"] };
+    const loaded = { id: "s2", type: Antonym, entityIds: ["stored-cat", "wolf"] };
+    const reloaded = { id: "s3", type: Antonym, entityIds: ["stored-dog", "fox"] };
+    const base: ImportDraft = {
+      ...baseDraft(),
+      relations: [earlier],
+      storedRelations: [earlier],
+      existing: { cat: existingEntity("cat") },
+    };
+    // what the loaders added meanwhile
+    const current: ImportDraft = {
+      ...base,
+      relations: [earlier, loaded, reloaded],
+      storedRelations: [earlier, loaded, reloaded],
+      existing: { ...base.existing, wolf: existingEntity("wolf") },
+      storedSynonyms: { hound: ["hound", "dog"] },
+    };
+    // the step's own result, computed from base
+    const next: ImportDraft = { ...base, entities: [newEntity("puppy")] };
+
+    const merged = withLoadedSince(next, base, current, "stored-dog");
+
+    expect(merged.entities.map((entity) => entity.id)).toEqual(["puppy"]);
+    expect(Object.keys(merged.existing).sort()).toEqual(["cat", "wolf"]);
+    expect(merged.storedSynonyms).toEqual({ hound: ["hound", "dog"] });
+    // the step loaded the relations of stored-dog itself
+    expect(merged.storedRelations).toEqual([earlier, loaded]);
+    expect(merged.relations).toEqual([earlier, loaded]);
+  });
 });
 
 describe("draftAfterAppend", () => {
@@ -544,6 +669,29 @@ describe("draftAfterAppend", () => {
     expect(next.relations.map((item) => [...item.entityIds].sort())).toEqual([
       ["hound", "monica", "stored-dog"],
     ]);
+  });
+
+  it("takes a synonym cloud as the validation left it", () => {
+    const cloud = {
+      id: "c1",
+      type: RelationEnums.Type.Synonym,
+      entityIds: ["stored-dog", "stored-hound"],
+    };
+    const previous: ImportDraft = {
+      entities: [newEntity("stored-dog"), newEntity("stored-hound")],
+      relations: [cloud],
+      existing: {},
+    };
+    // the validation found the cloud in the database and left it out
+    const plan: ImportPlan = {
+      entities: previous.entities,
+      relations: [],
+      existingEntities: {},
+      valueCopyIds: [],
+      appends: {},
+    };
+
+    expect(draftAfterAppend(previous, plan).relations).toEqual([]);
   });
 });
 
@@ -617,6 +765,15 @@ describe("stored relations of an appended draft", () => {
   it("leaves a stored relation with a left-out member as it is stored", () => {
     const draft = toggleLeftOut(deleteDraftRelation(withStored(), "s1"), "dog");
     expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
+  });
+
+  it("keeps a stored relation unlinked when another appended draft loads it again", () => {
+    // hound is appended as well, and its stored relations hold the synonym too
+    const draft = addStoredRelations(deleteDraftRelation(withStored(), "s2"), [syn]);
+
+    expect(draft.relations.map((item) => item.id)).toEqual(["s1"]);
+    expect(draft.storedRelations!.map((item) => item.id)).toEqual(["s1", "s2"]);
+    expect(storedRelationChanges(draft).deleted).toEqual([syn]);
   });
 });
 
