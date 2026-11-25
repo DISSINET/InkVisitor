@@ -19,8 +19,10 @@ export const StyledHint = styled.p`
 // when a long error list sits below it) and scrolls from there. The editor
 // lays a highlighted <pre> under a transparent textarea; both take their font
 // from this wrapper, so they stay aligned.
-export const StyledJsonEditor = styled.div<{ $digits: number }>`
+export const StyledJsonEditor = styled.div<{ $digits: number; $plain: boolean }>`
   flex: 1;
+  /* a plain textarea scrolls itself and fills the box */
+  display: ${({ $plain }) => ($plain ? "flex" : "block")};
   width: 100%;
   min-height: ${({ theme }) => theme.space[48]};
   overflow: auto;
@@ -81,6 +83,19 @@ export const StyledJsonEditor = styled.div<{ $digits: number }>`
   .token.operator {
     color: ${({ theme }) => theme.color["xmlQuote"]};
   }
+`;
+
+// the field for a JSON past the highlighting limit, in the editor's type
+export const StyledPlainJsonEditor = styled.textarea`
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
 `;
 
 // the draft tabs take the modal's height; Detail scrolls inside its own box

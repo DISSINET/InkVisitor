@@ -141,16 +141,23 @@ describe("EntityImportModal", () => {
     expect(buttonNamed("Import 1 entity")).toBeDefined();
   });
 
-  it("opens at most the entities that are not Values in Detail", async () => {
-    entitiesGet.mockResolvedValueOnce({ data: [] });
+  it("opens the imported entities in Detail only when asked, Values left out", async () => {
+    entitiesGet.mockResolvedValue({ data: [] });
     await pasteAndValidate([
       { class: "C", labels: ["TEST dog"] },
       { class: "V", labels: ["TEST small"] },
     ]);
 
-    const field = document.querySelector('input[type="number"]') as HTMLInputElement;
-    expect(field.value).toBe("1");
-    expect(field.max).toBe("1");
+    const box = document.querySelector(
+      '[role="checkbox"][aria-label="open in Detail"]'
+    ) as HTMLElement;
+    expect(box.getAttribute("aria-checked")).toBe("false");
+    await act(async () => box.click());
+    expect(box.getAttribute("aria-checked")).toBe("true");
+
+    await clickValidating("Import 2 entities");
+    await act(afterPaint);
+    expect(onImported).toHaveBeenCalledWith(expect.any(Array), 1);
   });
 
   it("undoes an append to a database entity, back to the new draft", async () => {

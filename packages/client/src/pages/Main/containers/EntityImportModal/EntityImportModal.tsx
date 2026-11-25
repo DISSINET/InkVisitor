@@ -4,7 +4,7 @@ import {
   Button,
   ButtonGroup,
   CancelButton,
-  Input,
+  Checkbox,
   Modal,
   Submit,
   ModalContent,
@@ -99,8 +99,8 @@ interface AppendRecord {
   storedLabel?: string;
 }
 
-// how many imported entities Create opens in Detail unless the user sets it
-const DEFAULT_DETAIL_OPEN_COUNT = 10;
+// how many imported entities Import opens in Detail when asked to
+const DETAIL_OPEN_COUNT = 10;
 
 interface EntityImportModal {
   closeModal: () => void;
@@ -119,8 +119,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
   const [step, setStep] = useState<Step>("input");
   const [text, setText] = useState("");
-  // null: the default, capped by the number of entities that can open
-  const [detailOpenChoice, setDetailOpenChoice] = useState<number | null>(null);
+  const [openInDetail, setOpenInDetail] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
   // the text Validate last refused; Validate stays off until it is changed
@@ -548,7 +547,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     included.filter((entity) => entity.class !== EntityEnums.Class.Value).length,
     maxTabCount
   );
-  const detailOpenCount = Math.min(detailOpenChoice ?? DEFAULT_DETAIL_OPEN_COUNT, detailOpenMax);
+  const detailOpenCount = openInDetail ? Math.min(DETAIL_OPEN_COUNT, detailOpenMax) : 0;
 
   return (
     <Modal
@@ -678,22 +677,12 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               }
             </StyledDraftModeHint>
             <ButtonGroup>
-              <Input
-                type="number"
+              <Checkbox
                 label="open in Detail"
-                labelSpaceNoWrap
-                width={50}
-                value={String(detailOpenCount)}
-                min={0}
-                max={detailOpenMax}
-                changeOnType
+                value={openInDetail && detailOpenMax > 0}
                 disabled={detailOpenMax === 0}
-                onChangeFn={(value) => {
-                  const count = Number(value);
-                  setDetailOpenChoice(
-                    Math.min(Math.max(0, Number.isFinite(count) ? count : 0), detailOpenMax)
-                  );
-                }}
+                tooltipLabel={`Import opens up to ${DETAIL_OPEN_COUNT} of the imported entities in Detail; Values never open`}
+                onChangeFn={setOpenInDetail}
               />
               <CancelButton onClick={handleClose} />
               <Button
