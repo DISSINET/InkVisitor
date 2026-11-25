@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchReplaceRelation",
+    "body": {
+      "entityIds": [
+        "rp-p",
+        "rp-c"
+      ],
+      "fromEntityId": "c3",
+      "relationType": "CLA",
+      "toEntityId": "c2"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "changed": 1,
+      "errors": {},
+      "failed": 0,
+      "items": 1,
+      "merged": 0,
+      "nested": 0,
+      "result": true,
+      "selected": 2,
+      "skipped": 0,
+      "unmatched": 1
+    }
+  }
+}

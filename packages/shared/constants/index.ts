@@ -6,6 +6,13 @@
 export const MAX_DOCUMENTS_EXPORT_BATCH = 50;
 
 /**
+ * Upper bound on entity ids in one batch replace request. The server refuses
+ * a longer list and the client splits a larger selection into requests of this
+ * size, so both sides read the same number.
+ */
+export const MAX_BATCH_REPLACE_ENTITIES = 1000;
+
+/**
  * Bounds on a saved query's stored tree, checked in SavedQuery.isValid. The
  * tree is client-supplied JSON that any logged-in user may POST and that a
  * shared query then serves to everyone, and the request body limit is 150mb -

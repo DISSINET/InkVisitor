@@ -1,7 +1,7 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { describe, expect, it } from "vitest";
-import { isReadOnlyColumn } from "./types";
+import { BatchAction, batchOptions, isBatchActionOffered, isReadOnlyColumn } from "./types";
 
 describe("isReadOnlyColumn", () => {
   it("a forward relation column can be edited", () => {
@@ -24,5 +24,30 @@ describe("isReadOnlyColumn", () => {
 
   it("read-only column types stay read-only", () => {
     expect(isReadOnlyColumn({ type: Explore.EExploreColumnType.ECL, params: {} })).toBe(true);
+  });
+});
+
+describe("isBatchActionOffered", () => {
+  const none = { canBatchEdit: false, canBatchReplace: false };
+  const editor = { canBatchEdit: false, canBatchReplace: true };
+  const admin = { canBatchEdit: true, canBatchReplace: true };
+
+  it("replace relation is offered to editors and admins, not to a viewer or an unloaded role", () => {
+    expect(isBatchActionOffered(BatchAction.replace_relation, none)).toBe(false);
+    expect(isBatchActionOffered(BatchAction.replace_relation, editor)).toBe(true);
+    expect(isBatchActionOffered(BatchAction.replace_relation, admin)).toBe(true);
+  });
+
+  it("admin-only actions stay hidden from editors", () => {
+    expect(isBatchActionOffered(BatchAction.add_relation, editor)).toBe(false);
+    expect(isBatchActionOffered(BatchAction.add_relation, admin)).toBe(true);
+  });
+
+  it("actions for everyone are always offered", () => {
+    expect(isBatchActionOffered(BatchAction.open_in_detail, none)).toBe(true);
+  });
+
+  it("replace relation is listed in the menu", () => {
+    expect(batchOptions.map((o) => o.value)).toContain(BatchAction.replace_relation);
   });
 });

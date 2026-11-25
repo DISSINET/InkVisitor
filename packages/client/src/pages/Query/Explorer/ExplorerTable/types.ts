@@ -5,6 +5,7 @@ export enum BatchAction {
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
+  replace_relation = "replace_relation",
   set_language = "set_language",
   set_pos = "set_pos",
 }
@@ -21,6 +22,7 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.add_metaprop, label: "add new metaproperty" },
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
+  { value: BatchAction.replace_relation, label: "replace relation" },
   { value: BatchAction.set_language, label: "set label language" },
   { value: BatchAction.set_pos, label: "set part of speech" },
 ];
@@ -34,6 +36,17 @@ export const restrictedBatchActions = new Set<BatchAction>([
   BatchAction.set_language,
   BatchAction.set_pos,
 ]);
+
+/** Batch actions offered to Editor, Admin and Owner. */
+export const editorBatchActions = new Set<BatchAction>([BatchAction.replace_relation]);
+
+export const isBatchActionOffered = (
+  action: BatchAction,
+  rights: { canBatchEdit: boolean; canBatchReplace: boolean },
+): boolean =>
+  rights.canBatchEdit ||
+  (rights.canBatchReplace && editorBatchActions.has(action)) ||
+  !(restrictedBatchActions.has(action) || editorBatchActions.has(action));
 
 import { Explore } from "@inkvisitor/shared/types/query";
 

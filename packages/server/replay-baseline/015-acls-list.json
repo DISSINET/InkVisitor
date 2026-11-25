@@ -217,6 +217,15 @@
       },
       {
         "controller": "entities",
+        "id": "acl-63",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": "batchReplaceRelation"
+      },
+      {
+        "controller": "entities",
         "id": "acl-40",
         "method": "POST",
         "roles": [

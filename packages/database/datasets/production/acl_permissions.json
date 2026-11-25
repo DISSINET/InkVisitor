@@ -61,5 +61,6 @@
 {"controller": "users", "id": "df2c19e7-fd6f-42d5-95b2-a7f518008323", "method": "GET", "public": false, "roles": [], "route": "owner"},
 {"controller": "settings", "id": "ed589847-0818-4cd0-a968-6abb2b56e2a0", "method": "PUT", "public": false, "roles": ["admin"], "route": "group/:groupkey"},
 {"controller": "entities", "id": "f82a0626-f2d1-4071-bd18-779e354052fc", "method": "POST", "public": false, "roles": ["editor"], "route": ":entityId/clone"},
-{"controller": "entities", "id": "ff66bc41-5520-4714-ad71-671b67f4c5c8", "method": "GET", "roles": ["editor"], "route": ":entityId/relations"}
+{"controller": "entities", "id": "ff66bc41-5520-4714-ad71-671b67f4c5c8", "method": "GET", "roles": ["editor"], "route": ":entityId/relations"},
+{"controller": "entities", "id": "502f11ae-b7f2-4477-94f9-a0c8998b8043", "method": "POST", "roles": ["editor"], "route": "batchReplaceRelation"}
 ]

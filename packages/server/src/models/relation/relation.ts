@@ -22,6 +22,7 @@ import Entity from "@models/entity/entity";
 import Audit from "@models/audit/audit";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import Path from "./path";
+import { chunksOf, writtenIds } from "@models/batch-write";
 import { findEntityById } from "@service/shorthands";
 
 /**
@@ -318,8 +319,8 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * Emits the relation deletion audit. Called after the relation is removed -
-   * from the delete route and from deleteMany (Synonym cloud-merge).
+   * Emits the relation deletion audit. Called after the relation is removed,
+   * from the delete route.
    * @param request
    */
   async afterDelete(request: IRequest): Promise<void> {
@@ -748,9 +749,9 @@ export default class Relation implements IRelationModel {
     return relationsCopied;
   }
   /**
-   * Removes multiple relation entries, emitting a deletion audit for each.
-   * Loads the relations first (the audit needs the snapshot) before the bulk
-   * delete.
+   * Removes multiple relation entries in one bulk delete and writes one
+   * deletion audit per relation the delete reports as removed, from the
+   * snapshot the delete returns.
    * @param request
    * @param ids
    * @returns
@@ -767,12 +768,68 @@ export default class Relation implements IRelationModel {
       returnChanges: true,
     });
 
-    for (const change of result.changes || []) {
-      if (change.old_val) {
-        await new Relation(change.old_val).afterDelete(request);
+    const entries: { modelId: string; changes: object }[] = [];
+    for (const { old_val } of result.changes || []) {
+      if (old_val) {
+        entries.push({
+          modelId: old_val.id,
+          changes: new Relation(old_val).auditSnapshot(),
+        });
+      }
+    }
+    await Audit.createMany(
+      request,
+      AuditScope.Relation,
+      entries,
+      EventType.RELATION_DELETE
+    );
+
+    return result;
+  }
+
+  /**
+   * Inserts relations that already carry their ids and writes one create audit
+   * per relation written. A chunk the database refuses as a whole is reported
+   * as failed, not thrown.
+   * @param request
+   * @param relations
+   * @returns ids written and ids not written
+   */
+  static async insertMany(
+    request: IRequest,
+    relations: RelationTypes.IRelation[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const written = new Set<string>();
+    for (const chunk of chunksOf(relations)) {
+      try {
+        const result = await storage.relations.insert(
+          request.db.connection,
+          chunk,
+          { returnChanges: true }
+        );
+        writtenIds(result).forEach((id) => written.add(id));
+      } catch (e) {
+        // any error of the insert (a dropped connection, a released handle)
+        // leaves the whole chunk unwritten; the caller reports those rows as
+        // failed
+        console.error("[Relation.insertMany]: inserting a chunk failed", e);
       }
     }
 
-    return result;
+    const writtenRelations = relations.filter(({ id }) => written.has(id));
+    await Audit.createMany(
+      request,
+      AuditScope.Relation,
+      writtenRelations.map((r) => ({
+        modelId: r.id,
+        changes: new Relation(r).auditSnapshot(),
+      })),
+      EventType.RELATION_CREATE
+    );
+
+    return {
+      written: writtenRelations.map(({ id }) => id),
+      failed: relations.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
   }
 }

@@ -106,3 +106,11 @@ export const StyledBatchArrow = styled.span`
   font-size: ${({ theme }) => theme.fontSize.lg};
   color: ${({ theme }) => theme.color.mutedText};
 `;
+
+/** the notes of a batch confirmation, one bullet each */
+export const StyledBatchNotes = styled.ul`
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color.mutedText};
+`;

@@ -5,6 +5,7 @@ import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
 import { BatchActionAddReference } from "./BatchActionAddReference";
 import { BatchActionAddRelation } from "./BatchActionAddRelation";
 import { BatchActionExportCsv } from "./BatchActionExportTsv";
+import { BatchActionReplaceRelation } from "./BatchActionReplaceRelation";
 import { BatchActionSetLanguage } from "./BatchActionSetLanguage";
 import { BatchActionSetPos } from "./BatchActionSetPos";
 
@@ -15,6 +16,7 @@ interface ExplorerTableBatchActionModalProps {
   onClose: () => void;
   onExport: (selectedColumnIds: string[]) => void;
   onApplyAction: () => void;
+  onClearSelection: () => void;
 }
 
 export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionModalProps> = ({
@@ -24,6 +26,7 @@ export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionMod
   onClose,
   onExport,
   onApplyAction,
+  onClearSelection,
 }) => {
   const renderContent = () => {
     switch (batchAction) {
@@ -58,6 +61,15 @@ export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionMod
             selectedEntityIds={selectedEntityIds}
             onClose={onClose}
             onApply={onApplyAction}
+          />
+        );
+      case BatchAction.replace_relation:
+        return (
+          <BatchActionReplaceRelation
+            selectedEntityIds={selectedEntityIds}
+            onClose={onClose}
+            onApply={onApplyAction}
+            onClearSelection={onClearSelection}
           />
         );
       case BatchAction.set_language:

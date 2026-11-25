@@ -40,6 +40,8 @@ interface ExplorerBoxProps {
 
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
+  /** When false the replace relation batch action is not offered. */
+  canBatchReplace?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -59,6 +61,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onToggleIncludeEquivalents = () => {},
   onToggleIncludeSubordinates = () => {},
   canBatchEdit = false,
+  canBatchReplace = false,
 }) => {
   const isStats = state.view.mode === Explore.EViewMode.Stats;
   // Stats view with no search criteria: show only the prompt, hiding the control
@@ -100,6 +103,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
                     setBatchActionSelected: controls.setBatchActionSelected,
                     onApplyBatchAction: controls.handleApplyBatchAction,
                     canBatchEdit,
+                    canBatchReplace,
                   }
             }
             newColumn={
@@ -167,9 +171,13 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
             controls.handleExport(selectedColumnIds);
             controls.setIsBatchModalOpen(false);
           }}
+          onClearSelection={controls.clearSelection}
           onApplyAction={() => {
             controls.setIsBatchModalOpen(false);
             queryClient.invalidateQueries({ queryKey: ["entity"] });
+            queryClient.invalidateQueries({ queryKey: ["audit"] });
+            queryClient.invalidateQueries({ queryKey: ["statement"] });
+            queryClient.invalidateQueries({ queryKey: ["territory"] });
             invalidateExplorerQuery();
           }}
         />

@@ -30,6 +30,9 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   { controller: "entities", method: "DELETE", route: ":entityId?" },
   { controller: "entities", method: "POST", route: ":entityId/restore" },
   { controller: "entities", method: "POST", route: ":entityId/clone" },
+  // batch replace of a relation behind the Explorer; editors are checked row by
+  // row inside the handler
+  { controller: "entities", method: "POST", route: "batchReplaceRelation" },
   // the relations of one entity, read by the Explorer relation column and by
   // the JSON import's checks; never seeded, so it answers only to Admin/Owner
   { controller: "entities", method: "GET", route: ":entityId/relations" },

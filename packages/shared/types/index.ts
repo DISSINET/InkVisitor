@@ -70,6 +70,8 @@ import { IRequestQuery } from "./request-query";
 import {
   IBatchAttributeChange,
   IBatchSetAttributeChanges,
+  IRequestBatchReplaceRelation,
+  IResponseBatchReplace,
 } from "./request-batch";
 import { IResponseQuery, IResponseQueryEntity, IResponseQueryUser } from "./response-query";
 import { ISavedQuery, ISavedQueryCreate, ISavedQueryData, ISavedQueryUpdate } from "./saved-query";
@@ -81,6 +83,8 @@ export type {
   ClassificationOrder,
   IBatchAttributeChange,
   IBatchSetAttributeChanges,
+  IRequestBatchReplaceRelation,
+  IResponseBatchReplace,
   EntityOrder,
   EntityTooltip,
   IAction,

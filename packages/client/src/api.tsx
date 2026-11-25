@@ -7,10 +7,12 @@ import {
   IDocumentExport,
   IEntity,
   IReference,
+  IRequestBatchReplaceRelation,
   IRequestQuery,
   IRequestStats,
   IResponseAudit,
   IResponseBackup,
+  IResponseBatchReplace,
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
@@ -2028,6 +2030,17 @@ class Api {
         { entityIds, relationType, targetEntityId },
         options,
       );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+  async batchEntityReplaceRelation(
+    body: IRequestBatchReplaceRelation,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseBatchReplace>> {
+    try {
+      const response = await this.connection.post(`/entities/batchReplaceRelation`, body, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

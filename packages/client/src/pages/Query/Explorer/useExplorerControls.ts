@@ -16,6 +16,12 @@ interface UseExplorerControlsParams {
   stableSignature?: string;
 }
 
+/** The selected ids that are part of the result, in the result's order. */
+export const selectedInResult = (
+  resultIds: string[],
+  selected: Set<string>,
+): string[] => resultIds.filter((id) => selected.has(id));
+
 /**
  * Owns the explorer's row-selection / batch-action / new-column state at a level
  * above the individual view modes, so the shared ExplorerControlBar (rendered in
@@ -53,11 +59,14 @@ export const useExplorerControls = ({
   }
   const { entityIds, total } = lastResultRef.current;
 
-  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
+  // every ticked id, including ones of earlier results; the row checkboxes read
+  // this, the counter and the batch actions read `selectedInCurrent`
+  const [selectedIdsRaw, setSelectedEntityIds] = useState<string[]>([]);
   const selectedEntityIdsSet = useMemo(
-    () => new Set(selectedEntityIds),
-    [selectedEntityIds],
+    () => new Set(selectedIdsRaw),
+    [selectedIdsRaw],
   );
+  const clearSelection = useCallback(() => setSelectedEntityIds([]), []);
 
   const [rowLastClicked, setRowLastClicked] = useState<number>(-1);
   const rowLastClickedRef = useRef<number>(-1);
@@ -133,45 +142,47 @@ export const useExplorerControls = ({
     setRowLastClicked(-1);
   }, [entityIds, selectedEntityIdsSet]);
 
-  const selectedInCurrentCount = useMemo(
-    () => entityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
+  const selectedInCurrent = useMemo(
+    () => selectedInResult(entityIds, selectedEntityIdsSet),
     [entityIds, selectedEntityIdsSet],
   );
+  const selectedInCurrentCount = selectedInCurrent.length;
   const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
   const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
 
   const handleExport = useCallback(
     (selectedColumnIds?: string[]) => {
-      const rowIndices = selectedEntityIds
+      const rowIndices = selectedInCurrent
         .map((entityId) => entityIds.indexOf(entityId))
         .filter((index) => index >= 0);
       onExport(rowIndices, selectedColumnIds);
     },
-    [selectedEntityIds, entityIds, onExport],
+    [selectedInCurrent, entityIds, onExport],
   );
 
   const handleApplyBatchAction = useCallback(async () => {
     if (batchActionSelected === BatchAction.open_in_detail) {
-      if (selectedEntityIds.length === 0) {
+      if (selectedInCurrent.length === 0) {
         return;
       }
-      onOpenEntitiesInDetail?.(selectedEntityIds);
+      onOpenEntitiesInDetail?.(selectedInCurrent);
       return;
     }
     if (batchActionSelected === BatchAction.copy_uuids) {
-      if (selectedEntityIds.length === 0) {
+      if (selectedInCurrent.length === 0) {
         return;
       }
-      await navigator.clipboard.writeText(selectedEntityIds.join(" "));
+      await navigator.clipboard.writeText(selectedInCurrent.join(" "));
       toast.info("UUIDs copied to clipboard");
       return;
     }
     setIsBatchModalOpen(true);
-  }, [batchActionSelected, selectedEntityIds, onOpenEntitiesInDetail]);
+  }, [batchActionSelected, selectedInCurrent, onOpenEntitiesInDetail]);
 
   return {
-    selectedEntityIds,
+    selectedEntityIds: selectedInCurrent,
     setSelectedEntityIds,
+    clearSelection,
     selectedEntityIdsSet,
     rowLastClicked,
     setRowLastClicked,
