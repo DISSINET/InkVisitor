@@ -42,6 +42,8 @@ interface FilterPopoverWithButton extends FilterPopoverBase {
   label: string;
   tooltipLabel?: string;
   buttonSize?: ButtonSize;
+  /** the button sits on the blue fill of a start node */
+  onBlueFill?: boolean;
   trigger?: never;
 }
 
@@ -51,6 +53,7 @@ interface FilterPopoverWithTrigger extends FilterPopoverBase {
   label?: never;
   tooltipLabel?: never;
   buttonSize?: never;
+  onBlueFill?: never;
 }
 
 type FilterPopover = FilterPopoverWithButton | FilterPopoverWithTrigger;
@@ -65,6 +68,7 @@ type FilterPopover = FilterPopoverWithButton | FilterPopoverWithTrigger;
 export const FilterPopover: React.FC<FilterPopover> = (props) => {
   const { title, count, onClear, placement = "bottom-start", width = "30rem", children } = props;
   const [isOpen, setIsOpen] = useState(false);
+  const isActive = count > 0 || isOpen;
   const toggle = () => setIsOpen((open) => !open);
 
   const { refs, floatingStyles } = useFloating({
@@ -129,14 +133,16 @@ export const FilterPopover: React.FC<FilterPopover> = (props) => {
         ) : (
           <>
             {/* filled like the query builder's pickers and framed in its blue;
-                filled with the blue while filters are set or the panel is open */}
+                filled with the blue while filters are set or the panel is open.
+                On a start node's blue fill, which would hide that, it takes a
+                darker blue instead */}
             <Button
               size={props.buttonSize ?? ButtonSize.Medium}
               icon={<IcoFilter size={14} />}
               label={count > 0 ? `${props.label} · ${count}` : props.label}
-              color={count > 0 || isOpen ? "query2" : "white"}
-              textColor={count > 0 || isOpen ? "query2Text" : "black"}
-              borderColor="query2"
+              color={isActive ? (props.onBlueFill ? "queryActive" : "query2") : "white"}
+              textColor={isActive ? "query2Text" : "black"}
+              borderColor={isActive && props.onBlueFill ? "queryActive" : "query2"}
               textRegular
               tooltipLabel={props.tooltipLabel}
               onClick={toggle}
@@ -145,7 +151,7 @@ export const FilterPopover: React.FC<FilterPopover> = (props) => {
               <IconButton
                 size={props.buttonSize ?? ButtonSize.Medium}
                 icon={<IcoClose size={14} />}
-                color="black"
+                color={props.onBlueFill ? "query2Text" : "black"}
                 noBorder
                 noBackground
                 tooltipLabel="clear all"

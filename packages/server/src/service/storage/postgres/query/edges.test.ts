@@ -17,6 +17,8 @@ const INDEXED: [string, string][] = [
   ["I_IS:A2", "statement_entity_ids"],
   ["I_IS:PS", "statement_entity_ids"],
   ["I_IS:A", "statement_entity_ids"],
+  // the documents table's column, on the documents anchoring a target
+  ["EAT:", "entity_ids"],
 ];
 
 const ids = (n: number): string[] => Array.from({ length: n }, (_, i) => `e-${i}`);

@@ -1,4 +1,5 @@
 import { asyncRouteHandler } from "../index";
+import { aclGuard } from "@middlewares/acl";
 import { NextFunction, Response, Router } from "express";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseBackup } from "@inkvisitor/shared/types";
@@ -77,29 +78,25 @@ export default Router()
    * The file is piped through the api (behind the session cookie) - it is never
    * exposed as a public/static link.
    *
-   * This is a raw handler (binary stream) so it does not go through
-   * asyncRouteHandler - the owner check is therefore enforced explicitly below.
+   * The handler writes the response itself (binary stream), so it takes the
+   * ACL check from aclGuard, not from asyncRouteHandler.
    */
   .get(
     "/download",
-    async (request: IRequest, res: Response, next: NextFunction) => {
-      try {
-        assertOwner(request);
-        const { resolved } = requireBackup(request);
+    aclGuard(async (request: IRequest, res: Response, next: NextFunction) => {
+      assertOwner(request);
+      const { resolved } = requireBackup(request);
 
-        const stat = fs.statSync(resolved);
-        res.setHeader("Content-Type", "application/gzip");
-        res.setHeader("Content-Length", stat.size);
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${path.basename(resolved)}"`
-        );
+      const stat = fs.statSync(resolved);
+      res.setHeader("Content-Type", "application/gzip");
+      res.setHeader("Content-Length", stat.size);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${path.basename(resolved)}"`
+      );
 
-        const stream = fs.createReadStream(resolved);
-        stream.on("error", next);
-        stream.pipe(res);
-      } catch (err) {
-        next(err);
-      }
-    }
+      const stream = fs.createReadStream(resolved);
+      stream.on("error", next);
+      stream.pipe(res);
+    })
   );

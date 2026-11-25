@@ -1,3 +1,4 @@
+import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import styled from "styled-components";
 import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
 
@@ -78,47 +79,77 @@ export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
   transform: rotate(270deg);
 `;
 
-// The query tree scrolls on its own above the search rows, which stay in place
+// the query tree and the search rows floating over its bottom
+export const StyledQueryBuilderArea = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+`;
+
+// The query tree scrolls on its own behind the search rows, which stay in place
 // at the bottom of the Query Builder box.
-// a thinner and quieter scrollbar than the global one, so the builder's horizontal scrollbar
-// does not read as the edge between the Query Builder and the Explorer
-export const StyledQueryScroller = styled.div`
+export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: auto;
-  /* room below the last node for its EQ / SUB badges, which hang over its bottom border */
-  padding-bottom: ${({ theme }) => theme.space[3]};
-  &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  /* on hover the thumb takes the global hover colour */
-  &::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.color.gray[400]};
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: ${({ theme }) => theme.color.gray[700]};
-  }
+  /* the Query Builder header floats over the top of the tree */
+  padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
+  /* the resize handle straddles the box edge and covers this gap, so the horizontal
+     scrollbar sits clear of it */
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  /* room below the last node for its EQ / SUB badges, which hang over its bottom border,
+     and for the search rows, so the last node scrolls clear of them */
+  padding-bottom: calc(
+    ${({ theme }) => theme.space[3]} + ${({ $searchRowsHeight }) => $searchRowsHeight}px +
+      ${({ theme }) => theme.space[4]}
+  );
+  /* a node scrolled into view stops below the header and above the search rows, not
+     behind them */
+  scroll-padding-top: ${BOX_HEADER_HEIGHT / 10}rem;
+  scroll-padding-bottom: calc(
+    ${({ $searchRowsHeight }) => $searchRowsHeight}px + ${({ theme }) => theme.space[2]}
+  );
 `;
 
-// a card inset at the bottom of the Query Builder box, with page background around it, so
-// the result rows read as part of the builder, not the top of the Explorer.
-// It is as wide as its rows, left-aligned with the query tree, so on a wide screen the
-// search button stays next to the filters
-export const StyledSearchRows = styled.div`
-  flex-shrink: 0;
+// a card floating over the bottom of the Query Builder box, the query tree visible around
+// it, so the result rows read as part of the builder, not the top of the Explorer.
+// It is as wide as its rows and centred, so on a wide screen the search button stays next
+// to the filters
+export const StyledSearchRows = styled.div<{ $scrollbarWidth: number; $scrollbarHeight: number }>`
+  position: absolute;
+  left: 0;
+  /* centred on the query tree, beside its vertical scrollbar */
+  right: ${({ $scrollbarWidth }) => $scrollbarWidth}px;
+  /* on the query tree's horizontal scrollbar, or in its place, above the resize handle's gap */
+  bottom: calc(
+    ${({ theme }) => theme.space[2]} + ${({ $scrollbarHeight }) => $scrollbarHeight}px
+  );
+  /* above the grid cells of the query tree */
+  z-index: 2;
   display: flex;
   width: fit-content;
-  max-width: calc(100% - 2 * ${({ theme }) => theme.space[3]});
+  /* 100% is the whole box, the vertical scrollbar included */
+  max-width: calc(
+    100% - ${({ $scrollbarWidth }) => $scrollbarWidth}px - 2 * ${({ theme }) => theme.space[3]}
+  );
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
-  /* the extra bottom space is what the resize handle, which straddles the box edge, covers */
-  /* a smaller gap above than below ties the card to the builder rather than the Explorer */
-  margin: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]}
-    ${({ theme }) => theme.space[4]};
-  background-color: ${({ theme }) => theme.color["gray"][100]};
+  margin: 0 auto;
+  /* the query tree shows faintly through the card, blurred so its labels do not read
+     behind the card's own */
+  background-color: color-mix(in srgb, ${({ theme }) => theme.color["gray"][100]} 75%, transparent);
+  backdrop-filter: blur(4px);
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  transition: background-color 0.2s ease;
+  /* solid while the card is in use */
+  &:hover,
+  &:focus-within {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 
 export const StyledSearchRow = styled.div`

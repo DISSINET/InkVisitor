@@ -5,7 +5,11 @@ import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { deepCopy } from "utils/utils";
 import { QueryValidity } from "./types";
-import { isQueryRequestEmpty, isStatsRequestEmpty } from "./Query/utils";
+import {
+  isQueryRequestEmpty,
+  isStatsRequestEmpty,
+  withoutIgnoredStartNodes,
+} from "./Query/utils";
 
 interface UseQueryDataParams {
   queryState: Query.INode;
@@ -44,14 +48,15 @@ const rowCacheStore = new Map<string, RowCache>();
  * Returns a copy of the query tree with the ROOT node's expansion params set to
  * the page-level result-expansion flags — the server (`QuerySearch.run`) reads
  * them from the root to append equivalents/subordinates of the final result
- * entities. Non-root nodes' per-target flags are sent as-is.
+ * entities. Non-root nodes' per-target flags are sent as-is. The start nodes the
+ * search ignores are left out (withoutIgnoredStartNodes).
  */
 export const buildQueryWithResultExpansion = (
   query: Query.INode,
   globalIncludeEquivalents: boolean,
   globalIncludeSubordinates: boolean,
 ): Query.INode => {
-  const resolved = deepCopy(query);
+  const resolved = deepCopy(withoutIgnoredStartNodes(query));
   resolved.params.includeEquivalents = globalIncludeEquivalents;
   resolved.params.includeSubordinates = globalIncludeSubordinates;
   return resolved;

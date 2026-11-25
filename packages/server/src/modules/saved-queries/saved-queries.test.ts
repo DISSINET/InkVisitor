@@ -24,7 +24,7 @@ import {
   createAgentWithUserId,
   getAuthenticatedAgent,
   AuthAgent,
-} from "@modules/testAuth";
+} from "../../test/testAuth";
 
 describe("Saved queries", function () {
   const db = new Db();

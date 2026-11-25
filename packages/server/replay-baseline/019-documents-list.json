@@ -26,8 +26,7 @@
           "V": []
         },
         "id": "2",
-        "title": "Second doc",
-        "updatedAt": "<datetime>"
+        "title": "Second doc"
       },
       {
         "anchors": [],
@@ -47,8 +46,7 @@
           "V": []
         },
         "id": "1",
-        "title": "First doc",
-        "updatedAt": "<datetime>"
+        "title": "First doc"
       },
       {
         "anchors": [],
@@ -68,8 +66,7 @@
           "V": []
         },
         "id": "3",
-        "title": "Third doc",
-        "updatedAt": "<datetime>"
+        "title": "Third doc"
       }
     ]
   }

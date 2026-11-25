@@ -13,7 +13,7 @@ import { getAuditByEntityId } from "@modules/audits";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -26,7 +26,7 @@ import {
   IResponseEntityExpansion,
   IResponseGeneric,
   ITerritory,
-  IUser,
+  IResponseQueryUser,
   Relation as RelationType,
   RequestSearch,
   AuditScope,
@@ -45,22 +45,26 @@ import {
   PermissionDeniedError,
   TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
-import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import {
+  IRequestQuery,
+  IRequestQueryExport,
+  IRequestQueryExportJson,
+} from "@inkvisitor/shared/types/request-query";
 import { IBatchSetAttributeChanges } from "@inkvisitor/shared/types/request-batch";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import Territory from "@models/territory/territory";
-import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
-
 import {
-  EventType,
-  EXPLORE_STATS_ENTITY_LIMIT,
-} from "@inkvisitor/shared/types/stats";
+  IResponseQuery,
+  IResponseQueryExportJson,
+} from "@inkvisitor/shared/types/response-query";
+
+import { EventType } from "@inkvisitor/shared/types/stats";
+import { storage } from "@service/storage";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
-import User from "@models/user/user";
 import { randomUUID } from "crypto";
 
 export default Router()
@@ -1036,7 +1040,7 @@ export default Router()
           total: entityIds.length,
           expansion: querySearch.expansionCounts,
           stats,
-          statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
+          statsEntityLimit: storage.audits.entityIdsLimit,
         };
       }
 
@@ -1109,6 +1113,45 @@ export default Router()
 
       return { tsvText: tsvHeader + "\n" + tsvBodyRows };
     })
+  )
+
+  .post(
+    "/query-export-json",
+    asyncRouteHandler<IResponseQueryExportJson>(
+      async (request: IRequest<undefined, IRequestQueryExportJson>) => {
+        // admins pass the ACL on every route, so owner-only is decided here
+        if (!request.getUserOrFail().hasRole([UserEnums.Role.Owner])) {
+          throw new PermissionDeniedError("the JSON export is for the owner only");
+        }
+        const { entityIds } = request.body;
+        if (!Array.isArray(entityIds) || entityIds.length === 0) {
+          throw new BadParams("entityIds array must be provided");
+        }
+
+        const conn = request.db.connection;
+        const entities = await Entity.findEntitiesByIds(conn, entityIds);
+        const ids = entities.map((entity) => entity.id);
+        // two Resources may share a document
+        const documentIds = new Set<string>();
+        for (const entity of entities) {
+          const documentId =
+            entity.class === EntityEnums.Class.Resource
+              ? (entity.data as IResourceData).documentId
+              : undefined;
+          if (documentId) {
+            documentIds.add(documentId);
+          }
+        }
+
+        const relations = await Relation.findForEntities(conn, ids);
+        const audits = (await Audit.getAllForMany(conn, AuditScope.Entity, ids)).concat(
+          await Audit.getAllRelationAuditsForEntities(conn, ids),
+          await Audit.getAllForMany(conn, AuditScope.Document, [...documentIds])
+        );
+
+        return { entities, relations, audits };
+      }
+    )
   )
 
   .post(
@@ -1721,7 +1764,7 @@ export default Router()
     })
   );
 
-const parseColumnValue = (columnValue: string | IEntity | number | string | IUser) => {
+const parseColumnValue = (columnValue: string | number | IEntity | IResponseQueryUser) => {
   if (typeof columnValue === "string") {
     return columnValue;
   }
@@ -1731,9 +1774,8 @@ const parseColumnValue = (columnValue: string | IEntity | number | string | IUse
   if ("class" in columnValue && "labels" in columnValue) {
     return `(${columnValue.class}):${columnValue.labels[0]}[${columnValue.id}]`;
   }
-  if (columnValue instanceof User) {
+  if ("name" in columnValue) {
     return columnValue.name;
-  } else {
-    return "unknown value";
   }
+  return "unknown value";
 };

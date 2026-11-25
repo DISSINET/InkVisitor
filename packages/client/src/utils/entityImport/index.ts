@@ -4,7 +4,7 @@ export {
   searchCandidates,
   storedRelationsOf,
 } from "./apiAdapters";
-export { buildEntityJson } from "./entityJson";
+export { buildEntityJson, buildEntityJsonFromRelations } from "./entityJson";
 export { count, errorMessage, formatIssue, STALE_ACTION } from "./helpers";
 export { maxImportEntities } from "./types";
 export type { ImportIssue, ImportPlan, ImportValidation, StoredRelationChanges } from "./types";

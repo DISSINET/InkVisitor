@@ -199,35 +199,8 @@
             "col-cla-inverse": [],
             "col-class": "Concept",
             "col-created-by": {
-              "active": true,
-              "bookmarks": [],
-              "email": "admin@admin.com",
-              "hash": "",
               "id": "1",
-              "name": "admin",
-              "options": {
-                "askBeforePropDelete": true,
-                "defaultLanguage": "",
-                "defaultStatementLanguage": "",
-                "defaultTerritory": "",
-                "geocoding": {
-                  "context": {}
-                },
-                "hideStatementElementsOrderTable": false,
-                "promotedTemplateClass": "*",
-                "searchLanguages": [],
-                "starredTemplates": [],
-                "workingLanguages": []
-              },
-              "rights": [
-                {
-                  "mode": "admin",
-                  "territory": "T0"
-                }
-              ],
-              "role": "admin",
-              "storedTerritories": [],
-              "verified": true
+              "name": "admin"
             },
             "col-detail": "updated detail",
             "col-language": "Latin",
@@ -378,7 +351,7 @@
                 "certainty": "1",
                 "children": [],
                 "elvl": "3",
-                "id": "<uuid-17>",
+                "id": "<uuid-11>",
                 "logic": "1",
                 "mood": [],
                 "moodvariant": "1",
@@ -400,7 +373,7 @@
             ],
             "references": [
               {
-                "id": "<uuid-18>",
+                "id": "<uuid-12>",
                 "resource": "dissinet-resource",
                 "value": "rp-v"
               }
@@ -417,35 +390,8 @@
             "col-cla-inverse": [],
             "col-class": "Person",
             "col-created-by": {
-              "active": true,
-              "bookmarks": [],
-              "email": "admin@admin.com",
-              "hash": "",
               "id": "1",
-              "name": "admin",
-              "options": {
-                "askBeforePropDelete": true,
-                "defaultLanguage": "",
-                "defaultStatementLanguage": "",
-                "defaultTerritory": "",
-                "geocoding": {
-                  "context": {}
-                },
-                "hideStatementElementsOrderTable": false,
-                "promotedTemplateClass": "*",
-                "searchLanguages": [],
-                "starredTemplates": [],
-                "workingLanguages": []
-              },
-              "rights": [
-                {
-                  "mode": "admin",
-                  "territory": "T0"
-                }
-              ],
-              "role": "admin",
-              "storedTerritories": [],
-              "verified": true
+              "name": "admin"
             },
             "col-detail": "editor touched this",
             "col-language": "Latin",
@@ -575,7 +521,7 @@
                 "certainty": "1",
                 "children": [],
                 "elvl": "3",
-                "id": "<uuid-35>",
+                "id": "<uuid-29>",
                 "logic": "1",
                 "mood": [],
                 "moodvariant": "1",
@@ -597,7 +543,7 @@
             ],
             "references": [
               {
-                "id": "<uuid-36>",
+                "id": "<uuid-30>",
                 "resource": "dissinet-resource",
                 "value": "rp-v"
               }

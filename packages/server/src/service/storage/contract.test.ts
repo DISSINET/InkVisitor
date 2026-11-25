@@ -679,6 +679,23 @@ describe("audits", () => {
     expect(documents.map((a) => a.id)).toEqual(["au-5"]);
   });
 
+  it("allForMany gives every audit of the listed models", async () => {
+    expect(ids(await storage.audits.allForMany(conn, "entity" as any, ["m2", "m1", "none"]))).toEqual([
+      "au-1",
+      "au-2",
+      "au-3",
+      "au-4",
+    ]);
+    expect(await storage.audits.allForMany(conn, "entity" as any, [])).toEqual([]);
+    expect(ids(await storage.audits.allForMany(conn, "document" as any, ["doc1", "m1"]))).toEqual(["au-5"]);
+  });
+
+  it("relationAuditsForEntities gives each matching relation audit once", async () => {
+    expect(ids(await storage.audits.relationAuditsForEntities(conn, ["m1", "m2"]))).toEqual(["au-6", "au-7"]);
+    expect(ids(await storage.audits.relationAuditsForEntities(conn, ["m1"]))).toEqual(["au-6"]);
+    expect(await storage.audits.relationAuditsForEntities(conn, [])).toEqual([]);
+  });
+
   it("relationAuditsForEntity, newest first, capped", async () => {
     expect((await storage.audits.relationAuditsForEntity(conn, "m2", 5)).map((a) => a.id)).toEqual(["au-7", "au-6"]);
     expect((await storage.audits.relationAuditsForEntity(conn, "m2", 1)).map((a) => a.id)).toEqual(["au-7"]);

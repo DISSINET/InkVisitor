@@ -57,3 +57,21 @@ export const nextOccurenceIndexAfter = (
   );
   return next === -1 ? 0 : next;
 };
+
+/**
+ * The occurrence the Next (`step` 1) and Previous (`step` -1) arrows activate,
+ * wrapping around both ends of the list. While the selection of the active
+ * occurrence is deferred, the text does not show it yet, so Next stays on it
+ * and the caller selects it; Previous steps back as usual.
+ */
+export const stepOccurenceIndex = (
+  activeIndex: number,
+  occurenceCount: number,
+  step: 1 | -1,
+  isSelectionDeferred: boolean,
+): number => {
+  if (isSelectionDeferred && step === 1) {
+    return activeIndex;
+  }
+  return (activeIndex + step + occurenceCount) % occurenceCount;
+};

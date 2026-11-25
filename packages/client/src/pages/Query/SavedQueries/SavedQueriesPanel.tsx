@@ -1,4 +1,5 @@
 import { FloatingPortal, autoUpdate, offset, size, useFloating } from "@floating-ui/react";
+import { MAX_SAVED_QUERY_DEPTH } from "@inkvisitor/shared/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity, ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
 import { SavedQueryNameNotUnique } from "@inkvisitor/shared/types/errors";
@@ -23,7 +24,7 @@ import {
 } from "Theme/icons";
 import { ExploreActionType } from "../Explorer/state";
 import { QueryAction, QueryActionType } from "../Query/state";
-import { QUERY_NAME_MAX_LENGTH, suggestQueryName } from "../Query/utils";
+import { QUERY_NAME_MAX_LENGTH, queryDepth, suggestQueryName } from "../Query/utils";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
 import {
   StyledCharCounter,
@@ -196,6 +197,12 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
 
   const trimmedSaveName = saveName.trim();
   const saveNameTaken = !!trimmedSaveName && isNameTaken(trimmedSaveName, saveShared);
+  // the server refuses a deeper tree (SavedQuery.isQueryNodeValid)
+  const depth = queryDepth(queryState);
+  const depthError =
+    depth > MAX_SAVED_QUERY_DEPTH
+      ? `A saved query holds at most ${MAX_SAVED_QUERY_DEPTH} levels of nodes; this one has ${depth}`
+      : undefined;
 
   const saveMutation = useMutation({
     mutationFn: (payload: ISavedQueryCreate) => api.savedQueryCreate(payload),
@@ -241,7 +248,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   });
 
   const handleSave = () => {
-    if (!trimmedSaveName || saveNameTaken || saveMutation.isPending) {
+    if (!trimmedSaveName || saveNameTaken || depthError || saveMutation.isPending) {
       return;
     }
     saveMutation.mutate({
@@ -430,6 +437,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                   Name already used in {saveShared ? SHARED_LABEL : MINE_LABEL}
                 </StyledNameError>
               )}
+              {depthError && <StyledNameError role="alert">{depthError}</StyledNameError>}
               <StyledSaveFooter
                 onKeyDown={(e) => {
                   // Enter while the Save button holds focus saves; the checkbox
@@ -461,7 +469,10 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                     label="Save"
                     icon={<IcoSave size={14} />}
                     color="info"
-                    disabled={!trimmedSaveName || saveNameTaken || saveMutation.isPending}
+                    disabled={
+                      !trimmedSaveName || saveNameTaken || !!depthError || saveMutation.isPending
+                    }
+                    tooltipLabel={depthError}
                     onClick={handleSave}
                   />
                 </StyledSaveAction>

@@ -1,6 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
+import { AnchorsNode } from "@models/document/anchors";
 import { getSubordinateEntityIds } from "@models/relation/functions";
 import { filterEntityIdsByRowLabelFilter } from "@service/query/explore-label-filter";
 import { getNodeExpansionIds } from "@service/query/node-expansion";
@@ -1128,5 +1129,129 @@ describe("explore: edges and node params of 1.6.1", () => {
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityClasses: [C.Concept] })])).toEqual(["r-1"]);
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityClasses: [C.Person] })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R")])).toEqual(["r-1"]);
+  });
+});
+
+describe("explore: EAT:, the entities anchored under a territory", () => {
+  const E = { entityClasses: [C.Action, C.Concept, C.Location, C.Person, C.Resource, C.Statement, C.Territory] };
+  /** a document as a save stores it: the entity ids by class and the anchors tree of the content */
+  const document = (id: string, content: string, entityIds: Partial<Record<EntityEnums.Class, string[]>>): Row => ({
+    id,
+    title: id,
+    content,
+    entityIds,
+    anchors: JSON.parse(
+      JSON.stringify(AnchorsNode.buildAnchorsTree(content, entityIds as Record<EntityEnums.Class, string[]>))
+    ),
+  });
+
+  beforeAll(async () => {
+    await storage.entities.insert(conn, [
+      entity("t-leaf", C.Territory, ["Leaf territory"], { data: { parent: { territoryId: "t-child", order: 9 } } }),
+      entity("t-bare", C.Territory, ["Unanchored territory"], { data: { parent: { territoryId: "t-root", order: 9 } } }),
+      entity("t-cross", C.Territory, ["Crossed territory"], { data: { parent: false } }),
+      entity("t-after", C.Territory, ["Territory after the crossed one"], { data: { parent: false } }),
+      entity("t-open", C.Territory, ["Territory with a lone opening tag"], { data: { parent: false } }),
+      // with t-leaf, more territories of one label than either adapter looks up through the documents index
+      ...Array.from({ length: 105 }, (_, i) => entity(`t-many-${i}`, C.Territory, [`Leaf lookalike ${i}`], { data: { parent: false } })),
+    ]);
+    await storage.documents.insert(
+      conn,
+      document(
+        "d-2",
+        "<c-4>a</c-4> <s-1> <c-2>j</c-2> </s-1> <t-root> <p-2>b</p-2> <t-child> <l-1>c</l-1> <s-2> <c-1>d</c-1> </s-2> </t-child> </t-root>",
+        { T: ["t-root", "t-child"], P: ["p-2"], L: ["l-1"], S: ["s-1", "s-2"], C: ["c-4", "c-2", "c-1"] }
+      )
+    );
+    await storage.documents.insert(
+      conn,
+      document("d-3", "<t-child> <p-1>e</p-1> </t-child> <t-leaf> <r-2>f</r-2> </t-leaf>", {
+        T: ["t-child", "t-leaf"],
+        P: ["p-1"],
+        R: ["r-2"],
+      })
+    );
+    // s-3 opens inside t-cross and closes after t-after, so the tree nests t-after below t-cross
+    await storage.documents.insert(
+      conn,
+      document("d-4", "<t-cross> <a-1>g</a-1> <s-3> h </t-cross> <t-after> <c-3>i</c-3> </t-after> </s-3>", {
+        T: ["t-cross", "t-after"],
+        A: ["a-1"],
+        S: ["s-3"],
+        C: ["c-3"],
+      })
+    );
+    await storage.documents.insert(conn, document("d-5", "<t-open> <r-1>k</r-1>", { T: ["t-open"], R: ["r-1"] }));
+  });
+
+  it("emits every entity anchored inside the territory's span, at any depth", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-root" })])).toEqual(["c-1", "l-1", "p-2", "s-2", "t-child"]);
+    expect(await explore({ entityClasses: [C.Person] }, [edge("EAT:", { entityId: "t-root" })])).toEqual(["p-2"]);
+  });
+
+  it("reads the span of the territory in every document that anchors it", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-child" })])).toEqual(["c-1", "l-1", "p-1", "s-2"]);
+  });
+
+  it("a territory anchored nowhere spans nothing", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-bare" })])).toEqual([]);
+  });
+
+  it("the SUB toggle adds the spans of the subTs, wherever they are anchored", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-root", includeSubordinates: true })])).toEqual([
+      "c-1",
+      "l-1",
+      "p-1",
+      "p-2",
+      "r-2",
+      "s-2",
+      "t-child",
+    ]);
+  });
+
+  it("only a territory's anchor opens a span", async () => {
+    // c-1 lies inside the anchor of s-2, and c-2 inside s-1 outside every territory
+    expect(await explore(E, [edge("EAT:", { entityId: "s-2" })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("EAT:")])).toEqual(["c-1", "c-3"]);
+  });
+
+  it("an anchor crossing the end of the span keeps what follows the span out", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-cross" })])).toEqual(["a-1", "s-3"]);
+    expect(await explore(E, [edge("EAT:", { entityId: "t-after" })])).toEqual(["c-3"]);
+  });
+
+  it("a territory tag that never closes spans nothing", async () => {
+    expect(await explore(E, [edge("EAT:", { entityId: "t-open" })])).toEqual([]);
+  });
+
+  it("a long list of target territories reads the same spans", async () => {
+    expect(await explore(E, [edge("EAT:", { label: "Leaf" })])).toEqual(["r-2"]);
+  });
+
+  it("without a target reads the span of every territory", async () => {
+    expect(await explore(E, [edge("EAT:")])).toEqual([
+      "a-1",
+      "c-1",
+      "c-3",
+      "l-1",
+      "p-1",
+      "p-2",
+      "r-2",
+      "s-2",
+      "s-3",
+      "t-child",
+    ]);
+  });
+
+  it("an unpinned target narrows to the territories passing its filters and conditions", async () => {
+    expect(await explore(E, [edge("EAT:", { label: "Leaf territory" })])).toEqual(["r-2"]);
+    expect(await explore(E, [edge("EAT:", node({}, [edge("I_CT:", { entityId: "t-child" })]))])).toEqual(["r-2"]);
+    expect(await explore(E, [edge("EAT:", { label: "no such territory" })])).toEqual([]);
+  });
+
+  it("a negative edge keeps the entities anchored outside the span or nowhere", async () => {
+    expect(
+      await explore({ entityClasses: [C.Resource] }, [edge("EAT:", { entityId: "t-leaf" }, Query.EdgeLogic.Negative)])
+    ).toEqual(["r-1"]);
   });
 });

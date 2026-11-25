@@ -155,7 +155,7 @@
               "certainty": "1",
               "children": [],
               "elvl": "3",
-              "id": "<uuid-17>",
+              "id": "<uuid-11>",
               "logic": "1",
               "mood": [],
               "moodvariant": "1",
@@ -177,7 +177,7 @@
           ],
           "references": [
             {
-              "id": "<uuid-18>",
+              "id": "<uuid-12>",
               "resource": "dissinet-resource",
               "value": "rp-v"
             }
@@ -206,7 +206,7 @@
               "certainty": "1",
               "children": [],
               "elvl": "3",
-              "id": "<uuid-35>",
+              "id": "<uuid-29>",
               "logic": "1",
               "mood": [],
               "moodvariant": "1",
@@ -228,7 +228,7 @@
           ],
           "references": [
             {
-              "id": "<uuid-36>",
+              "id": "<uuid-30>",
               "resource": "dissinet-resource",
               "value": "rp-v"
             }

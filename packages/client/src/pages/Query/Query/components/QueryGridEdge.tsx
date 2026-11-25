@@ -1,5 +1,5 @@
-import { Button, Checkbox, IconWithTooltip } from "components";
-import { IcoClose, IcoWarning } from "Theme/icons";
+import { Checkbox, IconWithTooltip } from "components";
+import { IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
@@ -14,7 +14,7 @@ import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QUERY_PROP_VALUE_X } from "../../c
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
 import { EdgePropPairPicker } from "./EdgePropPairPicker";
-import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "pages/Query/utils";
+import { buildEdgeTypeOptionGroups, findValidEdgeTypesForEdge } from "pages/Query/utils";
 import {
   StyledEdgeBox,
   StyledEdgeContainer,
@@ -35,7 +35,6 @@ interface QueryGridEdgeProps {
   edge: Query.IEdge;
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
-  isRootEdge?: boolean;
   // when this edge is not the last of its parent's children, the vertical
   // spine must continue down past this branch to reach the siblings below
   extendVertical?: boolean;
@@ -54,15 +53,13 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   edge,
   dispatch,
   problems,
-  isRootEdge = false,
   extendVertical = false,
   extendNegative = false,
   onOpenEntityInDetail,
   isValueConnector = false,
 }) => {
   const theme = useTheme();
-  const sourceNode = isRootEdge ? rootNode : node;
-  const validEdgesTypes = findValidEdgeTypesForSourceNode(sourceNode, isRootEdge);
+  const validEdgesTypes = findValidEdgeTypesForEdge(rootNode, edge.id);
 
   const edgeTypeOptions = buildEdgeTypeOptionGroups(
     validEdgesTypes.filter(
@@ -162,19 +159,6 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               />
             </StyledEdgeNotToggle>
             <StyledEdgeValueLabel>with value</StyledEdgeValueLabel>
-            <Button
-              icon={<IcoClose size={12} />}
-              noBackground
-              noBorder
-              textColor="query2Text"
-              tooltipLabel="remove the value node"
-              onClick={() =>
-                dispatch({
-                  type: QueryActionType.updateEdgeValueNode,
-                  payload: { edgeId: edge.id, hasValueNode: false },
-                })
-              }
-            />
           </StyledEdgeValueBox>
         ) : (
           <StyledEdgeBox $color={lineColor}>

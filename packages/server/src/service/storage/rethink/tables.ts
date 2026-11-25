@@ -347,6 +347,9 @@ async function edgePerEntityInRange(
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
+  // countByBucket tests every audit against the whole id list, so its cost is audits x ids
+  entityIdsLimit: 500,
+
   async firstFor(conn, scope, modelId) {
     const result = await byScopeAndModel(scope, modelId)
       .orderBy(r.asc("date"))
@@ -386,6 +389,31 @@ export const audits: AuditStore = {
       .filter({ auditScope: AuditScope.Relation })
       .orderBy(r.desc("date"))
       .limit(n)
+      .run(unwrap(conn));
+  },
+
+  async allForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    return r
+      .table(TABLE.audits)
+      .getAll(r.args(modelIds.map((modelId) => [scope, modelId])), {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
+      .run(unwrap(conn));
+  },
+
+  async relationAuditsForEntities(conn, entityIds) {
+    if (!entityIds.length) {
+      return [];
+    }
+    // a multi-index getAll returns a row once per listed entity it holds
+    return r
+      .table(TABLE.audits)
+      .getAll(r.args(entityIds), { index: DbEnums.Indexes.AuditRelationEntityIds })
+      .filter({ auditScope: AuditScope.Relation })
+      .distinct()
       .run(unwrap(conn));
   },
 

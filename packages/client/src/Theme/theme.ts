@@ -47,6 +47,8 @@ const theme = {
     white: "#fff",
     grey: "#C4C4C4",
     greyer: "#4a5568",
+    // a panel separator while hovered or dragged: a grey apart from the blue of the query lines
+    separatorActive: "#4a5568", // gray 700
     // notes and field labels that must sit below body text in both themes;
     // greyer lands one step from the dark page's text color and stops reading
     // as secondary there
@@ -81,6 +83,9 @@ const theme = {
     query2: "#4C5DAE",
     // text on a query2 fill, the same in both themes as white reads on either blue
     query2Text: "#fff",
+    // a control in use on a query2 fill: darker than the fill, with query2Text on it, the
+    // same in both themes
+    queryActive: "#324185",
     query3: "#324185",
     query4: "#1A2332",
     queryInvalid: "#EF4444",

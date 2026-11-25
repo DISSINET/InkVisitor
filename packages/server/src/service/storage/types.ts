@@ -153,6 +153,10 @@ export interface AuditStore extends TableStore<IAudit> {
   firstForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
   lastNFor(conn: Conn, scope: AuditScope, modelId: string, n: number): Promise<IAudit[]>;
   relationAuditsForEntity(conn: Conn, entityId: string, n: number): Promise<IAudit[]>;
+  /** every audit of the listed models, in no promised order */
+  allForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
+  /** every relation audit whose snapshot lists any of the entities, each once, in no promised order */
+  relationAuditsForEntities(conn: Conn, entityIds: string[]): Promise<IAudit[]>;
   earliestDate(conn: Conn): Promise<Date | null>;
   /** audits on the calendar day of `date` */
   onDate(conn: Conn, date: Date): Promise<IAudit[]>;
@@ -164,6 +168,8 @@ export interface AuditStore extends TableStore<IAudit> {
   page(conn: Conn, filter: { skip: number; take: number; from: Date }): Promise<IAudit[]>;
   /** event counts per time bucket and group key; group[0] is the bucket */
   countByBucket(conn: Conn, params: AuditCountParams): Promise<{ group: string[]; reduction: number }[]>;
+  /** the longest `entityIds` list countByBucket is given; null when a list of any length is served */
+  readonly entityIdsLimit: number | null;
 }
 
 export interface UserStore extends TableStore<IUser> {

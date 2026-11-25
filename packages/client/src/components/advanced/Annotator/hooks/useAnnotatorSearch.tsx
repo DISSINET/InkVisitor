@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
+import { useDebouncedCallback } from "hooks";
 import { clampActiveOccurenceIndex } from "../AnnotatorSearchLine/replaceUtils";
 
 /** Shorter queries match too much of a document to be worth running. */
@@ -9,6 +10,12 @@ export const MIN_SEARCH_TERM_LENGTH = 3;
  * regular expression, and the browser throws on one past its size limit.
  */
 export const MAX_SEARCH_TERM_LENGTH = 200;
+
+/**
+ * How long the text has to stay unedited before it is searched again. A search
+ * walks the whole document, which is too slow to run on every keystroke.
+ */
+export const SEARCH_REFRESH_AFTER_EDIT_MS = 500;
 
 export const isSearchTermInRange = (term: string): boolean =>
   term.length >= MIN_SEARCH_TERM_LENGTH && term.length <= MAX_SEARCH_TERM_LENGTH;
@@ -89,23 +96,48 @@ interface UseAnnotatorSearchParams {
   isWholeWordOnlyMode: boolean;
   isCaseSensitiveMode: boolean;
   annotatorMode: EditMode;
-  /**
-   * Bumped to re-run the search against text the annotator changed under it
-   * (replace all). The text itself is not a dependency — searching on every
-   * keystroke in edit mode would be far too expensive.
-   */
-  searchRefreshKey?: number;
   setSearchOccurences: React.Dispatch<
     React.SetStateAction<Occurrence[] | null>
   >;
   setSearchActiveOccurence: React.Dispatch<React.SetStateAction<number>>;
   setSelectedText: React.Dispatch<React.SetStateAction<string>>;
+  /**
+   * True while the hits were searched again under a text edit and the active
+   * one is not selected in the text. See {@link AnnotatorSearch.dropHitsOnEdit}.
+   */
+  setIsOccurenceSelectionDeferred: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface AnnotatorSearch {
+  /**
+   * Searches the current text again. For a caller that changed the text itself
+   * and wants the active hit selected afterwards (replace).
+   */
+  refreshSearch: () => void;
+  /**
+   * To call on every text change the user makes by hand (typing, paste, undo,
+   * discard) or that arrives from the server. A hit is a position in the text,
+   * so the hits are dropped at once, leaving Next, Previous and Replace nothing
+   * outdated to act on, and searched again when the editing pauses. Selecting
+   * the active hit then would take the caret from the place being edited, so
+   * its selection is deferred until the user steps to it.
+   *
+   * Does nothing in highlight mode. Its text hides the tags, so the anchor
+   * changes made there move no hit, and selecting a hit on every refetch would
+   * pull the view away from what the user is anchoring. Text edited elsewhere
+   * and refetched in highlight mode therefore leaves the hits outdated until
+   * the search runs again.
+   *
+   * Keeps one identity, so a callback registered once on the annotator can
+   * call it.
+   */
+  dropHitsOnEdit: () => void;
 }
 
 /**
  * Hook that handles annotator search functionality.
  * Executes search based on various modes (regex, case sensitive, whole word, etc.)
- * and reacts to width changes as well.
+ * and reacts to width changes and text edits as well.
  */
 export const useAnnotatorSearch = ({
   annotator,
@@ -116,13 +148,46 @@ export const useAnnotatorSearch = ({
   isWholeWordOnlyMode,
   isCaseSensitiveMode,
   annotatorMode,
-  searchRefreshKey,
   setSearchOccurences,
   setSearchActiveOccurence,
   setSelectedText,
-}: UseAnnotatorSearchParams): void => {
+  setIsOccurenceSelectionDeferred,
+}: UseAnnotatorSearchParams): AnnotatorSearch => {
   const searchTermRef = useRef<string>("");
   const previousWidthRef = useRef<number | null>(null);
+
+  // The text is not a dependency of the search, so a change of it reaches the
+  // search through this key.
+  const [searchRefreshKey, setSearchRefreshKey] = useState<number>(0);
+  const refreshSearch = useCallback(() => setSearchRefreshKey((key) => key + 1), []);
+  const refreshSearchAfterEdit = useDebouncedCallback(refreshSearch, SEARCH_REFRESH_AFTER_EDIT_MS);
+
+  const annotatorRef = useRef<Annotator | null>(annotator);
+  useLayoutEffect(() => {
+    annotatorRef.current = annotator;
+  });
+
+  const dropHitsOnEdit = useCallback(() => {
+    if (annotatorRef.current?.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
+    setSearchOccurences(null);
+    setIsOccurenceSelectionDeferred(true);
+    refreshSearchAfterEdit();
+  }, [setSearchOccurences, setIsOccurenceSelectionDeferred, refreshSearchAfterEdit]);
+
+  // A search the user changed shows its hit again.
+  useEffect(() => {
+    setIsOccurenceSelectionDeferred(false);
+  }, [
+    debouncedSearchTerm,
+    isRegexMode,
+    isExtendToWholeWordMode,
+    isWholeWordOnlyMode,
+    isCaseSensitiveMode,
+    annotatorMode,
+    setIsOccurenceSelectionDeferred,
+  ]);
 
   const resetActiveOccurrenceOnSearchTermChange = useCallback(() => {
     // If the search term has changed, reset the active occurrence to 0
@@ -283,4 +348,6 @@ export const useAnnotatorSearch = ({
     setSearchActiveOccurence,
     setSelectedText,
   ]);
+
+  return { refreshSearch, dropHitsOnEdit };
 };

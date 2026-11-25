@@ -2,6 +2,7 @@ export enum BatchAction {
   open_in_detail = "open_in_detail",
   copy_uuids = "copy_uuids",
   export_tsv = "export_tsv",
+  export_json = "export_json",
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
@@ -18,12 +19,16 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.open_in_detail, label: "open in detail" },
   { value: BatchAction.copy_uuids, label: "copy UUIDs to clipboard" },
   { value: BatchAction.export_tsv, label: "export as tsv" },
+  { value: BatchAction.export_json, label: "export as json" },
   { value: BatchAction.add_metaprop, label: "add new metaproperty" },
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
   { value: BatchAction.set_language, label: "set label language" },
   { value: BatchAction.set_pos, label: "set part of speech" },
 ];
+
+/** Batch actions restricted to the Owner role. */
+export const ownerOnlyBatchActions = new Set<BatchAction>([BatchAction.export_json]);
 
 /** Batch actions restricted to Admin and Owner roles. */
 export const restrictedBatchActions = new Set<BatchAction>([
@@ -59,6 +64,7 @@ export const contentSizedColumnTypes = new Set([
   Explore.EExploreColumnType.ER,
   Explore.EExploreColumnType.EPV,
   Explore.EExploreColumnType.EPT,
+  Explore.EExploreColumnType.EPO,
   Explore.EExploreColumnType.ERR,
   Explore.EExploreColumnType.ERV,
   Explore.EExploreColumnType.EUI,
@@ -82,6 +88,8 @@ export const readOnlyColumnTypes = new Set([
   // territories are derived from the statements using the entity, so there is
   // nothing on the entity itself to write back to
   Explore.EExploreColumnType.EUI,
+  // the props belong to the origin entities, not to the row
+  Explore.EExploreColumnType.EPO,
 ]);
 
 /**

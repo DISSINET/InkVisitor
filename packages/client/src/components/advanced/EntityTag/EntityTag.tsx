@@ -479,6 +479,7 @@ function areEntityTagsEqual(
   if (prev.isSubordinate !== next.isSubordinate) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
+  if (prev.tagMaxWidth !== next.tagMaxWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
   if (prev.disableContextMenu !== next.disableContextMenu) return false;

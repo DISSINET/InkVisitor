@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../server";
 import { apiPath } from "@common/constants";
 import { Db, storage } from "@service/storage";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "./testAuth";
 import { pool } from "@middlewares/db";
 
 /**

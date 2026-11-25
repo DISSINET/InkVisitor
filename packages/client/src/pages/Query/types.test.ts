@@ -1,8 +1,14 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesHidden, edgeTypesImplemented } from "./types";
 import {
+  edgeTypesHidden,
+  edgeTypesImplemented,
+  edgeTypesWithoutSubordinates,
+  edgeTypesWithSubtreeDepth,
+} from "./types";
+import {
+  findValidEdgeTypesForEdge,
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
   getRelationAllowedClasses,
@@ -193,6 +199,39 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
         edge(Query.EdgeType["EUT:"], pickedTerritory),
       ).valid,
     ).toBe(true);
+  });
+});
+
+describe("query builder offers the 'anchored under T' edge (EAT:)", () => {
+  it("any source node (e.g. Person, Statement, Territory) can select EAT:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Statement,
+      EntityEnums.Class.Territory,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(Query.EdgeType["EAT:"]);
+    }
+  });
+
+  it("source may be any entity; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Territory])),
+      ).valid,
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EAT:"], sourceNode([EntityEnums.Class.Person])),
+      ).valid,
+    ).toBe(false);
+  });
+
+  it("the SUB toggle widens the picked Territory to its subTs", () => {
+    expect(edgeTypesWithoutSubordinates).not.toContain(Query.EdgeType["EAT:"]);
+    expect(edgeTypesWithSubtreeDepth).not.toContain(Query.EdgeType["EAT:"]);
   });
 });
 
@@ -408,6 +447,44 @@ describe("the SE edge of a start node", () => {
   it("is left out of the edge type dropdown", () => {
     expect(findValidEdgeTypesForSourceNode(sourceNode([]))).toContain(Query.EdgeType.SE);
     expect(edgeTypesHidden).toContain(Query.EdgeType.SE);
+  });
+});
+
+describe("the edge types an edge offers", () => {
+  const person = [EntityEnums.Class.Person];
+  const concept = [EntityEnums.Class.Concept];
+  const withId = (id: string, type: Query.EdgeType, target: Query.INode): Query.IEdge => ({
+    ...edge(type, target),
+    id,
+  });
+  const deeper = withId("deeper", Query.EdgeType["HP:V"], sourceNode([]));
+  const fromStartNode = withId("from-start-node", Query.EdgeType["EP:T"], {
+    ...sourceNode(concept),
+    edges: [deeper],
+  });
+  const root: Query.INode = {
+    ...sourceNode([]),
+    operator: Query.NodeOperator.Or,
+    edges: [withId("se", Query.EdgeType.SE, { ...sourceNode(person), edges: [fromStartNode] })],
+  };
+
+  it("under a start node are those of a root with its classes", () => {
+    const types = findValidEdgeTypesForEdge(root, "from-start-node");
+    expect(types).toEqual(findValidEdgeTypesForSourceNode(sourceNode(person), true));
+    expect(types).not.toContain(Query.EdgeType["I_IS:A1"]);
+  });
+
+  it("under the root are narrowed by the root's classes", () => {
+    const personRoot = { ...sourceNode(person), edges: [fromStartNode] };
+    expect(findValidEdgeTypesForEdge(personRoot, "from-start-node")).toEqual(
+      findValidEdgeTypesForSourceNode(sourceNode(person), true),
+    );
+  });
+
+  it("deeper down are not narrowed by class", () => {
+    const types = findValidEdgeTypesForEdge(root, "deeper");
+    expect(types).toEqual(findValidEdgeTypesForSourceNode(sourceNode(concept)));
+    expect(types).not.toEqual(findValidEdgeTypesForSourceNode(sourceNode(concept), true));
   });
 });
 

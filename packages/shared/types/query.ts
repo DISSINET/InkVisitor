@@ -105,6 +105,7 @@ export namespace Query {
     "SUT:" = "SUT:",
     "I_SUT:" = "I_SUT:",
     "EUT:" = "EUT:",
+    "EAT:" = "EAT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
     "HR:R" = "HR:R",
@@ -284,6 +285,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Statement] },
     },
     "EUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "EAT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
     "SUT:D": {},
@@ -666,6 +670,13 @@ export namespace Query {
       },
     ],
     "EUT:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
+      },
+    ],
+    "EAT:": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       {
         nodeType: NodeType.E,
@@ -1123,6 +1134,7 @@ export namespace Query {
     "SUT:": "S under T",
     "I_SUT:": "T has S",
     "EUT:": "used in statements under T",
+    "EAT:": "anchored under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "HR:R": "has reference: resource",
@@ -1204,6 +1216,7 @@ export namespace Query {
     "SUT:": "Finds statements directly under the target territory (with SUB: anywhere below it)",
     "I_SUT:": "Finds the territory that directly holds the target statement",
     "EUT:": "Finds entities used in statements directly under the target territory",
+    "EAT:": "Finds entities anchored in the full text anywhere inside the target territory's span (with SUB: also inside the spans of its subTs anchored elsewhere)",
     "SUT:D": "Finds statements directly under the target territory",
     "I_SUT:D": "Finds the territory that directly holds the target statement",
     "HR:R": "Finds entities whose references point to the target resource",
@@ -1491,6 +1504,7 @@ export namespace Explore {
     ER = "ER", // Entity Relations
     EPV = "EPV", // Entity Property value
     EPT = "EPT", // Entity Property types
+    EPO = "EPO", // Entity Property origins
     ERR = "ERR", // Entity Reference Resources
     ERV = "ERV", // Entity Reference Values
     ES = "ES", // Entity Statements
@@ -1555,6 +1569,7 @@ export namespace Explore {
     [EExploreColumnType.ER]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsER>;
     [EExploreColumnType.EPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
     [EExploreColumnType.EPT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPO]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
     [EExploreColumnType.ERR]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ERV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsERV>;
     [EExploreColumnType.ES]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
@@ -1613,6 +1628,21 @@ export namespace Explore {
         "Shows the types (Concepts) of metaproperties attached to the entity. Editable: you can add or remove property types.",
       isDisabled: false,
       params: {},
+    },
+    [EExploreColumnType.EPO]: {
+      label: "Entity Property origins",
+      description:
+        "Shows the entities that have a metaproperty of a specific type whose value is this entity, the origins of those metaproperties. The property type is a Concept entity that defines which metaproperties are followed.",
+      isDisabled: false,
+      params: { propertyType: "" },
+      paramsDef: [
+        {
+          id: "propertyType",
+          type: "entity",
+          label: "Property type",
+          isRequired: true,
+        },
+      ],
     },
     [EExploreColumnType.ERR]: {
       label: "Entity Reference Resources",

@@ -7,6 +7,7 @@ import {
   buildEdgeTypeOptionGroups,
   buildStableSignature,
   computeWindowUpdate,
+  entityPickerInitCategory,
   getRelationAllowedClasses,
   getEdgeSourceClasses,
   getRelationConstrainedCategoryTypes,
@@ -503,12 +504,35 @@ describe("getRelationConstrainedCategoryTypes", () => {
   });
 });
 
+describe("entityPickerInitCategory", () => {
+  const { Action, Concept, Group } = EntityEnums.Class;
+
+  it("opens on the stored class", () => {
+    expect(entityPickerInitCategory([Group], [Action, Concept])).toBe(Group);
+  });
+
+  it("leaves an empty stored list to the picker's wildcard when it offers several classes", () => {
+    expect(entityPickerInitCategory([], [Action, Concept])).toBeUndefined();
+    expect(entityPickerInitCategory(undefined, classesAll)).toBeUndefined();
+  });
+
+  it("names a class for a picker that offers one class or none", () => {
+    expect(entityPickerInitCategory([], [Action])).toBe(Action);
+    expect(entityPickerInitCategory([], [])).toBe(Concept);
+  });
+});
+
 describe("buildEdgeTypeOptionGroups", () => {
   const T = Query.EdgeType;
 
   it("groups types in the fixed group order and drops empty groups", () => {
     const groups = buildEdgeTypeOptionGroups([T["R:SYN"], T["IS:"], T["EP:T"]], []);
     expect(groups.map((g) => g.label)).toEqual(["Property", "Relation", "Position in statement"]);
+  });
+
+  it("lists the edges reading what lies under a territory in one Territory group", () => {
+    const groups = buildEdgeTypeOptionGroups([T["SUT:"], T["EUT:"], T["EAT:"]], []);
+    expect(groups.map((g) => g.label)).toEqual(["Territory"]);
   });
 
   it("puts the any variant first, then sorts alphabetically by menu label", () => {

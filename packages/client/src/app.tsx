@@ -118,6 +118,9 @@ const queryClient = new QueryClient({
       // turn on for airplane / offline work
       // networkMode: "always",
     },
+    mutations: {
+      networkMode: "always",
+    },
   },
 });
 export const App: React.FC = () => {

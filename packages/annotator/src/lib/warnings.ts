@@ -116,13 +116,13 @@ function formatAsymmetricalAnchorMessage(
   const parts: string[] = [];
   if (opening > 0) {
     parts.push(
-      `${opening} orphaned opening tag${opening === 1 ? "" : "s"}`
+      `${opening} asymmetrical opening tag${opening === 1 ? "" : "s"}`
     );
   }
   if (closing > 0) {
     parts.push(
-      `${closing} orphaned closing tag${closing === 1 ? "" : "s"}`
+      `${closing} asymmetrical closing tag${closing === 1 ? "" : "s"}`
     );
   }
-  return `Asymmetrical anchor${anchors.length === 1 ? "" : "s"} detected: ${parts.join(", ")}`;
+  return `Broken anchor${anchors.length === 1 ? "" : "s"} detected: ${parts.join(", ")}`;
 }

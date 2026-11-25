@@ -7,6 +7,7 @@ import { nodeLabel } from "../../../../common/searchLabel";
 import { ExploreResolvers } from "../../types";
 import { wrap } from "../conn";
 import { TABLE } from "../tables";
+import { AnchorSpot, anchoredUnder } from "./anchored";
 import { auditAndCoOccurrenceIds, withinEntityFilters, withinIds } from "./filters";
 import SearchNode from "./nodes";
 import { QUERY_RUN_OPTIONS } from "./run-options";
@@ -1921,6 +1922,94 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
 }
 
 /**
+ * The deepest anchors tree a document row can hold: RethinkDB stores 20
+ * nested levels, and a tree nested 10 deep needs more than that.
+ */
+const ANCHORS_TREE_DEPTH = 10;
+
+/**
+ * The longest target list looked up through the DocumentEntityIds index. The
+ * index reads the whole document row, text and tree, once per target the
+ * document anchors, all of them at a time, and a territory shares its
+ * document with its subTs: hundreds of targets would hold hundreds of copies
+ * of one large row in memory. A longer list reads every document once.
+ */
+const INDEXED_ANCHOR_TARGETS_LIMIT = 10;
+
+/**
+ * [anchor, class, indexStart, indexEnd] of every node of an anchors tree (an
+ * AnchorSpot each). The tree is flattened in the database, so the text every
+ * node repeats in `content` stays there.
+ */
+function anchorSpots(nodes: RDatum, depth = ANCHORS_TREE_DEPTH): RDatum {
+  if (depth === 0) {
+    return r.expr([]);
+  }
+  return nodes.concatMap(function (node: RDatum) {
+    return r
+      .expr([
+        [
+          node("anchor").default(null),
+          node("class").default(null),
+          node("indexStart").default(null),
+          node("indexEnd").default(null),
+        ],
+      ])
+      .add(anchorSpots(node("children").default([]), depth - 1));
+  }) as unknown as RDatum;
+}
+
+/**
+ * EAT: ("anchored under T"). Emits the ENTITIES ANCHORED inside the span of
+ * the target Territory's anchor: every anchor whose opening tag lies in it,
+ * at any depth, in every document that anchors the territory. The statements
+ * under the territory play no part, so an entity anchored in the text and
+ * used in no statement matches. An unconstrained target reads the span of
+ * every territory.
+ *
+ * ReQL cannot walk a tree of unknown depth to the end of a span, so prepare()
+ * loads the anchors of the documents that anchor a target and anchoredUnder
+ * picks the ones inside a span; run() intersects the ids found with the
+ * incoming stream q, keeping the subset invariant that positive matching and
+ * negation rely on.
+ */
+export class EdgeAnchoredUnderTerritory extends SearchEdge {
+  private anchoredIds: string[] = [];
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["EAT:"];
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    const targetIds = this.targetIds();
+    if (targetIds && !targetIds.length) {
+      this.anchoredIds = [];
+      return;
+    }
+    const table = r.table(TABLE.documents);
+    const spotsOf = function (doc: RDatum) {
+      return anchorSpots(doc("anchors").default([]));
+    };
+    const documents = await (
+      targetIds && targetIds.length <= INDEXED_ANCHOR_TARGETS_LIMIT
+        ? (
+            table.getAll(r.args(targetIds), { index: DbEnums.Indexes.DocumentEntityIds })("id").distinct() as unknown as RDatum
+          ).do(function (ids: RDatum) {
+            return table.getAll(r.args(ids)).map(spotsOf).coerceTo("array");
+          })
+        : table.map(spotsOf)
+    ).run(db, QUERY_RUN_OPTIONS);
+    this.anchoredIds = anchoredUnder(documents as AnchorSpot[][], targetIds);
+  }
+
+  run(q: RStream): RStream {
+    return intersectIdsWithStream(q, r.expr(this.anchoredIds) as unknown as RStream);
+  }
+}
+
+/**
  * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
  * target Statement S in ANY position - actions + action props, actants +
  * their classifications / identifications / props, statement-level props
@@ -2318,6 +2407,8 @@ function createEdge(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeTerritoryHasParent(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
+    case Query.EdgeType["EAT:"]:
+      return new EdgeAnchoredUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
     case Query.EdgeType["IS:S"]:

@@ -21,6 +21,7 @@ import {
 import api from "api";
 import { boxContentId, Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
+  AnchoredNearbyContext,
   ApplyTemplateModal,
   AuditTable,
   BreadcrumbItem,
@@ -648,7 +649,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   return (
-    <>
+    <AnchoredNearbyContext.Provider value={statement.anchoredNearby}>
       <React.Fragment key={statement.id}>
         <StyledEditorPreBlock>
           <StyledEditorPreSection>
@@ -1134,6 +1135,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         loading={updateStatementMutation.isPending}
         onCancel={() => setShowSubmitSection(false)}
       />
-    </>
+    </AnchoredNearbyContext.Provider>
   );
 };
