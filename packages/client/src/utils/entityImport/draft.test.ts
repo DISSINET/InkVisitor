@@ -1,22 +1,37 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IProp, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
+  addDraftEntity,
+  addStoredRelations,
+  appendUndoOf,
   buildDraftDetail,
+  draftAfterAppend,
   createDraftRelation,
   createDraftWrites,
   deleteDraftRelation,
   draftToImportJson,
   ImportDraft,
+  importMarksOf,
+  issuesWithEntityIds,
+  leftOutDrafts,
   mergeChanges,
+  removedFromProtocols,
   missingEntityIds,
   missingSynonymGroupIds,
-  removeDraftEntity,
   reorderDraftRelations,
+  replaceEntityId,
+  replaceUndoEntityId,
+  setAllConflictChoices,
+  storedRelationChanges,
   tabEntities,
+  toggleLeftOut,
+  undoAppend,
   updateDraftEntity,
   updateDraftRelation,
+  withLoadedSince,
 } from "./draft";
 import { normalizeEntities } from "./normalizeEntities";
+import { ImportPlan } from "./types";
 import { validateImport } from "./validateImport";
 
 const newEntity = (id: string, extra: Record<string, unknown> = {}) =>
@@ -84,72 +99,6 @@ describe("draft edits", () => {
       dogJson.relations.filter((item) => item.type === "SCL").map((item) => item.entityIds[1])
     ).toEqual(["mammal", "animal", "pet"]);
   });
-
-  it("leaves out an entity with every relation it is in", () => {
-    const { draft, removedRelations } = removeDraftEntity(baseDraft(), "dog");
-    expect(draft.entities.map((entity) => entity.id)).toEqual(["puppy"]);
-    expect(draft.relations).toEqual([]);
-    expect(removedRelations.map((item) => item.id)).toEqual(["r1", "r2", "r3"]);
-  });
-
-  it("removes the links other drafts have to a left-out entity", () => {
-    const withLinks = updateDraftEntity(baseDraft(), "puppy", {
-      props: newEntity("x", {
-        props: [
-          { type: "dog", value: "animal", children: [{ type: "size" }] },
-          { type: "size", value: "dog", children: [{ type: "dog" }, { type: "size", value: "dog" }] },
-        ],
-      }).props,
-      references: newEntity("x", {
-        references: [{ resource: "dog", value: "page" }, { resource: "book", value: "dog" }],
-      }).references,
-    });
-
-    const { draft, cleanups } = removeDraftEntity(withLinks, "dog");
-    const puppy = draft.entities[0];
-
-    // a metaprop typed by dog goes with its children; a value of dog is cleared
-    expect(puppy.props).toHaveLength(1);
-    expect(puppy.props[0]).toMatchObject({ type: { entityId: "size" }, value: { entityId: "" } });
-    expect(puppy.props[0].children.map((child) => [child.type.entityId, child.value.entityId])).toEqual([
-      ["size", ""],
-    ]);
-    expect(puppy.references.map((item) => [item.resource, item.value])).toEqual([["book", ""]]);
-    expect(cleanups).toEqual([
-      {
-        entityId: "puppy",
-        changes: [
-          "2 metaprops removed",
-          "2 metaprop values cleared",
-          "1 reference removed",
-          "1 reference value cleared",
-        ],
-      },
-    ]);
-  });
-
-  it("moves territories under a left-out territory to its parent", () => {
-    const territory = (id: string, parentId: string, protocol = {}) =>
-      newEntity(id, { class: "T", data: { parent: { territoryId: parentId }, protocol } });
-    const draft: ImportDraft = {
-      entities: [
-        territory("manuscript", "T0"),
-        territory("folio", "manuscript", { guidelines: ["manuscript"], startDate: "manuscript" }),
-      ],
-      relations: [],
-      existing: {},
-    };
-
-    const { draft: rest, cleanups } = removeDraftEntity(draft, "manuscript");
-    const folio = rest.entities[0] as ITerritory;
-
-    expect(folio.data.parent).toMatchObject({ territoryId: "T0" });
-    expect(folio.data.protocol).toMatchObject({ guidelines: [], startDate: "" });
-    expect(cleanups[0].changes).toEqual([
-      "moved to the parent of the left-out territory",
-      "2 protocol entries removed",
-    ]);
-  });
 });
 
 describe("buildDraftDetail", () => {
@@ -182,7 +131,7 @@ describe("draftToImportJson", () => {
     expect(puppy.relations.map((item) => item.entityIds)).toEqual([["puppy", "dog"]]);
   });
 
-  it("passes the import validation, also after a tab with links to it is closed", async () => {
+  it("passes the import validation, also with a linked draft left out", async () => {
     const context = {
       role: UserEnums.Role.Editor,
       defaultLanguage: EntityEnums.Language.English,
@@ -196,13 +145,17 @@ describe("draftToImportJson", () => {
     expect(valid.errors).toEqual([]);
     expect(valid.plan!.relations).toHaveLength(3);
 
-    // puppy's metaprop pointed at dog; closing dog's tab removes it
+    // puppy's metaprop points at dog, so leaving dog out leaves puppy out too
     const withProp = updateDraftEntity(baseDraft(), "puppy", {
       props: newEntity("x", { props: [{ type: "dog" }] }).props,
     });
-    const { draft } = removeDraftEntity(withProp, "dog");
-    const rest = await validateImport(JSON.stringify(draftToImportJson(draft)), context);
+    const withCat = { ...withProp, entities: [...withProp.entities, newEntity("cat")] };
+    const rest = await validateImport(
+      JSON.stringify(draftToImportJson(toggleLeftOut(withCat, "dog"))),
+      context
+    );
     expect(rest.errors).toEqual([]);
+    expect(rest.plan!.entities.map((entity) => entity.id)).toEqual(["cat"]);
   });
 });
 
@@ -333,5 +286,773 @@ describe("createDraftWrites", () => {
     await writes.updateRelation("r3", { entityIds: ["hound", "canine"] });
 
     expect(draft().relations.map((item) => item.id)).toEqual(["r1", "r2"]);
+  });
+});
+
+describe("replaceEntityId", () => {
+  it("swaps the id of a draft wherever the drafts use it, and nothing else", () => {
+    const draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { notes: ["dog"] }),
+        newEntity("puppy", { props: [{ type: "size", value: "dog" }] }),
+      ],
+    };
+
+    const swapped = replaceEntityId(draft, "dog", "stored-dog");
+
+    expect(swapped.entities.map((entity) => entity.id)).toEqual(["stored-dog", "puppy"]);
+    // a note that holds the same text is no link
+    expect(swapped.entities[0].notes).toEqual(["dog"]);
+    expect(swapped.entities[1].props[0].value.entityId).toBe("stored-dog");
+    expect(swapped.relations.map((item) => item.entityIds)).toEqual([
+      ["stored-dog", "animal"],
+      ["puppy", "stored-dog"],
+      ["hound", "stored-dog"],
+    ]);
+  });
+});
+
+describe("issuesWithEntityIds", () => {
+  it("names the draft of each issue by its position in the import JSON", () => {
+    const issues = issuesWithEntityIds(baseDraft(), [
+      { entityIndex: 2, message: "broken" },
+      { message: "about the whole import" },
+    ]);
+    expect(issues.map((issue) => issue.entityId)).toEqual(["puppy", undefined]);
+  });
+});
+
+describe("leaving drafts out", () => {
+  const withLinks = (): ImportDraft => ({
+    ...baseDraft(),
+    entities: [
+      newEntity("dog"),
+      newEntity("puppy", { props: [{ type: "size", value: "v-small" }] }),
+      newEntity("kennel", { props: [{ type: "dog", value: "v-small" }] }),
+      newEntity("v-small", { class: "V", labels: ["small"] }),
+      newEntity("v-loud", { class: "V", labels: ["loud"] }),
+      newEntity("bark", { props: [{ type: "size", value: "v-loud" }] }),
+    ],
+  });
+  const jsonIds = (draft: ImportDraft) =>
+    draftToImportJson(draft).map((entity) => (entity as { id: string }).id);
+
+  it("leaves out the drafts pointing at a left-out one and the Values only they use", () => {
+    let draft = toggleLeftOut(withLinks(), "dog");
+    draft = toggleLeftOut(draft, "bark");
+
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({
+      dog: "dog",
+      // its metaprop type is the dog
+      kennel: "dog",
+      bark: "bark",
+      // only the left-out bark uses it
+      "v-loud": "bark",
+    });
+    expect(jsonIds(draft)).toEqual(["puppy", "v-small"]);
+    // puppy still uses the small Value, so it stays; the relations with the
+    // dog go, and its synonym cloud keeps too few members to stay
+    expect(
+      draftToImportJson(draft).flatMap((entity) => (entity as { relations: object[] }).relations)
+    ).toEqual([]);
+  });
+
+  it("keeps the drafts and relations pointing at a left-out appended draft", () => {
+    const draft = toggleLeftOut(
+      {
+        ...withLinks(),
+        appends: { dog: { stored: existingEntity("dog"), conflicts: [], skipped: {} as never } },
+      },
+      "dog"
+    );
+
+    // the dog's stored entity stays in the database, so the kennel's link holds
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({ dog: "dog" });
+    expect(jsonIds(draft)).toEqual(["puppy", "kennel", "v-small", "v-loud", "bark"]);
+    // the puppy's superclass keeps the dog; the dog's own relations go
+    expect(
+      draftToImportJson(draft).flatMap(
+        (entity) => (entity as { relations: { entityIds: string[] }[] }).relations
+      )
+    ).toEqual([{ type: RelationEnums.Type.Superclass, entityIds: ["puppy", "dog"] }]);
+  });
+
+  it("drops a protocol entry naming a left-out draft and keeps the territory", () => {
+    const territory = (id: string, data: Record<string, unknown>) =>
+      newEntity(id, { class: "T", data }) as ITerritory;
+    const draft = toggleLeftOut(
+      {
+        entities: [
+          territory("t1", { protocol: { guidelines: ["rules", "manual"] } }),
+          territory("t2", { parent: { territoryId: "t1" } }),
+          newEntity("rules", { class: "R" }),
+          newEntity("manual", { class: "R" }),
+        ],
+        relations: [],
+        existing: {},
+      },
+      "rules"
+    );
+
+    expect(Object.fromEntries(leftOutDrafts(draft))).toEqual({ rules: "rules" });
+    const [t1] = draftToImportJson(draft) as { data: { protocol: { guidelines: string[] } } }[];
+    expect(jsonIds(draft)).toEqual(["t1", "t2", "manual"]);
+    expect(t1.data.protocol.guidelines).toEqual(["manual"]);
+    expect(removedFromProtocols(draft, "rules")).toEqual(["t1"]);
+    expect(removedFromProtocols(draft, "manual")).toEqual([]);
+  });
+
+  it("brings the drafts left out with one back with it", () => {
+    const draft = toggleLeftOut(toggleLeftOut(withLinks(), "dog"), "dog");
+
+    expect(leftOutDrafts(draft).size).toBe(0);
+    expect(jsonIds(draft)).toEqual(["dog", "puppy", "kennel", "v-small", "v-loud", "bark"]);
+  });
+});
+
+describe("undoAppend", () => {
+  it("brings back the appended draft only, the other drafts keep their changes", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { detail: "from the import" }),
+        newEntity("puppy", { props: [{ type: "size", value: "dog" }] }),
+      ],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+
+    // the append: the draft takes the stored id and the stored entity's state
+    let appended = replaceEntityId(before, "dog", "stored-dog");
+    appended = {
+      ...appended,
+      entities: appended.entities.map((entity) =>
+        entity.id === "stored-dog" ? { ...entity, detail: "stored detail" } : entity
+      ),
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    // an edit to another draft made after the append
+    appended = updateDraftEntity(appended, "puppy", { detail: "edited later" });
+
+    const undone = undoAppend(appended, undo);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual(["dog", "puppy"]);
+    expect(undone.entities[0].detail).toBe("from the import");
+    expect(undone.entities[1].detail).toBe("edited later");
+    expect(undone.entities[1].props[0].value.entityId).toBe("dog");
+    expect(undone.appends).toEqual({});
+    expect(undone.relations.map((relation) => relation.entityIds).sort()).toEqual(
+      [
+        ["dog", "animal"],
+        ["hound", "dog"],
+        ["puppy", "dog"],
+      ].sort()
+    );
+  });
+
+  it("undoes an earlier append and keeps a later one", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { props: [{ type: "size", value: "puppy" }] }),
+        newEntity("puppy"),
+        newEntity("kennel", { props: [{ type: "size", value: "dog" }] }),
+      ],
+      relations: [],
+    };
+    const stored = (id: string) => ({
+      stored: existingEntity(id),
+      conflicts: [],
+      skipped: {} as never,
+    });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = { ...draft, appends: { "stored-dog": stored("stored-dog") } };
+
+    // the later appends: the puppy the dog points at, the kennel pointing at the dog
+    for (const [fromId, toId] of [
+      ["puppy", "stored-puppy"],
+      ["kennel", "stored-kennel"],
+    ]) {
+      draft = replaceEntityId(draft, fromId, toId);
+      draft = { ...draft, appends: { ...draft.appends, [toId]: stored(toId) } };
+      undoDog = replaceUndoEntityId(undoDog, fromId, toId);
+    }
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual([
+      "dog",
+      "stored-puppy",
+      "stored-kennel",
+    ]);
+    expect(undone.entities[0].props[0].value.entityId).toBe("stored-puppy");
+    expect(undone.entities[2].props[0].value.entityId).toBe("dog");
+    expect(Object.keys(undone.appends!).sort()).toEqual(["stored-kennel", "stored-puppy"]);
+  });
+
+  it("keeps, with its edit, a stored relation that also links another appended draft", () => {
+    const { Antonym } = RelationEnums.Type;
+    const shared = { id: "s1", type: Antonym, entityIds: ["stored-dog", "stored-cat"] };
+    const ownOnly = { id: "s2", type: Antonym, entityIds: ["stored-dog", "wolf"] };
+    const edited = { ...shared, entityIds: ["stored-cat", "stored-dog"] };
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(replaceEntityId(before, "dog", "stored-dog"), "cat", "stored-cat");
+    undoDog = replaceUndoEntityId(undoDog, "cat", "stored-cat");
+    draft = {
+      ...draft,
+      appends: { "stored-dog": stored("stored-dog"), "stored-cat": stored("stored-cat") },
+      // the shared relation was edited in the drafts
+      relations: [edited, ownOnly],
+      storedRelations: [shared, ownOnly],
+    };
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.storedRelations).toEqual([shared]);
+    expect(undone.relations).toEqual([edited]);
+    expect(storedRelationChanges(undone).updated).toEqual([
+      { before: shared, changes: { entityIds: ["stored-cat", "stored-dog"] } },
+    ]);
+  });
+
+  it("keeps an edit that moves a stored relation to or from another appended draft", () => {
+    const { Antonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(replaceEntityId(before, "dog", "stored-dog"), "cat", "stored-cat");
+    undoDog = replaceUndoEntityId(undoDog, "cat", "stored-cat");
+    // one edit takes the other appended draft out, the other puts it in
+    const away = { id: "s1", type: Antonym, entityIds: ["stored-dog", "stored-cat"] };
+    const toward = { id: "s2", type: Antonym, entityIds: ["stored-dog", "wolf"] };
+    draft = {
+      ...draft,
+      appends: { "stored-dog": stored("stored-dog"), "stored-cat": stored("stored-cat") },
+      relations: [
+        { ...away, entityIds: ["stored-dog", "wolf"] },
+        { ...toward, entityIds: ["stored-dog", "stored-cat"] },
+      ],
+      storedRelations: [away, toward],
+    };
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.storedRelations!.map((relation) => relation.id)).toEqual(["s1", "s2"]);
+    expect(undone.relations.map((relation) => relation.id)).toEqual(["s1", "s2"]);
+    const changes = storedRelationChanges(undone);
+    expect(changes.deleted).toEqual([]);
+    expect(changes.updated.map(({ before: original }) => original.id)).toEqual(["s1", "s2"]);
+  });
+
+  it("keeps once a stored relation the draft was added to, with its later edits", () => {
+    const cloud = { id: "s1", type: RelationEnums.Type.Synonym, entityIds: ["stored-dog", "x"] };
+    const stored = (id: string) => ({ stored: existingEntity(id), conflicts: [], skipped: {} as never });
+    // dog is appended, and cat was added to the stored synonyms of dog
+    let draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("stored-dog"), newEntity("cat")],
+      relations: [{ ...cloud, entityIds: ["stored-dog", "x", "cat"] }],
+      storedRelations: [cloud],
+      appends: { "stored-dog": stored("stored-dog") },
+    };
+    const undoCat = appendUndoOf(draft, "cat", "stored-cat");
+    draft = replaceEntityId(draft, "cat", "stored-cat");
+    draft = { ...draft, appends: { ...draft.appends, "stored-cat": stored("stored-cat") } };
+    // an edit made after the append
+    draft = updateDraftRelation(draft, "s1", { entityIds: ["stored-dog", "stored-cat"] });
+
+    const undone = undoAppend(draft, undoCat);
+
+    expect(undone.relations).toEqual([{ ...cloud, entityIds: ["stored-dog", "cat"] }]);
+    expect(storedRelationChanges(undone).updated).toEqual([
+      { before: cloud, changes: { entityIds: ["stored-dog", "cat"] } },
+    ]);
+  });
+
+  it("brings back no stored relation as one of the import", () => {
+    const cloud = relation("s1", RelationEnums.Type.Synonym, "stored-cat", "y");
+    const stored = (id: string) => ({
+      stored: existingEntity(id),
+      conflicts: [],
+      skipped: {} as never,
+    });
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    let undoCat = appendUndoOf(before, "cat", "stored-cat");
+    let draft = replaceEntityId(before, "cat", "stored-cat");
+    draft = { ...draft, appends: { "stored-cat": stored("stored-cat") } };
+    draft = addStoredRelations(draft, [cloud]);
+    // dog joins the stored synonyms of cat, then is appended too
+    draft = updateDraftRelation(draft, "s1", { entityIds: ["stored-cat", "y", "dog"] });
+    let undoDog = appendUndoOf(draft, "dog", "stored-dog");
+    draft = replaceEntityId(draft, "dog", "stored-dog");
+    draft = { ...draft, appends: { ...draft.appends, "stored-dog": stored("stored-dog") } };
+    undoCat = replaceUndoEntityId(undoCat, "dog", "stored-dog");
+
+    draft = undoAppend(draft, undoCat);
+    undoDog = replaceUndoEntityId(undoDog, "stored-cat", "cat");
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.relations).toEqual([]);
+    expect(undone.storedRelations).toEqual([]);
+  });
+
+  it("brings back a relation of the draft deleted and made again since, once", () => {
+    const { Antonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      relations: [relation("r1", Antonym, "dog", "cat")],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = {
+      ...draft,
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    draft = deleteDraftRelation(draft, "r1");
+    draft = createDraftRelation(draft, relation("r2", Antonym, "stored-dog", "cat"));
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.relations).toEqual([relation("r1", Antonym, "dog", "cat")]);
+  });
+
+  it("brings back once, as it was, a relation of the draft edited after the append", () => {
+    const { Synonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      relations: [relation("r1", Synonym, "dog", "puppy")],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    const replaced = replaceEntityId(before, "dog", "stored-dog");
+    // the validation of the append returns every relation under a new id
+    let draft = draftAfterAppend(replaced, {
+      entities: replaced.entities,
+      relations: [relation("new", Synonym, "stored-dog", "puppy")],
+      existingEntities: {},
+      valueCopyIds: [],
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    });
+    // an edit made after the append
+    draft = updateDraftRelation(draft, draft.relations[0].id, {
+      entityIds: ["stored-dog", "puppy", "hound"],
+    });
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.relations).toEqual([relation("r1", Synonym, "dog", "puppy")]);
+  });
+
+  it("brings back the draft's relations as they were and points links made since at it", () => {
+    const { Antonym, Identification, Superclass, Synonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog"),
+        newEntity("puppy", { props: [{ type: "size", value: "stored-dog" }] }),
+      ],
+      relations: [
+        { ...relation("r1", Identification, "dog", "puppy"), certainty: "1" } as Relation.IRelation,
+        relation("r2", Superclass, "dog", "animal"),
+        relation("r3", Synonym, "dog", "hound"),
+        // the JSON links puppy to the stored entity itself
+        relation("r4", Antonym, "puppy", "stored-dog"),
+      ],
+    };
+    // the append; the database holds r2 and r3 already, so the validation drops them
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = {
+      ...draft,
+      relations: draft.relations.filter((item) => item.id === "r1" || item.id === "r4"),
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    draft = addStoredRelations(draft, [
+      relation("s2", Superclass, "stored-dog", "animal"),
+      relation("s3", Synonym, "stored-dog", "hound"),
+    ]);
+    // edits made during the append
+    draft = updateDraftRelation(draft, "r1", { certainty: "4" } as never);
+    draft = deleteDraftRelation(draft, "s3");
+    draft = createDraftRelation(draft, relation("r5", Superclass, "puppy", "stored-dog"));
+    draft = updateDraftEntity(draft, "puppy", {
+      props: [
+        ...draft.entities[1].props,
+        ...newEntity("x", { props: [{ type: "colour", value: "stored-dog" }] }).props,
+      ],
+    });
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.relations.map((item) => [item.id, item.entityIds.join(">")])).toEqual([
+      ["r1", "dog>puppy"],
+      ["r4", "puppy>stored-dog"],
+      ["r5", "puppy>dog"],
+      // dropped as stored, so they come back
+      ["r2", "dog>animal"],
+      ["r3", "dog>hound"],
+    ]);
+    expect((undone.relations[0] as Relation.IIdentification).certainty).toBe("1");
+    expect(undone.storedRelations).toEqual([]);
+    expect(undone.entities[1].props.map((prop) => prop.value.entityId)).toEqual([
+      "stored-dog",
+      "dog",
+    ]);
+  });
+
+  it("brings back a relation of the draft that a later append dropped as stored", () => {
+    const { Antonym } = RelationEnums.Type;
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [relation("r1", Antonym, "dog", "cat")],
+    };
+    const stored = (id: string) => ({
+      stored: existingEntity(id),
+      conflicts: [],
+      skipped: {} as never,
+    });
+    let undoDog = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = { ...draft, appends: { "stored-dog": stored("stored-dog") } };
+    // the append of cat; the database holds the relation, so the validation drops it
+    draft = replaceEntityId(draft, "cat", "stored-cat");
+    undoDog = replaceUndoEntityId(undoDog, "cat", "stored-cat");
+    draft = {
+      ...draft,
+      relations: [],
+      appends: { ...draft.appends, "stored-cat": stored("stored-cat") },
+    };
+    const twin = relation("s1", Antonym, "stored-dog", "stored-cat");
+    draft = addStoredRelations(draft, [twin]);
+
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.relations.map((item) => [item.id, item.entityIds.join(">")])).toEqual([
+      ["s1", "stored-dog>stored-cat"],
+      ["r1", "dog>stored-cat"],
+    ]);
+    expect(undone.storedRelations).toEqual([twin]);
+  });
+
+  it("drops a draft made since that only the appended one points at", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = {
+      ...draft,
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    // made during the append: one for dog only, one cat uses too, one on its own
+    for (const id of ["fresh", "shared", "own"]) {
+      draft = addDraftEntity(draft, newEntity(id));
+    }
+    draft = updateDraftEntity(draft, "stored-dog", {
+      props: newEntity("x", {
+        props: [
+          { type: "size", value: "fresh" },
+          { type: "colour", value: "shared" },
+        ],
+      }).props,
+    });
+    draft = updateDraftEntity(draft, "cat", {
+      props: newEntity("x", { props: [{ type: "colour", value: "shared" }] }).props,
+    });
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual(["dog", "cat", "shared", "own"]);
+  });
+
+  it("points a draft at another one whose append was undone before", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog", { props: [{ type: "size", value: "cat" }] }), newEntity("cat")],
+      relations: [],
+    };
+    const stored = (id: string) => ({
+      stored: existingEntity(id),
+      conflicts: [],
+      skipped: {} as never,
+    });
+    let undoCat = appendUndoOf(before, "cat", "stored-cat");
+    let draft = replaceEntityId(before, "cat", "stored-cat");
+    draft = { ...draft, appends: { "stored-cat": stored("stored-cat") } };
+    let undoDog = appendUndoOf(draft, "dog", "stored-dog");
+    draft = replaceEntityId(draft, "dog", "stored-dog");
+    draft = { ...draft, appends: { ...draft.appends, "stored-dog": stored("stored-dog") } };
+    undoCat = replaceUndoEntityId(undoCat, "dog", "stored-dog");
+
+    // cat's append is undone first; dog's undo takes cat's own id back
+    draft = undoAppend(draft, undoCat);
+    undoDog = replaceUndoEntityId(undoDog, "stored-cat", "cat");
+    const undone = undoAppend(draft, undoDog);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual(["dog", "cat"]);
+    expect(undone.entities[0].props[0].value.entityId).toBe("cat");
+    expect(undone.appends).toEqual({});
+  });
+});
+
+describe("withLoadedSince", () => {
+  it("adds to a step's result what loaded while the step waited", () => {
+    const { Antonym } = RelationEnums.Type;
+    const earlier = { id: "s1", type: Antonym, entityIds: ["stored-dog", "cat"] };
+    const loaded = { id: "s2", type: Antonym, entityIds: ["stored-cat", "wolf"] };
+    const reloaded = { id: "s3", type: Antonym, entityIds: ["stored-dog", "fox"] };
+    const base: ImportDraft = {
+      ...baseDraft(),
+      relations: [earlier],
+      storedRelations: [earlier],
+      existing: { cat: existingEntity("cat") },
+    };
+    // what the loaders added meanwhile
+    const current: ImportDraft = {
+      ...base,
+      relations: [earlier, loaded, reloaded],
+      storedRelations: [earlier, loaded, reloaded],
+      existing: { ...base.existing, wolf: existingEntity("wolf") },
+      storedSynonyms: { hound: ["hound", "dog"] },
+    };
+    // the step's own result, computed from base
+    const next: ImportDraft = { ...base, entities: [newEntity("puppy")] };
+
+    const merged = withLoadedSince(next, base, current, "stored-dog");
+
+    expect(merged.entities.map((entity) => entity.id)).toEqual(["puppy"]);
+    expect(Object.keys(merged.existing).sort()).toEqual(["cat", "wolf"]);
+    expect(merged.storedSynonyms).toEqual({ hound: ["hound", "dog"] });
+    // the step loaded the relations of stored-dog itself
+    expect(merged.storedRelations).toEqual([earlier, loaded]);
+    expect(merged.relations).toEqual([earlier, loaded]);
+  });
+});
+
+describe("draftAfterAppend", () => {
+  it("appends while a left-out draft fails the checks, and keeps that draft as it was", async () => {
+    const storedDog = {
+      ...existingEntity("stored-dog"),
+      detail: "",
+      language: EntityEnums.Language.English,
+      status: EntityEnums.Status.Approved,
+      notes: [],
+      data: {},
+      references: [],
+      props: [],
+      updatedAt: "t1",
+    } as unknown as IEntity;
+    const stored = [storedDog, existingEntity("hound")];
+    const context = {
+      role: UserEnums.Role.Admin,
+      defaultLanguage: EntityEnums.Language.English,
+      source: {
+        getEntities: async (ids: string[]) => stored.filter((entity) => ids.includes(entity.id)),
+        getForwardRelations: async () => [],
+      },
+      fromDrafts: true,
+    };
+    const draft: ImportDraft = {
+      entities: [
+        newEntity("dog"),
+        // points at an entity that exists nowhere
+        newEntity("monica", { props: [{ type: "missing", value: "missing" }] }),
+      ],
+      relations: [relation("r1", RelationEnums.Type.Synonym, "hound", "dog", "monica")],
+      existing: { hound: existingEntity("hound") },
+      leftOutIds: ["monica"],
+    };
+    const replaced = replaceEntityId(draft, "dog", "stored-dog");
+    const withLeftOut = await validateImport(
+      JSON.stringify(draftToImportJson({ ...replaced, leftOutIds: [] })),
+      context
+    );
+    expect(withLeftOut.plan).toBeNull();
+
+    const { errors, plan } = await validateImport(
+      JSON.stringify(draftToImportJson(replaced)),
+      context
+    );
+    expect(errors).toEqual([]);
+
+    const next = draftAfterAppend(replaced, plan!);
+    expect(next.entities.map((entity) => entity.id).sort()).toEqual(["monica", "stored-dog"]);
+    expect(next.entities.find((entity) => entity.id === "monica")).toEqual(draft.entities[1]);
+    expect(next.leftOutIds).toEqual(["monica"]);
+    expect(next.relations.map((item) => [...item.entityIds].sort())).toEqual([
+      ["hound", "monica", "stored-dog"],
+    ]);
+  });
+
+  it("takes a synonym cloud as the validation left it", () => {
+    const cloud = {
+      id: "c1",
+      type: RelationEnums.Type.Synonym,
+      entityIds: ["stored-dog", "stored-hound"],
+    };
+    const previous: ImportDraft = {
+      entities: [newEntity("stored-dog"), newEntity("stored-hound")],
+      relations: [cloud],
+      existing: {},
+    };
+    // the validation found the cloud in the database and left it out
+    const plan: ImportPlan = {
+      entities: previous.entities,
+      relations: [],
+      existingEntities: {},
+      valueCopyIds: [],
+      appends: {},
+    };
+
+    expect(draftAfterAppend(previous, plan).relations).toEqual([]);
+  });
+});
+
+describe("setAllConflictChoices", () => {
+  it("settles every conflict of every appended draft at once", () => {
+    const conflict = (stored: string, imported: string) => ({
+      path: "detail",
+      label: "detail",
+      stored,
+      imported,
+      storedValue: stored,
+      importedValue: imported,
+      useImported: false,
+    });
+    const draft: ImportDraft = {
+      ...baseDraft(),
+      entities: [
+        newEntity("dog", { detail: "stored dog" }),
+        newEntity("puppy", { detail: "stored puppy" }),
+      ],
+      appends: {
+        dog: {
+          stored: existingEntity("dog"),
+          conflicts: [conflict("stored dog", "new dog")],
+          skipped: {} as never,
+        },
+        puppy: {
+          stored: existingEntity("puppy"),
+          conflicts: [conflict("stored puppy", "new puppy")],
+          skipped: {} as never,
+        },
+      },
+    };
+
+    const imported = setAllConflictChoices(draft, true);
+    expect(imported.entities.map((entity) => entity.detail)).toEqual(["new dog", "new puppy"]);
+
+    const back = setAllConflictChoices(imported, false);
+    expect(back.entities.map((entity) => entity.detail)).toEqual(["stored dog", "stored puppy"]);
+    expect(back.appends!.dog.conflicts[0].useImported).toBe(false);
+  });
+});
+
+describe("stored relations of an appended draft", () => {
+  const scl = relation("s1", RelationEnums.Type.Superclass, "dog", "animal");
+  const syn = relation("s2", RelationEnums.Type.Synonym, "dog", "hound");
+  const withStored = (): ImportDraft =>
+    addStoredRelations(
+      { ...baseDraft(), relations: [], appends: { dog: {} as never } },
+      [scl, syn, scl]
+    );
+
+  it("shows them in the drafts but never sends them as new relations", () => {
+    const draft = withStored();
+    expect(draft.relations.map((item) => item.id)).toEqual(["s1", "s2"]);
+    const json = draftToImportJson(draft) as { relations: object[] }[];
+    expect(json.flatMap((entity) => entity.relations)).toEqual([]);
+    expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
+  });
+
+  it("turns an edit and an unlink into changes to the stored relations", () => {
+    let draft = updateDraftRelation(withStored(), "s1", { entityIds: ["dog", "hound"] });
+    draft = deleteDraftRelation(draft, "s2");
+
+    expect(storedRelationChanges(draft)).toEqual({
+      updated: [{ before: scl, changes: { entityIds: ["dog", "hound"] } }],
+      deleted: [syn],
+    });
+  });
+
+  it("leaves a stored relation with a left-out member as it is stored", () => {
+    const draft = toggleLeftOut(deleteDraftRelation(withStored(), "s1"), "dog");
+    expect(storedRelationChanges(draft)).toEqual({ updated: [], deleted: [] });
+  });
+
+  it("keeps a stored relation unlinked when another appended draft loads it again", () => {
+    // hound is appended as well, and its stored relations hold the synonym too
+    const draft = addStoredRelations(deleteDraftRelation(withStored(), "s2"), [syn]);
+
+    expect(draft.relations.map((item) => item.id)).toEqual(["s1"]);
+    expect(draft.storedRelations!.map((item) => item.id)).toEqual(["s1", "s2"]);
+    expect(storedRelationChanges(draft).deleted).toEqual([syn]);
+  });
+});
+
+describe("importMarksOf", () => {
+  it("marks what the append adds and the stored relations edited in the drafts", () => {
+    const prop = (id: string, children: IProp[] = []) =>
+      ({ id, type: { entityId: "t" }, value: { entityId: "v" }, children }) as unknown as IProp;
+    const born = prop("p-born");
+    const place = prop("p-place");
+    const stored = {
+      ...newEntity("dog", { labels: ["dog", "hound"], notes: ["old"] }),
+      props: [born],
+      references: [{ id: "r-stored", resource: "book", value: "p1" }],
+    } as IEntity;
+    const appended = {
+      ...stored,
+      labels: ["dog", "hound", "canine"],
+      notes: ["old", "new"],
+      props: [{ ...born, children: [place] }, { ...born, id: "p-born-2" }],
+      references: [...stored.references, { id: "r-added", resource: "book", value: "p2" }],
+    } as IEntity;
+    const storedRelation = relation("stored-scl", RelationEnums.Type.Superclass, "dog", "animal");
+    const draft: ImportDraft = {
+      entities: [appended],
+      relations: [
+        { ...storedRelation, entityIds: ["dog", "mammal"] },
+        relation("added-syn", RelationEnums.Type.Synonym, "dog", "hound"),
+      ],
+      existing: {},
+      appends: { dog: { stored, conflicts: [], skipped: {} as never } },
+      storedRelations: [storedRelation],
+    };
+
+    const marks = importMarksOf(draft, "dog")!;
+
+    expect([...marks.addedIds]).toEqual(["p-place", "p-born-2", "r-added", "added-syn"]);
+    expect([...marks.changedIds]).toEqual(["stored-scl"]);
+    expect([...marks.addedLabels]).toEqual(["canine"]);
+    expect([...marks.addedNotes]).toEqual(["new"]);
+    expect(importMarksOf(draft, "puppy")).toBeUndefined();
   });
 });

@@ -1,6 +1,6 @@
 import { IEntity, IReference } from "@inkvisitor/shared/types";
 import { Button } from "components";
-import { useTheme } from "hooks";
+import { useImportMark, useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaExternalLinkAlt, FaGripVertical } from "react-icons/fa";
@@ -112,12 +112,18 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
 
   const theme = useTheme();
 
+  const importMark = useImportMark(reference.id);
   const resourceEntity = entities[reference.resource];
   const valueEntity = entities[reference.value];
 
   return (
     <>
-      <StyledGrid ref={dropRef} data-handler-id={handlerId} style={{ opacity }}>
+      <StyledGrid
+        ref={dropRef}
+        data-handler-id={handlerId}
+        style={{ opacity }}
+        $importMark={importMark}
+      >
         {hasOrder && userCanEdit ? (
           <StyledDragHandle ref={dragRef}>
             <FaGripVertical color={theme.color.black} />

@@ -315,6 +315,74 @@ describe("validateRelations", () => {
     ]);
   });
 
+  it("counts the stored relations of a stored member of a single-relation type", async () => {
+    const { PropertyReciprocal } = RelationEnums.Type;
+    const db = database(
+      [existingEntity("dog"), existingEntity("wolf")],
+      [dbRelation(PropertyReciprocal, "dog", "wolf")]
+    );
+    const entities = normalize([
+      concept("dog", [relation(PropertyReciprocal, "dog", "cat")]),
+      concept("cat"),
+      concept("fox", [relation(PropertyReciprocal, "fox", "wolf")]),
+    ]);
+    const { items } = normalizeRelationItems(entities);
+    const { errors } = await validateRelations(
+      items,
+      entities,
+      db.existing,
+      db.source,
+      new Set(["dog"])
+    );
+
+    expect(errors.map((error) => [error.entityIndex, error.message])).toEqual([
+      [1, '"dog" can have only one Property Reciprocal relation'],
+      [3, '"wolf" can have only one Property Reciprocal relation'],
+    ]);
+  });
+
+  it("leaves out of the count a stored relation the drafts unlink", async () => {
+    const { PropertyReciprocal } = RelationEnums.Type;
+    const unlinked = dbRelation(PropertyReciprocal, "dog", "wolf");
+    const db = database([existingEntity("dog"), existingEntity("wolf")], [unlinked]);
+    const entities = normalize([
+      concept("dog", [relation(PropertyReciprocal, "dog", "cat")]),
+      concept("cat"),
+    ]);
+    const { items } = normalizeRelationItems(entities);
+    const { errors, relations } = await validateRelations(
+      items,
+      entities,
+      db.existing,
+      db.source,
+      new Set(["dog"]),
+      { deleted: [unlinked], updated: [] }
+    );
+
+    expect(errors).toEqual([]);
+    expect(relations.map((created) => created.entityIds)).toEqual([["dog", "cat"]]);
+  });
+
+  it("creates again a stored relation the drafts unlink and add back", async () => {
+    const { Antonym } = RelationEnums.Type;
+    const unlinked = dbRelation(Antonym, "dog", "cat");
+    const db = database([existingEntity("dog"), existingEntity("cat")], [unlinked]);
+    const entities = normalize([concept("dog", [relation(Antonym, "dog", "cat")])]);
+    const { items } = normalizeRelationItems(entities);
+    const validate = (deleted: Relation.IRelation[]) =>
+      validateRelations(items, entities, db.existing, db.source, new Set(["dog"]), {
+        deleted,
+        updated: [],
+      });
+
+    // kept in the database, the relation is there already
+    expect((await validate([])).relations).toEqual([]);
+    // unlinked, it is created anew
+    expect((await validate([unlinked])).relations.map((created) => created.entityIds)).toEqual([
+      ["dog", "cat"],
+    ]);
+  });
+
   it("notes a synonym group that joins synonyms in the database", async () => {
     const { notes } = await run(
       [concept("dog", [relation(Synonym, "dog", "hound")])],

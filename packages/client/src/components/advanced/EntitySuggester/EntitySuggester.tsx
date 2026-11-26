@@ -206,8 +206,8 @@ const EntitySuggesterFull: React.FC<
 }) => {
   // where creating an entity would write too early (the JSON import's drafts),
   // no entity is created and no template is linked or instantiated
-  const { createsEntities } = useEntityEditing();
-  const disableCreate = disableCreateProp || !createsEntities;
+  const { createsEntities, createDraft } = useEntityEditing();
+  const disableCreate = disableCreateProp || (!createsEntities && !createDraft);
   const disableTemplateInstantiation = disableTemplateInstantiationProp || !createsEntities;
   const disableTemplatesAccept = disableTemplatesAcceptProp || !createsEntities;
 
@@ -383,6 +383,10 @@ const EntitySuggesterFull: React.FC<
     if (!disableCleanTypedAfterCreate) {
       handleClean();
     }
+    // a draft opens where the drafts are, and nothing stored changed
+    if (createDraft) {
+      return;
+    }
     if (openDetailOnCreate && entity.class !== EntityEnums.Class.Value) {
       openCreatedInDetail(entity.id);
     }
@@ -417,7 +421,12 @@ const EntitySuggesterFull: React.FC<
         newCreated.label,
         newCreated.detail,
       );
-      entityCreateMutation.mutate(newEntity);
+      if (createDraft) {
+        createDraft(newEntity);
+        onMutationSuccess(newEntity);
+      } else {
+        entityCreateMutation.mutate(newEntity);
+      }
     }
   };
 
@@ -488,7 +497,8 @@ const EntitySuggesterFull: React.FC<
       entityClass: item.entityClass,
       categoryTypes,
       reuseDroppedValue,
-      canCreate: canCreateEntities(getStoredUserRole(), disableCreate),
+      // a copy of a dropped Value is written to the database at once
+      canCreate: canCreateEntities(getStoredUserRole(), disableCreate || !createsEntities),
     });
 
   const handleDropped = async (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {

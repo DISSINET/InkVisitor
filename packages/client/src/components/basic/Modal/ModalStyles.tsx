@@ -58,14 +58,22 @@ const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
     }
   }
 };
+// a narrow gutter is as wide on the sides as above and below the card
 export const StyledCard = styled(animated.div)<Card>`
   position: relative;
-  width: ${({ width }) => getWidth(width)};
-  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth / 10}rem` : "calc(100vw - 4rem)")};
+  width: ${({ theme, width, $narrowGutter }) =>
+    $narrowGutter && width === "full"
+      ? `calc(100vw - 2 * ${theme.space[4]})`
+      : getWidth(width)};
+  max-width: ${({ theme, $maxWidth, $narrowGutter }) =>
+    $maxWidth
+      ? `${$maxWidth / 10}rem`
+      : `calc(100vw - ${$narrowGutter ? `2 * ${theme.space[4]}` : "4rem"})`};
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
-  margin: ${({ theme }) => `0 ${theme.space[8]}`};
+  margin: ${({ theme, $narrowGutter }) =>
+    `0 ${$narrowGutter ? theme.space[4] : theme.space[8]}`};
   max-height: ${({ theme, $narrowGutter }) =>
     `calc(100vh - 2 * ${$narrowGutter ? theme.space[4] : theme.space[16]})`};
   z-index: 155;

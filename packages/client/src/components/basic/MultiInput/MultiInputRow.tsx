@@ -8,6 +8,7 @@ import { StyledDragHandle, StyledRow, StyledRowActions } from "./MultiInputStyle
 
 interface MultiInputRow {
   value: string;
+  marked?: boolean;
   index: number;
   width?: number | "full";
   disabled: boolean;
@@ -19,6 +20,7 @@ interface MultiInputRow {
 }
 export const MultiInputRow: React.FC<MultiInputRow> = ({
   value,
+  marked,
   index,
   width,
   disabled,
@@ -60,7 +62,12 @@ export const MultiInputRow: React.FC<MultiInputRow> = ({
   drag(dragRef);
 
   return (
-    <StyledRow ref={dropRef} data-handler-id={handlerId} $isDragging={isDragging}>
+    <StyledRow
+      ref={dropRef}
+      data-handler-id={handlerId}
+      $isDragging={isDragging}
+      $importMark={marked ? "added" : undefined}
+    >
       <Input
         disabled={disabled}
         type="textarea"

@@ -12,7 +12,13 @@ import {
   unique,
 } from "./helpers";
 import { EdgeGraph, addForwardEdges, loadForwardClosure } from "./relationGraph";
-import { ImportDataSource, ImportEntity, ImportIssue, ImportRelationItem } from "./types";
+import {
+  ImportDataSource,
+  ImportEntity,
+  ImportIssue,
+  ImportRelationItem,
+  StoredRelationChanges,
+} from "./types";
 
 const RELATION_KEYS = ["type", "entityIds", "id", "order", "certainty", "subtrees"];
 
@@ -31,6 +37,10 @@ const SUPERCLASS_FOLLOWED_TYPES = [
 ];
 
 const ruleOf = (type: RelationEnums.Type) => Relation.RelationRules[type]!;
+
+/** Equal for two relations of one type that link the same entities. */
+export const relationKey = ({ type, entityIds }: Pick<Relation.IRelation, "type" | "entityIds">) =>
+  `${type}:${ruleOf(type).asymmetrical ? entityIds.join(">") : [...entityIds].sort().join("|")}`;
 
 /**
  * Reads the "relations" list of every input entity into relation objects,
@@ -196,16 +206,67 @@ export const validateRelations = async (
   items: ImportRelationItem[],
   entities: ImportEntity[],
   existing: Map<string, IEntity>,
-  source: Pick<ImportDataSource, "getForwardRelations">
-): Promise<{ relations: Relation.IRelation[]; errors: ImportIssue[]; notes: ImportIssue[] }> => {
+  source: Pick<ImportDataSource, "getForwardRelations">,
+  // input entities appended to stored ones: in the input and in the database
+  appendIds: Set<string> = new Set(),
+  // the stored relations the drafts unlink or edit, which Import writes first
+  storedChanges: StoredRelationChanges = { deleted: [], updated: [] }
+): Promise<{
+  relations: Relation.IRelation[];
+  errors: ImportIssue[];
+  notes: ImportIssue[];
+  // relations the database already holds, by the input entity they were under
+  skipped: ImportRelationItem[];
+}> => {
   const errors: ImportIssue[] = [];
   const notes: ImportIssue[] = [];
+  const skipped: ImportRelationItem[] = [];
 
   const batch = new Map(entities.map((item) => [item.entity.id, item]));
   const byIndex = new Map(entities.map((item) => [item.index, item]));
   const isNew = (entityId: string) => batch.has(entityId);
+  const isStored = (entityId: string) => !isNew(entityId) || appendIds.has(entityId);
   const entityOf = (entityId: string) => batch.get(entityId)?.entity ?? existing.get(entityId);
   const labelOf = (entityId: string) => quote(entityOf(entityId)?.labels[0] ?? entityId);
+
+  // The stored relations as they are once Import has written the drafts'
+  // changes to them: an unlinked one is gone, an edited one is in its edited
+  // form. Every check against the database reads them through fetchForward.
+  const deletedIds = new Set(storedChanges.deleted.map((relation) => relation.id));
+  const edited = storedChanges.updated.map(
+    ({ before, changes }) => ({ ...before, ...changes }) as Relation.IRelation
+  );
+  const editedById = new Map(edited.map((relation) => [relation.id, relation]));
+
+  // several steps ask for the stored relations of one entity and type
+  const forwardRequests = new Map<string, Promise<Relation.IRelation[]>>();
+  const fetchForward = (entityId: string, type: RelationEnums.Type) => {
+    const key = `${type}:${entityId}`;
+    if (!forwardRequests.has(key)) {
+      // forward: an asymmetrical relation starts at the entity, any other
+      // relation holds it
+      const isForward = (relation: Relation.IRelation) =>
+        relation.type === type &&
+        (ruleOf(type).asymmetrical
+          ? relation.entityIds[0] === entityId
+          : relation.entityIds.includes(entityId));
+      forwardRequests.set(
+        key,
+        source.getForwardRelations(entityId, type).then((stored) => {
+          const kept = stored
+            .filter((relation) => !deletedIds.has(relation.id))
+            .map((relation) => editedById.get(relation.id) ?? relation)
+            .filter(isForward);
+          const keptIds = new Set(kept.map((relation) => relation.id));
+          return [
+            ...kept,
+            ...edited.filter((relation) => isForward(relation) && !keptIds.has(relation.id)),
+          ];
+        })
+      );
+    }
+    return forwardRequests.get(key)!;
+  };
 
   const issue = (item: ImportRelationItem, message: string, subPath = ""): ImportIssue => ({
     entityIndex: item.ownerIndex,
@@ -252,7 +313,7 @@ export const validateRelations = async (
     }
 
     // a directional relation belongs to the entity it starts at, and Detail
-    // sets it only there, so the import never adds one to an existing entity
+    // sets it only there, so the import adds one only to an entity of the input
     if (rule.asymmetrical && !isNew(entityIds[0])) {
       notes.push(
         issue(
@@ -294,7 +355,7 @@ export const validateRelations = async (
     synonymGroups.push(merged);
   }
 
-  const entries: RelationEntry[] = [];
+  let entries: RelationEntry[] = [];
   const seenKeys = new Map<string, ImportRelationItem>();
   for (const item of accepted) {
     const { type, entityIds } = item.relation;
@@ -315,9 +376,7 @@ export const validateRelations = async (
       continue;
     }
 
-    const key = `${type}:${
-      ruleOf(type).asymmetrical ? entityIds.join(">") : [...entityIds].sort().join("|")
-    }`;
+    const key = relationKey(item.relation);
     const first = seenKeys.get(key);
     if (first) {
       notes.push(
@@ -329,6 +388,26 @@ export const validateRelations = async (
     entries.push({ item, relation: item.relation });
   }
 
+  // 2b. relations of appended entities the database already holds
+  const isStoredAlready = async ({ relation }: RelationEntry) => {
+    const rule = ruleOf(relation.type);
+    // a directional relation is stored with the entity it starts at
+    const entityId = rule.asymmetrical
+      ? relation.entityIds[0]
+      : relation.entityIds.find((member) => appendIds.has(member));
+    if (!entityId || !appendIds.has(entityId)) {
+      return false;
+    }
+    return (await fetchForward(entityId, relation.type)).some((candidate) =>
+      rule.cloudType
+        ? relation.entityIds.every((member) => candidate.entityIds.includes(member))
+        : relationKey(candidate) === relationKey(relation)
+    );
+  };
+  const storedAlready = await Promise.all(entries.map(isStoredAlready));
+  skipped.push(...entries.filter((_, index) => storedAlready[index]).map((entry) => entry.item));
+  entries = entries.filter((_, index) => !storedAlready[index]);
+
   // 3. tree edges, with the database edges around them
   const treeEdges = new Map<RelationEnums.Type, TreeEdge[]>();
   for (const entry of entries) {
@@ -339,7 +418,6 @@ export const validateRelations = async (
     }
   }
   const edgesOf = (type: RelationEnums.Type) => treeEdges.get(type) ?? [];
-  const fetchForward = source.getForwardRelations;
 
   // first level of Classification / Action-event equivalent: the edges the
   // existing sources already have, and those plus the input edges
@@ -347,9 +425,7 @@ export const validateRelations = async (
   const firstHopGraphs = new Map<RelationEnums.Type, EdgeGraph>();
   for (const type of SUPERCLASS_FOLLOWED_TYPES) {
     const databaseGraph = new EdgeGraph();
-    const existingSources = unique(edgesOf(type).map(({ from }) => from)).filter(
-      (entityId) => !isNew(entityId)
-    );
+    const existingSources = unique(edgesOf(type).map(({ from }) => from)).filter(isStored);
     await Promise.all(
       existingSources.map((entityId) =>
         addForwardEdges(databaseGraph, type, entityId, fetchForward)
@@ -378,7 +454,13 @@ export const validateRelations = async (
       }
     }
     if (startIds.length) {
-      await loadForwardClosure(graph, type, startIds, isNew, fetchForward);
+      await loadForwardClosure(
+        graph,
+        type,
+        startIds,
+        (entityId) => !isStored(entityId),
+        fetchForward
+      );
     }
     chainGraphs.set(type, graph);
   }
@@ -446,21 +528,38 @@ export const validateRelations = async (
   const kept = entries.filter((entry) => !dropped.has(entry));
 
   // 6. types that allow a single relation per entity; synonyms are exempt, the
-  // server merges their groups instead. Of these, only the asymmetrical Action
-  // event equivalent can meet a relation of an existing entity in the database.
+  // server merges their groups instead. A stored member of a symmetrical
+  // relation, appended or not, counts the relations it has in the database.
+  const isSingle = (type: RelationEnums.Type) => {
+    const rule = ruleOf(type);
+    return !rule.multiple && !rule.cloudType;
+  };
+  const storedCounts = new Map<string, number>();
+  await Promise.all(
+    kept
+      .filter(({ relation }) => isSingle(relation.type) && !ruleOf(relation.type).asymmetrical)
+      .flatMap(({ relation }) =>
+        relation.entityIds.filter(isStored).map(async (entityId) => {
+          const stored = await fetchForward(entityId, relation.type);
+          storedCounts.set(`${relation.type}:${entityId}`, stored.length);
+        })
+      )
+  );
   const relationCounts = new Map<string, number>();
   for (const entry of kept) {
     const { type, entityIds } = entry.relation;
     const rule = ruleOf(type);
-    if (rule.multiple || rule.cloudType) {
+    if (!isSingle(type)) {
       continue;
     }
-    const countedIds = rule.asymmetrical ? [entityIds[0]] : unique(entityIds.filter(isNew));
+    const countedIds = rule.asymmetrical ? [entityIds[0]] : unique(entityIds);
     for (const entityId of countedIds) {
       const key = `${type}:${entityId}`;
       const previous =
         relationCounts.get(key) ??
-        databaseFirstHopGraphs.get(type)?.successors(entityId).length ??
+        (rule.asymmetrical
+          ? databaseFirstHopGraphs.get(type)?.successors(entityId).length
+          : storedCounts.get(key)) ??
         0;
       relationCounts.set(key, previous + 1);
       if (previous + 1 === 2) {
@@ -480,7 +579,7 @@ export const validateRelations = async (
     kept
       .filter((entry) => entry.relation.type === RelationEnums.Type.Synonym)
       .map(async (entry) => {
-        const members = entry.relation.entityIds.filter((entityId) => !isNew(entityId));
+        const members = entry.relation.entityIds.filter(isStored);
         const groups = (
           await Promise.all(
             members.map((entityId) => fetchForward(entityId, RelationEnums.Type.Synonym))
@@ -498,5 +597,5 @@ export const validateRelations = async (
       })
   );
 
-  return { relations: kept.map((entry) => entry.relation), errors, notes };
+  return { relations: kept.map((entry) => entry.relation), errors, notes, skipped };
 };

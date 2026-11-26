@@ -2,7 +2,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
-import React, { act, useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { createRoot, Root } from "react-dom/client";
@@ -16,12 +16,21 @@ import { normalizeEntities } from "utils/entityImport/normalizeEntities";
 import { saveStoredUser } from "utils/userStorage";
 import { EntityImportDrafts } from "./EntityImportDrafts";
 
+// the search for database entities a draft may duplicate fails while set
+const search = vi.hoisted(() => ({ fails: false, results: [] as unknown[] }));
+
 // Detail renders with no server behind it: every api call answers empty,
 // except the signed-in user, whose options Detail reads
 vi.mock("api", () => {
   const answer = async () => ({ data: [] });
   const calls: Record<string, unknown> = {
     isLoggedIn: () => true,
+    entitiesSearch: async () => {
+      if (search.fails) {
+        throw new Error("network");
+      }
+      return { data: search.results };
+    },
     usersGet: async () => ({ data: { options: { defaultLanguage: "eng", workingLanguages: [] } } }),
   };
   return {
@@ -87,16 +96,26 @@ const initialDraft: ImportDraft = {
 
 let latestDraft: ImportDraft = initialDraft;
 const closed: string[] = [];
+// changes the drafts as the modal does, for what happens outside the drafts
+let changeDraft: (change: (current: ImportDraft) => ImportDraft) => void = () => {};
 
 const Harness = () => {
   const [draft, setDraft] = useState(initialDraft);
   latestDraft = draft;
+  useEffect(() => {
+    changeDraft = (change) => setDraft((current) => change(current));
+  }, []);
   return (
     <EntityImportDrafts
       draft={draft}
       onDraftChange={(change) => setDraft((current) => change(current))}
-      onCloseTab={(entityId) => closed.push(entityId)}
-      onMoveTab={() => {}}
+      onToggleLeftOut={(entityId) => closed.push(entityId)}
+      onConflictChoice={() => {}}
+      onAllConflictChoices={() => {}}
+      onAppendTo={async () => false}
+      undoableAppendIds={[]}
+      onUndoAppend={() => {}}
+      onRebase={() => {}}
       errors={[]}
       notes={[{ message: "a note" }]}
     />
@@ -138,6 +157,7 @@ describe("EntityImportDrafts", () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+    search.results = [];
   });
 
   const text = () => container.textContent ?? "";
@@ -192,6 +212,49 @@ describe("EntityImportDrafts", () => {
     });
 
     expect(latestDraft.entities[0].detail).toBe("edited in the draft");
+  });
+
+  it("offers no candidate that another draft was appended to since the search", async () => {
+    const stored = { ...existingEntity("stored-hit", EntityEnums.Class.Action), labels: ["TEST hit"] };
+    search.results = [stored];
+    await openTab("TEST hit");
+    expect(text()).toContain("Possibly already in the database");
+
+    // another draft is appended to the stored entity: it is a draft now
+    await act(async () =>
+      changeDraft((current) => ({
+        ...current,
+        entities: [...current.entities, { ...stored, labels: ["TEST strike"] }],
+      }))
+    );
+    expect(text()).not.toContain("Possibly already in the database");
+  });
+});
+
+describe("EntityImportDrafts when the search for duplicates fails", () => {
+  beforeEach(async () => {
+    search.fails = true;
+    await renderDrafts();
+  });
+
+  afterEach(() => {
+    search.fails = false;
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it("says so and searches again on request", async () => {
+    const failure = "The search for this entity in the database failed.";
+    expect(container.textContent).toContain(failure);
+
+    search.fails = false;
+    const button = [...container.querySelectorAll("button")].find(
+      (element) => element.textContent === "search again"
+    );
+    expect(button).toBeDefined();
+    await act(async () => button!.click());
+
+    expect(container.textContent).not.toContain(failure);
   });
 });
 

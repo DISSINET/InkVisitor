@@ -10,8 +10,16 @@ interface MultiInput {
   onChange: (values: string[]) => void;
   width?: number | "full";
   disabled?: boolean;
+  // values marked as added by an import, see ImportMarks
+  markedValues?: Set<string>;
 }
-export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disabled = true }) => {
+export const MultiInput: React.FC<MultiInput> = ({
+  values,
+  onChange,
+  width,
+  disabled = true,
+  markedValues,
+}) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
     const newDisplayValues = values.map((v) => v || "");
@@ -69,6 +77,7 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
             key={key}
             index={key}
             value={value}
+            marked={markedValues?.has(value)}
             width={width}
             disabled={disabled}
             hasOrder={displayValues.length > 1}

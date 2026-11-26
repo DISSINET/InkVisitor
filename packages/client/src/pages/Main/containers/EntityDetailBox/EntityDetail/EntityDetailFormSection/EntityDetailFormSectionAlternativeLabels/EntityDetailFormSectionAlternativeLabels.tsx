@@ -1,4 +1,5 @@
 import { Input, IconWithTooltip, Button } from "components";
+import { useEntityEditing } from "hooks";
 import React, { useState } from "react";
 import { IoStar } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
@@ -40,6 +41,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
   const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<false | number>(false);
   const [newAltLabel, setNewAltLabel] = useState<string>("");
   const alternativeLabels = entity.labels.slice(1);
+  const { importMarks } = useEntityEditing();
 
   const isNewAltLabelValid =
     newAltLabel.trim().length > 0 && !isDuplicateLabel(entity.labels, newAltLabel);
@@ -62,9 +64,14 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
     <>
       <StyledAlternativeLabels>
         {alternativeLabels.map((label, key) => {
+          const isImportAdded = !!importMarks?.addedLabels.has(label);
           return (
-            <StyledAlternativeLabelWrap key={key} $isEditing={currentlyEditedAltLabel === key}>
-              <StyledGreyBar />
+            <StyledAlternativeLabelWrap
+              key={key}
+              $isEditing={currentlyEditedAltLabel === key}
+              $isImportAdded={isImportAdded}
+            >
+              <StyledGreyBar $isImportAdded={isImportAdded} />
               <>
                 {currentlyEditedAltLabel === key ? (
                   <Input

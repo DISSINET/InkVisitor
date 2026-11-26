@@ -3,6 +3,7 @@ import { formatIssue, ImportIssue } from "utils/entityImport";
 import { EntityDetailExpandIcon } from "../EntityDetailBox/EntityDetail/EntityDetailExpandIcon/EntityDetailExpandIcon";
 import {
   StyledIssue,
+  StyledIssueLink,
   StyledIssueList,
   StyledIssueSection,
   StyledIssueTitle,
@@ -15,6 +16,10 @@ interface EntityImportIssueList {
   isError?: boolean;
   // the title, with the count, opens and closes the list
   collapsible?: boolean;
+  // given, an issue about one draft opens that draft
+  onSelectEntity?: (entityId: string) => void;
+  // given, an issue with a place in the input text jumps to it
+  onSelectOffset?: (offset: number) => void;
 }
 
 export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
@@ -22,6 +27,8 @@ export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
   issues,
   isError = false,
   collapsible = false,
+  onSelectEntity,
+  onSelectOffset,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -43,7 +50,20 @@ export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
         <StyledIssueList>
           {issues.map((issue, issueIndex) => (
             <StyledIssue key={issueIndex} $error={isError}>
-              {formatIssue(issue)}
+              {issue.entityId && onSelectEntity ? (
+                <StyledIssueLink
+                  type="button"
+                  onClick={() => onSelectEntity(issue.entityId!)}
+                >
+                  {formatIssue(issue)}
+                </StyledIssueLink>
+              ) : issue.offset !== undefined && onSelectOffset ? (
+                <StyledIssueLink type="button" onClick={() => onSelectOffset(issue.offset!)}>
+                  {formatIssue(issue)}
+                </StyledIssueLink>
+              ) : (
+                formatIssue(issue)
+              )}
             </StyledIssue>
           ))}
         </StyledIssueList>

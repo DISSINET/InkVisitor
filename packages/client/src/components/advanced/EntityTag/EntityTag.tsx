@@ -110,7 +110,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   index,
   moveFn,
   isSelected,
-  disableTooltip: disableTooltipProp = false,
+  disableTooltip = false,
   disableDrag: disableDragProp = false,
   entityIsReadOnly,
   disableDoubleClick: disableDoubleClickProp = false,
@@ -131,12 +131,12 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isEquivalent = false,
   isSubordinate = false,
 }) => {
-  // An unstored entity has no tooltip to fetch and nothing to drag or act on
-  // from its menu; where Detail offers no stored-entity features (the JSON
-  // import's modal) a double click would open Detail behind it.
+  // An unstored entity's tooltip shows only what the entity holds, as there is
+  // nothing to fetch, and it has nothing to drag or act on from its menu;
+  // where Detail offers no stored-entity features (the JSON import's modal) a
+  // double click would open Detail behind it.
   const editing = useEntityEditing();
   const isUnstored = editing.unstoredEntityIds.has(entity.id);
-  const disableTooltip = disableTooltipProp || isUnstored;
   const disableDrag = disableDragProp || isUnstored;
   const disableDoubleClick = disableDoubleClickProp || !editing.offersStoredEntityFeatures;
   const disableContextMenu = disableContextMenuProp || isUnstored;
@@ -409,6 +409,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
           tagHovered={tagHovered}
           referenceElement={referenceEl.current}
           customTooltipAttributes={customTooltipAttributes}
+          skipFetch={isUnstored}
         />
       )}
       <Tag
@@ -425,6 +426,10 @@ const EntityTagInner: React.FC<EntityTag> = ({
           setClickedOnce(false);
           if (onDoubleClickOverride) {
             onDoubleClickOverride(e);
+            return;
+          }
+          if (isUnstored && editing.openUnstored) {
+            editing.openUnstored(entity.id);
             return;
           }
           if (!disableDoubleClick) {
