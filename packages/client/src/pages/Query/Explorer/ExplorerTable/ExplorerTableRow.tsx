@@ -648,7 +648,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           <Checkbox
             value={isSelected}
             color="primary"
-            noFill
             size={15}
             onChangeFn={handleCheckboxChange}
           />

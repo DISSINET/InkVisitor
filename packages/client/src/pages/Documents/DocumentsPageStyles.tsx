@@ -192,12 +192,6 @@ export const StyledSelectHeaderCell = styled.div`
   ${stickyHeaderCell}
 `;
 
-/** Disabled rows keep the box in place so the column stays aligned */
-export const StyledDisabledSelect = styled.div`
-  opacity: 0.4;
-  cursor: not-allowed;
-`;
-
 export const StyledTitleWrap = styled.div<{ $editable: boolean }>`
   display: flex;
   align-items: center;
