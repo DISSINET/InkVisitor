@@ -4,6 +4,8 @@ import { IBookmarkFolder, IEntity } from "@inkvisitor/shared/types";
 import { config, useSpring } from "@react-spring/web";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
+import { BookmarkFolderModal } from "components/advanced/BookmarkFolderModal/BookmarkFolderModal";
+import { CBookmarkFolder } from "constructors";
 import {
   IcoCaretRight,
   IcoCardText,
@@ -11,6 +13,7 @@ import {
   IcoCopy,
   IcoEdit,
   IcoListTree,
+  IcoPlus,
   IcoStar,
   IcoUnlink,
 } from "Theme/icons";
@@ -23,6 +26,7 @@ import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxState
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState } from "types";
+import { toStoredBookmarkFolders } from "utils/bookmarkFolders";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledCheckGlyph,
@@ -81,6 +85,9 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
 
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const submenuCloseTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // the new folder modal replaces the menus, and the menu stays mounted until it closes
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
 
   const menu = useFloating({
     placement: "right-start",
@@ -110,6 +117,10 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   }, [position.x, position.y, menu.refs]);
 
   useEffect(() => {
+    // the modal handles its own Escape and closing clicks
+    if (creatingFolder) {
+      return;
+    }
     const isInsideMenu = (target: Node) =>
       Boolean(menu.refs.floating.current?.contains(target)) ||
       Boolean(submenu.refs.floating.current?.contains(target));
@@ -138,7 +149,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       window.removeEventListener("resize", onClose);
       window.removeEventListener("scroll", onClose, true);
     };
-  }, [onClose, menu.refs, submenu.refs]);
+  }, [onClose, menu.refs, submenu.refs, creatingFolder]);
 
   useEffect(() => {
     return () => clearTimeout(submenuCloseTimeout.current);
@@ -179,12 +190,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     if (!bookmarkFolders) {
       return;
     }
-    // the user record stores id lists, while the query answers with whole entities
-    const folders: IBookmarkFolder[] = bookmarkFolders.map((folder) => ({
-      id: folder.id,
-      name: folder.name,
-      entityIds: folder.entities.map((bookmarked) => bookmarked.id),
-    }));
+    const folders = toStoredBookmarkFolders(bookmarkFolders);
     const target = folders.find((folder) => folder.id === folderId);
     if (!target) {
       return;
@@ -200,6 +206,31 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       doneMessage: wasBookmarked
         ? `removed from [${target.name}]`
         : `bookmarked in [${target.name}]`,
+    });
+    onClose();
+  };
+
+  const trimmedFolderName = newFolderName.trim();
+  const newFolderNameIsValid =
+    trimmedFolderName !== "" &&
+    !(bookmarkFolders ?? []).some((folder) => folder.name === trimmedFolderName);
+
+  const startCreatingFolder = () => {
+    clearTimeout(submenuCloseTimeout.current);
+    setSubmenuOpen(false);
+    setCreatingFolder(true);
+  };
+
+  // the new folder starts with the entity the menu was opened on
+  const createFolder = () => {
+    if (!bookmarkFolders || !newFolderNameIsValid) {
+      return;
+    }
+    const newFolder = CBookmarkFolder(trimmedFolderName);
+    newFolder.entityIds = [entity.id];
+    changeBookmarksMutation.mutate({
+      bookmarks: [...toStoredBookmarkFolders(bookmarkFolders), newFolder],
+      doneMessage: `bookmarked in new folder [${trimmedFolderName}]`,
     });
     onClose();
   };
@@ -335,68 +366,70 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     <>
       {/* tags are rendered inside modals too, so the menu portals to the body and
           sits above the modal layer rather than inside the clipped page content */}
-      <FloatingPortal>
-        <StyledMenuFloating ref={menu.refs.setFloating} style={menu.floatingStyles}>
-          <StyledMenuGroup
-            style={animatedMount}
-            onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
-          >
-            <StyledMenuHeader>
-              <StyledMenuHeaderLabel>{entityLabel}</StyledMenuHeaderLabel>
-            </StyledMenuHeader>
-            <StyledMenuDivider />
-
-            {navigationItems.length > 0 && (
-              <>
-                {navigationItems}
-                <StyledMenuDivider />
-              </>
-            )}
-
-            {renderItem("copy-label", "Copy label", <IcoCopy size={ICON_SIZE} />, () =>
-              copyToClipboard(entityLabel, "label"),
-            )}
-            {renderItem("copy-id", "Copy ID", <IcoClipboard size={ICON_SIZE} />, () =>
-              copyToClipboard(entity.id, "id"),
-            )}
-
-            <StyledMenuDivider />
-
-            <StyledMenuItem
-              key="bookmarks"
-              ref={submenu.refs.setReference}
-              onMouseEnter={openSubmenu}
-              onMouseLeave={scheduleSubmenuClose}
-              onClick={openSubmenu}
+      {!creatingFolder && (
+        <FloatingPortal>
+          <StyledMenuFloating ref={menu.refs.setFloating} style={menu.floatingStyles}>
+            <StyledMenuGroup
+              style={animatedMount}
+              onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
             >
-              <StyledItemIcon>
-                <IcoStar size={ICON_SIZE} />
-              </StyledItemIcon>
-              <StyledItemLabel>Bookmarks</StyledItemLabel>
-              <StyledItemTrailing>
-                {bookmarkedInCount > 0 && <StyledItemCount>{bookmarkedInCount}</StyledItemCount>}
-                <IcoCaretRight size={ICON_SIZE + 3} />
-              </StyledItemTrailing>
-            </StyledMenuItem>
+              <StyledMenuHeader>
+                <StyledMenuHeaderLabel>{entityLabel}</StyledMenuHeaderLabel>
+              </StyledMenuHeader>
+              <StyledMenuDivider />
 
-            {onUnlink && (
-              <>
-                <StyledMenuDivider />
-                {renderItem(
-                  "unlink",
-                  unlinkLabel,
-                  <IcoUnlink size={ICON_SIZE} />,
-                  () => {
-                    onUnlink();
-                    onClose();
-                  },
-                  "danger",
-                )}
-              </>
-            )}
-          </StyledMenuGroup>
-        </StyledMenuFloating>
-      </FloatingPortal>
+              {navigationItems.length > 0 && (
+                <>
+                  {navigationItems}
+                  <StyledMenuDivider />
+                </>
+              )}
+
+              {renderItem("copy-label", "Copy label", <IcoCopy size={ICON_SIZE} />, () =>
+                copyToClipboard(entityLabel, "label"),
+              )}
+              {renderItem("copy-id", "Copy ID", <IcoClipboard size={ICON_SIZE} />, () =>
+                copyToClipboard(entity.id, "id"),
+              )}
+
+              <StyledMenuDivider />
+
+              <StyledMenuItem
+                key="bookmarks"
+                ref={submenu.refs.setReference}
+                onMouseEnter={openSubmenu}
+                onMouseLeave={scheduleSubmenuClose}
+                onClick={openSubmenu}
+              >
+                <StyledItemIcon>
+                  <IcoStar size={ICON_SIZE} />
+                </StyledItemIcon>
+                <StyledItemLabel>Bookmarks</StyledItemLabel>
+                <StyledItemTrailing>
+                  {bookmarkedInCount > 0 && <StyledItemCount>{bookmarkedInCount}</StyledItemCount>}
+                  <IcoCaretRight size={ICON_SIZE + 3} />
+                </StyledItemTrailing>
+              </StyledMenuItem>
+
+              {onUnlink && (
+                <>
+                  <StyledMenuDivider />
+                  {renderItem(
+                    "unlink",
+                    unlinkLabel,
+                    <IcoUnlink size={ICON_SIZE} />,
+                    () => {
+                      onUnlink();
+                      onClose();
+                    },
+                    "danger",
+                  )}
+                </>
+              )}
+            </StyledMenuGroup>
+          </StyledMenuFloating>
+        </FloatingPortal>
+      )}
 
       {submenuOpen && (
         <FloatingPortal>
@@ -427,10 +460,28 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               ) : (
                 <StyledEmptyNote>no bookmark folders yet</StyledEmptyNote>
               )}
+              <StyledMenuDivider />
+              <StyledMenuItem onClick={startCreatingFolder}>
+                <StyledItemIcon>
+                  <IcoPlus size={ICON_SIZE} />
+                </StyledItemIcon>
+                <StyledItemLabel>New folder</StyledItemLabel>
+              </StyledMenuItem>
             </StyledMenuGroup>
           </StyledMenuFloating>
         </FloatingPortal>
       )}
+
+      <BookmarkFolderModal
+        showModal={creatingFolder}
+        title="New Bookmark folder"
+        submitLabel="Create and bookmark"
+        name={newFolderName}
+        onNameChange={setNewFolderName}
+        isValid={newFolderNameIsValid}
+        onSubmit={createFolder}
+        onClose={onClose}
+      />
     </>
   );
 };

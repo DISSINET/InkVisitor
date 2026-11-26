@@ -1,20 +1,7 @@
-import { IBookmarkFolder, IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
+import { IBookmarkFolder, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  CancelButton,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
-  ModalInputLabel,
-  ModalInputWrap,
-  Submit,
-} from "components";
+import { Button, Loader, Submit } from "components";
+import { BookmarkFolderModal } from "components/advanced/BookmarkFolderModal/BookmarkFolderModal";
 import { CBookmarkFolder } from "constructors";
 import { useBookmarksQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
@@ -25,6 +12,7 @@ import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkB
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 import { IcoPlusBold } from "Theme/icons";
 import { ButtonSize } from "types";
+import { toStoredBookmarkFolders } from "utils/bookmarkFolders";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -56,19 +44,8 @@ export const EntityBookmarkBox: React.FC = () => {
     return "";
   }, [removingFolder]);
 
-  const getBookmarksCopy = (): IBookmarkFolder[] | false => {
-    if (bookmarkFolders) {
-      return bookmarkFolders.map((bookmark: IResponseBookmarkFolder) => {
-        return {
-          id: bookmark.id,
-          name: bookmark.name,
-          entityIds: bookmark.entities.map((a: IEntity) => a.id),
-        };
-      });
-    } else {
-      return false;
-    }
-  };
+  const getBookmarksCopy = (): IBookmarkFolder[] | false =>
+    bookmarkFolders ? toStoredBookmarkFolders(bookmarkFolders) : false;
 
   const editedFolderIsValid = useMemo(() => {
     return (
@@ -221,46 +198,18 @@ export const EntityBookmarkBox: React.FC = () => {
       )}
       <Loader show={isFetching} />
 
-      <Modal
+      <BookmarkFolderModal
         key="bookmark-folder-modal"
         showModal={isFolderModalOpen}
+        title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"}
+        submitLabel={isEditMode ? "Submit" : "Create"}
+        name={editingFolderName}
+        onNameChange={setEditingFolderName}
+        isValid={Boolean(editedFolderIsValid)}
+        onSubmit={submitFolderModal}
         onClose={closeFolderModal}
-        onEnterPress={submitFolderModal}
-        width={350}
-      >
-        <ModalHeader title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"} />
-        <ModalContent>
-          <ModalInputForm alignLeft>
-            <ModalInputLabel>new label:</ModalInputLabel>
-            <ModalInputWrap>
-              <Input
-                labelSpaceNoWrap
-                placeholder=""
-                onChangeFn={(newName: string) => setEditingFolderName(newName)}
-                value={editingFolderName}
-                changeOnType
-                autoFocus
-                width="full"
-              />
-            </ModalInputWrap>
-          </ModalInputForm>
-        </ModalContent>
-
-        <ModalFooter>
-          <ButtonGroup>
-            <CancelButton key="cancel" onClick={closeFolderModal} />
-
-            <Button
-              key="submit"
-              label={isEditMode ? "Submit" : "Create"}
-              color="info"
-              onClick={submitFolderModal}
-              disabled={!editedFolderIsValid}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-        <Loader show={createFolderMutation.isPending || acceptEditingFolderMutation.isPending} />
-      </Modal>
+        isLoading={createFolderMutation.isPending || acceptEditingFolderMutation.isPending}
+      />
 
       <Submit
         title={`Remove Bookmark folder ${removingFolderName}`}
