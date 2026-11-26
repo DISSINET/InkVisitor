@@ -185,7 +185,7 @@ describe("EntityImportModal", () => {
 
     await act(async () => buttonNamed("undo append").click());
     expect(document.body.textContent).toContain(
-      '"TEST dog" goes back to how it was before the append.',
+      '"TEST dog" and its relations go back to how they were before the append.',
     );
     await act(async () => buttonNamed("Undo append").click());
 

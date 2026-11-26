@@ -422,6 +422,8 @@ export interface AppendUndo {
   entities: IEntity[];
   // which of those are Value copies
   copyIds: string[];
+  // every draft then, to tell the drafts made since
+  draftIds: string[];
 }
 
 export const appendUndoOf = (
@@ -454,6 +456,7 @@ export const appendUndoOf = (
     relations: draft.relations.filter((relation) => relation.entityIds.includes(entityId)),
     entities,
     copyIds: entities.filter((entity) => isValueCopy(draft, entity.id)).map((entity) => entity.id),
+    draftIds: draft.entities.map((entity) => entity.id),
   };
 };
 
@@ -485,15 +488,18 @@ export const replaceUndoEntityId = (
       ids: link.ids.map(swap),
     })),
     copyIds: undo.copyIds.map(swap),
+    draftIds: undo.draftIds.map(swap),
   };
 };
 
 /**
  * Undoes one "append to it". The draft and its relations of the import come
- * back as they were before the append, and the stored relations loaded for
- * the append go. The other drafts keep every change made since, the stored
- * relations of other appended drafts included; a link in them to the stored
- * entity follows the draft back, unless the database or the JSON put it there.
+ * back as they were before the append, edits made in the Detail of another
+ * draft included. The stored relations loaded for the append go, and so do
+ * the drafts made since that only the appended one points at. The other
+ * drafts keep every other change made since, the stored relations of other
+ * appended drafts included; a link in them to the stored entity follows the
+ * draft back, unless the database or the JSON put it there.
  */
 export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft => {
   const { entityId, storedId } = undo;
@@ -585,21 +591,44 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
     });
   // one the validation dropped as stored, or one unlinked since, comes back too
   const keptIds = new Set(relations.map((relation) => relation.id));
+  const nextRelations = [
+    ...relations,
+    ...[...originals.values()].filter((relation) => !keptIds.has(relation.id)),
+  ];
+
+  // a draft made since for the appended one only, such as a new entity picked
+  // as its metaprop value, goes with the changes made to it; one that a kept
+  // draft or a relation points at stays
+  const refIds = (owners: IEntity[]) =>
+    collectEntityRefs(
+      owners.map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
+    ).map((ref) => ref.id);
+  const all = [...entities, ...restored];
+  const relationIds = new Set(nextRelations.flatMap((relation) => relation.entityIds));
+  let dropped = new Set(
+    refIds(draft.entities.filter((entity) => entity.id === storedId)).filter(
+      (id) =>
+        id !== storedId && present.has(id) && !undo.draftIds.includes(id) && !isValueCopy(draft, id)
+    )
+  );
+  for (let changed = true; changed; ) {
+    const used = new Set(refIds(all.filter((entity) => !dropped.has(entity.id))));
+    const next = new Set([...dropped].filter((id) => !used.has(id) && !relationIds.has(id)));
+    changed = next.size !== dropped.size;
+    dropped = next;
+  }
 
   return {
     ...draft,
-    entities: [...entities, ...restored],
-    relations: [
-      ...relations,
-      ...[...originals.values()].filter((relation) => !keptIds.has(relation.id)),
-    ],
+    entities: all.filter((entity) => !dropped.has(entity.id)),
+    relations: nextRelations,
     storedRelations: draft.storedRelations?.filter((relation) => !goes(relation.id)),
     appends,
     valueCopyIds: [
       ...(draft.valueCopyIds ?? []),
       ...undo.copyIds.filter((id) => !present.has(id)),
     ],
-    leftOutIds: draft.leftOutIds?.map(swapBack),
+    leftOutIds: draft.leftOutIds?.map(swapBack).filter((id) => !dropped.has(id)),
   };
 };
 

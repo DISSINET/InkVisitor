@@ -1,6 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
+  addDraftEntity,
   addStoredRelations,
   appendUndoOf,
   buildDraftDetail,
@@ -754,6 +755,41 @@ describe("undoAppend", () => {
       ["r1", "dog>stored-cat"],
     ]);
     expect(undone.storedRelations).toEqual([twin]);
+  });
+
+  it("drops a draft made since that only the appended one points at", () => {
+    const before: ImportDraft = {
+      ...baseDraft(),
+      entities: [newEntity("dog"), newEntity("cat")],
+      relations: [],
+    };
+    const undo = appendUndoOf(before, "dog", "stored-dog");
+    let draft = replaceEntityId(before, "dog", "stored-dog");
+    draft = {
+      ...draft,
+      appends: {
+        "stored-dog": { stored: existingEntity("stored-dog"), conflicts: [], skipped: {} as never },
+      },
+    };
+    // made during the append: one for dog only, one cat uses too, one on its own
+    for (const id of ["fresh", "shared", "own"]) {
+      draft = addDraftEntity(draft, newEntity(id));
+    }
+    draft = updateDraftEntity(draft, "stored-dog", {
+      props: newEntity("x", {
+        props: [
+          { type: "size", value: "fresh" },
+          { type: "colour", value: "shared" },
+        ],
+      }).props,
+    });
+    draft = updateDraftEntity(draft, "cat", {
+      props: newEntity("x", { props: [{ type: "colour", value: "shared" }] }).props,
+    });
+
+    const undone = undoAppend(draft, undo);
+
+    expect(undone.entities.map((entity) => entity.id)).toEqual(["dog", "cat", "shared", "own"]);
   });
 
   it("points a draft at another one whose append was undone before", () => {

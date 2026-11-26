@@ -766,7 +766,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       />
       <Submit
         title="Undo append"
-        text={`"${undoSubmitRecord?.undo.entity.labels[0]}" goes back to how it was before the append. Your changes to it since will be lost.`}
+        text={`"${undoSubmitRecord?.undo.entity.labels[0]}" and its relations go back to how they were before the append. Your changes to them since will be lost.`}
         submitLabel="Undo append"
         cancelLabel="Keep editing"
         show={!!undoSubmitRecord}
