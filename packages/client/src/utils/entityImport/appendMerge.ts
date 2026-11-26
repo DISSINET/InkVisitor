@@ -1,7 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
 import { isDuplicateLabel } from "utils/entityLabels";
-import { count, isPlainObject, sameJson, setAtPath, unique } from "./helpers";
+import { count, isPlainObject, sameJson, setAtPath } from "./helpers";
 
 /**
  * A field that holds one value, set differently in the database and in the
@@ -406,123 +406,6 @@ export const mergeIntoStored = (
   entity.references = mergeReferences(stored.references, imported.references, same, skipped);
 
   return { entity, conflicts, skipped };
-};
-
-type Fields = Record<string, unknown>;
-
-/**
- * The fields of an appended item once the append is undone: a field the item
- * still holds as stored takes the imported value back, a field changed since
- * keeps its value.
- */
-export const unmergeFields = <T extends object>(
-  now: T,
-  stored: T | undefined,
-  imported: T,
-  omitted: string[] = []
-): T => {
-  const nowFields = now as unknown as Fields;
-  const storedFields = (stored ?? {}) as unknown as Fields;
-  const importedFields = imported as unknown as Fields;
-  return Object.fromEntries(
-    unique([...Object.keys(nowFields), ...Object.keys(importedFields)])
-      .filter((key) => !omitted.includes(key))
-      .map((key) => [
-        key,
-        sameJson(nowFields[key], storedFields[key]) ? importedFields[key] : nowFields[key],
-      ])
-      .filter(([, value]) => value !== undefined)
-  ) as unknown as T;
-};
-
-// an item only the stored entity has goes; one the import has too takes the
-// import's id back, so no draft shares an id with a stored item
-const unmergeItems = <T extends { id: string }>(
-  items: T[],
-  stored: T[],
-  imported: T[],
-  isSame: (storedItem: T, importedItem: T) => boolean,
-  unmergeItem: (item: T, storedItem: T, importedItem: T) => T
-): T[] => {
-  const storedById = new Map(stored.map((item) => [item.id, item]));
-  const unused = [...imported];
-  return items.flatMap((item) => {
-    const storedItem = storedById.get(item.id);
-    if (!storedItem) {
-      return [item];
-    }
-    const matchIndex = unused.findIndex((candidate) => isSame(storedItem, candidate));
-    if (matchIndex === -1) {
-      return [];
-    }
-    const [importedItem] = unused.splice(matchIndex, 1);
-    return [{ ...unmergeItem(item, storedItem, importedItem), id: importedItem.id }];
-  });
-};
-
-const unmergeProps = (
-  props: IProp[],
-  stored: IProp[],
-  imported: IProp[],
-  same: SameEntity
-): IProp[] =>
-  unmergeItems(
-    props,
-    stored,
-    imported,
-    (storedProp, importedProp) => sameProp(storedProp, importedProp, same),
-    (prop, storedProp, importedProp) => ({
-      ...unmergeFields(prop, storedProp, importedProp, ["children"]),
-      children: unmergeProps(prop.children, storedProp.children, importedProp.children, same),
-    })
-  );
-
-// a label or note of the import, or one added since; one both had keeps the
-// import's spelling, one only the stored entity had goes
-const unmergeTexts = (texts: string[], stored: string[], imported: string[]): string[] =>
-  unique(
-    texts.flatMap((text) => {
-      if (!stored.includes(text)) {
-        return [text];
-      }
-      const own = imported.find((candidate) => candidate.trim() === text.trim());
-      return own === undefined ? [] : [own];
-    })
-  );
-
-/**
- * The draft an undone append leaves, from the appended entity as it is now.
- * What only the stored entity had goes, since the stored entity keeps its
- * database state. What the import brought, edited or added since, stays, and
- * an item both had that was deleted since stays deleted.
- */
-export const unmergeFromStored = (
-  now: IEntity,
-  stored: IEntity,
-  imported: IEntity,
-  same: SameEntity
-): IEntity => {
-  const labels = unmergeTexts(now.labels, stored.labels ?? [], imported.labels);
-  // the imported main label leads again
-  const main = imported.labels[0];
-  return {
-    ...unmergeFields(now, stored, imported, ["labels", "notes", "data", "props", "references"]),
-    id: imported.id,
-    labels: labels.includes(main) ? [main, ...labels.filter((label) => label !== main)] : labels,
-    notes: unmergeTexts(now.notes, stored.notes ?? [], imported.notes),
-    data: unmergeFields(now.data ?? {}, stored.data ?? {}, imported.data ?? {}),
-    props: unmergeProps(now.props, stored.props ?? [], imported.props, same),
-    references: unmergeItems(
-      now.references,
-      stored.references ?? [],
-      imported.references,
-      (storedReference, importedReference) =>
-        same(storedReference.resource, importedReference.resource) &&
-        same(storedReference.value, importedReference.value),
-      (reference, storedReference, importedReference) =>
-        unmergeFields(reference, storedReference, importedReference)
-    ),
-  };
 };
 
 /**

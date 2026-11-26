@@ -366,7 +366,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             { ...record, undo: replaceUndoEntityId(record.undo, entityId, storedId) },
           ])
         ),
-        [storedId]: { undo: appendUndoOf(draft, entityId, storedId, next), storedLabel },
+        [storedId]: { undo: appendUndoOf(draft, entityId, storedId), storedLabel },
       }));
       setDraftErrors([]);
       setDraftNotes((notes) => [
@@ -382,9 +382,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
   };
 
+  // the changes made to the draft since the append are lost, so undo asks first
+  const [undoSubmitId, setUndoSubmitId] = useState<string | null>(null);
+  const undoSubmitRecord = undoSubmitId ? appendRecords[undoSubmitId] : undefined;
+
   // only the appended draft goes back to how it was; the other drafts keep
   // every change made since
   const handleUndoAppend = (storedId: string) => {
+    setUndoSubmitId(null);
     const record = appendRecords[storedId];
     if (!record) {
       return;
@@ -392,11 +397,17 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     setDraft((current) => current && undoAppend(current, record.undo));
     // its stored relations load again if it is appended again
     requestedRelationIds.current.delete(storedId);
-    setAppendRecords((records) => {
-      const rest = { ...records };
-      delete rest[storedId];
-      return rest;
-    });
+    // the other appends' undos follow the draft back to its own id
+    setAppendRecords((records) =>
+      Object.fromEntries(
+        Object.entries(records)
+          .filter(([id]) => id !== storedId)
+          .map(([id, other]) => [
+            id,
+            { ...other, undo: replaceUndoEntityId(other.undo, storedId, record.undo.entityId) },
+          ]),
+      ),
+    );
     setDraftErrors([]);
     setDraftNotes((notes) => [
       ...notes,
@@ -628,7 +639,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onAllConflictChoices={handleAllConflictChoices}
               onAppendTo={handleAppendTo}
               undoableAppendIds={Object.keys(appendRecords)}
-              onUndoAppend={handleUndoAppend}
+              onUndoAppend={setUndoSubmitId}
               onRebase={handleRebase}
               errors={draftErrors}
               notes={draftNotes}
@@ -752,6 +763,15 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         show={showRemoveSubmit}
         onSubmit={createDrafts}
         onCancel={() => setShowRemoveSubmit(false)}
+      />
+      <Submit
+        title="Undo append"
+        text={`"${undoSubmitRecord?.undo.entity.labels[0]}" goes back to how it was before the append. Your changes to it since will be lost.`}
+        submitLabel="Undo append"
+        cancelLabel="Keep editing"
+        show={!!undoSubmitRecord}
+        onSubmit={() => undoSubmitId && handleUndoAppend(undoSubmitId)}
+        onCancel={() => setUndoSubmitId(null)}
       />
       <Submit
         title="Close the import"

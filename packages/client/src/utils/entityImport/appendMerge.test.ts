@@ -10,7 +10,6 @@ import {
   pairWarnings,
   sameEntityBy,
   storedFields,
-  unmergeFromStored,
 } from "./appendMerge";
 
 const concept = (overrides: Partial<IEntity> = {}): IEntity => ({
@@ -198,58 +197,6 @@ describe("mergeIntoStored", () => {
       {}
     );
     expect(conflicts).toEqual([]);
-  });
-});
-
-describe("unmergeFromStored", () => {
-  it("drops what only the stored entity had and keeps what was imported, edited or added", () => {
-    const stored = concept({
-      labels: ["Hund", "dog"],
-      detail: "stored detail",
-      legacyId: "S-1",
-      notes: ["stored note"],
-      props: [prop("size", "big"), prop("colour", "brown")],
-    });
-    const imported = concept({
-      id: "dog",
-      labels: ["dog", "puppy"],
-      legacyId: "I-1",
-      props: [prop("size", "big"), prop("age", "old")],
-    });
-    const { entity: merged } = mergeIntoStored(stored, { ...imported, id: stored.id }, same, {});
-    // edits made in Detail during the append
-    const now = {
-      ...merged,
-      labels: ["Hund", "puppy", "doggo"],
-      detail: "edited detail",
-      props: merged.props.map((item) =>
-        item.type.entityId === "age"
-          ? { ...item, value: { ...item.value, entityId: "young" } }
-          : item
-      ),
-    };
-
-    const draft = unmergeFromStored(now, stored, imported, same);
-
-    expect(draft.id).toBe("dog");
-    // the label both had was deleted, and one was added
-    expect(draft.labels).toEqual(["puppy", "doggo"]);
-    expect(draft.detail).toBe("edited detail");
-    // its conflict was left on the stored value
-    expect(draft.legacyId).toBe("I-1");
-    expect(draft.notes).toEqual([]);
-    expect(draft.props.map((item) => [item.id, item.type.entityId, item.value.entityId])).toEqual([
-      [imported.props[0].id, "size", "big"],
-      [imported.props[1].id, "age", "young"],
-    ]);
-  });
-
-  it("gives the imported main label the lead again", () => {
-    const stored = concept({ labels: ["love", "caritas"] });
-    const imported = concept({ id: "draft", labels: ["amor", "caritas"] });
-    const { entity: merged } = mergeIntoStored(stored, { ...imported, id: stored.id }, same, {});
-
-    expect(unmergeFromStored(merged, stored, imported, same).labels).toEqual(["amor", "caritas"]);
   });
 });
 

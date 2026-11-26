@@ -184,6 +184,10 @@ describe("EntityImportModal", () => {
     expect(buttonNamed("undo append")).toBeDefined();
 
     await act(async () => buttonNamed("undo append").click());
+    expect(document.body.textContent).toContain(
+      '"TEST dog" goes back to how it was before the append.',
+    );
+    await act(async () => buttonNamed("Undo append").click());
 
     expect(buttonNamed("undo append")).toBeUndefined();
     expect(buttonNamed("append to it")).toBeDefined();

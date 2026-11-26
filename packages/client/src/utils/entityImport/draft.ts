@@ -9,13 +9,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { EntityWrites, ImportMarks, LOCAL_WRITE_RESPONSE } from "hooks/useEntityEditing";
 import { v4 as uuidv4 } from "uuid";
-import {
-  AppendInfo,
-  applyConflictChoice,
-  sameEntityBy,
-  unmergeFields,
-  unmergeFromStored,
-} from "./appendMerge";
+import { AppendInfo, applyConflictChoice } from "./appendMerge";
 import { buildEntityJson } from "./entityJson";
 import { count, getAtPath, isPlainObject, setAtPath, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
@@ -411,7 +405,7 @@ const storedHolds = (stored: IEntity, entity: IEntity, path: string, targetId: s
   }
 };
 
-/** What undoing one "append to it" needs, taken around the append. */
+/** What undoing one "append to it" needs, taken just before the append. */
 export interface AppendUndo {
   entityId: string;
   storedId: string;
@@ -424,21 +418,16 @@ export interface AppendUndo {
   storedLinkRelationIds: string[];
   // its relations as they were
   relations: Relation.IRelation[];
-  // those that came through the append; the validation dropped the others as
-  // stored already, or merged them
-  passedRelationIds: string[];
   // the entities it points at; the append may leave out some of them
   entities: IEntity[];
   // which of those are Value copies
   copyIds: string[];
 }
 
-/** What undoing one "append to it" needs, from the drafts before and after it. */
 export const appendUndoOf = (
   draft: ImportDraft,
   entityId: string,
-  storedId: string,
-  after: ImportDraft = draft
+  storedId: string
 ): AppendUndo => {
   const ownerOf = (index: number) => draft.entities[index - 1];
   const refs = collectEntityRefs(
@@ -448,8 +437,6 @@ export const appendUndoOf = (
     refs.filter((ref) => ownerOf(ref.entityIndex).id === entityId).map((ref) => ref.id)
   );
   const entities = draft.entities.filter((entity) => pointedAt.has(entity.id));
-  const relations = draft.relations.filter((relation) => relation.entityIds.includes(entityId));
-  const afterIds = new Set(after.relations.map((relation) => relation.id));
   const asAppended = (id: string) => (id === entityId ? storedId : id);
   return {
     entityId,
@@ -464,18 +451,16 @@ export const appendUndoOf = (
     storedLinkRelationIds: draft.relations
       .filter((relation) => relation.entityIds.includes(storedId))
       .map((relation) => relation.id),
-    relations,
-    passedRelationIds: relations
-      .filter((relation) => afterIds.has(relation.id))
-      .map((relation) => relation.id),
+    relations: draft.relations.filter((relation) => relation.entityIds.includes(entityId)),
     entities,
     copyIds: entities.filter((entity) => isValueCopy(draft, entity.id)).map((entity) => entity.id),
   };
 };
 
 /**
- * The undo of an earlier append after a later "append to it" gave another
- * draft a stored id, so undoing the earlier one keeps the later one.
+ * The undo of an append after another draft's id changed: a later "append to
+ * it" gave that draft a stored id, or an undo gave it its own back, so undoing
+ * this append leaves that draft as it is.
  */
 export const replaceUndoEntityId = (
   undo: AppendUndo,
@@ -504,29 +489,18 @@ export const replaceUndoEntityId = (
 };
 
 /**
- * Undoes one "append to it". The stored entity keeps its database state: the
- * draft loses what only the stored entity had, and the stored relations
- * loaded for the append go. What the import brought, edited or added since,
- * stays with the draft, and an item both had that was deleted since stays
- * deleted. A link to the stored entity follows the draft back, unless the
- * database or the JSON put it there.
+ * Undoes one "append to it". The draft and its relations of the import come
+ * back as they were before the append, and the stored relations loaded for
+ * the append go. The other drafts keep every change made since, the stored
+ * relations of other appended drafts included; a link in them to the stored
+ * entity follows the draft back, unless the database or the JSON put it there.
  */
 export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft => {
   const { entityId, storedId } = undo;
   const swapBack = (id: string) => (id === storedId ? entityId : id);
   const present = new Set(draft.entities.map((entity) => entity.id));
   const appends = { ...draft.appends };
-  const append = appends[storedId];
   delete appends[storedId];
-
-  const entityOf = (id: string) =>
-    draft.entities.find((entity) => entity.id === id) ??
-    undo.entities.find((entity) => entity.id === id) ??
-    draft.existing[id];
-  const unmerged = (entity: IEntity) =>
-    append
-      ? unmergeFromStored(entity, append.stored, undo.entity, sameEntityBy(entityOf))
-      : undo.entity;
 
   const heldBefore = [...undo.storedLinks];
   const keepsLink = (entity: IEntity, path: string) => {
@@ -560,10 +534,10 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
   };
 
   const entities = draft.entities.map((entity) =>
-    relinked(entity.id === storedId ? unmerged(entity) : entity)
+    entity.id === storedId ? undo.entity : relinked(entity)
   );
   // what the append left out as already stored comes back with the draft
-  const restored = undo.entities.filter((entity) => !present.has(entity.id)).map(relinked);
+  const restored = undo.entities.filter((entity) => !present.has(entity.id));
 
   // the stored relations of the stored entity, loaded for the append, go;
   // one that also links another appended draft stays, edits and all, as that
@@ -583,59 +557,42 @@ export const undoAppend = (draft: ImportDraft, undo: AppendUndo): ImportDraft =>
       !copies.some((relation) => relation.entityIds.some((id) => otherAppendIds.has(id)))
     );
   };
+  // a relation of the import the draft had comes back as it was; in any other,
   // a member that is the stored entity follows the draft back, unless the
   // database or the JSON put it there
+  const originals = new Map(
+    undo.relations
+      .filter((relation) => !isStoredRelation(draft, relation.id))
+      .map((relation) => [relation.id, relation])
+  );
+  const originalKeys = new Set([...originals.values()].map(relationKey));
   const jsonLinkIds = new Set(undo.storedLinkRelationIds);
   const relations = draft.relations
     .filter((relation) => !isStoredRelation(draft, relation.id) || !goes(relation.id))
-    .map((relation) => {
-      const stored = storedById.get(relation.id);
-      const kept = stored ? stored.entityIds.includes(storedId) : jsonLinkIds.has(relation.id);
-      return kept || !relation.entityIds.includes(storedId)
-        ? relation
-        : { ...relation, entityIds: relation.entityIds.map(swapBack) };
-    });
-
-  // a relation of the draft the validation dropped comes back, unless the
-  // drafts hold it, or its stored twin, which both had, was unlinked since
-  const passed = new Set(undo.passedRelationIds);
-  const covers = (relation: Relation.IRelation, other: Relation.IRelation) =>
-    relation.type === other.type &&
-    (Relation.RelationRules[other.type]?.cloudType
-      ? other.entityIds.every((id) => relation.entityIds.includes(id))
-      : relationKey(relation) === relationKey(other));
-  const restoredRelations = undo.relations
-    .filter(
-      (original) =>
-        !passed.has(original.id) && !relations.some((relation) => covers(relation, original))
-    )
-    .flatMap((original) => {
-      const asStored = {
-        ...original,
-        entityIds: original.entityIds.map((id) => (id === entityId ? storedId : id)),
-      };
-      const twin = (draft.storedRelations ?? []).find((relation) => covers(relation, asStored));
-      if (!twin) {
+    .flatMap((relation) => {
+      const original = originals.get(relation.id);
+      if (original) {
         return [original];
       }
-      const twinNow = currentById.get(twin.id);
-      if (!twinNow || !covers(twinNow, asStored)) {
-        return [];
-      }
-      return [
-        {
-          ...unmergeFields(twinNow, twin, original, ["type", "entityIds"]),
-          id: original.id,
-          type: original.type,
-          entityIds: original.entityIds,
-        },
-      ];
+      const stored = storedById.get(relation.id);
+      const kept = stored ? stored.entityIds.includes(storedId) : jsonLinkIds.has(relation.id);
+      const now =
+        kept || !relation.entityIds.includes(storedId)
+          ? relation
+          : { ...relation, entityIds: relation.entityIds.map(swapBack) };
+      // a copy of one the draft had, made since, gives way to it
+      return !stored && originalKeys.has(relationKey(now)) ? [] : [now];
     });
+  // one the validation dropped as stored, or one unlinked since, comes back too
+  const keptIds = new Set(relations.map((relation) => relation.id));
 
   return {
     ...draft,
     entities: [...entities, ...restored],
-    relations: [...relations, ...restoredRelations],
+    relations: [
+      ...relations,
+      ...[...originals.values()].filter((relation) => !keptIds.has(relation.id)),
+    ],
     storedRelations: draft.storedRelations?.filter((relation) => !goes(relation.id)),
     appends,
     valueCopyIds: [
