@@ -1,5 +1,6 @@
-import { Button, Checkbox } from "components";
+import { Button, Checkbox, IconWithTooltip } from "components";
 import React from "react";
+import { IcoQuestion } from "Theme/icons";
 import { DocumentSortField, DocumentSortState } from "./types";
 import {
   StyledActionsHeaderCell,
@@ -29,7 +30,9 @@ const SortableHeader: React.FC<{
   label: string;
   sort: DocumentSortState;
   onSort: (field: DocumentSortField) => void;
-}> = ({ field, label, sort, onSort }) => {
+  // explains the column behind a question mark beside the label
+  hint?: string;
+}> = ({ field, label, sort, onSort, hint }) => {
   const isActive = sort?.field === field;
   const title = !isActive
     ? `Sort by ${label}`
@@ -45,6 +48,14 @@ const SortableHeader: React.FC<{
       title={title}
     >
       {label}
+      {hint && (
+        <IconWithTooltip
+          icon={<IcoQuestion size={9} />}
+          color="mutedText"
+          tooltipLabel={hint}
+          tooltipPosition="top"
+        />
+      )}
       {isActive && (
         <StyledSortIndicator aria-hidden>
           {sort.direction === "asc" ? "↑" : "↓"}
@@ -72,7 +83,6 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
           indeterminate={someSelected && !allSelected}
           onChangeFn={(value) => onToggleSelectAll(value)}
           tooltipLabel={allSelected ? "deselect all documents" : "select all documents"}
-          noFill
         />
       )}
     </StyledSelectHeaderCell>
@@ -97,6 +107,12 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
       </StyledBulkExportWrap>
     </StyledActionsHeaderCell>
     <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
-    <SortableHeader field="entityCount" label="Entities" sort={sort} onSort={onSort} />
+    <SortableHeader
+      field="entityCount"
+      label="Entities"
+      sort={sort}
+      onSort={onSort}
+      hint="distinct entities anchored in the document: an entity anchored several times counts once"
+    />
   </StyledGridHeader>
 );
