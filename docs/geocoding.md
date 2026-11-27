@@ -56,11 +56,23 @@ Wherever a single point is needed — a list row, a map mark, "show on map" — 
 `Point` stands for itself and any other geometry stands for the centre of its
 bounding box.
 
-Accuracy is one of four Concepts: `geo-accuracy:precise`,
-`geo-accuracy:approximate`, `geo-accuracy:region`, `geo-accuracy:unknown`. It is
-chosen by the researcher when accepting a suggestion. Quick geocode and the batch
-take it from how closely the sources agree on the place, not from the engine's own
-numbers.
+Accuracy is one of the project's accuracies: Concepts an owner lists, in order,
+in Global geocoding, each offered as its Concept's tag on one line, under a
+heading that is the tag of the Concept assigned for localisation accuracy (the
+one the accuracy is recorded under). The location type menus are headed by the
+Classification relation (CLA) the location type is recorded as. It is chosen by the researcher when accepting a suggestion. Two entries
+of the list are marked, one for a suggestion whose sources agree on the spot and
+one for a suggestion whose sources are scattered; a card's main button, quick
+geocode and the batch take the marked one, read from how closely the sources
+agree on the place, not from the engine's own numbers. The engine neither sends
+nor receives an accuracy.
+
+A Location whose accuracy is a Concept the list does not hold stays geocoded and
+reads as that Concept, flagged "not in the accuracy list"; a write only puts a
+Concept from the list. Settings saved before the list existed read their four
+accuracy Concepts (precise, approximate, region, unknown) as the list, in that
+order, with precise marked for agreeing sources and approximate for scattered
+ones, until an owner saves the table.
 
 Type is drawn from a fixed dictionary matching the engine's normalised place-type
 vocabulary. When the engine returns a type with no corresponding Concept
@@ -99,9 +111,13 @@ props only, so a query cannot ask for the source.
 
 The Concept is the `epistemicSource` role of the global settings. Where it is not
 assigned the sources are recorded as references alone. A coordinate written by a
-click on the map or drawn by hand names none, since no gazetteer supplied it. A
-write that keeps the coordinate where it was keeps the sources already named and
-adds those of the new run; one that moves it starts with only the new ones.
+click on the map or drawn by hand names none and changes no reference, since no
+gazetteer supplied it and it says nothing about which ones agree with it. A write
+from an engine suggestion — a card, quick geocode, the batch — replaces the
+references to the project's gazetteer Resources, and the gazetteers named under
+the geometry, with the ones that suggestion cites; the record-id Values of the
+references it removes are deleted like a replaced geometry's, through the checked
+delete. References to any other Resource stay.
 `addGeocodingSourcesJob` names the gazetteers of Locations written before, from
 the references they carry. A reference does not say which coordinate it supplied,
 so the job credits a gazetteer only when the Value holding its record id was
@@ -110,10 +126,34 @@ how one accepted suggestion writes them; a reference added by hand later, or lef
 behind when the coordinate was moved, is not credited, and a Location whose Values
 carry no creation time is left alone.
 
-Every source that contributed to an accepted suggestion gets a reference, with
-one exception: `llm-coords` is not a gazetteer but the language model's own
-coordinate guess, has no record to point at, and never gets one. All fifteen real
-sources always publish an identifier.
+A suggestion groups every record the engine found within its grouping radius
+(7.5 km for a church, 150 km for a region), and its coordinate is one of those
+records' own, `matches[representativeIndex]`: never a point between them. Which
+record is chosen is the engine's rule; Global geocoding can send another (place
+first, agreement, best score, medoid, densest), and sends none by default, leaving
+the engine's own, `place-first` since engine 0.8.0. A record at the edge of the
+group did not say the place is where the coordinate is, so a gazetteer is cited
+only where one of its records lies within the citing distance of the written
+coordinate. The distance is set per gazetteer location type in Global geocoding
+("Citing gazetteers"), and the one applied is that of the type the engine resolved
+the search to — the largest of several, the "none, or any" row for none — the same
+type that set the grouping radius, so it is known as soon as the suggestions
+arrive. The defaults are half the engine's τ per type: 1.5 km for a religious house
+or an archaeological site, 5 km for a settlement, 30 km for a region. The record
+the coordinate is taken from is always cited; every other gazetteer is cited with
+its best-matched record within the distance, the nearer of two; one with none
+within is not cited. A card draws its records with the coordinate's own first and
+the rest nearest first, and dims the ones too far to be cited.
+
+The panel lists the name forms the engine searched, during the run and after it,
+and marks "around it" each form engine 0.8.0 judged to name a larger place around
+the one sought: Kutná Hora, searched for Kloster Sedletz. Under the engine's
+default rule the records found by such a form give the coordinate only where
+nothing else was found, which is why the coordinate can lie away from them.
+
+`llm-coords` is not a gazetteer but the language model's own coordinate guess, has
+no record to point at, and is never cited. All fifteen real sources always publish
+an identifier.
 
 So there are **fifteen Resource entities, not sixteen**. The engine queries 16
 suggesters; only 15 of them are gazetteers.
@@ -141,15 +181,15 @@ panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
-validations. It assigns the geometry, accuracy and epistemic source roles, the four
-accuracy values, the project's own location types and fifteen gazetteer Resources. Each
+validations. It assigns the geometry, accuracy and epistemic source roles, the project's
+accuracies, the project's own location types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier
 have their base URL prefilled from the engine's own builders.
 
 The **page** modal, on the geocoding page itself, holds the preferences that are
 about how this researcher works rather than about a place: running the engine on
-selection, the accuracy a map click writes, what a quick geocode may accept, and
+selection, the accuracy a map click's menu marks first, what a quick geocode may accept, and
 which language model the engine may use.
 
 The split is not about trust. Creating an entity here follows the same rules as
@@ -666,9 +706,9 @@ place regardless. What they cannot do is notice this by looking at the list.
 ## Recording what location type it is
 
 A coordinate answers where; the project's location types answer what. The project
-defines its own list in the global settings — a name, the Concept a Location is
-classified under, a mark chosen from the set of marks and, optionally, the
-gazetteer type it answers to. Its description is the Concept's own detail, edited
+defines its own list in the global settings — the Concept a Location is
+classified under, whose label is what the location type is called, a mark chosen
+from the set of marks and, optionally, the gazetteer type it answers to. Its description is the Concept's own detail, edited
 in the same table and written to the Concept when the window is saved. The gazetteer location
 types, the engine's twelve, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The
@@ -897,8 +937,10 @@ read against each other without counting rows.
 
 One accept control per card rather than four. Four buttons of near-identical text
 six cards deep read as a wall instead of a choice, so the accuracy the card leads
-with — precise, or approximate where the matches are scattered — is the button,
-and the other three sit behind a caret beside it.
+with — the one marked for agreeing sources, or for scattered ones where the
+matches are scattered — is the button, and the rest of the list sits behind a
+caret beside it. Where no accuracy is marked for the card's case, the button
+reads "choose the accuracy" and opens the list.
 
 Each card lists the matches behind its suggestion as tags, and one tag is a whole
 match: the gazetteer, and the name that gazetteer has for the place. That replaces
@@ -1167,7 +1209,8 @@ second setting turns the refusal off for a corpus that is genuinely spread.
 
 Three things they never decide. The accuracy comes from the spread of the
 suggestion's own matches, the same reading the card leads with — how precisely a
-coordinate locates a place is a fact about the sources, not a preference. The
+coordinate locates a place is a fact about the sources, not a preference. Neither
+asks the engine anything until both marks are set in Global geocoding. The
 location type is written only where the corpus named one to stand for all of
 them, and is otherwise left alone. And neither ever replaces a coordinate that is
 already recorded: the batch runs over the marked Locations that have none, and
@@ -1178,8 +1221,8 @@ else stays marked, so the set left behind is exactly the Locations still wanting
 a person — including the ones a stopped run never reached.
 
 A quick geocode that wrote says so in a notice that stays up for twelve seconds:
-the place it matched and where that is, the location type, the accuracy, how many
-sources stood behind it, and the position. The whole notice is a way to the map,
+the place it matched and where that is, the location type, the accuracy, the
+gazetteers the written coordinate cites, and the position. The whole notice is a way to the map,
 since by the time it lands the researcher has usually looked away and the first
 thing they want is to see the answer.
 
@@ -1397,10 +1440,6 @@ the choice per browser.
 **F10 · Per-territory context overrides.** A default region, period, language and
 gazetteer location type per territory, so a register from Languedoc does not inherit the
 project-wide region.
-
-**F11 · Choosing which sources become references.** Every contributing source is
-written today. Preselecting the informative ones, or letting the researcher pick,
-would keep the reference list readable.
 
 **F12 · Recording which engine run produced a coordinate.** Engine version, run
 timestamp, and the margin and agreement at the time. The audit trail records that

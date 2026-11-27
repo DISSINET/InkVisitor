@@ -297,7 +297,9 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
 
   /* the selected Location's own coordinate stays the most prominent thing on
      the map, named with the accuracy it was recorded at */
-  const selectedName = selected ? `${selected.entity.labels[0]} · ${selected.accuracy}` : "";
+  const selectedName = selected
+    ? `${selected.entity.labels[0]}${selected.accuracyLabel ? ` · ${selected.accuracyLabel}` : ""}`
+    : "";
 
   useEffect(() => {
     if (!engineReachable || debouncedTerm.trim().length < 2) {
@@ -520,6 +522,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         >
           <EntityTag
             entity={hoveredCard.location.entity}
+            tooltipPassThrough
             disableDrag
             disableDoubleClick
             disableCopyToClipboard
@@ -531,7 +534,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
                   .map((entry) => describeEntry(entry, placeTypes, viaLabel))
                   .join(", ")
               : kindInfo(undefined).label}
-            {hoveredCard.location.accuracy ? ` · ${hoveredCard.location.accuracy}` : ""}
+            {hoveredCard.location.accuracyLabel ? ` · ${hoveredCard.location.accuracyLabel}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>
             {hoveredCard.location.lat?.toFixed(5)}, {hoveredCard.location.lon?.toFixed(5)}
@@ -588,11 +591,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           held={selected?.typeEntries}
           note={pendingNote(pending, !selected)}
           clearLabel={selected ? "leave the location type as it is" : "record no location type"}
-          clearDescription={
-            selected
-              ? "Only the coordinate is written."
-              : "The new Location is made with a coordinate and no location type."
-          }
           onChoose={(placeType) =>
             finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
@@ -713,9 +711,19 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         onManualChange={setManual}
         onSubmit={(event) => {
           event.preventDefault();
+          // an empty field is no coordinate, though Number("") is 0; a position
+          // off the earth is refused here too, before a Location is started for it
+          if (!manual.lat.trim() || !manual.lon.trim()) {
+            return;
+          }
           const lat = Number(manual.lat);
           const lon = Number(manual.lon);
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+          if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lon) ||
+            Math.abs(lat) > 90 ||
+            Math.abs(lon) > 180
+          ) {
             return;
           }
           // the same two questions the map click asks, anchored to the form

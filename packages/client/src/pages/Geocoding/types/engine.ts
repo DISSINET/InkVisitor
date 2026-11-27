@@ -1,3 +1,4 @@
+import { GeocodingRepresentative } from "@inkvisitor/shared/types/geocoding";
 /**
  * The HGA-Engine's response shape, mirrored from its `src/types.ts`.
  *
@@ -94,13 +95,14 @@ export interface Suggestion {
    */
   contextFit?: number | null;
   /**
-   * The MEDIAN distance from the highest-scoring match to each of the others,
-   * so half the matches behind a suggestion sit further out than this. It is not
-   * the width of the group, and the engine publishes no field that is.
+   * The MEDIAN distance from the match whose coordinate the suggestion carries
+   * to each of the others, so half the matches behind a suggestion sit further
+   * out than this. It is not the width of the group, and the engine publishes no
+   * field that is.
    *
-   * It can exceed `mergeRadiusKm`: grouping anchors on the first match and never
-   * recentres, so a chain of matches each within the radius of its neighbour
-   * spans more than the radius.
+   * It can exceed `mergeRadiusKm`: a match joins a group within the radius of
+   * the group's running mean, so a chain of matches each within the radius of
+   * the last spans more than the radius.
    */
   spreadKm: number;
   /** Outside the query's resolved region. Demoted rather than hidden, and common. */
@@ -112,6 +114,12 @@ export interface Suggestion {
   matches: EngineMatch[];
   sources: string[];
   attachment?: SuggestionAttachment;
+  /**
+   * The index into `matches` of the match whose `lat`, `lon` and `label` this
+   * suggestion carries: the record a written coordinate comes from. Absent from
+   * an engine older than 0.8.0.
+   */
+  representativeIndex?: number;
 }
 
 /**
@@ -169,6 +177,12 @@ export interface EngineCandidate {
    */
   llmProvider: string;
   llmModel: string;
+  /**
+   * `container` is the name of a larger place around the one sought (Kutná Hora
+   * for Kloster Sedletz), whose records the engine does not take the coordinate
+   * from. Absent on every form when the engine's marks did not arrive in time.
+   */
+  scope?: "place" | "container";
 }
 
 /** Per-dimension weights on the engine's context scoring. */
@@ -263,6 +277,12 @@ export interface SuggestRequest {
    * different questions and both answers are kept.
    */
   dedupeDiacritics?: boolean;
+  /**
+   * The rule for which match a suggestion's coordinate is taken from. Left off,
+   * the engine uses its own default (`place-first` since 0.8.0); an unknown
+   * value is refused with 422.
+   */
+  representative?: GeocodingRepresentative;
   /** Present on the echoed query, absent on one being sent. */
   candidates?: EngineCandidate[];
   /**
@@ -328,6 +348,8 @@ export interface SuggestResponse {
    * that has long since aged out of the ring.
    */
   requestId?: string;
+  /** The rule the engine applied for each suggestion's coordinate; absent before 0.8.0. */
+  representative?: GeocodingRepresentative;
   /**
    * `(top − second) / top`. Comparable between places, unlike `score`.
    *
@@ -470,6 +492,8 @@ export interface FeedbackRequest {
 export interface StreamCandidate {
   name: string;
   nameFit: number;
+  /** As on `EngineCandidate`: `container` names a larger place around the one sought. */
+  scope?: "place" | "container";
 }
 
 export interface EngineAuditEntry {

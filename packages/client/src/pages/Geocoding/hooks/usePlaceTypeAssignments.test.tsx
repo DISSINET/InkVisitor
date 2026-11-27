@@ -226,3 +226,31 @@ describe("usePlaceTypeAssignments, with the subclass tree of a location type", (
     ).toEqual([town.id]);
   });
 });
+
+describe("usePlaceTypeAssignments, while a location type is edited", () => {
+  it("does not place and count the Locations again when only a name changes", async () => {
+    answer({ entities: { a: [one("c-settlement", "c-settlement")] }, truncated: [] });
+    await mount({ types });
+    const placed = result.typesByLocation;
+    const counted = result.countByType;
+
+    await remount({ types: types.map((type) => (type.id === "settlement" ? { ...type, name: "settled place" } : type)) });
+    expect(result.typesByLocation).toBe(placed);
+    expect(result.countByType).toBe(counted);
+    expect(result.nodes.find((node) => node.id === "settlement")!.name).toBe("settled place");
+
+  });
+
+  it("places the Locations again when the location types are put in another order", async () => {
+    answer({
+      entities: { a: [one("c-settlement", "c-settlement"), one("c-church", "c-church")] },
+      truncated: [],
+    });
+    await mount({ types });
+    expect(result.typesByLocation.get("a")!.map((entry) => entry.typeId)).toEqual(["settlement", "church"]);
+
+    // the same Concepts, so the same request and the same answer: only the order moved
+    await remount({ types: [types[2], types[0], types[1], types[3]] });
+    expect(result.typesByLocation.get("a")!.map((entry) => entry.typeId)).toEqual(["church", "settlement"]);
+  });
+});

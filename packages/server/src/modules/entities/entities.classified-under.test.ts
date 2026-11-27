@@ -110,6 +110,12 @@ describe("entities/classified-under", () => {
       .expect(testErroneousResponse.bind(undefined, new BadParams("")));
   });
 
+  it("refuses a query that parses into an object rather than a list of ids", async () => {
+    await viewerAgent
+      .get(`${apiPath}/entities/classified-under?concepts[a]=b`)
+      .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+  });
+
   it("refuses a request that names more Concepts than a walk each is worth", async () => {
     const many = Array.from({ length: CLASSIFIED_UNDER_MAX_CONCEPTS + 1 }, (_, i) => `c${i}`);
     await viewerAgent

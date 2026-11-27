@@ -4,6 +4,7 @@ import {
   GeocodingAccuracy,
   IGeocodingRoles,
   defaultPlaceTypes,
+  defaultCiteWithinKm,
 } from "@inkvisitor/shared/types/geocoding";
 import {
   GeoJsonGeometry,
@@ -36,12 +37,16 @@ const roles: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
   epistemicSource: "c-source",
-  accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
+  accuracies: ["v-precise"],
+  accuracyWhenAgree: "v-precise",
+  accuracyWhenScattered: "",
   placeTypes: [
     { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
     { ...defaultPlaceTypes()[1], conceptId: "" },
   ],
   resources: { wikidata: "r-wikidata", geonames: "r-geonames" },
+  representative: "",
+  citeWithinKm: defaultCiteWithinKm(),
 };
 
 const userOptions = { defaultLanguage: EntityEnums.Language.English } as UserOptions;
@@ -65,7 +70,7 @@ const baseInput = {
   location: location(),
   roles,
   geometry: pointGeometry(17.033, 51.107) as GeoJsonGeometry,
-  accuracy: GeocodingAccuracy.Precise,
+  accuracy: "v-precise",
   userOptions,
 };
 
@@ -222,7 +227,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
       location: geocoded(),
       roles,
       geometry: same,
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       placeType: "settlement",
       current,
       userOptions,
@@ -248,7 +253,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
       location: geocoded(),
       roles,
       geometry: polygon,
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       current: JSON.parse(JSON.stringify(polygon)),
       userOptions,
     }) as GeocodingWritePlan;
@@ -261,7 +266,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
       location: geocoded(),
       roles,
       geometry: { type: "MultiPoint", coordinates: [[17.0384, 51.1079]] },
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       current: same,
       userOptions,
     }) as GeocodingWritePlan;
@@ -305,10 +310,7 @@ describe("planGeocodingWrite, what it offers for deletion", () => {
       location: location([prop("c-geo", "v-geo"), prop("c-acc", "v-unknown")]),
       roles: {
         ...roles,
-        accuracyValues: {
-          [GeocodingAccuracy.Precise]: "v-precise",
-          [GeocodingAccuracy.Unknown]: "v-unknown",
-        },
+        accuracies: ["v-precise", "v-unknown"],
       },
       geometry: pointGeometry(1, 2),
       accuracy: over.accuracy,
@@ -317,12 +319,12 @@ describe("planGeocodingWrite, what it offers for deletion", () => {
     }) as GeocodingWritePlan;
 
   it("never offers the Concept a previous accuracy pointed at", () => {
-    const plan = replaced({ accuracy: GeocodingAccuracy.Precise });
+    const plan = replaced({ accuracy: "v-precise" });
     expect(plan.displacedValueIds).not.toContain("v-unknown");
   });
 
   it("offers exactly the geometry Value it replaced", () => {
-    const plan = replaced({ accuracy: GeocodingAccuracy.Precise, placeType: "settlement" });
+    const plan = replaced({ accuracy: "v-precise", placeType: "settlement" });
     expect(plan.displacedValueIds).toEqual(["v-geo"]);
   });
 });
@@ -339,7 +341,7 @@ describe("planGeocodingWrite, what counts as replacing a geometry", () => {
       location: location(props),
       roles,
       geometry: pointGeometry(17.0384, 51.1079),
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       current,
       userOptions,
     }) as GeocodingWritePlan;
@@ -561,17 +563,31 @@ describe("planGeocodingWrite, the sources of a coordinate", () => {
     expect(sourcesOf(planOf(baseInput))).toEqual([]);
   });
 
-  it("keeps the sources a coordinate that stayed already names, and adds only the new ones", () => {
+  it("names exactly the gazetteers a new suggestion cites, under a coordinate that stayed", () => {
+    // geonames was named by an earlier suggestion that this one does not repeat
     const geometry = prop("c-geo", "v-geo");
-    geometry.children = [prop("c-acc", "v-old"), prop("c-source", "r-wikidata")];
+    geometry.children = [prop("c-acc", "v-old"), prop("c-source", "r-geonames")];
     const plan = planOf({
       ...baseInput,
       geometry: same,
       current: same,
       location: location([geometry]),
-      provenance: from("wikidata", "geonames"),
+      provenance: from("wikidata"),
     });
-    expect(sourcesOf(plan)).toEqual(["r-wikidata", "r-geonames"]);
+    expect(sourcesOf(plan)).toEqual(["r-wikidata"]);
+  });
+
+  it("keeps a source a researcher named that is none of the project's gazetteers", () => {
+    const geometry = prop("c-geo", "v-geo");
+    geometry.children = [prop("c-acc", "v-old"), prop("c-source", "r-a-book")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+      provenance: from("wikidata"),
+    });
+    expect(sourcesOf(plan)).toEqual(["r-a-book", "r-wikidata"]);
   });
 
   it("does not take a change of type for a change of source", () => {
@@ -667,7 +683,7 @@ describe("planGeocodingWrite, clearing versus leaving the location type", () => 
       location: typed(),
       roles,
       geometry: pointGeometry(1, 2),
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       placeType,
       userOptions,
     }) as GeocodingWritePlan;
@@ -695,7 +711,7 @@ describe("planGeocodingWrite, clearing versus leaving the location type", () => 
       location: typed(),
       roles,
       geometry: pointGeometry(1, 2),
-      accuracy: GeocodingAccuracy.Precise,
+      accuracy: "v-precise",
       placeType: "nonexistent",
       userOptions,
     });
@@ -859,5 +875,73 @@ describe("planGeocodingWrite, a subclass chosen as the location type", () => {
       placeType: nodeIdOf(roles.placeTypes[0].id, "v-town"),
     }) as GeocodingWritePlan;
     expect(plan.kindConceptId).toBe("v-town");
+  });
+});
+
+describe("planGeocodingWrite, an accuracy the project does not list", () => {
+  it("is refused, so only a listed Concept is ever put on a Location", () => {
+    const result = planGeocodingWrite({ ...baseInput, accuracy: "c-not-listed" });
+    expect(isBlocked(result)).toBe(true);
+  });
+});
+
+/**
+ * A write from an engine suggestion cites the gazetteers that suggestion's
+ * records place the Location by. One written again from another suggestion
+ * replaces what an earlier one cited, so a record that no longer agrees with the
+ * coordinate stops being cited for it; a coordinate placed by hand changes no
+ * reference, since it says nothing about which gazetteers agree with it.
+ */
+describe("planGeocodingWrite, the references a write from a suggestion replaces", () => {
+  const reference = (id: string, resource: string, value: string) => ({ id, resource, value });
+  const cited = [
+    reference("ref-1", "r-wikidata", "v-Q1"),
+    reference("ref-2", "r-geonames", "v-gn-town"),
+    // a researcher's own reference to a Resource that is no gazetteer of the project
+    reference("ref-3", "r-a-book", "v-page-12"),
+  ];
+  const located = { ...location(), references: cited };
+
+  it("removes the references to the project's gazetteers and adds the new ones, keeping the rest", () => {
+    const plan = planOf({
+      ...baseInput,
+      location: located,
+      provenance: [{ source: "wikidata", sourceId: "Q2" }],
+    });
+    expect(plan.references.map((one) => one.resource)).toEqual(["r-a-book", "r-wikidata"]);
+    expect(plan.references.find((one) => one.resource === "r-wikidata")!.value).not.toBe("v-Q1");
+  });
+
+  it("offers the record ids of the references it removed for deletion, and no other", () => {
+    const plan = planOf({
+      ...baseInput,
+      location: located,
+      provenance: [{ source: "wikidata", sourceId: "Q2" }],
+    });
+    expect(plan.displacedValueIds).toEqual(expect.arrayContaining(["v-Q1", "v-gn-town"]));
+    expect(plan.displacedValueIds).not.toContain("v-page-12");
+  });
+
+  it("offers a Value two removed references shared for deletion once", () => {
+    const plan = planOf({
+      ...baseInput,
+      location: {
+        ...location(),
+        references: [reference("a", "r-wikidata", "v-same"), reference("b", "r-geonames", "v-same")],
+      },
+      provenance: [],
+    });
+    expect(plan.displacedValueIds).toEqual(["v-same"]);
+  });
+
+  it("removes them even when the suggestion cites no gazetteer, as for the model's own guess", () => {
+    const plan = planOf({ ...baseInput, location: located, provenance: [] });
+    expect(plan.references.map((one) => one.id)).toEqual(["ref-3"]);
+  });
+
+  it("leaves every reference as it is for a coordinate placed by hand", () => {
+    const plan = planOf({ ...baseInput, location: located });
+    expect(plan.references).toEqual(cited);
+    expect(plan.displacedValueIds).toEqual([]);
   });
 });

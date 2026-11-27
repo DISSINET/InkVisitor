@@ -1,11 +1,19 @@
 import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
-import React from "react";
-import { FloatingPicker, FloatingPickerAnchor } from "./PlaceTypePicker";
+import { EntityTag } from "components/advanced";
+import React, { useRef } from "react";
+import { AccuracyEntry, useAccuracies } from "../../hooks/accuraciesContext";
 import {
-  StyledPickerDescription,
+  FloatingPicker,
+  FloatingPickerAnchor,
+  PickerHeader,
+  useOptionHighlight,
+} from "./PlaceTypePicker";
+import {
+  StyledPickerAside,
+  StyledPickerHead,
+  StyledPickerHeading,
   StyledPickerLabel,
   StyledPickerOption,
-  StyledPickerTitle,
 } from "./PlaceTypePickerStyles";
 
 /**
@@ -18,27 +26,6 @@ import {
  * Location, and the location type is not.
  */
 
-export const ACCURACY_ORDER: GeocodingAccuracy[] = [
-  GeocodingAccuracy.Precise,
-  GeocodingAccuracy.Approximate,
-  GeocodingAccuracy.Region,
-  GeocodingAccuracy.Unknown,
-];
-
-/**
- * What each accuracy claims, in the terms the researcher is deciding in.
- *
- * Written from the coordinate outward — how far from the point the place could
- * be — rather than from the sources inward, because the choice is made looking
- * at a map and a spread, not at a provenance record.
- */
-export const ACCURACY_MEANING: Record<GeocodingAccuracy, string> = {
-  [GeocodingAccuracy.Precise]: "The point is the place, to within a village or a street.",
-  [GeocodingAccuracy.Approximate]: "The right locality, but not the exact spot.",
-  [GeocodingAccuracy.Region]: "Somewhere in a wider area — a province, a valley, a diocese.",
-  [GeocodingAccuracy.Unknown]: "A coordinate worth recording, with no claim about how close it is.",
-};
-
 interface AccuracyPicker {
   anchor: FloatingPickerAnchor;
   /** Marked as where the value stands, if anywhere. */
@@ -49,12 +36,16 @@ interface AccuracyPicker {
    * a location type.
    */
   suggested?: GeocodingAccuracy | null;
-  /** Said under the title, where the evidence for the choice belongs. */
+  /** Said under the caption, where the evidence for the choice belongs. */
   note?: string;
   onChoose: (accuracy: GeocodingAccuracy) => void;
   onClose: () => void;
 }
 
+/**
+ * The project's accuracies, in the order the owner listed them, each as its
+ * Concept's tag on one line, under a header naming the Concept they are recorded as.
+ */
 export const AccuracyPicker: React.FC<AccuracyPicker> = ({
   anchor,
   current,
@@ -62,28 +53,142 @@ export const AccuracyPicker: React.FC<AccuracyPicker> = ({
   note,
   onChoose,
   onClose,
-}) => (
-  <FloatingPicker anchor={anchor} ariaLabel="Accuracy" onClose={onClose}>
-    <StyledPickerTitle>
-      how precisely is it known?
-      {note ? ` — ${note}` : ""}
-    </StyledPickerTitle>
-    {ACCURACY_ORDER.map((accuracy) => (
-      <StyledPickerOption
-        key={accuracy}
-        type="button"
-        role="option"
-        aria-selected={current === accuracy}
-        $current={current === accuracy}
-        $suggested={suggested === accuracy}
-        onClick={() => onChoose(accuracy)}
-      >
-        <StyledPickerLabel>
-          {accuracy}
-          {suggested === accuracy ? " · what its sources argue for" : ""}
-          <StyledPickerDescription>{ACCURACY_MEANING[accuracy]}</StyledPickerDescription>
-        </StyledPickerLabel>
-      </StyledPickerOption>
-    ))}
-  </FloatingPicker>
+}) => {
+  const { entries } = useAccuracies();
+  return (
+    <FloatingPicker
+      anchor={anchor}
+      ariaLabel="Accuracy"
+      onClose={onClose}
+      header={
+        <PickerHeader
+          caption="accuracy"
+          recordedAs={<AccuracyHeading />}
+          notes={[
+            note,
+            entries.length
+              ? null
+              : "No accuracies are listed yet; an owner sets them in Global geocoding.",
+          ]}
+        />
+      }
+    >
+      {entries.map((entry) => (
+        <AccuracyOption
+          key={entry.conceptId}
+          entry={entry}
+          current={current === entry.conceptId}
+          suggested={suggested === entry.conceptId}
+          onChoose={onChoose}
+        />
+      ))}
+    </FloatingPicker>
+  );
+};
+
+interface AccuracyOption {
+  entry: AccuracyEntry;
+  current: boolean;
+  suggested: boolean;
+  onChoose: (accuracy: GeocodingAccuracy) => void;
+}
+
+/** One accuracy of the picker, its tag drawn selected while the pointer or the keyboard is on it. */
+const AccuracyOption: React.FC<AccuracyOption> = ({ entry, current, suggested, onChoose }) => {
+  const option = useRef<HTMLButtonElement>(null);
+  const { highlighted, focusHandlers } = useOptionHighlight(option);
+  return (
+    <StyledPickerOption
+      ref={option}
+      type="button"
+      role="option"
+      aria-selected={current}
+      $current={current}
+      $suggested={suggested}
+      onClick={() => onChoose(entry.conceptId)}
+      {...focusHandlers}
+    >
+      <StyledPickerLabel>
+        <AccuracyTag entry={entry} highlighted={highlighted} withTooltip>
+          {suggested ? <StyledPickerAside>what its sources argue for</StyledPickerAside> : null}
+        </AccuracyTag>
+      </StyledPickerLabel>
+    </StyledPickerOption>
+  );
+};
+
+interface ChoiceTag {
+  entity: NonNullable<AccuracyEntry["entity"]>;
+  fullWidth?: boolean;
+  /** Drawn selected. */
+  highlighted?: boolean;
+  /** The entity's own tooltip on hover. */
+  withTooltip?: boolean;
+}
+
+/**
+ * A Concept's tag inside a control that does the choosing or heads a list of
+ * choices: its own click, drag, copy and menu are off, so a click reaches the
+ * control.
+ */
+const ChoiceTag: React.FC<ChoiceTag> = ({ entity, fullWidth, highlighted, withTooltip }) => (
+  <EntityTag
+    entity={entity}
+    fullWidth={fullWidth}
+    isSelected={highlighted}
+    disableTooltip={!withTooltip}
+    tooltipPassThrough
+    disableDrag
+    disableCopyToClipboard
+    disableDoubleClick
+    disableContextMenu
+  />
 );
+
+interface AccuracyTag {
+  entry: AccuracyEntry;
+  /** Drawn selected, for the option the pointer or the keyboard is on. */
+  highlighted?: boolean;
+  /** The Concept's own tooltip on hover; off where the control has a hint of its own. */
+  withTooltip?: boolean;
+  /** Said on the tag's line, after it. */
+  children?: React.ReactNode;
+}
+
+/**
+ * An accuracy as its Concept's tag, inside a control that does the choosing. A
+ * plain description stands in while the Concept loads or where it was deleted.
+ */
+export const AccuracyTag: React.FC<AccuracyTag> = ({
+  entry,
+  highlighted,
+  withTooltip,
+  children,
+}) => (
+  <StyledPickerHead>
+    {entry.entity ? (
+      <ChoiceTag entity={entry.entity} fullWidth highlighted={highlighted} withTooltip={withTooltip} />
+    ) : (
+      entry.label || "an accuracy whose Concept cannot be read"
+    )}
+    {children}
+  </StyledPickerHead>
+);
+
+/**
+ * The heading of a question about accuracy: the Concept the answer is recorded
+ * under on the coordinate, the one assigned for localisation accuracy in Global
+ * geocoding.
+ */
+export const AccuracyHeading: React.FC = () => {
+  const { roleConcept } = useAccuracies();
+  return roleConcept ? (
+    <StyledPickerHeading>
+      <ChoiceTag entity={roleConcept} withTooltip />
+    </StyledPickerHeading>
+  ) : (
+    <StyledPickerHeading data-hint="The accuracy is recorded on the coordinate under the Concept assigned for localisation accuracy in Global geocoding, and none is assigned yet.">
+      accuracy
+    </StyledPickerHeading>
+  );
+};

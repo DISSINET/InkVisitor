@@ -1,7 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
-  GeocodingAccuracy,
   IGeocodingContext,
   IGeocodingRoles,
   rolesShareAConcept,
@@ -49,6 +48,11 @@ import {
 import { GazetteerColumn, GazetteerPicker } from "../../components/gazetteer/GazetteerPicker";
 import { StyledGazetteerNote } from "../../components/gazetteer/GazetteerPickerStyles";
 import { PlaceTypeTable } from "../../components/placeType/PlaceTypeTable";
+import { AccuracyTable } from "../../components/placeType/AccuracyTable";
+import { CitingSettings } from "../../components/gazetteer/CitingSettings";
+import { engineParameters } from "../../utils/engine/engine";
+import { ACCURACY_CONCEPTS_KEY } from "../../hooks/accuraciesContext";
+import { accuraciesToSave, repeatedAccuracy } from "../../utils/write/accuracyEdits";
 import {
   PLACE_TYPE_ASSIGNMENTS_KEY,
   usePlaceTypeAssignments,
@@ -66,8 +70,11 @@ import {
  * needs no seeding job.
  */
 
-const NAMELESS = "Every location type needs a name.";
 const SHARED_CONCEPT = "One Concept cannot be used for two of the coordinate roles.";
+const REPEATED_ACCURACY = "One Concept is listed twice among the accuracies.";
+// a location type is called by its Concept's label, and by its stored name only
+// until it has one; a row added here has neither until a Concept is assigned
+const UNNAMED_TYPE = "Assign a Concept to every location type added, or remove the row.";
 
 interface GeocodingSettingsModal {
   roles: IGeocodingRoles;
@@ -102,7 +109,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         draft.geometry,
         draft.accuracy,
         draft.epistemicSource,
-        ...Object.values(draft.accuracyValues),
+        ...draft.accuracies,
         ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
       ].filter((id): id is string => !!id),
@@ -121,24 +128,14 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   });
   const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
 
-  /**
-   * The description of a location type is its Concept's detail. What is typed in
-   * the table is held here and written to the Concepts by Save, with the rest of
-   * the window, and only for a Concept whose text was changed.
-   */
-  const [details, setDetails] = useState<Record<string, string>>({});
-  const storedDetail = (conceptId: string) =>
-    assignments.conceptEntities[conceptId]?.detail ?? byId[conceptId]?.detail ?? "";
-  const detailOf = (conceptId: string) =>
-    conceptId in details ? details[conceptId] : storedDetail(conceptId);
-  // only Concepts still in the table: a row removed or given another Concept
-  // after its text was typed takes the text with it
-  const changedDetails = () => {
-    const shown = new Set(assignments.nodes.map((node) => node.conceptId));
-    return Object.entries(details).filter(
-      ([conceptId, detail]) => shown.has(conceptId) && detail !== storedDetail(conceptId)
-    );
-  };
+  // the gazetteer location types a search can name, for the citing distances; the
+  // same query key the query panel uses, so the two cost one request
+  const { data: parameters } = useQuery({
+    queryKey: ["geocoding-parameters"],
+    queryFn: ({ signal }) => engineParameters(signal),
+    staleTime: 60 * 60 * 1000,
+    retry: false,
+  });
 
   // every pick changes the id list and so the query key; the previous batch
   // keeps the other rows on screen while the new one loads
@@ -158,19 +155,53 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     return map;
   }, [assignedEntities, picked]);
 
+  /**
+   * The description of a location type or an accuracy is its Concept's detail.
+   * What is typed in the tables is held here and written to the Concepts by
+   * Save, with the rest of the window, and only for a Concept whose text was
+   * changed.
+   *
+   * A Concept's detail counts as read only once the Concept is: until then its
+   * field cannot be typed in, since text typed over a detail not yet shown would
+   * replace it unseen.
+   */
+  const [details, setDetails] = useState<Record<string, string>>({});
+  const readDetail = (conceptId: string): string | undefined => {
+    const entity = assignments.conceptEntities[conceptId] ?? byId[conceptId];
+    return typeof entity?.detail === "string" ? entity.detail : undefined;
+  };
+  const detailReady = (conceptId: string) => readDetail(conceptId) !== undefined;
+  const detailOf = (conceptId: string) =>
+    conceptId in details ? details[conceptId] : (readDetail(conceptId) ?? "");
+  // only Concepts still in the tables: a row removed or given another Concept
+  // after its text was typed takes the text with it
+  const changedDetails = () => {
+    const shown = new Set([
+      ...assignments.nodes.map((node) => node.conceptId),
+      ...draft.accuracies.filter(Boolean),
+    ]);
+    return Object.entries(details).filter(
+      ([conceptId, detail]) =>
+        shown.has(conceptId) && detailReady(conceptId) && detail !== readDetail(conceptId)
+    );
+  };
+
   const save = useMutation({
     mutationFn: async () => {
-      if (draft.placeTypes.some((one) => !one.name.trim())) {
-        throw new Error(NAMELESS);
-      }
       // the roles are told apart by their Concept, so one Concept in two of them
       // would make the geometry and the accuracy under it the same thing
       if (rolesShareAConcept(draft)) {
         throw new Error(SHARED_CONCEPT);
       }
+      if (repeatedAccuracy(draft)) {
+        throw new Error(REPEATED_ACCURACY);
+      }
+      if (draft.placeTypes.some((type) => !type.conceptId && !type.name.trim())) {
+        throw new Error(UNNAMED_TYPE);
+      }
       // the draft holds every role, so a role the researcher unlinked is absent
       // from this object — it has to replace, not merge
-      await putGeocodingRoles(draft);
+      await putGeocodingRoles({ ...draft, ...accuraciesToSave(draft) });
       // after the roles, not beside them: both rewrite the one settings row, and
       // two writes in flight would leave only whichever landed last
       if (sourcesChanged) {
@@ -198,11 +229,12 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
       queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
       queryClient.invalidateQueries({ queryKey: ["geocoding-type-concepts"] });
+      queryClient.invalidateQueries({ queryKey: [ACCURACY_CONCEPTS_KEY] });
       toast.success("Geocoding settings saved.");
       onClose();
     },
     onError: (error) => {
-      if (error instanceof Error && [NAMELESS, SHARED_CONCEPT].includes(error.message)) {
+      if (error instanceof Error && [SHARED_CONCEPT, REPEATED_ACCURACY, UNNAMED_TYPE].includes(error.message)) {
         toast.error(error.message);
         return;
       }
@@ -241,6 +273,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       <EntityTag
         entity={entity}
         fullWidth
+        tooltipPassThrough
         unlinkButton={{ onClick: unlink, tooltipLabel: "unlink entity" }}
       />
     );
@@ -375,16 +408,26 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>
           <StyledSectionNote>
-            The four Concepts a researcher chooses between when accepting a coordinate.
+            The Concepts a researcher chooses between when accepting a coordinate, in the order
+            they are offered. Mark the one taken without asking when a suggestion&apos;s sources
+            agree on the spot, and the one taken when they are scattered: a suggestion&apos;s main
+            button and quick geocoding use them. The description is the Concept&apos;s detail,
+            saved to the Concept.
           </StyledSectionNote>
-          {Object.values(GeocodingAccuracy).map((accuracy) =>
-            row(accuracy, draft.accuracyValues[accuracy], EntityEnums.Class.Concept, (id) =>
-              setDraft((d) => ({
-                ...d,
-                accuracyValues: withEntry(d.accuracyValues, accuracy, id),
-              }))
-            )
-          )}
+          <StyledKindsRow>
+            <AccuracyTable
+              value={draft}
+              onChange={(next) => setDraft((d) => ({ ...d, ...next }))}
+              renderConcept={(conceptId, set) =>
+                picker(conceptId || undefined, EntityEnums.Class.Concept, set)
+              }
+              detailOf={detailOf}
+              detailReady={detailReady}
+              onDetailChange={(conceptId, detail) =>
+                setDetails((current) => ({ ...current, [conceptId]: detail }))
+              }
+            />
+          </StyledKindsRow>
 
           <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
@@ -402,6 +445,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
               nodes={assignments.nodes}
               concepts={assignments.conceptEntities}
               detailOf={detailOf}
+              detailReady={detailReady}
               onDetailChange={(conceptId, detail) =>
                 setDetails((current) => ({ ...current, [conceptId]: detail }))
               }
@@ -439,6 +483,21 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
               </StyledUnsavedNote>
             </StyledFullRow>
           ) : null}
+
+          <StyledSectionHeading>Citing gazetteers</StyledSectionHeading>
+          <StyledSectionNote>
+            A suggestion&apos;s coordinate is one gazetteer record&apos;s own; the first choice says
+            which record the engine takes it from. A Location given a suggestion&apos;s coordinate
+            cites each gazetteer that has a record within the distance below of it, by the
+            gazetteer location type of the search: a record further away was grouped with the
+            others but does not place the Location there. A new write from a suggestion replaces
+            the gazetteer references an earlier one left; a coordinate set on the map changes none.
+          </StyledSectionNote>
+          <CitingSettings
+            value={draft}
+            onChange={(next) => setDraft((current) => ({ ...current, ...next }))}
+            placeTypes={parameters?.placeTypes}
+          />
         </StyledSettingsGrid>
       </ModalContent>
       <ModalFooter>

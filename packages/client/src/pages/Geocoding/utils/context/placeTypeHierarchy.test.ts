@@ -70,7 +70,7 @@ describe("expandPlaceTypes", () => {
   it("lists a location type and every subclass below it, depth first, each level by label", () => {
     const nodes = expandPlaceTypes([paths], { path: pathTree }, concepts);
     expect(nodes.map((node) => [node.name, node.depth])).toEqual([
-      ["ways", 0],
+      ["path", 0],
       ["pavement", 1],
       ["road", 1],
       ["highway", 2],
@@ -183,6 +183,13 @@ describe("expandPlaceTypes", () => {
       "city",
       "walled city",
     ]);
+  });
+
+  it("calls a location type by its Concept's label, and by its stored name only until it has one", () => {
+    expect(expandPlaceTypes([paths], { path: pathTree }, concepts)[0].name).toBe("path");
+    // the label not in yet, or no Concept at all
+    expect(expandPlaceTypes([paths], {}, {})[0].name).toBe("ways");
+    expect(expandPlaceTypes([root("empty", "")], {}, concepts)[0].name).toBe("empty");
   });
 
   it("gives a location type without a Concept, or whose tree is not in yet, no subclasses", () => {

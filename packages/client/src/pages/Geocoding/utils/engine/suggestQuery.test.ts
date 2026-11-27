@@ -12,6 +12,12 @@ describe("buildSuggestQuery", () => {
     expect(query.place_type).toBeUndefined();
   });
 
+  it("sends no rule for a suggestion's coordinate unless the project chose one, leaving the engine's own", () => {
+    expect("representative" in buildSuggestQuery("Roma", {} as IGeocodingContext)).toBe(false);
+    expect("representative" in buildSuggestQuery("Roma", {} as IGeocodingContext, "")).toBe(false);
+    expect(buildSuggestQuery("Roma", {} as IGeocodingContext, "medoid").representative).toBe("medoid");
+  });
+
   it("sends the list fields as lists", () => {
     const query = buildSuggestQuery("Roma", {
       regions: ["italy"],

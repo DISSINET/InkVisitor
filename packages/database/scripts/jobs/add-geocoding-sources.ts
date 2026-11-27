@@ -6,12 +6,14 @@ import type { Connection } from "rethinkdb-ts";
 import { GeocodingRows, pgGeocodingRows, rethinkGeocodingRows } from "./geocoding-rows";
 
 /**
- * How far apart the Value entity holding a gazetteer's record id and the Value
- * holding the geometry can have been created for both to belong to one write.
+ * How long after the Value holding the geometry the Value holding a gazetteer's
+ * record id can have been created for both to belong to one write.
  *
- * The page creates every Value of a write one after the other, so they are
- * seconds apart; a reference added by hand, or kept from an earlier geocode
- * while the coordinate was later moved, has its Value created at another time.
+ * The page creates every Value of a write one after the other, the geometry's
+ * first, so a write's record ids follow its geometry by seconds. One created
+ * before the geometry belongs to an earlier write; one added by hand, or kept
+ * from an earlier geocode while the coordinate was later moved, has its Value
+ * created at another time.
  */
 const SAME_WRITE_MS = 5 * 60 * 1000;
 
@@ -73,7 +75,8 @@ const gazetteersOfCurrentCoordinate = async (
     const at = createdAt.get(reference.value);
     if (
       at !== undefined &&
-      Math.abs(at - geometryAt) <= SAME_WRITE_MS &&
+      at >= geometryAt &&
+      at - geometryAt <= SAME_WRITE_MS &&
       !credited.includes(reference.resource)
     ) {
       credited.push(reference.resource);

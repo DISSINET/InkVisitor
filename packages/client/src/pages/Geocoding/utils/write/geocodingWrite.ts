@@ -44,6 +44,14 @@ export interface GeocodingWriteInput {
    * prop, so it is carried on the plan for the executor rather than in `props`.
    */
   placeType?: string | null;
+  /**
+   * The records an engine suggestion cites for this coordinate, present exactly
+   * when the write comes from one (a card, quick geocode, the batch). Such a
+   * write replaces the Location's references to the project's gazetteers, and
+   * the gazetteers named under a kept geometry, with these; a write without it
+   * leaves every reference as it is, since a coordinate placed by hand says
+   * nothing about which gazetteers agree with it.
+   */
   provenance?: GeocodingProvenance[];
   /**
    * The geometry the Location already carries, where it has one.
@@ -146,10 +154,16 @@ export const planGeocodingWrite = (
     geometry,
     accuracy,
     placeType,
-    provenance = [],
+    provenance,
     userOptions,
     current,
   } = input;
+  const fromSuggestion = provenance !== undefined;
+  const claims = provenance ?? [];
+  // what a write from a suggestion replaces: the project's gazetteers, as
+  // references and as sources named under the geometry. Any other Resource is a
+  // researcher's own
+  const gazetteerResources = new Set(Object.values(roles.resources).filter(Boolean));
 
   if (!roles.geometry || !roles.accuracy) {
     return { blocked: "The geocoding Concepts are not assigned yet — set them in the settings." };
@@ -168,10 +182,12 @@ export const planGeocodingWrite = (
     return { blocked: "That is not a valid GeoJSON geometry — a position is outside the earth." };
   }
 
-  const accuracyId = roles.accuracyValues[accuracy];
-  if (!accuracyId) {
-    return { blocked: `No Concept is assigned for the accuracy "${accuracy}".` };
+  // a write puts only what the project lists on a Location; a choice offers
+  // nothing else, and a default named before the list changed may not be in it
+  if (!accuracy || !roles.accuracies.includes(accuracy)) {
+    return { blocked: "The accuracy is not one of the project's accuracies." };
   }
+  const accuracyId = accuracy;
 
   // an accuracy prop beside the geometry that has notes under its own notes would
   // lose them, or push them to a level nothing shows, when it is written under the
@@ -234,7 +250,7 @@ export const planGeocodingWrite = (
 
   // the sources are named only where the project has the role for them; the
   // references below record them either way
-  const sources = roles.epistemicSource ? sourceResources(provenance, roles) : [];
+  const sources = roles.epistemicSource ? sourceResources(claims, roles) : [];
   const sourceChildren = (known: string[]) =>
     sources
       .filter((resourceId) => !known.includes(resourceId))
@@ -248,13 +264,23 @@ export const planGeocodingWrite = (
 
   // the geometry prop the Location keeps carries its other children over, and
   // the sources it already names, to which the new ones are added: a coordinate
-  // that did not move is still the one those gazetteers supplied. A new geometry
-  // prop starts with what this write says about it, and with whatever else a
-  // researcher hung under the geometry it replaces, which is about the place and
-  // not about the coordinate that moved
+  // that did not move is still the one those gazetteers supplied. A write from a
+  // suggestion names exactly the gazetteers that suggestion cites instead, the
+  // same ones its references cite. A new geometry prop starts with what this
+  // write says about it, and with whatever else a researcher hung under the
+  // geometry it replaces, which is about the place and not about the coordinate
+  // that moved
   let geometryProp: IProp;
   if (keptGeometry) {
-    const children = keptGeometry.children || [];
+    const children = (keptGeometry.children || []).filter(
+      (child) =>
+        !(
+          fromSuggestion &&
+          !!roles.epistemicSource &&
+          child.type?.entityId === roles.epistemicSource &&
+          gazetteerResources.has(child.value?.entityId)
+        ),
+    );
     const named = children
       .filter((child) => child.type?.entityId === roles.epistemicSource)
       .map((child) => child.value?.entityId);
@@ -290,10 +316,16 @@ export const planGeocodingWrite = (
     ...(keptGeometry ? [] : [geometryProp]),
   ];
 
+  // a write from a suggestion takes the place of the gazetteer references an
+  // earlier one left, so a record that no longer agrees with the coordinate is
+  // not cited for it
+  const replacedReferences = fromSuggestion
+    ? previousReferences.filter((reference) => gazetteerResources.has(reference.resource))
+    : [];
+  const references = previousReferences.filter((reference) => !replacedReferences.includes(reference));
   // `llm-coords` is the model's own guess rather than a gazetteer: it has no
   // record to cite, so it never becomes a reference
-  const references = [...previousReferences];
-  for (const claim of provenance) {
+  for (const claim of claims) {
     const resourceId = roles.resources[claim.source];
     if (!resourceId || !claim.sourceId) {
       continue;
@@ -308,15 +340,23 @@ export const planGeocodingWrite = (
     props,
     references,
     kindConceptId,
-    // Only the geometry Values, which this feature mints and nothing else
-    // names. The accuracy role points at Concepts drawn from the project's own
-    // vocabulary — a previous accuracy is a Concept other Locations use, and
-    // offering it for deletion asks the server to remove a term from the
-    // vocabulary because one place stopped using it.
-    displacedValueIds: displaced
-      .filter((prop) => prop.type?.entityId === roles.geometry)
-      .map((prop) => prop.value?.entityId)
-      .filter((id): id is string => !!id),
+    // The Values only the replaced props and references pointed at: a replaced
+    // geometry's, and the record ids of replaced gazetteer references. The
+    // checked delete keeps any that something else still points at. The
+    // accuracy role points at Concepts drawn from the project's own vocabulary
+    // — a previous accuracy is a Concept other Locations use, and offering it
+    // for deletion asks the server to remove a term from the vocabulary because
+    // one place stopped using it.
+    displacedValueIds: [
+      ...new Set(
+        [
+          ...displaced
+            .filter((prop) => prop.type?.entityId === roles.geometry)
+            .map((prop) => prop.value?.entityId),
+          ...replacedReferences.map((reference) => reference.value),
+        ].filter((id): id is string => !!id),
+      ),
+    ],
     previous: { props: previousProps, references: previousReferences },
     // the geometry Value it replaces, so a first geometry and a kept one
     // both read as false however much else the write changes

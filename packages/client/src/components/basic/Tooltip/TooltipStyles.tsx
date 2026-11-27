@@ -5,8 +5,10 @@ import styled from "styled-components";
 interface StyledContainer {
   $color: keyof ThemeColor;
   arrowoffset: number;
+  $passThrough?: boolean;
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
+  ${({ $passThrough }) => ($passThrough ? "pointer-events: none;" : "")}
   color: ${({ theme }) => theme.color.tooltipColor};
   background-color: ${({ theme, $color }) => theme.color[$color]};
   min-width: ${({ theme }) => theme.space[8]};

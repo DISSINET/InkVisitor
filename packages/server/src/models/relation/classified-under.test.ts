@@ -4,7 +4,7 @@ import { IClassifiedUnder } from "@inkvisitor/shared/types";
 import { Db } from "@service/storage";
 import { deleteRelations } from "@service/shorthands";
 import { saveRelationFixture } from "../../test/relations";
-import { getClassifiedUnder, getConceptTree, getConceptsBelow } from "./classified-under";
+import { getClassifiedUnder, getConceptTree } from "./classified-under";
 import * as functions from "./functions";
 import Relation from "./relation";
 
@@ -57,6 +57,13 @@ describe("getClassifiedUnder", () => {
     await saveRelationFixture(db.connection, SCL, ["diamond right", "diamond top"]);
     await saveRelationFixture(db.connection, SCL, ["diamond bottom", "diamond left"]);
     await saveRelationFixture(db.connection, SCL, ["diamond bottom", "diamond right"]);
+
+    // place <- town, place <- municipality; Stadt is a synonym of town and a
+    // subclass of municipality, so town is a municipality too
+    await saveRelationFixture(db.connection, SCL, ["town of place", "place"]);
+    await saveRelationFixture(db.connection, SCL, ["municipality", "place"]);
+    await saveRelationFixture(db.connection, SYN, ["town of place", "Stadt"]);
+    await saveRelationFixture(db.connection, SCL, ["Stadt", "municipality"]);
 
     await classify("L-direct", "settlement");
     await classify("L-city", "city");
@@ -177,6 +184,13 @@ describe("getClassifiedUnder", () => {
     expect(truncated).toBe(false);
   });
 
+  it("gives a node the superclass of its synonym as a parent too", async () => {
+    const { tree } = await getConceptTree(db.connection, "place");
+    const town = tree.nodes.find((node) => node.id === "town of place");
+    expect(town?.parents).toEqual(["municipality", "place"]);
+    expect(tree.aliases).toEqual({ Stadt: "town of place" });
+  });
+
   it("keeps both superclasses of a subclass that sits under two branches of one tree", async () => {
     const { tree } = await getConceptTree(db.connection, "diamond top");
     const bottom = tree.nodes.find((node) => node.id === "diamond bottom");
@@ -217,7 +231,7 @@ describe("getClassifiedUnder", () => {
   });
 
   it("lists the Concepts below one, itself included", async () => {
-    const { below, truncated } = await getConceptsBelow(db.connection, "settlement");
+    const { below, truncated } = await getConceptTree(db.connection, "settlement");
     expect([...below].sort()).toEqual(
       [
         "settlement",
@@ -266,7 +280,7 @@ describe("getClassifiedUnder, when the walk hits its limit", () => {
   it("stops at the limit rather than walking on through a wider and wider set", async () => {
     const { calls } = wideTree();
 
-    const { below, truncated } = await getConceptsBelow({} as any, "broad");
+    const { below, truncated } = await getConceptTree({} as any, "broad");
 
     expect(truncated).toBe(true);
     expect(below.size).toBe(functions.SUBORDINATE_MAX_NODES);
@@ -290,7 +304,7 @@ describe("getClassifiedUnder, when the walk hits its limit", () => {
         return relations;
       });
 
-    const { below, truncated } = await getConceptsBelow({} as any, "a");
+    const { below, truncated } = await getConceptTree({} as any, "a");
 
     expect([...below].sort()).toEqual(["a", "b", "c"]);
     expect(truncated).toBe(false);

@@ -1,8 +1,4 @@
-import {
-  GeocodingAccuracy,
-  IGeocodingContext,
-  IGeocodingPlaceType,
-} from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -20,6 +16,7 @@ import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
 import React, { useState } from "react";
 import { usePlaceTypes } from "../../hooks/placeTypesContext";
+import { useAccuracies } from "../../hooks/accuraciesContext";
 import { indentedName } from "../../hooks/useGeocodingBrowse";
 import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { toast } from "react-toastify";
@@ -47,11 +44,6 @@ import { QuickStrategy } from "../../utils/suggestions/quickGeocode";
  * project, because it decides what "geocoded" means — were it overridable here,
  * the same Location would read as geocoded for one person and not for another.
  */
-
-const accuracyOptions = Object.values(GeocodingAccuracy).map((value) => ({
-  value,
-  label: value,
-}));
 
 const taskCategoryOptions = [
   { value: "quick", label: "quick — fastest provider" },
@@ -121,6 +113,13 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  // the project's accuracies; a stored value that is none of them (a legacy
+  // word, a Concept taken off the list) reads as nothing marked
+  const accuracies = useAccuracies();
+  const accuracyOptions = [
+    { value: "", label: "nothing marked" },
+    ...accuracies.entries.map((entry) => ({ value: entry.conceptId, label: entry.label || "…" })),
+  ];
   const placeTypes = usePlaceTypes();
   /**
    * The preferences as they will be written, which is this researcher's layer
@@ -210,15 +209,21 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           )}
           {row(
             "map click",
-            "The accuracy recorded when you set a coordinate by clicking the map. Accepting " +
-              "a suggestion asks each time instead, because there the sources say how far " +
-              "apart they are.",
+            "The accuracy marked first in the menu a click on the map opens; you still " +
+              "choose. Accepting a suggestion marks what its sources argue for instead, " +
+              "because there the sources say how far apart they are.",
             <Dropdown.Single.Basic
               width="full"
               options={accuracyOptions}
-              value={draft.mapClickAccuracy ?? GeocodingAccuracy.Approximate}
+              value={
+                accuracies.entries.some((entry) => entry.conceptId === draft.mapClickAccuracy)
+                  ? (draft.mapClickAccuracy as GeocodingAccuracy)
+                  : ""
+              }
               onChange={(value) =>
-                setDraft((d) => ({ ...d, mapClickAccuracy: value as GeocodingAccuracy }))
+                // "" clears the mark: the stored preferences are merged into,
+                // and a key left out keeps the value stored under it
+                setDraft((d) => ({ ...d, mapClickAccuracy: (value as GeocodingAccuracy) || "" }))
               }
             />
           )}

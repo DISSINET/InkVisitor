@@ -20,7 +20,13 @@ export interface WrittenGeometry {
  * saved — so the strip is fed by every route that writes, and none of them has
  * to remember to.
  */
-export const useRecentGeocodes = () => {
+export const useRecentGeocodes = (
+  /**
+   * What an accuracy is called. The strip only shows it, so it keeps the name
+   * the accuracy had when the coordinate was written.
+   */
+  accuracyLabelOf: (accuracy: string) => string,
+) => {
   const [recent, setRecent] = useState<RecentGeocode[]>(loadRecent);
 
   const record = useCallback((written: WrittenGeometry) => {
@@ -32,14 +38,14 @@ export const useRecentGeocodes = () => {
         lat: anchor.lat,
         lon: anchor.lon,
         kind: written.geometry.type,
-        accuracy: written.accuracy,
+        accuracy: accuracyLabelOf(written.accuracy),
         suggestion: written.suggestion,
         at: Date.now(),
       });
       saveRecent(next);
       return next;
     });
-  }, []);
+  }, [accuracyLabelOf]);
 
   return { recent, record };
 };

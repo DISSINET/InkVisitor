@@ -3,6 +3,7 @@ import {
   GeocodingAccuracy,
   IGeocodingRoles,
   defaultPlaceTypes,
+  defaultCiteWithinKm,
 } from "@inkvisitor/shared/types/geocoding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -33,15 +34,16 @@ const stored: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
   epistemicSource: "c-source",
-  accuracyValues: {
-    [GeocodingAccuracy.Precise]: "v-precise",
-    [GeocodingAccuracy.Approximate]: "v-approx",
-  },
+  accuracies: ["v-precise", "v-approx"],
+  accuracyWhenAgree: "v-precise",
+  accuracyWhenScattered: "v-approx",
   placeTypes: [
     { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
     { ...defaultPlaceTypes()[1], conceptId: "v-fortress" },
   ],
   resources: { wikidata: "r-wikidata", geonames: "r-geonames" },
+  representative: "",
+  citeWithinKm: defaultCiteWithinKm(),
 };
 
 const written = (): IGeocodingRoles => settingUpdate.mock.calls[0][1].value.roles;
@@ -55,9 +57,9 @@ beforeEach(() => {
 
 describe("withEntry", () => {
   it("removes the key rather than blanking it, so a reader asking whether it exists is told no", () => {
-    const next = withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null);
-    expect(GeocodingAccuracy.Precise in next).toBe(false);
-    expect(next[GeocodingAccuracy.Approximate]).toBe("v-approx");
+    const next = withEntry(stored.resources, "wikidata", null);
+    expect("wikidata" in next).toBe(false);
+    expect(next.geonames).toBe("r-geonames");
   });
 
   it("sets the key without touching the others", () => {
@@ -66,8 +68,8 @@ describe("withEntry", () => {
   });
 
   it("leaves the map it was given alone", () => {
-    withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null);
-    expect(stored.accuracyValues[GeocodingAccuracy.Precise]).toBe("v-precise");
+    withEntry(stored.resources, "wikidata", null);
+    expect(stored.resources.wikidata).toBe("r-wikidata");
   });
 });
 
@@ -111,10 +113,34 @@ describe("putGeocodingRoles", () => {
 
 describe("patchGeocodingRoles", () => {
   it("merges the keyed maps, so a caller holding one key cannot express a removal", async () => {
-    await patchGeocodingRoles({
-      accuracyValues: withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null),
+    await patchGeocodingRoles({ resources: withEntry(stored.resources, "wikidata", null) });
+    expect(written().resources.wikidata).toBe("r-wikidata");
+  });
+
+  it("replaces the list of accuracies whole, and keeps an emptied one empty", async () => {
+    await patchGeocodingRoles({ accuracies: [], accuracyWhenAgree: "", accuracyWhenScattered: "" });
+    expect(written().accuracies).toEqual([]);
+  });
+
+  it("reads a row written before the accuracies were a list as the four, precise and approximate marked", async () => {
+    const { accuracies: _a, accuracyWhenAgree: _b, accuracyWhenScattered: _c, ...older } = stored;
+    settingGet.mockResolvedValue({
+      data: {
+        data: {
+          value: {
+            roles: {
+              ...older,
+              accuracyValues: { precise: "v-precise", approximate: "v-approx", unknown: "v-unknown" },
+            },
+            context: {},
+          },
+        },
+      },
     });
-    expect(written().accuracyValues[GeocodingAccuracy.Precise]).toBe("v-precise");
+    await patchGeocodingRoles({ geometry: "c-geo-2" });
+    expect(written().accuracies).toEqual(["v-precise", "v-approx", "v-unknown"]);
+    expect(written().accuracyWhenAgree).toBe("v-precise");
+    expect(written().accuracyWhenScattered).toBe("v-approx");
   });
 
   it("replaces the list of place types whole", async () => {

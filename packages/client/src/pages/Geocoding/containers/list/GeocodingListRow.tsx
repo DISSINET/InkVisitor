@@ -247,7 +247,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             geometry={location.geometry ?? undefined}
             lat={location.lat ?? undefined}
             lon={location.lon ?? undefined}
-            accuracy={location.accuracy ?? undefined}
+            accuracy={location.accuracyLabel || undefined}
           >
             <StyledRowMark $state="geocoded" />
           </CoordinateHover>
@@ -304,6 +304,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
               // Location must not put it on the clipboard
               disableCopyToClipboard
               tooltipPosition="right"
+              tooltipPassThrough
             />
           </StyledRowTag>
           {/* nothing at all for a Location that simply has none, and none for the

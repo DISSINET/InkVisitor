@@ -18,6 +18,8 @@ import {
   groupsOf,
 } from "../utils/context/geocodingGroups";
 import { GeocodingLocation, useGeocodingLocations } from "./useGeocodingLocations";
+import { PlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { Accuracies } from "./accuraciesContext";
 
 /**
  * The page's one collection, and the filters over it.
@@ -31,10 +33,32 @@ export const ANY = "any";
 
 export const anyOption: DropdownItem = { value: ANY, label: "any" };
 
-export const accuracyOptions: DropdownItem[] = [
-  anyOption,
-  ...Object.values(GeocodingAccuracy).map((value) => ({ value, label: value })),
-];
+/**
+ * The accuracies the list can be narrowed to: the project's, in the order the
+ * owner listed them, and then any Concept a Location still carries that the
+ * project has since taken off its list, so those Locations can be found.
+ */
+export const accuracyOptionsFor = (
+  locations: { accuracy: GeocodingAccuracy | null; accuracyLabel: string }[],
+  accuracies: Accuracies,
+  filtered: string = ANY,
+): DropdownItem[] => {
+  const listed = new Set(accuracies.entries.map((entry) => entry.conceptId));
+  const others = new Map<string, string>();
+  for (const location of locations) {
+    if (location.accuracy && !listed.has(location.accuracy)) {
+      others.set(location.accuracy, location.accuracyLabel || accuracies.labelOf(location.accuracy));
+    }
+  }
+  if (filtered !== ANY && !listed.has(filtered) && !others.has(filtered)) {
+    others.set(filtered, accuracies.labelOf(filtered));
+  }
+  return [
+    anyOption,
+    ...accuracies.entries.map((entry) => ({ value: entry.conceptId, label: entry.label || "…" })),
+    ...[...others].map(([value, label]) => ({ value, label })),
+  ];
+};
 
 /** Locations that state no location type. Not the same as "any". */
 export const NO_PLACE_TYPE = "__none";
@@ -100,6 +124,8 @@ export interface UseGeocodingBrowse {
    * list, and the list would look broken rather than the corpus untyped.
    */
   placeTypeOptions: DropdownItem[];
+  /** The accuracies the list can be narrowed to. */
+  accuracyOptions: DropdownItem[];
   /** How the list is arranged. Never changes which Locations it holds. */
   groupBy: GroupBy;
   setGroupBy: (groupBy: GroupBy) => void;
@@ -177,7 +203,13 @@ export const matchesKinds = (kinds: string[], filter: string): boolean => {
   return kinds.includes(filter);
 };
 
-export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse => {
+export const useGeocodingBrowse = (
+  roles: IGeocodingRoles,
+  /** What the Locations are classified under, as the page read it. */
+  assignments: PlaceTypeAssignments,
+  /** The project's accuracies, as the page read them. */
+  accuracies: Accuracies,
+): UseGeocodingBrowse => {
   const [filters, setFilters] = useState<GeocodingFilters>({
     label: "",
     createdBy: ANY,
@@ -239,7 +271,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
       filters.territoryId !== ANY && filters.subTerritories === "included" ? true : undefined,
     language: filters.language === ANY ? undefined : (filters.language as EntityEnums.Language),
     status: filters.status === ANY ? undefined : (filters.status as EntityEnums.Status),
-  });
+  }, assignments);
 
   // everything except the place type filter, which is what its own options are
   // drawn from: options taken from the whole collection would offer a location type the
@@ -283,13 +315,18 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
    * server, so the collection here has already been narrowed by them and a
    * count over it would say the same number for every option.
    */
+  const accuracyOptions = useMemo(
+    () => accuracyOptionsFor(locations, accuracies, filters.accuracy),
+    [locations, accuracies, filters.accuracy],
+  );
+
   const optionCounts = useMemo(() => {
     const counts: Record<string, Record<string, number>> = { accuracy: {}, placeType: {} };
     const underPlaceType = locations.filter((location) =>
       matchesKinds(location.placeTypes, filters.placeType),
     );
     counts.accuracy[ANY] = underPlaceType.length;
-    for (const accuracy of Object.values(GeocodingAccuracy)) {
+    for (const { value: accuracy } of accuracyOptions.filter((option) => option.value !== ANY)) {
       counts.accuracy[accuracy] = underPlaceType.filter(
         (location) => location.accuracy === accuracy,
       ).length;
@@ -307,7 +344,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
       ).length;
     }
     return counts;
-  }, [locations, filters.accuracy, filters.placeType, roles.placeTypes]);
+  }, [locations, filters.accuracy, filters.placeType, roles.placeTypes, accuracyOptions]);
 
   const clearFilters = useCallback(
     () =>
@@ -339,6 +376,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     statusOptions,
     createdByOptions,
     placeTypeOptions,
+    accuracyOptions,
     optionCounts,
     clearFilters,
     groupBy,

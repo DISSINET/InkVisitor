@@ -4,6 +4,7 @@ import React, { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, Rendered } from "../utils/test/renderForTest";
 import { UseGeocodingLocations, useGeocodingLocations } from "./useGeocodingLocations";
+import { usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 
 const api = vi.hoisted(() => ({
   entitiesSearch: vi.fn(),
@@ -26,7 +27,8 @@ const roles = { ...emptyGeocodingRoles(), placeTypes: types };
 
 let result: UseGeocodingLocations;
 const Probe = () => {
-  result = useGeocodingLocations(roles, {});
+  const assignments = usePlaceTypeAssignments(roles.placeTypes);
+  result = useGeocodingLocations(roles, {}, assignments);
   return null;
 };
 

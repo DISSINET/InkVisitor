@@ -1,4 +1,4 @@
-import { IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
+import { GeocodingRepresentative, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EngineProgress, engineSuggestStream, watchEngineProgress } from "../utils/engine/engine";
 import { StreamCandidate, SuggestResponse } from "../types/engine";
@@ -73,6 +73,8 @@ export interface UseGeocodingSuggest {
     locationId: string,
     name: string,
     context: IGeocodingContext,
+    /** The owner's rule for a suggestion's coordinate; "" for the engine's own. */
+    representative?: GeocodingRepresentative | "",
   ) => Promise<SuggestResponse | null>;
   cancel: () => void;
   clear: () => void;
@@ -122,7 +124,12 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
   }, []);
 
   const run = useCallback(
-    async (locationId: string, name: string, context: IGeocodingContext) => {
+    async (
+      locationId: string,
+      name: string,
+      context: IGeocodingContext,
+      representative: GeocodingRepresentative | "" = "",
+    ) => {
       // one at a time; a second press replaces the first rather than racing it
       abortRef.current?.abort();
       stopWatchingRef.current?.();
@@ -151,7 +158,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
       setResponseContext(null);
       setIsProvisional(false);
 
-      const query = buildSuggestQuery(name, context);
+      const query = buildSuggestQuery(name, context, representative);
 
       try {
         const result = await engineSuggestStream(

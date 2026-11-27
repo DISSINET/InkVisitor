@@ -87,8 +87,13 @@ export default Router()
     "/classified-under",
     asyncRouteHandler<IResponseClassifiedUnder>(
       async (request: IRequest<unknown, unknown, { concepts?: string | string[] }>) => {
-        const asked = ([] as string[])
-          .concat(request.query.concepts ?? [])
+        // a query string can also parse into an object (`concepts[a]=b`), which
+        // is no list of ids
+        const given = ([] as unknown[]).concat(request.query.concepts ?? []);
+        if (given.some((one) => typeof one !== "string")) {
+          throw new BadParams("concepts has to be a comma-separated list of ids");
+        }
+        const asked = (given as string[])
           .reduce<string[]>((all, one) => all.concat(one.split(",")), [])
           .map((id) => id.trim())
           .filter(Boolean);

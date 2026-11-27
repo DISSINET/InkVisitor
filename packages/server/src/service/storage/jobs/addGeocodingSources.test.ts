@@ -145,6 +145,15 @@ beforeEach(async () => {
       props: [prop(75, GEOMETRY, uuid(192))],
       references: [reference(74, GEONAMES)],
     },
+    // an earlier suggestion's GeoNames reference, a minute before the one written
+    // now: a write creates its geometry Value before its record id Values
+    {
+      id: uuid(23),
+      class: "L",
+      labels: ["written over"],
+      props: [prop(77, GEOMETRY, uuid(193))],
+      references: [reference(76, GEONAMES)],
+    },
   ]);
   await db.insertEntities([
     // the Value of a geometry and the Values of the record ids written with it
@@ -159,6 +168,9 @@ beforeEach(async () => {
     // neither has a creation time
     value(192),
     value(174),
+    // the record id a minute before the geometry it is checked against
+    value(193, later(60_000)),
+    value(176, T0),
   ]);
 });
 
@@ -221,6 +233,11 @@ describe("add-geocoding-sources", () => {
   it("credits no gazetteer for a reference that was added by hand long after the coordinate", async () => {
     await db.run("addGeocodingSourcesJob");
     expect((await location(21)).props[0].children).toEqual([]);
+  });
+
+  it("credits no gazetteer for a reference written before the coordinate, by an earlier write", async () => {
+    await db.run("addGeocodingSourcesJob");
+    expect((await location(23)).props[0].children).toEqual([]);
   });
 
   it("credits nothing where the Values say nothing of when they were written", async () => {

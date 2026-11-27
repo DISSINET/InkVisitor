@@ -644,9 +644,9 @@ export default class Relation implements IRelationModel {
     const items = (await storage.relations.forEntities(db, entityIds, relType)) as T[];
 
     if (position !== undefined) {
-      return items.filter(
-        (d) => entityIds.indexOf(d.entityIds[position]) !== -1
-      );
+      // a set: a subclass tree can ask for thousands of ids at once
+      const asked = new Set(entityIds);
+      return items.filter((d) => asked.has(d.entityIds[position]));
     }
     return items;
   }

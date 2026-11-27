@@ -237,6 +237,25 @@ describe("PlaceTypePicker, saying what the choice is about", () => {
     mount({ onChoose: vi.fn() });
     expect(document.body.textContent).not.toContain("new location");
   });
+
+  it("heads the list with what is asked, the relation it is recorded as, and the note, outside the options", () => {
+    mount({ note: "new location · 48.31000, 14.92000", onChoose: vi.fn() });
+    const header = document.querySelector("[role=dialog]")!.firstElementChild as HTMLElement;
+    expect(header.getAttribute("role")).toBeNull();
+    expect(header.textContent).toBe(
+      "add a location typerecorded asCLAClassificationnew location · 48.31000, 14.92000",
+    );
+    const heading = header.querySelector<HTMLElement>("[data-hint]")!;
+    expect(heading.textContent).toBe("CLAClassification");
+    expect(heading.dataset.hint).toContain("Classification (CLA) relation from the Location");
+    expect(document.querySelector("[role=listbox]")!.textContent).not.toContain("Classification");
+  });
+
+  it("calls the header of a list that is ticked what the place has", () => {
+    mount({ held: [], onToggle: vi.fn() });
+    const header = document.querySelector("[role=dialog]")!.firstElementChild as HTMLElement;
+    expect(header.textContent).toContain("location types of this place");
+  });
 });
 
 
@@ -299,6 +318,28 @@ describe("PlaceTypePicker, with the subclass tree of a location type", () => {
     await hover("church");
     const list = listOf("church");
     expect(namesIn(list)).toEqual(["cathedral", "chapel"]);
+  });
+
+  it("shows a location type as its name alone, without its Concept's detail under it", async () => {
+    mountTree([], { onChoose: vi.fn() });
+    await hover("church");
+    expect(option("cathedral").textContent).toBe("cathedral");
+    expect(document.body.textContent).not.toContain("the church of a bishop's see");
+  });
+
+  it("opens the subclasses of a subclass the pointer arrives on straight from another row", async () => {
+    mountTree([], { onChoose: vi.fn() });
+    await hover("church");
+    // from the settlement row of the first list straight onto cathedral, which
+    // enters the church row too, since its list sits inside it
+    act(() => {
+      option("settlement").dispatchEvent(
+        new MouseEvent("mouseout", { bubbles: true, relatedTarget: option("cathedral").parentElement }),
+      );
+    });
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 200)));
+    expect(namesIn(listOf("church"))).toEqual(["cathedral", "chapel"]);
+    expect(namesIn(listOf("cathedral"))).toEqual(["metropolitan cathedral"]);
   });
 
   it("goes on down the tree, a subclass with subclasses of its own opening the next list", async () => {

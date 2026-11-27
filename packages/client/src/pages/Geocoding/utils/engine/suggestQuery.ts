@@ -1,4 +1,4 @@
-import { IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
+import { GeocodingRepresentative, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { SuggestRequest } from "../../types/engine";
 import { ENGINE_LIMITS, withinListLimits } from "./engineLimits";
 import {
@@ -19,7 +19,11 @@ import {
  * mutually exclusive on the engine — both together is a 422 rather than a
  * merge — so `regionToSend` yields nothing whenever a box is in force.
  */
-export const buildSuggestQuery = (name: string, context: IGeocodingContext): SuggestRequest => ({
+export const buildSuggestQuery = (
+  name: string,
+  context: IGeocodingContext,
+  representative: GeocodingRepresentative | "" = "",
+): SuggestRequest => ({
   name,
   region: withinListLimits(regionToSend(context)),
   regionBbox: regionBoxToSend(context),
@@ -30,4 +34,6 @@ export const buildSuggestQuery = (name: string, context: IGeocodingContext): Sug
   disabledSources: disabledSourcesToSend(context)?.slice(0, ENGINE_LIMITS.disabledSources),
   taskCategory: context.taskCategory,
   dedupeDiacritics: context.dedupeDiacritics,
+  // left off for the engine's own default, which is its measured best
+  ...(representative ? { representative } : {}),
 });

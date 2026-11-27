@@ -33,7 +33,7 @@ const at = (id: string, over: Partial<GeocodingLocation> = {}): GeocodingLocatio
   }) as GeocodingLocation;
 
 const done = (id: string, over: Partial<GeocodingLocation> = {}) =>
-  at(id, { isGeocoded: true, accuracy: GeocodingAccuracy.Precise, ...over });
+  at(id, { isGeocoded: true, accuracy: "c-precise", ...over });
 
 const rowsOf = (groups: ReturnType<typeof groupsOf>) =>
   groups.flatMap((group) => group.rows.map((row) => row.entity.id));

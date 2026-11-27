@@ -41,11 +41,14 @@ export const isRootNode = (type: IGeocodingPlaceType): boolean =>
 /** The location types a project set up, out of a list that may hold their trees too. */
 export const rootsOf = <T extends IGeocodingPlaceType>(types: T[]): T[] => types.filter(isRootNode);
 
+// a location type is called by its Concept's label; the stored name is what it
+// is called while it has no Concept, or until the label is in
 const rootNode = (
   root: IGeocodingPlaceType,
   concepts: Record<string, TypeConcept>
 ): PlaceTypeNode => ({
   ...root,
+  name: (root.conceptId && concepts[root.conceptId]?.label) || root.name,
   rootId: root.id,
   parentIds: [],
   depth: 0,

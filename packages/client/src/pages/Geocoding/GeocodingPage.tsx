@@ -14,6 +14,8 @@ import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced"
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { CEntity } from "constructors";
+import { isBlocked, planGeocodingWrite } from "./utils/write/geocodingWrite";
 import { useAppSelector } from "redux/hooks";
 import { IcoMenuFold, IcoMenuUnfold } from "Theme/icons";
 import { ButtonSize } from "types";
@@ -57,6 +59,7 @@ import {
 import { useGeocodingSuggest } from "./hooks/useGeocodingSuggest";
 import { useGeocodingWriter } from "./hooks/useGeocodingWriter";
 import { useRecentGeocodes } from "./hooks/useRecentGeocodes";
+import { AccuraciesProvider, useAccuracyList } from "./hooks/accuraciesContext";
 import { useRefreshedSelection } from "./hooks/useRefreshedSelection";
 
 /**
@@ -97,6 +100,8 @@ export const GeocodingPage: React.FC = () => {
     () => ({ ...storedRoles, placeTypes: typeHierarchy.nodes }),
     [storedRoles, typeHierarchy.nodes]
   );
+  // the project's accuracies, each called by its Concept's label
+  const accuracies = useAccuracyList(storedRoles);
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
@@ -299,7 +304,7 @@ export const GeocodingPage: React.FC = () => {
   // the suggestions all sit under this component
   const [selected, setSelected] = useState<GeocodingLocation | undefined>(undefined);
 
-  const browse = useGeocodingBrowse(roles);
+  const browse = useGeocodingBrowse(roles, typeHierarchy, accuracies);
   const panels = useGeocodingPanels();
 
   // a Location whose classifications could not be read looks like one with no
@@ -314,6 +319,8 @@ export const GeocodingPage: React.FC = () => {
     } else {
       toast.dismiss(TYPES_UNREADABLE_TOAST);
     }
+    // it says something about this page, and goes with it
+    return () => toast.dismiss(TYPES_UNREADABLE_TOAST);
   }, [browse.typesError]);
 
   /**
@@ -523,7 +530,7 @@ export const GeocodingPage: React.FC = () => {
       : editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
 
   useRefreshedSelection(browse.all, selected, setSelected);
-  const { recent, record: recordRecent } = useRecentGeocodes();
+  const { recent, record: recordRecent } = useRecentGeocodes(accuracies.labelOf);
   const {
     write,
     editTypes,
@@ -610,6 +617,7 @@ export const GeocodingPage: React.FC = () => {
     clearSuggestions: suggest.clear,
     onSelect: setSelected,
     onShowOnMap: (lat, lon) => setFocus((current) => nextFocus(current, lat, lon)),
+    accuracyLabelOf: accuracies.labelOf,
   });
 
   /**
@@ -669,7 +677,7 @@ export const GeocodingPage: React.FC = () => {
     if (suggest.responseFor === selected.entity.id || suggest.runningFor === selected.entity.id) {
       return;
     }
-    suggest.run(selected.entity.id, selected.entity.labels[0] || "", context);
+    suggest.run(selected.entity.id, selected.entity.labels[0] || "", context, storedRoles.representative);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.entity.id, context.autoSearch, engineReady]);
 
@@ -701,6 +709,7 @@ export const GeocodingPage: React.FC = () => {
       concepts={typeHierarchy.conceptEntities}
       viaLabels={browse.viaLabels}
     >
+      <AccuraciesProvider value={accuracies}>
       <HintLayer />
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also
@@ -761,7 +770,12 @@ export const GeocodingPage: React.FC = () => {
             // becomes the subject before the engine is asked about it
             onGeocode={(location) => {
               setSelected(location);
-              suggest.run(location.entity.id, location.entity.labels[0] || "", context);
+              suggest.run(
+                location.entity.id,
+                location.entity.labels[0] || "",
+                context,
+                storedRoles.representative,
+              );
             }}
           />
         </Box>
@@ -842,11 +856,26 @@ export const GeocodingPage: React.FC = () => {
                 return;
               }
               if (!selected) {
-                // nothing to write on yet: the dialog makes the Location, and
-                // writes this once it exists
-                if (canPlaceNew) {
-                  createLocation.openWithDraft({ geometry, accuracy, placeType });
+                if (!canPlaceNew) {
+                  return;
                 }
+                // nothing to write on yet: the dialog makes the Location, and
+                // writes this once it exists. The write is planned on an empty
+                // Location first, so a coordinate it would refuse never leaves a
+                // Location made for it behind
+                const check = planGeocodingWrite({
+                  location: CEntity(user.options, EntityEnums.Class.Location, ""),
+                  roles,
+                  geometry,
+                  accuracy,
+                  placeType,
+                  userOptions: user.options,
+                });
+                if (isBlocked(check)) {
+                  toast.error(check.blocked);
+                  return;
+                }
+                createLocation.openWithDraft({ geometry, accuracy, placeType });
                 return;
               }
               writeAndAdvance({
@@ -1004,6 +1033,7 @@ export const GeocodingPage: React.FC = () => {
           }}
         />
       ) : null}
+      </AccuraciesProvider>
     </PlaceTypesProvider>
   );
 };

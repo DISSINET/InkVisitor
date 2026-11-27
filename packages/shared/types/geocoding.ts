@@ -10,8 +10,18 @@
  * a code default, then the project default, then the user's own.
  */
 
-/** How precisely a coordinate locates the place. */
-export enum GeocodingAccuracy {
+/**
+ * How precisely a coordinate locates the place: the id of one of the Concepts the
+ * project lists as its accuracies (`IGeocodingRoles.accuracies`).
+ */
+export type GeocodingAccuracy = string;
+
+/**
+ * The four accuracies a project had before it defined its own, under which a
+ * settings row written then holds its Concepts (`accuracyValues`). Read only to
+ * turn such a row into the list.
+ */
+export enum LegacyGeocodingAccuracy {
   Precise = "precise",
   Approximate = "approximate",
   Region = "region",
@@ -122,6 +132,10 @@ export const ENGINE_PLACE_TYPE_INFO: Record<
 export interface IGeocodingPlaceType {
   /** Stable and never shown; what a default and a write refer to. */
   id: string;
+  /**
+   * What the location type is called while it has no Concept. Once it has one,
+   * it is called by the Concept's label, and this is not shown or edited.
+   */
   name: string;
   /** A key into the client's icon set, shared by every Concept of the type's subclass tree. */
   icon: string;
@@ -189,6 +203,118 @@ export const normalizePlaceTypes = (stored: unknown): IGeocodingPlaceType[] => {
 };
 
 /**
+ * The accuracies a stored settings row stands for.
+ *
+ * A row with a list is read as it is, an empty list included: an owner who
+ * removed every accuracy keeps none. A row written before the list existed holds
+ * a map from the four words to Concepts, which becomes the list in the order the
+ * words were offered, with "precise" taken when the sources agree and
+ * "approximate" when they are scattered. A Concept listed twice is kept once, and
+ * a mark on a Concept not in the list is dropped.
+ */
+export const normalizeAccuracyRoles = (
+  stored: unknown,
+): Pick<IGeocodingRoles, "accuracies" | "accuracyWhenAgree" | "accuracyWhenScattered"> => {
+  const roles: Record<string, unknown> =
+    stored && typeof stored === "object" ? (stored as Record<string, unknown>) : {};
+  const unique = (ids: unknown[]) =>
+    [...new Set(ids.filter((id): id is string => typeof id === "string" && !!id))];
+
+  let accuracies: string[];
+  let agree: unknown;
+  let scattered: unknown;
+  if (Array.isArray(roles.accuracies)) {
+    accuracies = unique(roles.accuracies);
+    agree = roles.accuracyWhenAgree;
+    scattered = roles.accuracyWhenScattered;
+  } else {
+    const legacy: Record<string, unknown> =
+      roles.accuracyValues && typeof roles.accuracyValues === "object"
+        ? (roles.accuracyValues as Record<string, unknown>)
+        : {};
+    accuracies = unique(Object.values(LegacyGeocodingAccuracy).map((word) => legacy[word]));
+    agree = legacy[LegacyGeocodingAccuracy.Precise];
+    scattered = legacy[LegacyGeocodingAccuracy.Approximate];
+  }
+  const inList = (id: unknown) => (typeof id === "string" && accuracies.includes(id) ? id : "");
+  return {
+    accuracies,
+    accuracyWhenAgree: inList(agree),
+    accuracyWhenScattered: inList(scattered),
+  };
+};
+
+/**
+ * How the engine picks the one match whose coordinate a suggestion carries, as
+ * its `representative` request field takes it. Every rule picks a real match,
+ * never a point between them.
+ */
+export const GEOCODING_REPRESENTATIVES = [
+  "place-first",
+  "agreement",
+  "best-score",
+  "medoid",
+  "densest",
+] as const;
+
+export type GeocodingRepresentative = (typeof GEOCODING_REPRESENTATIVES)[number];
+
+/** The key of the citing distance for a search that named no location type, or `any`. */
+export const CITE_WITHIN_ANY = "";
+
+/**
+ * How close a gazetteer's record must lie to the written coordinate to be
+ * cited, in km, per gazetteer location type of the search.
+ *
+ * Half the distance at which the engine counts a source's agreement as fading
+ * (its τ per place type, which also sets the radius it groups matches within,
+ * 2.5 τ), so a record cited is well inside the group it came from.
+ */
+export const defaultCiteWithinKm = (): Record<string, number> => ({
+  archaeological: 1.5,
+  religious: 1.5,
+  fortress: 2.5,
+  port: 2.5,
+  battlefield: 2.5,
+  settlement: 5,
+  diocese: 5,
+  mountain: 7.5,
+  road: 7.5,
+  island: 10,
+  river: 12.5,
+  lake: 12.5,
+  "ecclesiastical-province": 15,
+  region: 30,
+  [CITE_WITHIN_ANY]: 5,
+});
+
+/**
+ * The citing settings a stored row stands for: an unknown or missing rule is the
+ * engine's own default, and every distance the row does not hold, or holds as
+ * anything but a positive number, is the default one.
+ */
+export const normalizeCitingRoles = (
+  stored: unknown,
+): Pick<IGeocodingRoles, "representative" | "citeWithinKm"> => {
+  const roles: Record<string, unknown> =
+    stored && typeof stored === "object" ? (stored as Record<string, unknown>) : {};
+  const representative = (GEOCODING_REPRESENTATIVES as readonly string[]).includes(
+    roles.representative as string,
+  )
+    ? (roles.representative as GeocodingRepresentative)
+    : "";
+  const citeWithinKm = defaultCiteWithinKm();
+  if (roles.citeWithinKm && typeof roles.citeWithinKm === "object") {
+    for (const [type, km] of Object.entries(roles.citeWithinKm as Record<string, unknown>)) {
+      if (typeof km === "number" && Number.isFinite(km) && km > 0) {
+        citeWithinKm[type] = km;
+      }
+    }
+  }
+  return { representative, citeWithinKm };
+};
+
+/**
  * Entity ids, one per role. Empty means unassigned — the page then still lists,
  * filters and takes a coordinate from a map click, and only engine-driven
  * geocoding is unavailable.
@@ -210,8 +336,18 @@ export interface IGeocodingRoles {
    * sources as references only.
    */
   epistemicSource: string;
-  /** Concept per accuracy value — these are the prop's possible values. */
-  accuracyValues: Partial<Record<GeocodingAccuracy, string>>;
+  /**
+   * The Concepts an accuracy prop may be valued with, in the order they are
+   * offered. A row being filled in holds "", which is offered nowhere.
+   */
+  accuracies: string[];
+  /**
+   * The accuracy taken without asking when a suggestion's sources agree on the
+   * spot (a card's main button, quick geocoding), or "" for none.
+   */
+  accuracyWhenAgree: string;
+  /** The accuracy taken without asking when a suggestion's sources are scattered, or "" for none. */
+  accuracyWhenScattered: string;
   /**
    * The project's location types. A location type with no Concept blocks the write
    * rather than being invented.
@@ -223,6 +359,17 @@ export interface IGeocodingRoles {
    * guess, has no record to cite, and needs no Resource.
    */
   resources: Record<string, string>;
+  /**
+   * The engine's rule for which match a suggestion's coordinate is taken from,
+   * sent with every search; "" sends none, which is the engine's own default.
+   */
+  representative: GeocodingRepresentative | "";
+  /**
+   * Per gazetteer location type of the search (`CITE_WITHIN_ANY` for none or
+   * `any`), how close in km a gazetteer's record must lie to the written
+   * coordinate for the gazetteer to be cited on the Location.
+   */
+  citeWithinKm: Record<string, number>;
 }
 
 /**
@@ -349,7 +496,11 @@ export interface IGeocodingContext {
   taskCategory?: "quick" | "quality" | "offline";
   /** Run the engine as soon as a Location is selected. */
   autoSearch?: boolean;
-  /** Written when a coordinate is set by clicking the map rather than accepting a suggestion. */
+  /**
+   * The accuracy marked in the menu a map click opens, as the one usually meant:
+   * a Concept of the project's accuracies. A value written before the project
+   * defined its own list is a word that matches none of them, and marks nothing.
+   */
   mapClickAccuracy?: GeocodingAccuracy;
   /**
    * Whether accepting a coordinate also records what location type it is.
@@ -435,14 +586,17 @@ export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   geometry: "",
   accuracy: "",
   epistemicSource: "",
-  accuracyValues: {},
+  accuracies: [],
+  accuracyWhenAgree: "",
+  accuracyWhenScattered: "",
   placeTypes: defaultPlaceTypes(),
   resources: {},
+  representative: "",
+  citeWithinKm: defaultCiteWithinKm(),
 });
 
 export const defaultGeocodingContext = (): IGeocodingContext => ({
   autoSearch: true,
-  mapClickAccuracy: GeocodingAccuracy.Approximate,
   taskCategory: "quick",
   recordPlaceType: true,
 });

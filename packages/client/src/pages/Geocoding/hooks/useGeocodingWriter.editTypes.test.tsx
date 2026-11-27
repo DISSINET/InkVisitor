@@ -1,6 +1,6 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { IGeocodingRoles, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import { IGeocodingRoles, defaultPlaceTypes, defaultCiteWithinKm } from "@inkvisitor/shared/types/geocoding";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -34,13 +34,17 @@ const roles: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
   epistemicSource: "",
-  accuracyValues: {},
+  accuracies: [],
+  accuracyWhenAgree: "",
+  accuracyWhenScattered: "",
   placeTypes: [
     { ...defaultPlaceTypes()[0], id: "settlement", name: "settlement", conceptId: "c-settlement" },
     { ...defaultPlaceTypes()[1], id: "fortress", name: "fortress", conceptId: "c-fortress" },
     { ...defaultPlaceTypes()[2], id: "church", name: "church", conceptId: "" },
   ],
   resources: {},
+  representative: "",
+  citeWithinKm: defaultCiteWithinKm(),
 };
 
 const location = { id: "L1", labels: ["Breslau"], props: [] } as unknown as IEntity;

@@ -10,13 +10,13 @@ export const StyledKindScroll = styled.div`
   overflow-x: auto;
 `;
 
-const COLUMNS = "2.4rem 11rem 21rem 11rem 2.2rem 4.5rem minmax(14rem, 1fr) 2.2rem";
+const COLUMNS = "2.4rem 26rem 11rem 2.2rem 4.5rem minmax(14rem, 1fr) 2.2rem";
 
 export const StyledKindHeader = styled.div`
   display: grid;
   grid-template-columns: ${COLUMNS};
   gap: ${({ theme }) => theme.space[2]};
-  min-width: 70rem;
+  min-width: 65rem;
   padding-bottom: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["greyer"]};
@@ -66,7 +66,7 @@ export const StyledKindRow = styled.div<{ $inactive?: boolean }>`
   grid-template-columns: ${COLUMNS};
   gap: ${({ theme }) => theme.space[2]};
   align-items: center;
-  min-width: 70rem;
+  min-width: 65rem;
   padding: ${({ theme }) => theme.space[1]} 0;
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
   /* a deactivated Concept is kept in its place, paler, so the tree stays whole */

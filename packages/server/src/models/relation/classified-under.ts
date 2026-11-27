@@ -118,14 +118,17 @@ export const getConceptTree = async (
       if (!parent || child === concept || nodeOf(child) === parent) {
         continue;
       }
-      if (parents.has(child)) {
-        if (!isAncestor(child, parent)) {
-          parents.get(child)!.add(parent);
+      // a node already in the tree, or a synonym of one, which reads as that
+      // node: the superclass is one more parent of it. The Concept asked has none
+      const node = nodeOf(child);
+      if (node && node !== concept) {
+        if (!isAncestor(node, parent)) {
+          parents.get(node)!.add(parent);
         }
         continue;
       }
       if (seen.has(child)) {
-        // a synonym of a node, which reads as that node
+        // the Concept asked, or a synonym of it
         continue;
       }
       if (seen.size >= SUBORDINATE_MAX_NODES) {
@@ -147,18 +150,6 @@ export const getConceptTree = async (
     below: seen,
     truncated,
   };
-};
-
-/**
- * The Concepts at or below `concept`: itself, its synonyms, its subclasses at
- * every level, and the synonyms of those, with whether the walk was cut short.
- */
-export const getConceptsBelow = async (
-  conn: Conn,
-  concept: string
-): Promise<{ below: Set<string>; truncated: boolean }> => {
-  const { below, truncated } = await getConceptTree(conn, concept);
-  return { below, truncated };
 };
 
 /**

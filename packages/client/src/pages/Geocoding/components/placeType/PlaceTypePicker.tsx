@@ -1,7 +1,8 @@
-import { IResponseEntity } from "@inkvisitor/shared/types";
+import { RelationEnums } from "@inkvisitor/shared/enums";
+import { IResponseEntity, Relation } from "@inkvisitor/shared/types";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "components";
+import { Button, LetterIcon } from "components";
 import { EntityTag } from "components/advanced";
 import { IcoCheck, IcoChevronRight } from "Theme/icons";
 import { ButtonSize } from "types";
@@ -11,14 +12,20 @@ import {
   StyledPickerCheck,
   StyledPickerDescription,
   StyledPickerFooter,
+  StyledPickerCaption,
   StyledPickerHead,
+  StyledPickerHeader,
+  StyledPickerHeaderRow,
+  StyledPickerHeading,
   StyledPickerLabel,
   StyledPickerList,
+  StyledPickerNote,
   StyledPickerOption,
+  StyledPickerRecordedAs,
   StyledPickerPanel,
+  StyledPickerRelation,
   StyledPickerRow,
   StyledPickerSubmenu,
-  StyledPickerTitle,
   StyledSubmenuToggle,
 } from "./PlaceTypePickerStyles";
 import { UNKNOWN_PLACE_TYPE, kindInfo, placeTypeInfo } from "./placeTypeIcons";
@@ -77,12 +84,14 @@ const useFloatingPickerPosition = (anchor: FloatingPickerAnchor) => {
 interface FloatingPicker {
   anchor: FloatingPickerAnchor;
   ariaLabel: string;
-  /** The panel's own list scrolled. */
+  /** The panel's list of options scrolled. */
   onScroll?: () => void;
   /** Several options can be selected at once. */
   multiselectable?: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Above the options, kept out of the list: what is asked. */
+  header?: React.ReactNode;
   /** Controls that are not options, kept out of the list. */
   footer?: React.ReactNode;
 }
@@ -100,12 +109,13 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
   multiselectable,
   onClose,
   children,
+  header,
   footer,
 }) => {
   const { panel, position } = useFloatingPickerPosition(anchor);
 
-  // the keyboard goes in with the panel and back to what opened it, which the
-  // portal would otherwise leave focus behind on
+  // the keyboard goes into the panel when it opens and back to what opened it
+  // when it closes: the panel is drawn in a portal, away from its opener
   useEffect(() => {
     const opener = document.activeElement;
     panel.current?.querySelector<HTMLElement>("[role=option]:not(:disabled)")?.focus();
@@ -163,9 +173,9 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
    */
   useEffect(() => {
     const onScroll = (event: Event) => {
-      // the panel is taller than the vocabulary it lists, so it scrolls itself.
-      // Its own scrolling moves it nowhere and must not close it — only the
-      // page moving underneath it does
+      // the vocabulary is longer than the panel is tall, so its list scrolls.
+      // That scrolling moves the panel nowhere and must not close it — only
+      // the page moving underneath it does
       if (panel.current?.contains(event.target as Node)) {
         return;
       }
@@ -187,12 +197,13 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
         role="dialog"
         aria-label={ariaLabel}
         onKeyDown={moveFocus}
-        onScroll={(event) => event.target === event.currentTarget && onScroll?.()}
       >
+        {header}
         <StyledPickerList
           role="listbox"
           aria-label={ariaLabel}
           aria-multiselectable={multiselectable || undefined}
+          onScroll={(event) => event.target === event.currentTarget && onScroll?.()}
         >
           {children}
         </StyledPickerList>
@@ -202,6 +213,44 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
     document.body
   );
 };
+
+interface PickerHeader {
+  /** What is asked, as a caption. */
+  caption: string;
+  /** What the answer is recorded as, said after "recorded as" at the caption's right. */
+  recordedAs: React.ReactNode;
+  /** What the choice is about, a line each, under the caption. */
+  notes?: React.ReactNode[];
+}
+
+/** The header of a picker: what is asked, what the answer is recorded as, and what it is about. */
+export const PickerHeader: React.FC<PickerHeader> = ({ caption, recordedAs, notes = [] }) => (
+  <StyledPickerHeader>
+    <StyledPickerHeaderRow>
+      <StyledPickerCaption>{caption}</StyledPickerCaption>
+      <StyledPickerRecordedAs>
+        recorded as
+        {recordedAs}
+      </StyledPickerRecordedAs>
+    </StyledPickerHeaderRow>
+    {notes.filter(Boolean).map((note, index) => (
+      <StyledPickerNote key={index}>{note}</StyledPickerNote>
+    ))}
+  </StyledPickerHeader>
+);
+
+const CLASSIFICATION = RelationEnums.Type.Classification;
+
+/**
+ * The heading of a question about location types: what the answer is recorded
+ * as, a Classification of the Location under the location type's Concept.
+ */
+const ClassificationHeading: React.FC = () => (
+  <StyledPickerHeading data-hint="A location type is recorded as a Classification (CLA) relation from the Location to the location type's Concept.">
+    <LetterIcon letter={CLASSIFICATION} color="info" />
+    <StyledPickerRelation>{Relation.RelationRules[CLASSIFICATION]?.label}</StyledPickerRelation>
+  </StyledPickerHeading>
+);
 
 interface PlaceTypePicker {
   anchor: FloatingPickerAnchor;
@@ -223,9 +272,9 @@ interface PlaceTypePicker {
    * since unticking is how a location type goes.
    */
   clearLabel?: string;
-  /** What choosing none does, said under its wording. */
+  /** What choosing none does, said under its wording, where the wording alone does not say how far it reaches. */
   clearDescription?: string;
-  /** What the choice is about, said under the title: where the coordinate is that the location type goes with. */
+  /** What the choice is about, said in the header: where the coordinate is that the location type goes with. */
   note?: string;
   /** One click chooses one location type, which is added to the others, and the list closes. */
   onChoose?: (placeType: string | null) => void;
@@ -290,6 +339,51 @@ const PickerSubmenu: React.FC<{
   );
 };
 
+// a focus the browser draws a ring for: it does for the keyboard, and not for
+// the focus a list puts on its first option when a pointer opened it
+const byKeyboard = (element: Element): boolean => {
+  try {
+    return element.matches(":focus-visible");
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Whether an option is the one the pointer is over or the keyboard has moved
+ * to, so its Concept's tag can be drawn selected.
+ *
+ * The pointer is read from the browser's own enter and leave on `element`, not
+ * React's: the tag's tooltip is drawn in a portal, and React counts a pointer
+ * over the tooltip as still inside the option, which leaves the option lit
+ * after the pointer has moved on to the next one.
+ */
+export const useOptionHighlight = (element: React.RefObject<HTMLElement | null>) => {
+  const [pointed, setPointed] = useState(false);
+  const [keyed, setKeyed] = useState(false);
+  useEffect(() => {
+    const node = element.current;
+    if (!node) {
+      return;
+    }
+    const enter = () => setPointed(true);
+    const leave = () => setPointed(false);
+    node.addEventListener("mouseenter", enter);
+    node.addEventListener("mouseleave", leave);
+    return () => {
+      node.removeEventListener("mouseenter", enter);
+      node.removeEventListener("mouseleave", leave);
+    };
+  }, [element]);
+  return {
+    highlighted: pointed || keyed,
+    focusHandlers: {
+      onFocus: (event: React.FocusEvent<HTMLElement>) => setKeyed(byKeyboard(event.currentTarget)),
+      onBlur: () => setKeyed(false),
+    },
+  };
+};
+
 /** What a row of the picker needs of the picker it is in. */
 interface RowContext {
   openPath: string[];
@@ -345,14 +439,17 @@ const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext 
   const offered =
     mapped && !inferred && !busy && (toggling ? kind.active || direct : kind.active && !direct);
   const concept = concepts[kind.conceptId];
+  const clickable = offered || children.length > 0;
+  const { highlighted, focusHandlers } = useOptionHighlight(row);
 
   return (
     <StyledPickerRow
       ref={row}
-      onMouseEnter={(event) => {
-        event.stopPropagation();
-        hover(level, kind, children.length > 0);
-      }}
+      // a list of subclasses sits inside the row it opened from, so a pointer
+      // arriving on a subclass enters both rows, outer first; the one timer
+      // they share leaves the subclass's the last word. The event goes on to
+      // the tag inside, whose tooltip opens on it
+      onMouseEnter={() => hover(level, kind, children.length > 0)}
     >
       <StyledPickerOption
         type="button"
@@ -362,8 +459,9 @@ const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext 
         aria-expanded={children.length > 0 ? isOpen : undefined}
         data-option-level={level}
         data-option-id={kind.id}
-        disabled={!offered && !children.length}
+        disabled={!clickable}
         aria-disabled={!offered || undefined}
+        {...focusHandlers}
         $current={direct}
         $suggested={fits}
         onClick={() => {
@@ -412,7 +510,8 @@ const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext 
               <EntityTag
                 entity={concept}
                 fullWidth
-                disableTooltip
+                isSelected={highlighted && clickable}
+                tooltipPassThrough
                 disableDrag
                 disableCopyToClipboard
                 disableDoubleClick
@@ -441,8 +540,6 @@ const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext 
             <StyledPickerDescription>
               Deactivated: not offered for a new assignment.
             </StyledPickerDescription>
-          ) : info.description ? (
-            <StyledPickerDescription>{info.description}</StyledPickerDescription>
           ) : null}
         </StyledPickerLabel>
         {direct ? (
@@ -618,6 +715,21 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
       multiselectable={toggling}
       onClose={onClose}
       onScroll={() => open(0, null)}
+      header={
+        <PickerHeader
+          caption={toggling ? "location types of this place" : "add a location type"}
+          recordedAs={<ClassificationHeading />}
+          notes={[
+            note,
+            answering.length > 1 ? (
+              <>
+                {answering.length} of your location types answer to &ldquo;{engineLabel}&rdquo;,
+                the gazetteers&apos; word for it — the starred one is your favourite.
+              </>
+            ) : null,
+          ]}
+        />
+      }
       footer={
         toggling ? (
           <StyledPickerFooter>
@@ -626,17 +738,6 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
         ) : null
       }
     >
-      <StyledPickerTitle>
-        {toggling ? "location types of this place" : "add a location type"}
-      </StyledPickerTitle>
-      {note ? <StyledPickerDescription>{note}</StyledPickerDescription> : null}
-      {answering.length > 1 ? (
-        <StyledPickerDescription>
-          {answering.length} of your location types answer to &ldquo;{engineLabel}&rdquo;, the
-          gazetteers&apos; word for it — the starred one is your favourite.
-        </StyledPickerDescription>
-      ) : null}
-
       {clearLabel && !toggling ? (
         <StyledPickerOption
           type="button"

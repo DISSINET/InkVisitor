@@ -1,4 +1,3 @@
-import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
 import { describe, expect, it } from "vitest";
 import { SuggestResponse, Suggestion } from "../../types/engine";
 import { isTaken, namesOfTied, quickPick, tooCloseToCall } from "./quickGeocode";
@@ -10,14 +9,17 @@ const at = (score: number, matchCount = 1): Suggestion =>
 const run = (scores: number[], margin: number | null = 0.5): SuggestResponse =>
   ({ suggestions: scores.map((score) => at(score)), margin }) as SuggestResponse;
 
+/** The two accuracies a project marked, by what they stand for. */
+const MARKS = { accuracyWhenAgree: "c-agree", accuracyWhenScattered: "c-scattered" };
+
 describe("quickPick", () => {
   it("takes nothing from a run that found nothing", () => {
-    expect(quickPick(null, { strategy: "topScore" })).toEqual({ skip: "no gazetteer offered a place" });
-    expect(quickPick(run([]), { strategy: "topScore" })).toEqual({ skip: "no gazetteer offered a place" });
+    expect(quickPick(null, { strategy: "topScore", marks: MARKS })).toEqual({ skip: "no gazetteer offered a place" });
+    expect(quickPick(run([]), { strategy: "topScore", marks: MARKS })).toEqual({ skip: "no gazetteer offered a place" });
   });
 
   it("takes the strongest under 'whichever scores highest', however close the second", () => {
-    const pick = quickPick(run([0.51, 0.5]), { strategy: "topScore" });
+    const pick = quickPick(run([0.51, 0.5]), { strategy: "topScore", marks: MARKS });
     expect(isTaken(pick) && pick.index).toBe(0);
   });
 
@@ -27,7 +29,7 @@ describe("quickPick", () => {
    * of them writes a coin toss into the corpus.
    */
   it("refuses a crowd under 'clear winner only', and says which answers they are", () => {
-    const pick = quickPick(run([0.51, 0.5]), { strategy: "clearWinner" });
+    const pick = quickPick(run([0.51, 0.5]), { strategy: "clearWinner", marks: MARKS });
     expect(isTaken(pick)).toBe(false);
     expect((pick as { skip: string }).skip).toContain("too close to call");
   });
@@ -35,7 +37,7 @@ describe("quickPick", () => {
   it("takes a leader that is ahead by more than the engine's margin", () => {
     // 0.2 is the margin the engine's own auto-accept sketch uses; 0.5 is well
     // outside 80% of 0.9
-    const pick = quickPick(run([0.9, 0.5]), { strategy: "clearWinner" });
+    const pick = quickPick(run([0.9, 0.5]), { strategy: "clearWinner", marks: MARKS });
     expect(isTaken(pick) && pick.index).toBe(0);
   });
 
@@ -45,12 +47,12 @@ describe("quickPick", () => {
    * what "clear" means.
    */
   it("takes a lone answer under either strategy", () => {
-    expect(isTaken(quickPick(run([0.4], null), { strategy: "clearWinner" }))).toBe(true);
-    expect(isTaken(quickPick(run([0.4], null), { strategy: "topScore" }))).toBe(true);
+    expect(isTaken(quickPick(run([0.4], null), { strategy: "clearWinner", marks: MARKS }))).toBe(true);
+    expect(isTaken(quickPick(run([0.4], null), { strategy: "topScore", marks: MARKS }))).toBe(true);
   });
 
   it("refuses a run of several whose margin the engine did not report", () => {
-    expect(quickPick(run([0.9, 0.5], null), { strategy: "clearWinner" })).toEqual({
+    expect(quickPick(run([0.9, 0.5], null), { strategy: "clearWinner", marks: MARKS })).toEqual({
       skip: "the engine reported no margin, so nothing here is a clear winner",
     });
   });
@@ -66,10 +68,18 @@ describe("quickPick", () => {
       suggestions: [{ ...at(0.9, 3), spreadKm: 20 } as Suggestion],
       mergeRadiusKm: 25,
     } as SuggestResponse;
-    const one = quickPick(tight, { strategy: "topScore" });
-    const two = quickPick(scattered, { strategy: "topScore" });
-    expect(isTaken(one) && one.accuracy).toBe(GeocodingAccuracy.Precise);
-    expect(isTaken(two) && two.accuracy).toBe(GeocodingAccuracy.Approximate);
+    const one = quickPick(tight, { strategy: "topScore", marks: MARKS });
+    const two = quickPick(scattered, { strategy: "topScore", marks: MARKS });
+    expect(isTaken(one) && one.accuracy).toBe("c-agree");
+    expect(isTaken(two) && two.accuracy).toBe("c-scattered");
+  });
+
+  it("takes nothing where the project marked no accuracy for an answer like this one", () => {
+    const pick = quickPick(run([0.9]), {
+      strategy: "topScore",
+      marks: { accuracyWhenAgree: "", accuracyWhenScattered: "c-scattered" },
+    });
+    expect(isTaken(pick)).toBe(false);
   });
 });
 
@@ -88,12 +98,12 @@ describe("quickPick and an answer outside the region", () => {
    */
   it("refuses an off-region answer however far ahead it is, under either strategy", () => {
     const reason = "the best answer is outside the region the query asked about";
-    expect(quickPick(away(), { strategy: "clearWinner" })).toEqual({ skip: reason });
-    expect(quickPick(away(), { strategy: "topScore" })).toEqual({ skip: reason });
+    expect(quickPick(away(), { strategy: "clearWinner", marks: MARKS })).toEqual({ skip: reason });
+    expect(quickPick(away(), { strategy: "topScore", marks: MARKS })).toEqual({ skip: reason });
   });
 
   it("takes it where the corpus says off-region answers count", () => {
-    const pick = quickPick(away(), { strategy: "clearWinner", takeOffRegion: true });
+    const pick = quickPick(away(), { strategy: "clearWinner", takeOffRegion: true, marks: MARKS });
     expect(isTaken(pick) && pick.index).toBe(0);
   });
 
@@ -107,7 +117,7 @@ describe("quickPick and an answer outside the region", () => {
       suggestions: [{ ...at(0.51), offRegion: true } as Suggestion, at(0.5)],
       margin: 0.02,
     } as SuggestResponse;
-    expect(quickPick(crowdedAndAway, { strategy: "clearWinner" })).toEqual({
+    expect(quickPick(crowdedAndAway, { strategy: "clearWinner", marks: MARKS })).toEqual({
       skip: "the best answer is outside the region the query asked about",
     });
   });
@@ -183,7 +193,7 @@ describe("saying which answers were too close to call", () => {
         at("Frankfurt an der Oder (Brandenburg, Germany, ... World)", 0.59),
       ],
     } as unknown as SuggestResponse;
-    const pick = quickPick(response, { strategy: "clearWinner" });
+    const pick = quickPick(response, { strategy: "clearWinner", marks: MARKS });
     expect(isTaken(pick)).toBe(false);
     expect((pick as { skip: string }).skip).toContain("Frankfurt an der Oder");
   });

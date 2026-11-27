@@ -13,23 +13,23 @@ const picked: MapPending = { lat: 51.1, lon: 17.03, x: 120, y: 240 };
 
 describe("afterAccuracy", () => {
   it("asks the location type when the preference is unset", () => {
-    const step = afterAccuracy(picked, GeocodingAccuracy.Precise, undefined);
+    const step = afterAccuracy(picked, "c-precise", undefined);
     expect("ask" in step).toBe(true);
   });
 
   it("asks the location type when the preference is on", () => {
-    expect("ask" in afterAccuracy(picked, GeocodingAccuracy.Precise, true)).toBe(true);
+    expect("ask" in afterAccuracy(picked, "c-precise", true)).toBe(true);
   });
 
   it("writes straight through when the project records no location type", () => {
-    const step = afterAccuracy(picked, GeocodingAccuracy.Region, false);
-    expect(step).toEqual({ write: { accuracy: GeocodingAccuracy.Region } });
+    const step = afterAccuracy(picked, "c-region", false);
+    expect(step).toEqual({ write: { accuracy: "c-region" } });
   });
 
   it("names no location type on that write, so the Location keeps the one it has", () => {
     // undefined and null differ here: undefined keeps, null clears, and a map
     // click is a correction to where a place is rather than to what it is
-    const step = afterAccuracy(picked, GeocodingAccuracy.Region, false);
+    const step = afterAccuracy(picked, "c-region", false);
     expect("write" in step && "placeType" in step.write).toBe(false);
   });
 
@@ -39,15 +39,15 @@ describe("afterAccuracy", () => {
    * recording it nowhere.
    */
   it("writes the kind named for the whole corpus, without asking", () => {
-    const step = afterAccuracy(picked, GeocodingAccuracy.Region, false, "settlement");
+    const step = afterAccuracy(picked, "c-region", false, "settlement");
     expect(step).toEqual({
-      write: { accuracy: GeocodingAccuracy.Region, placeType: "settlement" },
+      write: { accuracy: "c-region", placeType: "settlement" },
     });
   });
 
   it("still names no kind where none was chosen for the corpus", () => {
     for (const none of [undefined, null] as const) {
-      const step = afterAccuracy(picked, GeocodingAccuracy.Region, false, none);
+      const step = afterAccuracy(picked, "c-region", false, none);
       expect("write" in step && "placeType" in step.write).toBe(false);
     }
   });
@@ -58,15 +58,15 @@ describe("afterAccuracy", () => {
    * the blanket one over it would replace a judgement with a default.
    */
   it("ignores the blanket kind while the question is still asked", () => {
-    const step = afterAccuracy(picked, GeocodingAccuracy.Precise, true, "settlement");
+    const step = afterAccuracy(picked, "c-precise", true, "settlement");
     expect("ask" in step).toBe(true);
   });
 
   it("carries the coordinate and the menu's position into the second question", () => {
-    const step = afterAccuracy(picked, GeocodingAccuracy.Approximate, true);
+    const step = afterAccuracy(picked, "c-approximate", true);
     expect("ask" in step && step.ask).toEqual({
       ...picked,
-      accuracy: GeocodingAccuracy.Approximate,
+      accuracy: "c-approximate",
     });
   });
 });

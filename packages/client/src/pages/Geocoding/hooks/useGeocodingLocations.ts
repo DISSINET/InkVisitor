@@ -11,7 +11,7 @@ import {
   collectGeoValueIds,
   deriveGeocoding,
 } from "../utils/write/geocodingDerivation";
-import { LocationTypeEntry, usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { LocationTypeEntry, PlaceTypeAssignments } from "./usePlaceTypeAssignments";
 import { entryApplies } from "../utils/context/placeTypeHierarchy";
 
 /**
@@ -69,6 +69,12 @@ export interface UseGeocodingLocations {
 export const useGeocodingLocations = (
   roles: IGeocodingRoles,
   filters: GeocodingServerFilters,
+  /**
+   * What the Locations are classified under, read once by the page for the whole
+   * of it: the tree of every location type is worked out there, and a second read
+   * here would work it out again on every render of the list.
+   */
+  assignments: PlaceTypeAssignments,
 ): UseGeocodingLocations => {
   const {
     data: entities,
@@ -92,8 +98,6 @@ export const useGeocodingLocations = (
     () => collectGeoValueIds(entities || [], roles),
     [entities, roles],
   );
-
-  const assignments = usePlaceTypeAssignments(roles.placeTypes);
 
   const { data: values, isFetching: loadingValues } = useEntitiesQuery(
     "geocoding-values",

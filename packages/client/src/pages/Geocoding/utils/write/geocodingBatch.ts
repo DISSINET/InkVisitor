@@ -41,8 +41,13 @@ export interface BatchStep {
    * produced no answer to keep it from.
    */
   mergeRadiusKm?: number;
+  /**
+   * How close a record had to lie to be cited, for the search that produced the
+   * choices, so one chosen afterwards cites as it would have then.
+   */
+  citingKm?: number;
   /** The one that was written, and how precisely it was said to locate. */
-  taken?: { suggestion: Suggestion; accuracy: GeocodingAccuracy };
+  taken?: { suggestion: Suggestion; accuracy: GeocodingAccuracy; cited?: string[] };
 }
 
 export interface BatchRun {
@@ -66,7 +71,7 @@ export const withStep = (
   run: BatchRun | null,
   id: string,
   state: BatchStepState,
-  fields: Pick<BatchStep, "note" | "choices" | "taken" | "mergeRadiusKm"> = {},
+  fields: Pick<BatchStep, "note" | "choices" | "taken" | "mergeRadiusKm" | "citingKm"> = {},
 ): BatchRun | null =>
   run && {
     ...run,

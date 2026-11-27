@@ -6,6 +6,8 @@ import {
   IGeocodingSettings,
   defaultGeocodingContext,
   emptyGeocodingRoles,
+  normalizeAccuracyRoles,
+  normalizeCitingRoles,
   normalizePlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
@@ -127,6 +129,8 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
       // a row from before the list existed holds a map, which this turns into
       // the default list with its Concepts
       placeTypes: normalizePlaceTypes(stored?.roles?.placeTypes),
+      ...normalizeAccuracyRoles(stored?.roles),
+      ...normalizeCitingRoles(stored?.roles),
     };
 
     const projectContext = layerGeocodingContext<IGeocodingContext>(

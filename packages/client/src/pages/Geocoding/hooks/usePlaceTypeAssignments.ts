@@ -122,12 +122,24 @@ export const usePlaceTypeAssignments = (
     return expandPlaceTypes(roots, data?.response.trees ?? {}, byId);
   }, [roots, data, conceptEntities]);
 
+  // where a Location sits in the trees depends on which Concept each node is and
+  // what lies above it, not on its name or mark, which the settings window changes
+  // on every key typed; the nodes are held at their shape, so placing every
+  // classified entity and counting them happens only when the shape changes
+  const shapeKey = useMemo(
+    () =>
+      nodes.map((node) => `${node.id}:${node.conceptId}>${node.parentIds.join(",")}`).join("|"),
+    [nodes]
+  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const shaped = useMemo(() => nodes, [shapeKey]);
+  const typesByLocation = useMemo(
+    () => deriveTypeEntries(shaped, data?.response ?? EMPTY),
+    [shaped, data]
+  );
+
   // the tooltip of an inferred type says which classification it comes from, and
   // the server answers with ids; the few Concepts in question are fetched once
-  const typesByLocation = useMemo(
-    () => deriveTypeEntries(nodes, data?.response ?? EMPTY),
-    [nodes, data]
-  );
   const viaIds = useMemo(() => {
     const ids = new Set<string>();
     typesByLocation.forEach((entries) =>
@@ -147,11 +159,10 @@ export const usePlaceTypeAssignments = (
     [viaEntities]
   );
 
-  return useMemo(() => {
-    const response = data?.response ?? EMPTY;
+  const counted = useMemo(() => {
     const countByType: Record<string, number> = {};
     const inferredByType: Record<string, number> = {};
-    for (const node of nodes) {
+    for (const node of shaped) {
       countByType[node.id] = 0;
       inferredByType[node.id] = 0;
     }
@@ -170,7 +181,11 @@ export const usePlaceTypeAssignments = (
         }
       }
     });
+    return { countByType, inferredByType };
+  }, [shaped, typesByLocation, onlyLocationIds]);
 
+  return useMemo(() => {
+    const response = data?.response ?? EMPTY;
     const truncatedTypes = roots
       .filter(
         (placeType) => placeType.conceptId && response.truncated.includes(placeType.conceptId)
@@ -185,23 +200,13 @@ export const usePlaceTypeAssignments = (
       nodes,
       conceptEntities,
       typesByLocation,
-      countByType,
-      inferredByType,
+      countByType: counted.countByType,
+      inferredByType: counted.inferredByType,
       truncatedTypes,
       pendingTypes,
       viaLabels,
       isLoading,
       error: error ?? null,
     };
-  }, [
-    data,
-    nodes,
-    roots,
-    conceptEntities,
-    typesByLocation,
-    onlyLocationIds,
-    viaLabels,
-    isLoading,
-    error,
-  ]);
+  }, [data, nodes, roots, conceptEntities, typesByLocation, counted, viaLabels, isLoading, error]);
 };

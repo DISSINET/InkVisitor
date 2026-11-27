@@ -7,7 +7,7 @@ import {
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button, Checkbox, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown, { EntityTag } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   IcoChevronRight,
@@ -51,8 +51,9 @@ import { ButtonSize } from "types";
 /**
  * The project's own location types, each with the subclass tree of its Concept.
  *
- * Free to define on a location type: a name, the Concept a Location is
- * classified under, a mark, and the gazetteer type it answers to. The gazetteer
+ * Free to define on a location type: the Concept a Location is classified
+ * under, whose label is what the type is called, a mark, and the gazetteer type
+ * it answers to. The gazetteer
  * type is what connects a suggestion's own type to the project's vocabulary, and
  * the star marks the location type offered first where several answer to the
  * same gazetteer type. Every subclass of the Concept, at every depth, is a
@@ -70,6 +71,8 @@ interface PlaceTypeTable {
   concepts: Record<string, IEntity>;
   /** A Concept's detail as the table shows it: what was typed here, or what the Concept holds. */
   detailOf: (conceptId: string) => string;
+  /** Whether a Concept has been read, so its detail can be edited without replacing one not yet shown. */
+  detailReady: (conceptId: string) => boolean;
   onDetailChange: (conceptId: string, detail: string) => void;
   /** The assigned Concept with its unlink, or the suggester that picks one. */
   renderConcept: (conceptId: string, set: (conceptId: string | null) => void) => React.ReactNode;
@@ -144,12 +147,195 @@ const EngineTypeHelp: React.FC = () => {
   );
 };
 
+/** What a row's count stands on: no Concept, a failed read, an answer awaited, or an answer. */
+type CountState = "unassigned" | "failed" | "loading" | "ready";
+
+/** How many Locations come under a row, at it or below it, and how many of those only through something below. */
+const CountCell: React.FC<{
+  state: CountState;
+  count: number;
+  inferred: number;
+  truncated: boolean;
+}> = React.memo(({ state, count, inferred, truncated }) => (
+  <StyledKindCount>
+    {state === "unassigned" ? "–" : state === "failed" ? "?" : state === "loading" ? "…" : count}
+    {state === "ready" && inferred ? (
+      <IconWithTooltip
+        icon={<StyledKindInferred>+{inferred}</StyledKindInferred>}
+        tooltipText={`${inferred} of these are classified under a subclass or a synonym of this Concept, not under the Concept itself.`}
+        tooltipPosition="top"
+      />
+    ) : null}
+    {truncated ? (
+      <IconWithTooltip
+        icon={<IcoWarning />}
+        color="warning"
+        tooltipText="This Concept has more subclasses than can be followed, so the deepest are not listed, Locations classified under them are not counted and they show no location type. Assign a narrower Concept."
+        tooltipPosition="top"
+      />
+    ) : null}
+  </StyledKindCount>
+));
+
+/** The fold toggle, the tick, then whatever names the Concept. */
+const TreeCell: React.FC<{
+  depth: number;
+  open: boolean;
+  hasChildren: boolean;
+  /** What the fold toggle names. */
+  name: string;
+  onToggleFold: () => void;
+  /** No tick where the row has no Concept yet. */
+  tick: { active: boolean; onChange: (active: boolean) => void } | null;
+  children: React.ReactNode;
+}> = ({ depth, open, hasChildren, name, onToggleFold, tick, children }) => (
+  <StyledTreeCell $depth={depth}>
+    {hasChildren ? (
+      <StyledFoldToggle
+        type="button"
+        $open={open}
+        aria-expanded={open}
+        aria-label={open ? `fold the subclasses of ${name}` : `show the subclasses of ${name}`}
+        onClick={onToggleFold}
+      >
+        <IcoChevronRight />
+      </StyledFoldToggle>
+    ) : (
+      <StyledFoldSpacer />
+    )}
+    {tick ? (
+      <Checkbox
+        value={tick.active}
+        onChangeFn={tick.onChange}
+        tooltipLabel={
+          tick.active
+            ? "offered when a location type is assigned; untick to stop offering it"
+            : "not offered when a location type is assigned; Locations already classified under it keep it"
+        }
+      />
+    ) : null}
+    {children}
+  </StyledTreeCell>
+);
+
+/** The Concept's detail, edited in place once the Concept has been read. */
+const DescriptionCell: React.FC<{
+  conceptId: string;
+  detail: string;
+  ready: boolean;
+  onChange: (conceptId: string, detail: string) => void;
+}> = ({ conceptId, detail, ready, onChange }) => (
+  <Input
+    type="textarea"
+    rows={1}
+    value={conceptId ? detail : ""}
+    onChangeFn={(next) => onChange(conceptId, next)}
+    placeholder={
+      !conceptId ? "assign a Concept first" : ready ? "the Concept's detail" : "reading the Concept"
+    }
+    disabled={!conceptId || !ready}
+    changeOnType
+    width="full"
+  />
+);
+
+interface SubclassRow {
+  /** Where in the tree the row is, which a Concept with two superclasses has two of. */
+  path: string;
+  depth: number;
+  open: boolean;
+  hasChildren: boolean;
+  /** The mark of the location type at the root, which the row shares. */
+  icon: string;
+  name: string;
+  rootId: string;
+  conceptId: string;
+  active: boolean;
+  concept: IEntity | undefined;
+  countState: CountState;
+  count: number;
+  inferred: number;
+  detail: string;
+  /** Whether the Concept has been read, so its detail can be edited. */
+  detailReady: boolean;
+  onToggleFold: (path: string) => void;
+  onSetActive: (rootId: string, conceptId: string, active: boolean) => void;
+  onDetailChange: (conceptId: string, detail: string) => void;
+}
+
+/**
+ * One subclass of a location type's Concept.
+ *
+ * A tree can hold hundreds of them, and the table renders again on every key
+ * typed anywhere in the window, so a row takes only plain values and callbacks
+ * that keep their identity, and renders again only when one of its own changes.
+ */
+const SubclassRow: React.FC<SubclassRow> = React.memo(
+  ({
+    path,
+    depth,
+    open,
+    hasChildren,
+    icon,
+    name,
+    rootId,
+    conceptId,
+    active,
+    concept,
+    countState,
+    count,
+    inferred,
+    detail,
+    detailReady,
+    onToggleFold,
+    onSetActive,
+    onDetailChange,
+  }) => {
+    return (
+      <StyledKindRow $inactive={!active}>
+        <StyledInheritedMark aria-hidden>{React.createElement(placeIcon(icon))}</StyledInheritedMark>
+        <TreeCell
+          depth={depth}
+          open={open}
+          hasChildren={hasChildren}
+          name={name}
+          onToggleFold={() => onToggleFold(path)}
+          tick={{ active, onChange: (next) => onSetActive(rootId, conceptId, next) }}
+        >
+          {concept ? (
+            <EntityTag
+              entity={concept}
+              fullWidth
+              disableTooltip
+              disableDrag
+              disableCopyToClipboard
+            />
+          ) : (
+            <span>{name || "…"}</span>
+          )}
+        </TreeCell>
+        <span />
+        <span />
+        <CountCell state={countState} count={count} inferred={inferred} truncated={false} />
+        <DescriptionCell
+          conceptId={conceptId}
+          detail={detail}
+          ready={detailReady}
+          onChange={onDetailChange}
+        />
+        <span />
+      </StyledKindRow>
+    );
+  }
+);
+
 export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   value,
   onChange,
   nodes,
   concepts,
   detailOf,
+  detailReady,
   onDetailChange,
   renderConcept,
   counts,
@@ -173,9 +359,18 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   const patch = (id: string, changes: Partial<IGeocodingPlaceType>) =>
     onChange(value.map((one) => (one.id === id ? { ...one, ...changes } : one)));
 
-  const setActive = (rootId: string, conceptId: string, active: boolean) =>
-    onChange(
-      value.map((one) =>
+  // the callbacks every subclass row is handed keep their identity for the life
+  // of the table, so a row the edit did not touch is not rendered again; they
+  // read the list and the handlers as they are when called
+  const latest = useRef({ value, onChange, onDetailChange });
+  useLayoutEffect(() => {
+    latest.current = { value, onChange, onDetailChange };
+  });
+
+  const setActive = useCallback((rootId: string, conceptId: string, active: boolean) => {
+    const { value: current, onChange: change } = latest.current;
+    change(
+      current.map((one) =>
         one.id !== rootId
           ? one
           : {
@@ -186,17 +381,26 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
             }
       )
     );
+  }, []);
 
-  const toggleFold = (path: string) =>
-    setFolded((current) => {
-      const next = new Set(current);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
+  const toggleFold = useCallback(
+    (path: string) =>
+      setFolded((current) => {
+        const next = new Set(current);
+        if (next.has(path)) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+        return next;
+      }),
+    []
+  );
+
+  const changeDetail = useCallback(
+    (conceptId: string, detail: string) => latest.current.onDetailChange(conceptId, detail),
+    []
+  );
 
   const add = () =>
     onChange([
@@ -212,89 +416,14 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
       },
     ]);
 
-  const count = (node: PlaceTypeNode, kind: IGeocodingPlaceType) => (
-    <StyledKindCount>
-      {!node.conceptId
-        ? "–"
-        : countsFailed
-          ? "?"
-          : countsLoading || pendingTypes.includes(kind.id)
-            ? "…"
-            : (counts[node.id] ?? 0)}
-      {node.conceptId &&
-      !countsFailed &&
-      !countsLoading &&
-      !pendingTypes.includes(kind.id) &&
-      inferredCounts[node.id] ? (
-        <IconWithTooltip
-          icon={<StyledKindInferred>+{inferredCounts[node.id]}</StyledKindInferred>}
-          tooltipText={`${inferredCounts[node.id]} of these are classified under a subclass or a synonym of this Concept, not under the Concept itself.`}
-          tooltipPosition="top"
-        />
-      ) : null}
-      {node.id === kind.id && truncatedTypes.includes(kind.id) ? (
-        <IconWithTooltip
-          icon={<IcoWarning />}
-          color="warning"
-          tooltipText="This Concept has more subclasses than can be followed, so the deepest are not listed, Locations classified under them are not counted and they show no location type. Assign a narrower Concept."
-          tooltipPosition="top"
-        />
-      ) : null}
-    </StyledKindCount>
-  );
-
-  /** The fold toggle, the tick, then whatever names the Concept. */
-  const treeCell = (
-    node: PlaceTypeNode,
-    path: string,
-    depth: number,
-    open: boolean,
-    hasChildren: boolean,
-    name: React.ReactNode
-  ) => (
-    <StyledTreeCell $depth={depth}>
-      {hasChildren ? (
-        <StyledFoldToggle
-          type="button"
-          $open={open}
-          aria-expanded={open}
-          aria-label={
-            open ? `fold the subclasses of ${node.name}` : `show the subclasses of ${node.name}`
-          }
-          onClick={() => toggleFold(path)}
-        >
-          <IcoChevronRight />
-        </StyledFoldToggle>
-      ) : (
-        <StyledFoldSpacer />
-      )}
-      {node.conceptId ? (
-        <Checkbox
-          value={node.active}
-          onChangeFn={(active) => setActive(node.rootId, node.conceptId, active)}
-          tooltipLabel={
-            node.active
-              ? "offered when a location type is assigned; untick to stop offering it"
-              : "not offered when a location type is assigned; Locations already classified under it keep it"
-          }
-        />
-      ) : null}
-      {name}
-    </StyledTreeCell>
-  );
-
-  const description = (node: PlaceTypeNode) => (
-    <Input
-      type="textarea"
-      rows={1}
-      value={node.conceptId ? detailOf(node.conceptId) : ""}
-      onChangeFn={(detail) => onDetailChange(node.conceptId, detail)}
-      placeholder={node.conceptId ? "the Concept's detail" : "assign a Concept first"}
-      disabled={!node.conceptId}
-      changeOnType
-      width="full"
-    />
-  );
+  const countStateOf = (rootId: string, conceptId: string): CountState =>
+    !conceptId
+      ? "unassigned"
+      : countsFailed
+        ? "failed"
+        : countsLoading || pendingTypes.includes(rootId)
+          ? "loading"
+          : "ready";
 
   /** A subclass row and, unless folded, the rows below it. */
   const subclassRows = (
@@ -306,40 +435,30 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   ): React.ReactNode[] => {
     const children = (below.get(node.id) ?? []).filter((child) => !trail.has(child.id));
     const open = !folded.has(path);
-    const Icon = placeIcon(kind.icon);
-    const concept = concepts[node.conceptId];
     const rows: React.ReactNode[] = [];
     if (showInactive || node.active) {
       rows.push(
-        <StyledKindRow key={path} $inactive={!node.active}>
-          <StyledInheritedMark aria-hidden>
-            <Icon />
-          </StyledInheritedMark>
-          <span />
-          {treeCell(
-            node,
-            path,
-            depth,
-            open,
-            children.length > 0,
-            concept ? (
-              <EntityTag
-                entity={concept}
-                fullWidth
-                disableTooltip
-                disableDrag
-                disableCopyToClipboard
-              />
-            ) : (
-              <span>{node.name || "…"}</span>
-            )
-          )}
-          <span />
-          <span />
-          {count(node, kind)}
-          {description(node)}
-          <span />
-        </StyledKindRow>
+        <SubclassRow
+          key={path}
+          path={path}
+          depth={depth}
+          open={open}
+          hasChildren={children.length > 0}
+          icon={kind.icon}
+          name={node.name}
+          rootId={node.rootId}
+          conceptId={node.conceptId}
+          active={node.active}
+          concept={concepts[node.conceptId]}
+          countState={countStateOf(kind.id, node.conceptId)}
+          count={counts[node.id] ?? 0}
+          inferred={inferredCounts[node.id] ?? 0}
+          detail={detailOf(node.conceptId)}
+          detailReady={detailReady(node.conceptId)}
+          onToggleFold={toggleFold}
+          onSetActive={setActive}
+          onDetailChange={changeDetail}
+        />
       );
     }
     if (open) {
@@ -362,7 +481,6 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
       </StyledKindToolbar>
       <StyledKindHeader>
         <span />
-        <span>name</span>
         <span>Concept a Location is classified under</span>
         <StyledKindHeadHelp>
           <span>gazetteer type</span>
@@ -389,6 +507,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         const children =
           nodeById.get(kind.id)?.conceptId === kind.conceptId ? (below.get(kind.id) ?? []) : [];
         const open = !folded.has(kind.id);
+        // the Concept's label once it is in, which is what the row is called
+        const name = nodeById.get(kind.id)?.name || kind.name || "this location type";
         return (
           <React.Fragment key={kind.id}>
             {showInactive || node.active || !kind.conceptId ? (
@@ -397,7 +517,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                   <StyledIconButton
                     type="button"
                     $open={iconFor?.id === kind.id}
-                    aria-label={`mark for ${kind.name || "this location type"}`}
+                    aria-label={`mark for ${name}`}
                     onClick={(event) => {
                       const box = event.currentTarget.getBoundingClientRect();
                       setIconFor(
@@ -451,24 +571,26 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                       )
                     : null}
                 </StyledIconAnchor>
-                <Input
-                  value={kind.name}
-                  onChangeFn={(name) => patch(kind.id, { name })}
-                  placeholder="name"
-                  changeOnType
-                  width="full"
-                />
                 <StyledKindCell>
-                  {treeCell(
-                    node,
-                    kind.id,
-                    0,
-                    open,
-                    children.length > 0,
-                    renderConcept(kind.conceptId, (conceptId) =>
+                  <TreeCell
+                    depth={0}
+                    open={open}
+                    hasChildren={children.length > 0}
+                    name={name}
+                    onToggleFold={() => toggleFold(kind.id)}
+                    tick={
+                      kind.conceptId
+                        ? {
+                            active: node.active,
+                            onChange: (active) => setActive(kind.id, kind.conceptId, active),
+                          }
+                        : null
+                    }
+                  >
+                    {renderConcept(kind.conceptId, (conceptId) =>
                       onChange(assignConcept(value, kind.id, conceptId))
-                    )
-                  )}
+                    )}
+                  </TreeCell>
                 </StyledKindCell>
                 <Dropdown.Single.Basic
                   width="full"
@@ -506,8 +628,18 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                     tooltipPosition="top"
                   />
                 </StyledFavorite>
-                {count(node, kind)}
-                {description(node)}
+                <CountCell
+                  state={countStateOf(kind.id, kind.conceptId)}
+                  count={counts[kind.id] ?? 0}
+                  inferred={inferredCounts[kind.id] ?? 0}
+                  truncated={truncatedTypes.includes(kind.id)}
+                />
+                <DescriptionCell
+                  conceptId={kind.conceptId}
+                  detail={kind.conceptId ? detailOf(kind.conceptId) : ""}
+                  ready={!!kind.conceptId && detailReady(kind.conceptId)}
+                  onChange={changeDetail}
+                />
                 <Button
                   icon={<IcoTrash />}
                   color="danger"

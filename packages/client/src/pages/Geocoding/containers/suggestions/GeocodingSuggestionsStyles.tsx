@@ -579,7 +579,7 @@ export const StyledTypeStep = styled.div`
 
 export const StyledTypeStepHead = styled.div`
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[2]};

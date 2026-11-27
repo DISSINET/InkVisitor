@@ -23,6 +23,7 @@ import {
   readStage,
   sourceTally,
 } from "../../utils/engine/stageProgress";
+import { CandidateScopeMark } from "./CandidateScopeMark";
 
 /**
  * What a request looks like while it runs.
@@ -65,7 +66,7 @@ interface GeocodingProgress {
    * whether the engine understood the place, ten seconds before any coordinate
    * does.
    */
-  candidates: { name: string; nameFit: number }[];
+  candidates: { name: string; nameFit: number; scope?: "place" | "container" }[];
 }
 
 export const GeocodingProgress: React.FC<GeocodingProgress> = ({
@@ -121,6 +122,7 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
                     <StyledCandidateForm key={candidate.name}>
                       {candidate.name}
                       <StyledCandidateFit>{candidate.nameFit.toFixed(2)}</StyledCandidateFit>
+                      <CandidateScopeMark scope={candidate.scope} />
                     </StyledCandidateForm>
                   ))}
                 </StyledCandidateForms>

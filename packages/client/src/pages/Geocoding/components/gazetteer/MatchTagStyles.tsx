@@ -13,11 +13,17 @@ export const sourceColor = (theme: DefaultTheme, source: string) =>
  * where the name is the one searched for, broken as the claim weakens. One
  * weight throughout, because a thicker border reads as a heavier tag rather than
  * a better match. Drawn rather than written — see MatchTag.
+ *
+ * Citing takes the two channels left: the border's colour marks the record the
+ * coordinate is taken from, and the text's colour dims a record too far from the
+ * coordinate to be cited.
  */
 export const StyledMatchTag = styled.span<{
   $source: string;
   $borderStyle: string;
   $faded?: boolean;
+  $lead?: boolean;
+  $beyond?: boolean;
 }>`
   display: inline-flex;
   align-items: baseline;
@@ -26,11 +32,22 @@ export const StyledMatchTag = styled.span<{
   padding: 0 ${({ theme }) => theme.space[1]};
   /* neutral, because the hue is already printed inside the tag on the slug: a
      coloured hairline repeating it made sixteen colours into thirty-two marks */
-  border: 1px ${({ $borderStyle }) => $borderStyle} ${({ theme }) => theme.color["gray"][300]};
+  border: 1px ${({ $borderStyle }) => $borderStyle}
+    ${({ theme, $lead }) => ($lead ? theme.color["primary"] : theme.color["gray"][300])};
   opacity: ${({ $faded }) => ($faded ? 0.65 : 1)};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   line-height: 1.6;
+
+  ${({ theme, $beyond }) =>
+    $beyond
+      ? `
+    & > span,
+    & > span a {
+      color: ${theme.color["greyer"]};
+    }
+  `
+      : ""}
 `;
 
 export const StyledMatchTagSource = styled.span<{ $source: string }>`

@@ -4,6 +4,7 @@ import {
   GeocodingAccuracy,
   IGeocodingRoles,
   defaultPlaceTypes,
+  defaultCiteWithinKm,
 } from "@inkvisitor/shared/types/geocoding";
 import { CProp } from "constructors";
 import { describe, expect, it } from "vitest";
@@ -23,12 +24,13 @@ const roles: IGeocodingRoles = {
   geometry: "concept-geometry",
   accuracy: "concept-accuracy",
   epistemicSource: "concept-source",
-  accuracyValues: {
-    [GeocodingAccuracy.Precise]: "value-precise",
-    [GeocodingAccuracy.Approximate]: "value-approximate",
-  },
+  accuracies: ["value-precise", "value-approximate"],
+  accuracyWhenAgree: "value-precise",
+  accuracyWhenScattered: "value-approximate",
   placeTypes: defaultPlaceTypes(),
   resources: {},
+  representative: "",
+  citeWithinKm: defaultCiteWithinKm(),
 };
 
 // built through the app's own constructor rather than a hand-rolled literal, so
@@ -73,14 +75,14 @@ describe("deriveGeocoding", () => {
     expect(result.geometry).toEqual({ type: "Point", coordinates: [17.033, 51.107] });
     expect(result.lon).toBe(17.033);
     expect(result.lat).toBe(51.107);
-    expect(result.accuracy).toBe(GeocodingAccuracy.Precise);
+    expect(result.accuracy).toBe("value-precise");
     expect(result.problem).toBeNull();
   });
 
   it("still reads the shape that kept the accuracy beside the geometry, until it is migrated", () => {
     const result = deriveGeocoding(besideEachOther, roles, values);
     expect(result.isGeocoded).toBe(true);
-    expect(result.accuracy).toBe(GeocodingAccuracy.Precise);
+    expect(result.accuracy).toBe("value-precise");
   });
 
   it("reads the accuracy under the geometry before a stale one beside it", () => {
@@ -88,7 +90,7 @@ describe("deriveGeocoding", () => {
       nested("v-geo", "value-approximate"),
       prop("concept-accuracy", "value-precise"),
     ]);
-    expect(deriveGeocoding(both, roles, values).accuracy).toBe(GeocodingAccuracy.Approximate);
+    expect(deriveGeocoding(both, roles, values).accuracy).toBe("value-approximate");
   });
 
   it("does not read an accuracy hung under some other prop as the geometry's", () => {
@@ -180,15 +182,31 @@ describe("deriveGeocoding", () => {
     expect(result.problem).toContain("accuracy");
   });
 
-  it("is not geocoded when accuracy points at an unconfigured Concept", () => {
-    const result = deriveGeocoding(
-      location([nested("v-geo", "some-other-concept")]),
-      roles,
-      values,
-    );
-    expect(result.isGeocoded).toBe(false);
-    expect(result.problem).toContain("configured");
+  it("calls the accuracy by its Concept's label", () => {
+    const result = deriveGeocoding(location([nested("v-geo", "value-precise")]), roles, {
+      ...values,
+      "value-precise": entity("value-precise", "precisely"),
+    });
+    expect(result.accuracyLabel).toBe("precisely");
   });
+
+  it("keeps a coordinate whose accuracy Concept the project no longer lists, and says so", () => {
+    const result = deriveGeocoding(location([nested("v-geo", "some-other-concept")]), roles, {
+      ...values,
+      "some-other-concept": entity("some-other-concept", "roughly"),
+    });
+    expect(result.isGeocoded).toBe(true);
+    expect(result.accuracy).toBe("some-other-concept");
+    expect(result.accuracyLabel).toBe("roughly (not in the accuracy list)");
+  });
+
+  it("is not geocoded when the accuracy prop has no value", () => {
+    const result = deriveGeocoding(location([nested("v-geo", "")]), roles, values);
+    expect(result.isGeocoded).toBe(false);
+    expect(result.problem).toContain("accuracy");
+  });
+
+
 
   it("reports no problem for a Location that was never geocoded at all", () => {
     // an empty cell in the list is expected here; a warning would be noise on
@@ -230,15 +248,14 @@ describe("deriveGeocoding", () => {
 });
 
 describe("collectGeoValueIds", () => {
-  it("gathers the geometry value, which is the only one with a label to read", () => {
-    // the accuracy is told apart by its id, so nothing is fetched for it
-    expect(collectGeoValueIds([wellFormed], roles)).toEqual(["v-geo"]);
-    expect(collectGeoValueIds([besideEachOther], roles)).toEqual(["v-geo"]);
+  it("gathers the geometry value and the accuracy Concept, under the geometry or beside it", () => {
+    expect(collectGeoValueIds([wellFormed], roles)).toEqual(["v-geo", "value-precise"]);
+    expect(collectGeoValueIds([besideEachOther], roles)).toEqual(["v-geo", "value-precise"]);
   });
 
   it("deduplicates across Locations, so a shared value is fetched once", () => {
     const ids = collectGeoValueIds([wellFormed, wellFormed], roles);
-    expect(ids).toEqual(["v-geo"]);
+    expect(ids).toEqual(["v-geo", "value-precise"]);
   });
 
   it("ignores roles that are not assigned", () => {

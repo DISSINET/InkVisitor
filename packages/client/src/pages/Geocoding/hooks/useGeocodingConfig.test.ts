@@ -16,7 +16,7 @@ describe("layerGeocodingContext", () => {
     period: "1200-1400",
     language: "de",
     autoSearch: true,
-    mapClickAccuracy: GeocodingAccuracy.Approximate,
+    mapClickAccuracy: "c-approximate",
   };
 
   it("takes a later layer's value over an earlier one", () => {
@@ -27,7 +27,7 @@ describe("layerGeocodingContext", () => {
     const merged = layerGeocodingContext(base, { region: "occitania" });
     expect(merged.period).toBe("1200-1400");
     expect(merged.language).toBe("de");
-    expect(merged.mapClickAccuracy).toBe(GeocodingAccuracy.Approximate);
+    expect(merged.mapClickAccuracy).toBe("c-approximate");
   });
 
   it("treats an empty string as unset rather than as a value", () => {

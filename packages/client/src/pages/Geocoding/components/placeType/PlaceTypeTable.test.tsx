@@ -10,6 +10,16 @@ import { expandPlaceTypes } from "../../utils/context/placeTypeHierarchy";
 import { click, render, Rendered } from "../../utils/test/renderForTest";
 import { PlaceTypeTable } from "./PlaceTypeTable";
 
+// every tag a row draws is counted, so a test can tell which rows rendered again
+const tagRenders = vi.hoisted(() => ({ byEntity: {} as Record<string, number> }));
+vi.mock("components/advanced", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("components/advanced")>()),
+  EntityTag: ({ entity }: { entity: { id: string } }) => {
+    tagRenders.byEntity[entity.id] = (tagRenders.byEntity[entity.id] ?? 0) + 1;
+    return null;
+  },
+}));
+
 /**
  * A researcher adding a location type such as "church" has to pair it with one
  * of the twelve gazetteer location types, whose names mean more than they say.
@@ -28,6 +38,7 @@ const tree = {
   nodes: [],
   concepts: {},
   detailOf: () => "",
+  detailReady: () => true,
   onDetailChange: () => undefined,
 };
 
@@ -145,6 +156,7 @@ describe("PlaceTypeTable, with the subclass tree of each location type", () => {
         nodes={expandPlaceTypes(value, { "c-path": tree }, labels)}
         concepts={{}}
         detailOf={(conceptId) => labels[conceptId]?.detail ?? ""}
+        detailReady={() => true}
         onDetailChange={onDetailChange}
         renderConcept={() => <span>root tag</span>}
         counts={{}}
@@ -231,6 +243,86 @@ describe("PlaceTypeTable, with the subclass tree of each location type", () => {
       field.dispatchEvent(new Event("input", { bubbles: true }));
     });
     expect(onDetailChange).toHaveBeenCalledWith("c-road", "for carts and riders");
+  });
+
+  it("keeps a description out of reach until its Concept is read, so nothing typed replaces a detail unseen", () => {
+    mountTree([ways], { detailReady: (conceptId) => conceptId !== "c-road" });
+    const road = rowOf("for carts").querySelector<HTMLTextAreaElement>("textarea")!;
+    expect(road.disabled).toBe(true);
+    expect(road.placeholder).toBe("reading the Concept");
+    const path = view!
+      .all("[class*='KindRow']")
+      .map((row) => row.querySelector<HTMLTextAreaElement>("textarea"))
+      .filter((field): field is HTMLTextAreaElement => !!field && field !== road);
+    expect(path.some((field) => !field.disabled)).toBe(true);
+  });
+
+  it("keeps the location type's own description out of reach until its Concept is read", () => {
+    mountTree([ways], { detailReady: (conceptId) => conceptId !== "c-path" });
+    const own = rowOf("any way").querySelector<HTMLTextAreaElement>("textarea")!;
+    expect(own.disabled).toBe(true);
+    expect(own.placeholder).toBe("reading the Concept");
+    expect(rowOf("for carts").querySelector("textarea")!.disabled).toBe(false);
+  });
+
+  it("unticks on the list as it is after an edit, not as it was when the row was drawn", () => {
+    const onChange = vi.fn();
+    const table = (value: IGeocodingPlaceType[]) => (
+      <PlaceTypeTable
+        value={value}
+        onChange={onChange}
+        nodes={expandPlaceTypes(value, { "c-path": tree }, labels)}
+        concepts={{}}
+        detailOf={(conceptId) => labels[conceptId]?.detail ?? ""}
+        detailReady={() => true}
+        onDetailChange={vi.fn()}
+        renderConcept={() => <span>root tag</span>}
+        counts={{}}
+        countsLoading={false}
+        countsFailed={false}
+      />
+    );
+    view = render(table([ways]));
+    // a name typed since: the road's row is not drawn again, and its tick must
+    // still not undo the name
+    const renamed = { ...ways, name: "ways and paths" };
+    view.update(table([renamed]));
+    click(rowOf("for carts").querySelector("[role=checkbox]"));
+    expect(onChange).toHaveBeenLastCalledWith([{ ...renamed, inactive: ["c-road"] }]);
+  });
+
+  it("renders a subclass row again only when one of its own values changes", () => {
+    const concepts = Object.fromEntries(
+      Object.keys(labels).map((id) => [id, { id, class: "C", labels: [labels[id].label] }])
+    ) as unknown as React.ComponentProps<typeof PlaceTypeTable>["concepts"];
+    const table = (value: IGeocodingPlaceType[]) => (
+      <PlaceTypeTable
+        value={value}
+        onChange={vi.fn()}
+        // worked out again on every edit, as the settings window does
+        nodes={expandPlaceTypes(value, { "c-path": tree }, labels)}
+        concepts={concepts}
+        detailOf={(conceptId) => labels[conceptId]?.detail ?? ""}
+        detailReady={() => true}
+        onDetailChange={vi.fn()}
+        renderConcept={() => <span>root tag</span>}
+        counts={{}}
+        countsLoading={false}
+        countsFailed={false}
+      />
+    );
+    view = render(table([ways]));
+    const before = { ...tagRenders.byEntity };
+
+    // a name typed on the location type changes nothing a subclass row shows
+    view.update(table([{ ...ways, name: "ways and paths" }]));
+    expect(tagRenders.byEntity).toEqual(before);
+
+    // unticking the road renders the road again, and no other row
+    view.update(table([{ ...ways, name: "ways and paths", inactive: ["c-road"] }]));
+    expect(tagRenders.byEntity["c-road"]).toBe(before["c-road"] + 1);
+    expect(tagRenders.byEntity["c-highway"]).toBe(before["c-highway"]);
+    expect(tagRenders.byEntity["c-street"]).toBe(before["c-street"]);
   });
 
   it("names the column of gazetteer types as such", () => {

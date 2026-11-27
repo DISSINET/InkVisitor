@@ -23,7 +23,13 @@ export interface DerivedGeocoding {
   lon: number | null;
   /** Latitude of the anchor. */
   lat: number | null;
+  /** The Concept the accuracy prop is valued with, in the project's list or not. */
   accuracy: GeocodingAccuracy | null;
+  /**
+   * That Concept's label, and "not in the accuracy list" beside it where the
+   * project no longer lists it; empty while it cannot be read.
+   */
+  accuracyLabel: string;
   /**
    * The id of the project's location type, independent of `isGeocoded` — a location type
    * says nothing about a coordinate. Not a prop, so it is not derived here: a
@@ -45,6 +51,7 @@ const ungeocoded = (problem: string | null): DerivedGeocoding => ({
   lon: null,
   lat: null,
   accuracy: null,
+  accuracyLabel: "",
   placeType: null,
   problem,
 });
@@ -67,30 +74,23 @@ const accuracyPropOf = (entity: IEntity, roles: IGeocodingRoles, geometryProp?: 
  *
  * A search result carries only these ids — `IResponseEntity` bundles no entity
  * map, unlike the detail and statement responses — so the labels behind them
- * take a second, batched fetch. Only the geometry has a label to read: the
- * accuracy is told apart by its id.
+ * take a second, batched fetch: the geometry's, which is the coordinate, and the
+ * accuracy Concept's, which is what the accuracy is called.
  */
 export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles): string[] => {
   const ids = new Set<string>();
   for (const entity of entities) {
-    const valueId = propOfType(entity, roles.geometry)?.value?.entityId;
-    if (valueId) {
-      ids.add(valueId);
+    const geometryProp = propOfType(entity, roles.geometry);
+    for (const valueId of [
+      geometryProp?.value?.entityId,
+      roles.accuracy ? accuracyPropOf(entity, roles, geometryProp)?.value?.entityId : undefined,
+    ]) {
+      if (valueId) {
+        ids.add(valueId);
+      }
     }
   }
   return [...ids];
-};
-
-/** Reverses a role map — stored as name → entity id, read here id → name. */
-const nameForEntity = <T extends string>(
-  map: Partial<Record<T, string>>,
-  entityId: string | undefined,
-): T | null => {
-  if (!entityId) {
-    return null;
-  }
-  const hit = Object.entries(map).find(([, id]) => id === entityId);
-  return hit ? (hit[0] as T) : null;
 };
 
 /**
@@ -125,20 +125,33 @@ export const deriveGeocoding = (
   // is not GeoJSON, or a position outside the earth's range all mean ungeocoded
   // rather than a shape rendered somewhere wrong
   const geometry = parseGeometry(values[geometryProp!.value.entityId]?.labels?.[0]);
-  const accuracy = nameForEntity<GeocodingAccuracy>(
-    roles.accuracyValues,
-    accuracyProp!.value.entityId,
-  );
+  const accuracy = accuracyProp!.value?.entityId || null;
 
   if (!geometry) {
     return ungeocoded("geometry cannot be read");
   }
   if (!accuracy) {
-    return ungeocoded("accuracy is not one of the configured values");
+    return ungeocoded("accuracy has no value");
   }
 
+  // a Concept the project has since taken off its list still says how close the
+  // coordinate is, and the coordinate is kept: hiding it would hide every place
+  // coded with an accuracy the moment the owner tidied the list
+  const label = values[accuracy]?.labels?.[0] ?? "";
+  const accuracyLabel =
+    label && !roles.accuracies.includes(accuracy) ? `${label} (not in the accuracy list)` : label;
+
   const { lon, lat } = geometryAnchor(geometry);
-  return { isGeocoded: true, geometry, lon, lat, accuracy, placeType: null, problem: null };
+  return {
+    isGeocoded: true,
+    geometry,
+    lon,
+    lat,
+    accuracy,
+    accuracyLabel,
+    placeType: null,
+    problem: null,
+  };
 };
 
 /**

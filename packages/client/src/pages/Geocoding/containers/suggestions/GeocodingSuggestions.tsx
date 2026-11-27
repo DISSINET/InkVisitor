@@ -15,7 +15,13 @@ import { ElapsedSeconds } from "../../components/suggestion/ElapsedSeconds";
 import { GeocodingProgress } from "../../components/suggestion/GeocodingProgress";
 import { GeocodingProvenance } from "../../utils/write/geocodingWrite";
 import { MatchTag } from "../../components/gazetteer/MatchTag";
-import { ACCURACY_ORDER, AccuracyPicker } from "../../components/placeType/AccuracyPicker";
+import { CandidateScopeMark } from "../../components/suggestion/CandidateScopeMark";
+import {
+  AccuracyHeading,
+  AccuracyPicker,
+  AccuracyTag,
+} from "../../components/placeType/AccuracyPicker";
+import { useAccuracies } from "../../hooks/accuraciesContext";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
 import {
   KindIcon,
@@ -34,7 +40,11 @@ import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { degradationsOf, problemsOf } from "../../utils/engine/suggestIntegrity";
 import { splitLabel } from "../../utils/suggestions/suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "../../utils/suggestions/suggestionRank";
-import { provenanceOf } from "../../utils/suggestions/suggestionProvenance";
+import {
+  citingDistanceKm,
+  provenanceOf,
+  standingsOf,
+} from "../../utils/suggestions/suggestionProvenance";
 import {
   DEFAULT_MERGE_RADIUS_KM,
   SPREAD_WARNING_FRACTION,
@@ -199,12 +209,20 @@ interface SuggestionCard {
   /** The strongest score in the response this card belongs to. */
   topScore: number;
   mergeRadiusKm: number | undefined;
+  /**
+   * How close a gazetteer's record must lie to the coordinate to be cited, for
+   * the search this card came from; absent where nothing is about to be written
+   * from it, and no record is marked.
+   */
+  withinKm?: number;
+  /** The project's Resource per gazetteer: one without is never cited. */
+  resources?: Record<string, string>;
   band: ReturnType<typeof bandOf>;
   /** This card's own slice of `pending`, or null while it is not the one being accepted. */
   pendingHere: PendingAccept;
   accuracyMenuOpen: boolean;
   menuAnchor: { left: number; top: number; bottom: number } | null;
-  /** Whether every match is drawn rather than the strongest few. */
+  /** Whether every match is drawn rather than the nearest few. */
   allMatches: boolean;
   onToggleMatches: () => void;
   onShowOnMap: (lat: number, lon: number) => void;
@@ -212,7 +230,7 @@ interface SuggestionCard {
   onUseAs: (accuracy: GeocodingAccuracy, anchor: { left: number; top: number; bottom: number }) => void;
   onOpenAccuracyMenu: (anchor: { left: number; top: number; bottom: number }) => void;
   onCloseAccuracyMenu: () => void;
-  /** An accuracy picked in the card's own "how precisely is it known?" step. */
+  /** An accuracy picked in the card's own accuracy step. */
   onPickTypeStepAccuracy: (
     accuracy: GeocodingAccuracy,
     anchor: { left: number; top: number; bottom: number },
@@ -259,6 +277,8 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
   total,
   topScore,
   mergeRadiusKm,
+  withinKm,
+  resources,
   band,
   pendingHere,
   accuracyMenuOpen,
@@ -278,8 +298,18 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
   onHover,
 }) => {
   const { signals } = suggestion;
-  const { scattered, leadAccuracy } = scatterOf(suggestion, mergeRadiusKm);
+  const accuracies = useAccuracies();
+  const { scattered, leadAccuracy } = scatterOf(suggestion, mergeRadiusKm, {
+    accuracyWhenAgree: accuracies.whenAgree,
+    accuracyWhenScattered: accuracies.whenScattered,
+  });
   const tied = !showsScore(band, index);
+  // the coordinate's own record first, then the rest nearest first, so the few
+  // shown are the records about the spot the coordinate is on
+  const standings = useMemo(
+    () => standingsOf(suggestion, withinKm ?? Infinity, resources),
+    [suggestion, withinKm, resources],
+  );
   const { name: placeName, region } = splitLabel(suggestion.label);
 
   return (
@@ -413,15 +443,18 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
               border, because that vocabulary is the engine's own and reads
               as a verdict when it is spelled out twenty times */}
           <StyledMatchTags>
-            {(allMatches ? suggestion.matches : suggestion.matches.slice(0, VISIBLE_MATCHES)).map(
-              (match, i) => (
-                <MatchTag key={`${match.source}-${match.sourceId}-${i}`} match={match} />
-              ),
-            )}
+            {(allMatches ? standings : standings.slice(0, VISIBLE_MATCHES)).map((standing) => (
+              <MatchTag
+                key={`${standing.match.source}-${standing.match.sourceId}-${standing.index}`}
+                match={standing.match}
+                standing={withinKm === undefined ? undefined : standing}
+                withinKm={withinKm}
+              />
+            ))}
             {suggestion.matches.length > VISIBLE_MATCHES ? (
               <StyledShowMatches type="button" onClick={onToggleMatches}>
                 {allMatches
-                  ? `show the strongest ${VISIBLE_MATCHES}`
+                  ? `show the nearest ${VISIBLE_MATCHES}`
                   : `show ${suggestion.matches.length - VISIBLE_MATCHES} more matches`}
               </StyledShowMatches>
             ) : null}
@@ -430,8 +463,9 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       </StyledCardBody>
 
       {/* the reason and the control are two halves of one sentence: the
-          button says "approximate" and this says why, close enough to be
-          read as one thing. The whole of it stays on the chip's tooltip */}
+          button names the accuracy marked for scattered sources and this says
+          why, close enough to be read as one thing. The whole of it stays on
+          the chip's tooltip */}
       {scattered ? (
         <StyledScatterNote>
           the sources place this {suggestion.spreadKm.toFixed(0)} km apart
@@ -440,17 +474,26 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
 
       {preview ? null : (
       <StyledCardActions>
-        {/* one button per card rather than four. The lead accuracy is the
-            answer in the ordinary case and stays one click away; the other
-            three are a caret away, which is where four times six buttons of
-            near-identical text went */}
+        {/* one button per card, not one per accuracy: six cards of
+            near-identical buttons read as a wall. The lead accuracy is the
+            answer in the ordinary case and stays one click away; the rest of
+            the list is a caret away */}
         <StyledUseAs>
           <StyledUseAsMain
             type="button"
-            $pending={pendingHere?.accuracy === leadAccuracy}
-            onClick={(event) => onUseAs(leadAccuracy, event.currentTarget.getBoundingClientRect())}
+            $pending={!!leadAccuracy && pendingHere?.accuracy === leadAccuracy}
+            onClick={(event) => {
+              const box = event.currentTarget.getBoundingClientRect();
+              // with no accuracy marked for a case like this one there is
+              // nothing to take without asking, so the button asks
+              if (!leadAccuracy) {
+                onOpenAccuracyMenu({ left: box.left, top: box.top, bottom: box.bottom });
+                return;
+              }
+              onUseAs(leadAccuracy, box);
+            }}
           >
-            use as {leadAccuracy}
+            {leadAccuracy ? `use as ${accuracies.labelOf(leadAccuracy)}` : "choose the accuracy"}
           </StyledUseAsMain>
           <StyledUseAsCaret
             type="button"
@@ -472,7 +515,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           </StyledUseAsCaret>
 
           {/* the same control the map asks this with, rather than a menu of
-              four bare words: the accuracy is written on every Location and
+              bare words: the accuracy is written on every Location and
               a list half the size of the one that follows it reads as the
               lesser of the two questions */}
           {accuracyMenuOpen && menuAnchor ? (
@@ -498,7 +541,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       {pendingHere && pendingHere.accuracy === null ? (
         <StyledTypeStep>
           <StyledTypeStepHead>
-            how precisely is it known?
+            <AccuracyHeading />
             <StyledTypeStepAside>
               {scattered
                 ? `its sources sit ${suggestion.spreadKm.toFixed(1)} km apart`
@@ -506,21 +549,21 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             </StyledTypeStepAside>
           </StyledTypeStepHead>
           <StyledTypeChoices>
-            {ACCURACY_ORDER.map((accuracy) => (
+            {accuracies.entries.map((entry) => (
               <StyledTypeChoice
-                key={accuracy}
+                key={entry.conceptId}
                 type="button"
-                $suggested={accuracy === leadAccuracy}
+                $suggested={entry.conceptId === leadAccuracy}
                 data-hint={
-                  accuracy === leadAccuracy
-                    ? `${accuracy} — what the spread of its sources argues for`
-                    : accuracy
+                  entry.conceptId === leadAccuracy
+                    ? `${entry.label} — what the spread of its sources argues for`
+                    : entry.detail || entry.label
                 }
                 onClick={(event) =>
-                  onPickTypeStepAccuracy(accuracy, event.currentTarget.getBoundingClientRect())
+                  onPickTypeStepAccuracy(entry.conceptId, event.currentTarget.getBoundingClientRect())
                 }
               >
-                <span>{accuracy}</span>
+                <AccuracyTag entry={entry} />
               </StyledTypeChoice>
             ))}
           </StyledTypeChoices>
@@ -539,7 +582,6 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           held={held}
           suggested={suggestion.placeType}
           clearLabel="leave the location type as it is"
-          clearDescription="Only the coordinate is written."
           onChoose={(placeType) =>
             onChooseKind(pendingHere.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
@@ -804,6 +846,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     suggest.clear();
   };
 
+  // the citing distance of the search these suggestions came from, by the
+  // location types the engine resolved it to
+  const withinKm = citingDistanceKm(roles.citeWithinKm, response?.query?.criteria?.placeTypeIds);
+
   const accept = (
     suggestion: Suggestion,
     accuracy: GeocodingAccuracy,
@@ -821,7 +867,13 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             suggestions: response.suggestions,
           })
       : () => undefined;
-    onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType, feedback);
+    onAccept(
+      suggestion,
+      accuracy,
+      provenanceOf(suggestion, withinKm, roles.resources),
+      placeType,
+      feedback,
+    );
   };
 
   /**
@@ -910,6 +962,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           total={response.suggestions.length}
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
+          withinKm={withinKm}
+          resources={roles.resources}
           band={band}
           pendingHere={null}
           accuracyMenuOpen={accuracyMenu === hovered.index}
@@ -984,6 +1038,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           total={response.suggestions.length}
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
+          withinKm={withinKm}
+          resources={roles.resources}
           band={band}
           pendingHere={pendingHere}
           highlighted={highlighted === index}
@@ -1050,7 +1106,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         onReset={onContextReset}
         onRegeocode={
           answerIsStale && selected
-            ? () => suggest.run(selected.entity.id, name, context)
+            ? () => suggest.run(selected.entity.id, name, context, roles.representative)
             : undefined
         }
       />
@@ -1068,9 +1124,9 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                     geometry={selected.geometry ?? undefined}
                     lat={selected.lat ?? undefined}
                     lon={selected.lon ?? undefined}
-                    accuracy={selected.accuracy ?? undefined}
+                    accuracy={selected.accuracyLabel || undefined}
                   />{" "}
-                  {selected.accuracy}
+                  {selected.accuracyLabel}
                 </>
               ) : (
                 "not geocoded"
@@ -1145,7 +1201,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                   : undefined
             }
             disabled={!engineReady || isRunningForThis}
-            onClick={() => suggest.run(selected.entity.id, name, context)}
+            onClick={() => suggest.run(selected.entity.id, name, context, roles.representative)}
           />
           {isRunningForThis ? (
             <Button label="cancel" color="danger" onClick={suggest.cancel} />
@@ -1171,6 +1227,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                   <span key={`${candidate.name}-${index}`}>
                     {index ? ", " : ""}
                     <strong>{candidate.name}</strong> ({candidate.nameFit.toFixed(2)})
+                    <CandidateScopeMark scope={candidate.scope} />
                   </span>
                 ))}
               </StyledSearched>

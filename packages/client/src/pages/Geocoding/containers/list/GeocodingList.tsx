@@ -25,7 +25,7 @@ import { GeocodingFilterChips } from "./GeocodingFilterChips";
 import { GeocodingListRow, GeocodingListRowProps, GroupHeading } from "./GeocodingListRow";
 import { GeocodingTerritoryFilter, useTerritoryLabel } from "./GeocodingTerritoryFilter";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
-import { ANY, UseGeocodingBrowse, accuracyOptions } from "../../hooks/useGeocodingBrowse";
+import { ANY, UseGeocodingBrowse } from "../../hooks/useGeocodingBrowse";
 import { GroupBy, ListItem, flatten, groupByOptions, idsInRange } from "../../utils/context/geocodingGroups";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 import { useGeocodingListScroll } from "../../hooks/useGeocodingListScroll";
@@ -381,7 +381,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
               ),
             },
             { key: "createdBy", label: "created by", options: browse.createdByOptions },
-            { key: "accuracy", label: "accuracy", options: accuracyOptions,
+            { key: "accuracy", label: "accuracy", options: browse.accuracyOptions,
               counts: browse.optionCounts.accuracy },
             { key: "placeType", label: "location type", options: browse.placeTypeOptions,
               counts: browse.optionCounts.placeType },
@@ -400,6 +400,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
             <StyledSelectionLabel>selected</StyledSelectionLabel>
             <EntityTag
               entity={selected.entity}
+              tooltipPassThrough
               disableDrag
               disableDoubleClick
               disableCopyToClipboard
