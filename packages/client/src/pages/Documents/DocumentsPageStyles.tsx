@@ -270,7 +270,7 @@ export const StyledInputWrap = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   height: 5rem;
   min-width: 40rem;
-  margin-top: 1rem;
+  margin-top: ${({ theme }) => theme.space[2]};
   padding: 0.3rem 1rem;
   display: flex;
   justify-content: center;
