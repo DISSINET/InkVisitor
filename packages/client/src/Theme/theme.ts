@@ -47,9 +47,9 @@ const theme = {
     white: "#fff",
     grey: "#C4C4C4",
     greyer: "#4a5568",
-    // a panel separator while hovered or dragged: a sky blue apart from the indigo of the
+    // a panel separator while hovered or dragged: an azure apart from the indigo of the
     // query lines
-    separatorActive: "#4299e1", // blue 500
+    separatorActive: "#3182ce", // blue 600
     // notes and field labels that must sit below body text in both themes;
     // greyer lands one step from the dark page's text color and stops reading
     // as secondary there
