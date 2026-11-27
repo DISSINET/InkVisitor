@@ -38,8 +38,11 @@ export const StyledEmptyState = styled.div<StyledTableContainer>`
 
 /* auto table layout: every column takes the width of its widest cell, header
    or body — the nowrap on cells is what keeps that width single-line */
+/* separate borders: collapsed borders are painted by the table, not the cells,
+   so they scroll away from the pinned header and totals row and leave a gap */
 export const StyledTable = styled.table`
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 `;
 
 interface StyledTh {
@@ -58,12 +61,13 @@ export const StyledTh = styled.th<StyledTh>`
   font-size: 14px;
   position: sticky;
   top: 0;
-  z-index: 1;
+  /* above the pinned totals row, which sticks right below the header */
+  z-index: 3;
   ${({ $isSticky, $stickyOffset = 0 }) =>
     $isSticky &&
     `
     left: ${$stickyOffset}px;
-    z-index: 2;
+    z-index: 4;
     `}
 `;
 
@@ -71,6 +75,7 @@ interface StyledTd {
   $isSticky?: boolean;
   $stickyOffset?: number;
   $isTotalRow?: boolean;
+  $stickyTop?: number;
 }
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
@@ -95,5 +100,15 @@ export const StyledTd = styled.td<StyledTd>`
     position: sticky;
     left: ${$stickyOffset}px;
     z-index: 1;
+    `}
+
+  /* the totals row stays under the header while the body scrolls beneath it;
+     its two pinned cells stay above the rest of the row that scrolls sideways */
+  ${({ $isTotalRow, $isSticky, $stickyTop = 0 }) =>
+    $isTotalRow &&
+    `
+    position: sticky;
+    top: ${$stickyTop}px;
+    z-index: ${$isSticky ? 3 : 2};
     `}
 `;
