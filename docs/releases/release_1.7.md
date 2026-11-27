@@ -1,4 +1,4 @@
-# What's changed [Nov 20, 2026]
+# What's changed [Nov 27, 2026]
 
 InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer searches, columns and stats return quicker, and Explorer stats count every matching Entity instead of the first 500.
 
