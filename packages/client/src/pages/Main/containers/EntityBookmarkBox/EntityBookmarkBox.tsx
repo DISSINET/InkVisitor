@@ -128,7 +128,7 @@ export const EntityBookmarkBox: React.FC = () => {
       setRemovingFolder(false);
     },
     onSuccess: () => {
-      toast.warning("Bookmark folder removed");
+      toast.info("Bookmark folder removed");
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
   });
