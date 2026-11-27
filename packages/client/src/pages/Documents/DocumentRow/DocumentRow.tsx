@@ -118,12 +118,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   const [titleHead, titleTail] = splitTitleTail(localTitle, 7);
 
   return (
-    <StyledDocumentRow>
+    <StyledDocumentRow $selected={canManage && selected}>
       <StyledSelectCell>
         {canManage ? (
-          <Checkbox value={selected} onChangeFn={() => onToggleSelected(document.id)} />
+          <Checkbox value={selected} size={15} onChangeFn={() => onToggleSelected(document.id)} />
         ) : (
-          <Checkbox value={false} disabled tooltipLabel="you are not assigned to this resource" />
+          <Checkbox
+            value={false}
+            size={15}
+            disabled
+            tooltipLabel="you are not assigned to this resource"
+          />
         )}
       </StyledSelectCell>
       <StyledTitleWrap

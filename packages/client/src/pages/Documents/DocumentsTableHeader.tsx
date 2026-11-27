@@ -81,6 +81,7 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
         <Checkbox
           value={allSelected}
           indeterminate={someSelected && !allSelected}
+          size={15}
           onChangeFn={(value) => onToggleSelectAll(value)}
           tooltipLabel={allSelected ? "deselect all documents" : "select all documents"}
         />

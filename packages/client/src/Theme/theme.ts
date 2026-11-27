@@ -104,6 +104,8 @@ const theme = {
     tableOpened: "#d8ddf5",
     tableSelection: "#c4caf0",
     tableSelectionHover: "#e4e7f8",
+    // a row ticked by its checkbox: a gentle fill that leaves the row readable as a plain row
+    tableCheckedRow: "#e6eafa", // blue 50
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
