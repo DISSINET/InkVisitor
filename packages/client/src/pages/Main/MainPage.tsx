@@ -770,8 +770,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                           onClick={() => setShowEntityCreateModal(true)}
                           tooltipLabel="create new entity"
                         />
-                        {/* only owners may import entities */}
-                        {userRole === UserEnums.Role.Owner && (
+                        {/* only owners and admins may import entities */}
+                        {(userRole === UserEnums.Role.Owner ||
+                          userRole === UserEnums.Role.Admin) && (
                           <Button
                             icon={<IcoCode />}
                             label="import"

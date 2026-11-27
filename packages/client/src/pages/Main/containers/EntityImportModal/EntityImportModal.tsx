@@ -24,7 +24,7 @@ import {
   ImportWriteOutcome,
   importDataSource,
   importWriteApi,
-  MAX_IMPORT_ENTITIES,
+  maxImportEntities,
   missingEntityIds,
   missingSynonymGroupIds,
   removeDraftEntity,
@@ -375,7 +375,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         {step === "input" && (
           <StyledStep>
             <StyledHint>
-              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. Detail's JSON section shows this format; give a copy a new id.`}
+              {`Paste up to ${maxImportEntities(getStoredUserRole() as UserEnums.Role)} entities as a JSON object or array, or load a .json file. Detail's JSON section shows this format; give a copy a new id.`}
             </StyledHint>
             <EntityImportJsonEditor
               value={text}
