@@ -234,6 +234,18 @@ describe("collectStatementAnchors", () => {
       "S2",
     ]);
   });
+
+  it("leaves out an anchor whose opening tag never closes", () => {
+    const statement = EntityEnums.Class.Statement;
+    const anchors = [
+      { anchor: "S1", class: statement, indexStart: 0, indexEnd: -1, children: [] },
+      {
+        anchor: "S2", class: statement, indexStart: 5, indexEnd: 20,
+        children: [{ anchor: "S3", class: statement, indexStart: 8, indexEnd: -1 }],
+      },
+    ] as unknown as IAnchorsNode[];
+    expect(collectStatementAnchors(anchors).map((a) => a.anchor)).toEqual(["S2"]);
+  });
 });
 
 describe("collectTerritoryAnchors", () => {
@@ -253,6 +265,15 @@ describe("collectTerritoryAnchors", () => {
       "T1",
       "T2",
     ]);
+  });
+
+  it("leaves out an anchor whose opening tag never closes", () => {
+    const territory = EntityEnums.Class.Territory;
+    const anchors = [
+      { anchor: "T1", class: territory, indexStart: 0, indexEnd: -1, children: [] },
+      { anchor: "T2", class: territory, indexStart: 5, indexEnd: 20 },
+    ] as unknown as IAnchorsNode[];
+    expect(collectTerritoryAnchors(anchors).map((a) => a.anchor)).toEqual(["T2"]);
   });
 });
 

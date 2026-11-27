@@ -34,6 +34,7 @@ import { UserTag } from "./UserTag/UserTag";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 import { ValidationRule } from "./ValidationRule/ValidationRule";
 import { AbbreviatedTextWithTooltip } from "./AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip";
+import { AsymmetricalAnchorWarning } from "./AsymmetricalAnchorWarning/AsymmetricalAnchorWarning";
 import { DocumentTitle } from "./DocumentTitle/DocumentTitle";
 import { LayoutSeparatorVertical } from "./PanelSeparator/LayoutSeparatorVertical";
 import { LayoutSeparatorHorizontal } from "./PanelSeparator/LayoutSeparatorHorizontal";
@@ -63,6 +64,7 @@ export {
   ApplyTemplateModal,
   AttributeButtonGroup,
   AbbreviatedTextWithTooltip,
+  AsymmetricalAnchorWarning,
   AuditTable,
   RelationAuditTable,
   BreadcrumbItem,

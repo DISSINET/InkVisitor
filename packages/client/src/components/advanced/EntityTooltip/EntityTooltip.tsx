@@ -49,7 +49,7 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
-import { DocumentTitle } from "..";
+import { AsymmetricalAnchorWarning, DocumentTitle } from "..";
 import { RiNodeTree } from "react-icons/ri";
 
 interface EntityTooltip {
@@ -268,7 +268,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                             <StyledAnchorTextContent
                               $lines={anchorLines}
                             >
-                              {documentAnchor.anchorText}
+                              {documentAnchor.orphaned ? (
+                                <AsymmetricalAnchorWarning />
+                              ) : (
+                                documentAnchor.anchorText
+                              )}
                             </StyledAnchorTextContent>
                             {documentAnchor.count > 1 && (
                               <StyledAnchorCount>
