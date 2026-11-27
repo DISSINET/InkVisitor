@@ -1,6 +1,7 @@
 import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import styled from "styled-components";
 import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
+import { thinScrollbar } from "Theme/thinScrollbar";
 
 // Query Builder box buttons: compact result-expansion checkboxes (#2969),
 // grouped as a single ButtonGroup item next to "run search".
@@ -113,6 +114,7 @@ export const StyledQueryScroller = styled.div<{ $searchRowsHeight: number }>`
   scroll-padding-bottom: calc(
     ${({ $searchRowsHeight }) => $searchRowsHeight}px + ${({ theme }) => theme.space[2]}
   );
+  ${thinScrollbar}
 `;
 
 // a card floating over the bottom of the Query Builder box, the query tree visible around

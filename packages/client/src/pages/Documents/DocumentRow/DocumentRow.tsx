@@ -18,7 +18,6 @@ import {
   StyledActionsCell,
   StyledCount,
   StyledCountTag,
-  StyledDisabledSelect,
   StyledDocumentRow,
   StyledExportIcon,
   StyledOpenIcon,
@@ -119,14 +118,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   const [titleHead, titleTail] = splitTitleTail(localTitle, 7);
 
   return (
-    <StyledDocumentRow>
+    <StyledDocumentRow $selected={canManage && selected}>
       <StyledSelectCell>
         {canManage ? (
-          <Checkbox value={selected} onChangeFn={() => onToggleSelected(document.id)} noFill />
+          <Checkbox value={selected} size={15} onChangeFn={() => onToggleSelected(document.id)} />
         ) : (
-          <StyledDisabledSelect>
-            <Checkbox value={false} tooltipLabel="you are not assigned to this resource" noFill />
-          </StyledDisabledSelect>
+          <Checkbox
+            value={false}
+            size={15}
+            disabled
+            tooltipLabel="you are not assigned to this resource"
+          />
         )}
       </StyledSelectCell>
       <StyledTitleWrap

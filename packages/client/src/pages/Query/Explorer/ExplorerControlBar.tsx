@@ -79,8 +79,6 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
       <Checkbox
         value={sel.isAllCurrentSelected}
         indeterminate={!sel.isAllCurrentSelected && hasAnySelection}
-        color="primary"
-        noFill
         size={15}
         onChangeFn={() => {
           // any selection at all clears it; only an empty selection selects the page

@@ -48,7 +48,7 @@ const darkTheme = {
     white: "#060c26",
     grey: "#6b6b6b",
     greyer: "#b5b5b5",
-    separatorActive: "#718096", // gray 400, the slate of the dark greys
+    separatorActive: "#4299e1", // blue 500
     mutedText: "#a0aec0", // gray 500
     text: "#c7c7c7",
     primary: "#f6f6ff",
@@ -87,6 +87,8 @@ const darkTheme = {
     tableOpened: "#1a2650",
     tableSelection: "#2e3f7a",
     tableSelectionHover: "#3a4d8c",
+    // blue 50 here is a near-gray dimmer than the gray hover, so this takes tableOpened's navy
+    tableCheckedRow: "#1a2650",
     focusedCheckbox: "rgba(246,246,255,0.1)",
     uploadDocumentBg: "#22315a",
 

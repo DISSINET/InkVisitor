@@ -41,7 +41,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       queryClient.removeQueries({ queryKey: ["entity", removeEntityId] });
 
       entityToRemove &&
-        toast.warning(
+        toast.info(
           `Template [${entityToRemove.class}]: "${getShortLabelByLetterCount(
             getEntityLabel(entityToRemove),
             120

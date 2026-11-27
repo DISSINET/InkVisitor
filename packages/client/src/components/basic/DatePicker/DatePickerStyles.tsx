@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
+import { thinScrollbar } from "Theme/thinScrollbar";
 
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -465,18 +466,7 @@ export const StyledScrollColumn = styled.div`
   flex-direction: column;
   gap: ${({ theme }) => theme.space["px"]};
 
-  /* a narrower take on the global scrollbar, a 4px thumb in a 6px strip.
-     Chrome ignores the pseudo-elements once scrollbar-width is set, so that
-     applies only in Firefox */
-  @supports not selector(::-webkit-scrollbar) {
-    scrollbar-width: thin;
-  }
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    border-width: 1px;
-  }
+  ${thinScrollbar}
 `;
 
 export const StyledScrollItem = styled.button<{ $selected?: boolean }>`

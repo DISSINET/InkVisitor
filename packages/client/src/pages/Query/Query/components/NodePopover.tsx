@@ -13,13 +13,24 @@ interface NodePopover {
 /** A panel below a badge on a query node; closes on Escape or a click outside both. */
 export const NodePopover: React.FC<NodePopover> = ({ referenceElement, onClose, children }) => {
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+  const { styles, attributes, update } = usePopper(referenceElement, popperElement, {
     placement: "bottom",
     modifiers: [
       { name: "offset", options: { offset: [0, 8] } },
       { name: "flip", options: { fallbackPlacements: ["top", "auto"] } },
     ],
   });
+
+  // popper places the panel only on scroll and resize events, and the panel opens on a
+  // "loading…" line before its list arrives and widens it
+  useEffect(() => {
+    if (!popperElement || !update || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(() => update());
+    observer.observe(popperElement);
+    return () => observer.disconnect();
+  }, [popperElement, update]);
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;

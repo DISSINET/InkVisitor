@@ -177,6 +177,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   const handleRowClick = React.useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
+      // React bubbles clicks out of portals too: a tag's context menu or its modal sits in
+      // the body, and focusing the row remounts every row, the tag with its menu among them
+      if (!e.currentTarget.contains(target)) {
+        return;
+      }
       if (
         target.closest("button, a, input, textarea, select, [role='button'],  [data-no-row-click]")
       ) {
@@ -647,8 +652,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           {isLastClicked && <StyledFocusedCircle />}
           <Checkbox
             value={isSelected}
-            color="primary"
-            noFill
             size={15}
             onChangeFn={handleCheckboxChange}
           />

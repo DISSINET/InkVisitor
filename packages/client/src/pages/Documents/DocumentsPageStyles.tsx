@@ -71,6 +71,8 @@ export const StyledGrid = styled.div`
   display: grid;
   grid-template-columns: ${documentsGridColumns};
   align-items: stretch;
+  /* parts neighbouring highlighted rows, whose fills have rounded ends */
+  row-gap: 2px;
   min-width: min-content;
   margin-bottom: 0.5rem;
 `;
@@ -83,7 +85,10 @@ export const StyledGridHeader = styled.div`
  * Cells are grid items of the shared grid, so the row itself lays out nothing
  * and the hover fill has to be painted on the cells it contains.
  */
-export const StyledDocumentRow = styled.div`
+interface StyledDocumentRow {
+  $selected?: boolean;
+}
+export const StyledDocumentRow = styled.div<StyledDocumentRow>`
   display: contents;
 
   /* Controls inside a cell (the suggester's focus ring and create button, an
@@ -107,6 +112,26 @@ export const StyledDocumentRow = styled.div`
     border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
     border-bottom-right-radius: ${({ theme }) => theme.borderRadius["default"]};
   }
+
+  /* a row picked for export keeps its fill while hovered */
+  ${({ $selected, theme }) =>
+    $selected &&
+    css`
+      > * {
+        background-color: ${theme.color["tableCheckedRow"]};
+      }
+      &:hover > * {
+        background-color: ${theme.color["tableCheckedRow"]};
+      }
+      > *:first-child {
+        border-top-left-radius: ${theme.borderRadius["default"]};
+        border-bottom-left-radius: ${theme.borderRadius["default"]};
+      }
+      > *:last-child {
+        border-top-right-radius: ${theme.borderRadius["default"]};
+        border-bottom-right-radius: ${theme.borderRadius["default"]};
+      }
+    `}
 `;
 
 export const StyledSortableHeaderCell = styled.button<{ $active?: boolean }>`
@@ -192,12 +217,6 @@ export const StyledSelectHeaderCell = styled.div`
   ${stickyHeaderCell}
 `;
 
-/** Disabled rows keep the box in place so the column stays aligned */
-export const StyledDisabledSelect = styled.div`
-  opacity: 0.4;
-  cursor: not-allowed;
-`;
-
 export const StyledTitleWrap = styled.div<{ $editable: boolean }>`
   display: flex;
   align-items: center;
@@ -251,7 +270,7 @@ export const StyledInputWrap = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   height: 5rem;
   min-width: 40rem;
-  margin-top: 1rem;
+  margin-top: ${({ theme }) => theme.space[2]};
   padding: 0.3rem 1rem;
   display: flex;
   justify-content: center;
