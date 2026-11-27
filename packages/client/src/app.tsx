@@ -1,5 +1,5 @@
 import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
 import { Loader, Toast } from "components";
@@ -122,6 +122,19 @@ const queryClient = new QueryClient({
       networkMode: "always",
     },
   },
+});
+
+// Window focus is not passed on to queries while the server is down, so no
+// refetchOnWindowFocus query fires against it. PageHeader invalidates every
+// query once the socket reaches the server again.
+focusManager.setEventListener((handleFocus) => {
+  const onVisibilityChange = () => {
+    if (!api.isServerDown()) {
+      handleFocus();
+    }
+  };
+  window.addEventListener("visibilitychange", onVisibilityChange, false);
+  return () => window.removeEventListener("visibilitychange", onVisibilityChange);
 });
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();

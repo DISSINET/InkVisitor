@@ -6,6 +6,7 @@ import { PingColor } from "Theme/theme";
 import api, { HTML_CAPTURE_EVENT, HTML_CAPTURE_STORAGE_KEY, IDbStats } from "api";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
+import { SERVER_DOWN_TOAST_ID } from "components/basic/Toast/Toast";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
@@ -159,7 +160,14 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
   useEffect(() => {
     if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
       setWaitingForServerRestart(true);
+      toast.dark("server is down", {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        toastId: SERVER_DOWN_TOAST_ID,
+      });
     } else if (ping >= 0 && waitingForServerRestart) {
+      toast.dismiss(SERVER_DOWN_TOAST_ID);
       queryClient.invalidateQueries();
       setWaitingForServerRestart(false);
     }

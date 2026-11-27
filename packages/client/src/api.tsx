@@ -471,6 +471,11 @@ class Api {
     return this.ping;
   }
 
+  /** The socket lost the server (-1) or cannot reach it (-2). */
+  isServerDown(): boolean {
+    return this.ping === -1 || this.ping === -2;
+  }
+
   getDbStats(): IDbStats | null {
     return this.dbStats;
   }
