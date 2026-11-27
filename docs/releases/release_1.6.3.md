@@ -13,6 +13,7 @@
 
 ## Other improvements and fixes
 
+- Owners import up to 10 Entities from JSON: paste it or load a .json file, then review and edit each Entity in a draft tab before creating them (#3273)
 - The login logo band is coloured by instance, like the app header
 
 ## Deployment

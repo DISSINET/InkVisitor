@@ -44,6 +44,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 
 ## Other improvements and fixes
 
+- Admins can import Entities from JSON too, and one import holds up to 200 Entities for owners and 25 for admins (was 10 for owners) (#3273)
 - Label search treats quote marks and apostrophes as interchangeable, finds Czech accented letters from plain ones (`temer` finds `Teměř`) and reads typed regex characters literally (#3302)
 - The Templates filter matches like the Entity suggester (#3328)
 - Validation rules can apply only to Entities whose label or alternative label contains a given text (#3290)
