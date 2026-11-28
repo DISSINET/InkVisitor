@@ -2,11 +2,11 @@ import type { EngineSuggester } from "../../types/engine";
 import type { ChipTone } from "./gazetteerDetails";
 
 /**
- * What a researcher needs to see beside a source before deciding to ask it: what
- * it covers, how long it usually takes and how much it holds.
+ * What a researcher reads first on a source's card before deciding to ask it:
+ * what it covers, how long it usually takes and how much it holds.
  *
- * Every function answers null where the engine said nothing, so a row shows what
- * is known and leaves out the rest rather than printing "unknown" three times.
+ * Every function answers null where the engine said nothing, so the card shows
+ * what is known and leaves out the rest rather than printing "unknown" three times.
  */
 
 /** A source that usually answers within this is quick. */
@@ -16,9 +16,12 @@ export const SLOW_FROM_MS = 4000;
 /** Failures as a share of the runs that reached the source, from which it is said to fail often. */
 export const OFTEN_FAILS_FROM = 0.2;
 
+/** Where a description's first sentence ends, or -1 where it is one sentence. */
+const firstSentenceEnd = (text: string): number => text.search(/\.(\s|$)/);
+
 /** The first sentence of a description, for an engine that publishes no scope. */
 const firstSentence = (text: string): string => {
-  const end = text.search(/\.(\s|$)/);
+  const end = firstSentenceEnd(text);
   return (end === -1 ? text : text.slice(0, end)).trim();
 };
 
@@ -30,6 +33,22 @@ export const scopeLine = (suggester: EngineSuggester): string | null => {
   }
   const description = suggester.info.description?.trim();
   return description ? firstSentence(description) : null;
+};
+
+/**
+ * The description, for below the card's first line: all of it, or, where the
+ * engine gave no scope and `scopeLine` took the first sentence, what follows it.
+ */
+export const descriptionBelowScope = (suggester: EngineSuggester): string | null => {
+  const description = suggester.info.description?.trim();
+  if (!description) {
+    return null;
+  }
+  if (suggester.info.scope) {
+    return description;
+  }
+  const end = firstSentenceEnd(description);
+  return end === -1 ? null : description.slice(end + 1).trim() || null;
 };
 
 /** Seconds with the precision the figure deserves: 0.4 s, 4.8 s, 12 s. */

@@ -456,11 +456,14 @@ written only when it was changed from what the modal opened with, and after the
 roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
 
-**Each row says what the source covers, how long it takes and how much it holds.**
-Under the name, in both tables, one line of time · geography · topic from the
-engine's `info.scope`, then chips: how long it usually takes, and how many
-records it holds. Nothing is hidden behind a hover, because it is what a researcher
-reads to decide whether to ask a source at all ("use only what you need").
+**A row names the source; its card says what it covers, how long it takes and how
+much it holds.** The rows of both tables carry the name and only what changes
+whether the source can be switched on: the engine reporting it cannot answer, the
+project having switched it off, `llm-coords` not being a gazetteer. The card opens
+with what a researcher reads to decide whether to ask a source at all ("use only
+what you need"): one line of time · geography · topic from the engine's
+`info.scope`, then chips for how long it usually takes, whether it often fails and
+how many records it holds.
 
 The time is the engine's own measurement, `latency` on `GET /suggesters`: the
 median and 95th percentile of the last runs that really reached the source
@@ -471,23 +474,30 @@ failed or was cut off in a fifth or more of its runs also says `often fails`. Th
 figure is a typical wait and not a speed: it grows with the number of name forms
 searched, and it includes any wait a source's own rate limit imposes (Nominatim
 waits a second per form by its published policy), so the card says so. Until the
-engine has five runs of a source on record, `latency` is null and the row shows no
+engine has five runs of a source on record, `latency` is null and the card shows no
 speed, not a guess.
 
 The count is `info.size.records`, marked `≈` when the engine says it is
 approximate, and left out where nobody publishes one. An engine that publishes
-none of these gets the first sentence of the source's description as its line and,
-for a local file, the located records it measured.
+none of these gets the first sentence of the source's description as its first
+line, the rest of the description under "about", and, for a local file, the located
+records it measured.
 
 **A source is explained where it is chosen, and only there.** `GazetteerHover` gives
 a source's name in the gazetteer table of both modals a mark and a card. Hovering
-or focusing it shows what `GET /suggesters` says about the source: whether it is
-local records or an online service, its licence as chips (commercial use allowed
-or not, credit required, share-alike), its description, what it is good for
-(regions, periods, languages and gazetteer location types, written as words rather than
-slugs and codes), its limitations, how large its data is, the credit wording, the
-citation and the homepage. The card stays open briefly after the pointer leaves
-so the homepage link can be reached.
+or focusing it shows what `GET /suggesters` says about the source, in three parts
+with the one that decides first:
+- whether it is local records or an online service, what it covers, the speed,
+  failure and size chips, what it is good for (regions, periods, languages and
+  gazetteer location types, written as words rather than slugs and codes) and its
+  limitations;
+- its terms of use: the licence as chips (commercial use allowed or not, credit
+  required, share-alike), the credit wording and the licence note;
+- its description, the figures behind the chips, how much the engine weighs it,
+  the citation and the homepage.
+
+The card stays open briefly after the pointer leaves so the homepage link can be
+reached.
 
 Beside a result — on a match tag, in the progress strip, in the map's place search
 and in the quick-geocode notice — a source is its name in its colour and nothing

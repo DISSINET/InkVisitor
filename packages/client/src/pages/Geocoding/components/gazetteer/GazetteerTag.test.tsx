@@ -81,7 +81,7 @@ describe("GazetteerHover", () => {
       anchor.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     });
     const text = document.body.textContent ?? "";
-    expect(text).toContain("A gazetteer of the Hanseatic trade network.");
+    expect(text).toContain("A gazetteer of the Hanseatic trade network");
     expect(text).toContain("low countries");
     expect(text).toContain("German");
     expect(text).toContain("limitations");
@@ -137,7 +137,7 @@ describe("where the card is offered", () => {
     await act(async () => {
       host.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     });
-    expect(document.body.textContent).toContain("A gazetteer of the Hanseatic trade network.");
+    expect(document.body.textContent).toContain("A gazetteer of the Hanseatic trade network");
   });
 
   it("is used by the gazetteer tables of the settings and by nothing that shows a result", () => {
