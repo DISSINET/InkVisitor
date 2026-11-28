@@ -3,11 +3,21 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { StyledToastContainer } from "./ToastStyles";
 
+// stays up for as long as the browser is offline: no click, drag or right-click dismisses it
+export const OFFLINE_TOAST_ID = "offline";
+// stays up for as long as the socket cannot reach the server, dismissed the same way as above
+export const SERVER_DOWN_TOAST_ID = "server-down";
+
 interface Toast {}
 export const Toast: React.FC<Toast> = () => {
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     const toastEl = (e.target as HTMLElement).closest(".Toastify__toast");
-    if (toastEl && toastEl.id) {
+    if (
+      toastEl &&
+      toastEl.id &&
+      toastEl.id !== OFFLINE_TOAST_ID &&
+      toastEl.id !== SERVER_DOWN_TOAST_ID
+    ) {
       e.preventDefault();
       toast.dismiss(toastEl.id);
     }

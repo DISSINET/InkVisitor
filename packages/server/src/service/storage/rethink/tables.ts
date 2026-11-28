@@ -392,6 +392,31 @@ export const audits: AuditStore = {
       .run(unwrap(conn));
   },
 
+  async allForMany(conn, scope, modelIds) {
+    if (!modelIds.length) {
+      return [];
+    }
+    return r
+      .table(TABLE.audits)
+      .getAll(r.args(modelIds.map((modelId) => [scope, modelId])), {
+        index: DbEnums.Indexes.AuditScopeModelId,
+      })
+      .run(unwrap(conn));
+  },
+
+  async relationAuditsForEntities(conn, entityIds) {
+    if (!entityIds.length) {
+      return [];
+    }
+    // a multi-index getAll returns a row once per listed entity it holds
+    return r
+      .table(TABLE.audits)
+      .getAll(r.args(entityIds), { index: DbEnums.Indexes.AuditRelationEntityIds })
+      .filter({ auditScope: AuditScope.Relation })
+      .distinct()
+      .run(unwrap(conn));
+  },
+
   async earliestDate(conn) {
     const result = await r.table(TABLE.audits).min("date").run(unwrap(conn));
     return result ? new Date((result as any).date) : null;

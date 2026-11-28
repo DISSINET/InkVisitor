@@ -7,7 +7,7 @@ import { parseImportInput } from "./parse";
 import { collectEntityRefs, validateBatchIds, validateEntityRefs } from "./references";
 import { normalizeRelationItems, validateRelations } from "./relations";
 import { validateTerritories } from "./territories";
-import { ImportDataSource, ImportIssue, ImportValidation } from "./types";
+import { ImportDataSource, ImportIssue, ImportValidation, maxImportEntities } from "./types";
 
 /** Issues grouped by entity in input order; issues of no single entity last. */
 const byEntity = (issues: ImportIssue[]): ImportIssue[] =>
@@ -40,7 +40,7 @@ export const validateImport = async (
   text: string,
   context: ImportValidationContext
 ): Promise<ImportValidation> => {
-  const parsed = parseImportInput(text);
+  const parsed = parseImportInput(text, maxImportEntities(context.role));
   if (parsed.errors.length) {
     return { errors: parsed.errors, notes: [], plan: null };
   }

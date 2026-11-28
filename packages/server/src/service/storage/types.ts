@@ -153,6 +153,10 @@ export interface AuditStore extends TableStore<IAudit> {
   firstForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
   lastNFor(conn: Conn, scope: AuditScope, modelId: string, n: number): Promise<IAudit[]>;
   relationAuditsForEntity(conn: Conn, entityId: string, n: number): Promise<IAudit[]>;
+  /** every audit of the listed models, in no promised order */
+  allForMany(conn: Conn, scope: AuditScope, modelIds: string[]): Promise<IAudit[]>;
+  /** every relation audit whose snapshot lists any of the entities, each once, in no promised order */
+  relationAuditsForEntities(conn: Conn, entityIds: string[]): Promise<IAudit[]>;
   earliestDate(conn: Conn): Promise<Date | null>;
   /** audits on the calendar day of `date` */
   onDate(conn: Conn, date: Date): Promise<IAudit[]>;

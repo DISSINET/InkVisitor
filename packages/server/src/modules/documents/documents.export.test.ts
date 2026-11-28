@@ -14,7 +14,7 @@ import {
   createAgentWithUserId,
   getAuthenticatedAgent,
   AuthAgent,
-} from "@modules/testAuth";
+} from "../../test/testAuth";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { v4 as uuidv4 } from "uuid";

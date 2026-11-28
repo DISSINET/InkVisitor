@@ -1,29 +1,55 @@
 import AclPermission from "@models/acl/acl_permission";
 import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
 import { CustomError, PermissionDeniedError } from "@inkvisitor/shared/types/errors";
-import { Response, Request, NextFunction, Router } from "express";
+import { Response, Request, NextFunction, RequestHandler } from "express";
 import { IRequest } from "src/custom_typings/request";
 
 export const permissionDeniedErr = new PermissionDeniedError(
   "Endpoint not allowed"
 );
 
-interface RouterLayer {
-  stack: RouterLayer[];
-}
+// Open to every logged-in user whatever acl_permissions holds: whole
+// controllers here, single routes ("controller METHOD route") below.
+const OPEN_CONTROLLERS = new Set([
+  // read-only aggregations
+  "stats",
+  // any logged-in user may view any document; update, delete, export and
+  // removeAnchor are gated per resource inside the handlers
+  // (userCanManageDocument)
+  "documents",
+  // their per-resource rules are beyond the ACL table and are applied inside
+  // the handlers
+  "saved-queries",
+  // the Geocoding page sits behind login only and the engine enforces its
+  // own quota
+  "geocoding",
+]);
+
+const OPEN_ROUTES = new Set([
+  // only {id, name}, which stats charts and explorer filters need
+  "users GET simplified",
+  // the bulk equivalent of the public GET /entities/:entityId
+  "entities POST batch",
+  // backs the Explorer results; read-only. query-export is deliberately NOT
+  // here: bulk TSV export is offered only to Admin/Owner and its handler has
+  // no role check of its own, so it is left to its acl_permissions row.
+  "entities POST query",
+  // read-only companions to the public GET /entities/:entityId; entity-level
+  // access, where there is any, is handled inside each handler
+  "entities GET :entityId/tooltip",
+  "entities GET :entityId/detail",
+  "entities GET :entityId/used-relations",
+  "entities GET :entityId/expansion",
+  // the Geocoding page asks which entities come under each of the project's
+  // location types; it reads classifications and the superclass and synonym
+  // links between Concepts, which any logged-in user sees in a Concept's detail
+  "entities GET classified-under",
+]);
 
 class Acl {
-  cachedRoutes: Record<string, Record<string, any>> = {};
-
-  layers: RouterLayer[] = [];
-
   constructor() {
     this.authorize = this.authorize.bind(this);
     return;
-  }
-
-  public assignRoutes(router: Router): void {
-    this.layers = router.stack as unknown as RouterLayer[];
   }
 
   public authorize(req: Request, res: Response, next: NextFunction): void {
@@ -32,56 +58,75 @@ class Acl {
   }
 
   /**
-   * Returns Acl entries that match current route.
-   * If route does not exist, it is created with empty roles field and then returned as a match.
-   * @param req
-   * @returns
+   * The acl_permissions rows of the route. A route with none gets a row with
+   * no roles, which only the admin and owner bypass passes.
    */
-  private async getPermissions(req: IRequest): Promise<AclPermission[]> {
-    const controller = req.baseUrl.split("/").pop() || "";
-    const route = req.route.path
-      .split("/")
-      .filter((part) => !!part)
-      .join("/");
-    const method = req.method as HttpMethods;
+  private async getPermissions(
+    req: IRequest,
+    controller: string,
+    method: HttpMethods,
+    route: string
+  ): Promise<AclPermission[]> {
+    const read = () =>
+      AclPermission.findByRoute(req.db.connection, controller, method, route);
 
-    const permissions = await AclPermission.findByRoute(
-      req.db.connection,
-      controller,
-      method,
-      route
-    );
-
-    if (!permissions.length) {
-      // if permission does not exist yet, create one that only admin/owner can access
-      const newPermission = new AclPermission({
-        controller,
-        route,
-        method,
-        roles: [],
-        public: false,
-      });
-      await newPermission.save(req.db.connection);
-      permissions.push(newPermission);
+    const permissions = await read();
+    if (permissions.length) {
+      return permissions;
     }
 
-    return permissions;
+    const created = new AclPermission({
+      controller,
+      route,
+      method,
+      roles: [],
+      public: false,
+    });
+    try {
+      await created.save(req.db.connection);
+      return [created];
+    } catch (err) {
+      // PostgreSQL holds one row per route, so of several first requests
+      // that all found none, one insert succeeds and the rest fail: those
+      // decide by the row that is there
+      const existing = await read();
+      if (!existing.length) {
+        throw err;
+      }
+      return existing;
+    }
   }
 
   /**
    * Determine if the request should be blocked or allowed.
    * Block is represented by returned PermissionDeniedError error.
-   * @param req
-   * @returns
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
-    const permissions = await this.getPermissions(req);
     const controller = req.baseUrl.split("/").pop() || "";
     const route = req.route.path
       .split("/")
       .filter((part) => !!part)
       .join("/");
     const method = req.method as HttpMethods;
+
+    // decided before the read, so a logged-in user costs these routes no
+    // lookup and no row
+    if (
+      req.user &&
+      (OPEN_CONTROLLERS.has(controller) ||
+        OPEN_ROUTES.has(`${controller} ${method} ${route}`))
+    ) {
+      // throws for a session of a deleted user, which resolves to no user
+      req.getUserOrFail();
+      return null;
+    }
+
+    const permissions = await this.getPermissions(
+      req,
+      controller,
+      method,
+      route
+    );
 
     // allow public routes for all
     if (permissions.find((p) => p.public)) {
@@ -117,103 +162,8 @@ class Acl {
       return null;
     }
 
-    // The simplified user list (GET /users/simplified) returns only {id, name}
-    // and is needed by any logged-in user for stats charts and explorer filters.
-    if (
-      controller === "users" &&
-      route === "simplified" &&
-      method === HttpMethods.Get
-    ) {
-      return null;
-    }
-
-    // Stats queries (POST /stats, POST /stats/materialized) are read-only
-    // aggregations that any logged-in user may access.
-    if (controller === "stats") {
-      return null;
-    }
-
-    // Documents are governed by the route handlers, not the ACL table: any
-    // logged-in user may GET (view) any document, while update/delete/export/
-    // removeAnchor are gated per-resource inside the handlers
-    // (userCanManageDocument: Owner/Admin, or Editor assigned to the linked
-    // Resource). This also avoids the auto-created roles:[] permission that the
-    // ACL layer persists for routes lacking an explicit entry.
-    if (controller === "documents") {
-      return null;
-    }
-
-    // Saved queries (Explorer page) intentionally have no seeded ACL entries —
-    // the coarse ACL table cannot express their per-resource rules, so access is
-    // gated inside the handlers: any logged-in user may list/create private
-    // queries and moderate their own; sharing and moderating shared queries is
-    // restricted to Admin/Owner.
-    if (controller === "saved-queries") {
-      return null;
-    }
-
-    // Geocoding (HGA-Engine proxy) is open to any logged-in user: the Geocoding
-    // page sits behind login only and the engine enforces its own quota. No
-    // acl_permissions row is seeded, so this also keeps the auto-created
-    // roles:[] row from denying every non-admin.
-    if (controller === "geocoding") {
-      return null;
-    }
-
-    // The entities batch read (POST /entities/batch) is the bulk equivalent of
-    // the public GET /entities/:entityId; it backs e.g. fetching the entities
-    // behind a document's anchors. Allow it for any logged-in user (it has no
-    // seeded ACL entry, so it would otherwise be auto-denied to non-admins).
-    if (
-      controller === "entities" &&
-      route === "batch" &&
-      method === HttpMethods.Post
-    ) {
-      return null;
-    }
-
-    // POST /entities/query backs the Explorer results for everyone and has no
-    // seeded ACL entry. Read-only; mutations are still governed by the
-    // individual entity endpoints.
-    // query-export is deliberately NOT included: bulk TSV export is offered
-    // only to Admin/Owner in the Explorer, and the handler has no role check of
-    // its own, so it is left to its acl_permissions row.
-    if (
-      controller === "entities" &&
-      route === "query" &&
-      method === HttpMethods.Post
-    ) {
-      return null;
-    }
-
-    // GET /entities/classified-under reads classifications and the superclass and
-    // synonym links between Concepts, which any logged-in user may see in the
-    // Concept's detail, to tell the Geocoding page which entities come under
-    // each of the project's location types. It has no seeded ACL entry either.
-    if (
-      controller === "entities" &&
-      route === "classified-under" &&
-      method === HttpMethods.Get
-    ) {
-      return null;
-    }
-
-    // GET /entities/:entityId/tooltip, /detail, /used-relations and /expansion have
-    // no seeded ACL entries. All are read-only companions to the public
-    // GET /entities/:entityId, so any logged-in user may call them; entity-level
-    // access, where there is any, is handled inside each handler.
-    if (
-      controller === "entities" &&
-      (route.endsWith("/tooltip") ||
-        route.endsWith("/detail") ||
-        route.endsWith("/used-relations") ||
-        route.endsWith("/expansion")) &&
-      method === HttpMethods.Get
-    ) {
-      return null;
-    }
-
-    // allow admin/owner for any route
+    // allow admin/owner for any route. The read above runs for them too, so a
+    // route with no row gets one and shows up for role assignment.
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return null;
     }
@@ -227,5 +177,27 @@ class Acl {
     return permissionDeniedErr;
   }
 }
+
+/**
+ * Puts the ACL check in front of the handler of one route. It wraps a route
+ * and cannot sit on a router: Acl.validate reads req.route, which exists only
+ * inside a route. A denial, a check that fails and a handler that throws or
+ * rejects all go to the errors middleware; Express 4 drops the promise a
+ * handler returns, so a rejection left alone would end the process.
+ */
+export const aclGuard =
+  (handler: RequestHandler): RequestHandler =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const denied = req.acl ? await req.acl.validate(req) : null;
+      if (denied) {
+        next(denied);
+        return;
+      }
+      await handler(req, res, next);
+    } catch (err) {
+      next(err);
+    }
+  };
 
 export default Acl;

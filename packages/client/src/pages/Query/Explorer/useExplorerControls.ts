@@ -6,8 +6,9 @@ import { BatchAction, batchOptions } from "./ExplorerTable/types";
 interface UseExplorerControlsParams {
   data: IResponseQuery | undefined;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
-  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
+  onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => Promise<void>;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+  onExportJson?: (entityIds: string[]) => Promise<void>;
   /**
    * Identity of the current query (excludes offset/limit). Changes on a new
    * search/filter/sort/view but not on scroll pagination — used to drop the
@@ -29,6 +30,7 @@ export const useExplorerControls = ({
   getCachedEntity,
   onExport,
   onOpenEntitiesInDetail,
+  onExportJson,
   stableSignature,
 }: UseExplorerControlsParams) => {
   // `data` is undefined while a scroll-pagination window is fetching (the new
@@ -133,21 +135,38 @@ export const useExplorerControls = ({
     setRowLastClicked(-1);
   }, [entityIds, selectedEntityIdsSet]);
 
-  const selectedInCurrentCount = useMemo(
-    () => entityIds.filter((id) => selectedEntityIdsSet.has(id)).length,
+  // the selection can outlive a search; these are its rows in the current results
+  const selectedInCurrentIds = useMemo(
+    () => entityIds.filter((id) => selectedEntityIdsSet.has(id)),
     [entityIds, selectedEntityIdsSet],
   );
+  const selectedInCurrentCount = selectedInCurrentIds.length;
   const isAllCurrentSelected = total > 0 && selectedInCurrentCount === total;
   const hasPartialSelection = selectedInCurrentCount > 0 && !isAllCurrentSelected;
+
+  const [isExporting, setIsExporting] = useState(false);
+
+  /** Resolves to whether the file was downloaded; the API shows its own error toast. */
+  const runExport = useCallback(async (download: () => Promise<void>) => {
+    setIsExporting(true);
+    try {
+      await download();
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
 
   const handleExport = useCallback(
     (selectedColumnIds?: string[]) => {
       const rowIndices = selectedEntityIds
         .map((entityId) => entityIds.indexOf(entityId))
         .filter((index) => index >= 0);
-      onExport(rowIndices, selectedColumnIds);
+      return runExport(() => onExport(rowIndices, selectedColumnIds));
     },
-    [selectedEntityIds, entityIds, onExport],
+    [selectedEntityIds, entityIds, onExport, runExport],
   );
 
   const handleApplyBatchAction = useCallback(async () => {
@@ -166,8 +185,21 @@ export const useExplorerControls = ({
       toast.info("UUIDs copied to clipboard");
       return;
     }
+    if (batchActionSelected === BatchAction.export_json) {
+      if (onExportJson && selectedInCurrentIds.length > 0) {
+        await runExport(() => onExportJson(selectedInCurrentIds));
+      }
+      return;
+    }
     setIsBatchModalOpen(true);
-  }, [batchActionSelected, selectedEntityIds, onOpenEntitiesInDetail]);
+  }, [
+    batchActionSelected,
+    selectedEntityIds,
+    selectedInCurrentIds,
+    onOpenEntitiesInDetail,
+    onExportJson,
+    runExport,
+  ]);
 
   return {
     selectedEntityIds,
@@ -190,6 +222,7 @@ export const useExplorerControls = ({
     handleInvertSelection,
     handleApplyBatchAction,
     handleExport,
+    isExporting,
   };
 };
 

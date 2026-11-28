@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
+import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -15,6 +16,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Loader } from "components";
 import { CMetaProp } from "constructors";
+import { getEntityLabel } from "utils/utils";
 
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { SCROLLBAR_SIZE } from "Theme/constants";
@@ -31,11 +33,26 @@ import ExploreTableHeader from "./Header/ExploreTableHeader";
 import { CELL_DISPLAY_LIMIT } from "./Cell/ExplorerCellOverflow";
 import { HEIGHT_ROW_DEFAULT, ROW_NUMBER_MIN_DIGITS, WIDTH_COLUMN_FIRST } from "./constants";
 import { contentSizedColumnTypes } from "./types";
-import { estimateColumnWidth, getColumnWidth } from "./utils";
+import {
+  estimateColumnWidth,
+  fillColumnWidths,
+  getColumnWidth,
+  hasPropPair,
+  hasReferencePair,
+} from "./utils";
 
 const OVERSCAN_ROWS = 10;
 
 const EMPTY_COLUMNS: Explore.IExploreColumn[] = [];
+
+const toastAlreadyInColumn = (
+  rowEntity: IEntity,
+  value: IEntity,
+  column: Explore.IExploreColumn,
+) =>
+  toast.info(
+    `${getEntityLabel(rowEntity)} already has ${getEntityLabel(value)} in ${column.name}`,
+  );
 
 /**
  * Debounce delay before dispatching offset/limit changes during scroll.
@@ -185,6 +202,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       await api.entityUpdate(variables.entityId, variables.changes),
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -233,6 +251,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
 
+            if (hasPropPair(rowEntity.props, params.propertyType, newEntity.id)) {
+              toastAlreadyInColumn(rowEntity, newEntity, column);
+              break;
+            }
+
             const newProp: IProp = CMetaProp({
               typeEntityId: params.propertyType,
               valueEntityId: newEntity.id,
@@ -266,6 +289,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           case Explore.EExploreColumnType.ERV: {
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
+
+            if (hasReferencePair(rowEntity.references, params.resource, newEntity.id)) {
+              toastAlreadyInColumn(rowEntity, newEntity, column);
+              break;
+            }
 
             const newRef: IReference = {
               id: uuidv4(),
@@ -348,6 +376,17 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       columns.reduce((sum, col) => sum + (columnWidths[col.id] ?? getColumnWidth(col.type)), 0)
     );
   }, [columns, columnWidths]);
+
+  // The stack is sized from widthTable, never from the filled widths, so its
+  // measured width is the room the panel gives the table and filling it cannot
+  // feed back into the measurement.
+  const { ref: stackRef, width: widthStack = 0 } = useResizeObserver<HTMLDivElement>();
+
+  const columnWidthsFilled = useMemo(
+    () =>
+      fillColumnWidths(columns, columnWidths, widthStack - SCROLLBAR_SIZE, WIDTH_COLUMN_FIRST),
+    [columns, columnWidths, widthStack],
+  );
 
   // The last row carries the longest ordinal, so the number slot is sized from
   // the result count and handed to the header, the rows and the placeholders as
@@ -444,7 +483,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               rowId={index}
               rowItem={rowItem!}
               columns={columns}
-              columnWidths={columnWidths}
+              columnWidths={columnWidthsFilled}
               handleEditColumn={handleEditColumn}
               onRowSelect={onRowSelect}
               onRowClick={handleRowClick}
@@ -471,7 +510,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       getCachedEntity,
       onOpenEntityInDetail,
       total,
-      columnWidths,
+      columnWidthsFilled,
     ],
   );
 
@@ -535,6 +574,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             table by the list's vertical scrollbar, which takes layout width,
             so the rows keep the header's full width. */}
         <div
+          ref={stackRef}
           style={{
             width: widthTable + SCROLLBAR_SIZE,
             minWidth: "100%",
@@ -547,7 +587,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
           <ExploreTableHeader
             columns={columns}
-            columnWidths={columnWidths}
+            columnWidths={columnWidthsFilled}
             onRemoveColumn={handleRemoveColumn}
             onMoveColumn={handleMoveColumn}
           />

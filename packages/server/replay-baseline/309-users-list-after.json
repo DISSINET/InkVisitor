@@ -22,7 +22,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],
@@ -75,7 +74,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],
@@ -151,7 +149,7 @@
                     "certainty": "1",
                     "children": [],
                     "elvl": "3",
-                    "id": "<uuid-17>",
+                    "id": "<uuid-11>",
                     "logic": "1",
                     "mood": [],
                     "moodvariant": "1",
@@ -173,7 +171,7 @@
                 ],
                 "references": [
                   {
-                    "id": "<uuid-18>",
+                    "id": "<uuid-12>",
                     "resource": "dissinet-resource",
                     "value": "rp-v"
                   }
@@ -197,7 +195,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "C",
           "searchLanguages": [
             "eng"
@@ -282,7 +279,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],
@@ -337,7 +333,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],
@@ -390,7 +385,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],
@@ -417,7 +411,6 @@
           "geocoding": {
             "context": {}
           },
-          "hideStatementElementsOrderTable": false,
           "promotedTemplateClass": "*",
           "searchLanguages": [],
           "starredTemplates": [],

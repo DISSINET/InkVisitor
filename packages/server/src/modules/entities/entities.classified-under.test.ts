@@ -1,6 +1,6 @@
 import { Db } from "@service/storage";
 import { apiPath } from "@common/constants";
-import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
+import { AuthAgent, createAgentWithUserId } from "../../test/testAuth";
 import User from "@models/user/user";
 import Concept from "@models/concept/concept";
 import Superclass from "@models/relation/superclass";

@@ -14,7 +14,7 @@ import { BadParams } from "@inkvisitor/shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
 import { Response } from "supertest";
 import "ts-jest";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { prepareStatement } from "@models/statement/statement.test";
 import { pool } from "@middlewares/db";
 

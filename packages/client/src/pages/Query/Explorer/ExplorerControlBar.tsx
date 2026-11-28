@@ -12,7 +12,12 @@ import {
   StyledControlGroup,
   StyledTableControl,
 } from "./ExplorerTable/ExplorerTableStyles";
-import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
+import {
+  BatchAction,
+  batchOptions,
+  ownerOnlyBatchActions,
+  restrictedBatchActions,
+} from "./ExplorerTable/types";
 import { ButtonSize } from "types";
 import { IcoExchange } from "Theme/icons";
 
@@ -31,6 +36,10 @@ export interface ExplorerSelectionControls {
   onApplyBatchAction: () => void;
   /** When false, data-mutating batch actions (add metaprop / reference / relation) are hidden. */
   canBatchEdit?: boolean;
+  /** When false, owner-only batch actions (export as json) are hidden. */
+  isOwner?: boolean;
+  /** True while an export is being prepared on the server. */
+  isExporting?: boolean;
 }
 
 /** New-column toggle. Table view only (the stats view has no columns). */
@@ -70,8 +79,6 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
       <Checkbox
         value={sel.isAllCurrentSelected}
         indeterminate={!sel.isAllCurrentSelected && hasAnySelection}
-        color="primary"
-        noFill
         size={15}
         onChangeFn={() => {
           // any selection at all clears it; only an empty selection selects the page
@@ -114,15 +121,17 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
               }
             }}
             options={batchOptions.filter(
-              (o) => selection.canBatchEdit || !restrictedBatchActions.has(o.value)
+              (o) =>
+                (selection.canBatchEdit || !restrictedBatchActions.has(o.value)) &&
+                (selection.isOwner || !ownerOnlyBatchActions.has(o.value))
             )}
           />
           <Button
-            label="apply"
+            label={selection.isExporting ? "exporting" : "apply"}
             color="primary"
             inverted
             onClick={selection.onApplyBatchAction}
-            disabled={selection.selectedCount === 0}
+            disabled={selection.selectedCount === 0 || selection.isExporting}
             size={ButtonSize.Medium}
           />
         </StyledControlGroup>
@@ -144,7 +153,11 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
           />
         )}
         {/* Table only - the stats view carries its own loader over the chart. */}
-        <Loader loaderStyle="beat" show={isTable && isQueryFetching} size={7} />
+        <Loader
+          loaderStyle="beat"
+          show={isTable && (isQueryFetching || !!selection?.isExporting)}
+          size={7}
+        />
       </StyledControlGroup>
     </StyledTableControl>
   );

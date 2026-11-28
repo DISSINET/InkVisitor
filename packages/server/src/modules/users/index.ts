@@ -288,7 +288,8 @@ export default Router()
         }
 
         user.setPassword(password);
-        await user.update(request.db.connection, { password: user.password });
+        // a reset link works once, like an activation link
+        await user.update(request.db.connection, { password: user.password, hash: null });
         await invalidateUserSessions(request.db.connection, user.id);
 
         return {

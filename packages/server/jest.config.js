@@ -57,6 +57,7 @@ const UNIT_TEST_PATHS = [
   "src/common/allowedOrigins.test.ts",
   "src/common/functions.test.ts",
   "src/common/trustProxy.test.ts",
+  "src/middlewares/acl.test.ts",
   "src/middlewares/errors.test.ts",
   "src/models/action/action.test.ts",
   "src/models/audit/audit.test.ts",
@@ -162,7 +163,7 @@ module.exports = {
       globalSetup: "<rootDir>/src/test/globalSetup.ts",
       globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
       // (Re-list SILENCE_CONSOLE: this array overrides the one from `base`.)
-      // Auth is cookie-session based (see @modules/testAuth), so no per-worker
+      // Auth is cookie-session based (see src/test/testAuth.ts), so no per-worker
       // token minting is needed here.
       setupFiles: [SILENCE_CONSOLE],
       // retry.ts: retry the irreducible transport flake (integration only).

@@ -79,16 +79,21 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
     });
 
   // columns size to their content, so the offset the second pinned column
-  // sticks at is whatever width the first column rendered — measured live,
-  // since new data re-lays it out
+  // sticks at is whatever width the first column rendered, and the totals row
+  // sticks right below whatever height the header rendered — both measured
+  // live, since new data re-lays them out
   const firstColRef = useRef<HTMLTableCellElement>(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
+  const [headerHeight, setHeaderHeight] = useState(0);
   useLayoutEffect(() => {
     const el = firstColRef.current;
     if (!el) {
       return;
     }
-    const update = () => setFirstColWidth(el.offsetWidth);
+    const update = () => {
+      setFirstColWidth(el.offsetWidth);
+      setHeaderHeight(el.offsetHeight);
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(el);
@@ -147,6 +152,7 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
                       $isSticky={index <= 1}
                       $stickyOffset={index === 0 ? 0 : firstColWidth}
                       $isTotalRow={isTotalRow}
+                      $stickyTop={headerHeight}
                     >
                       {cell.render("Cell")}
                     </StyledTd>

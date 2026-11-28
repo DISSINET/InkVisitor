@@ -220,7 +220,6 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents
                       onChangeFn={() => {
                         handleToggleSelectClass(entityClassId);
                       }}
-                      noFill
                     />
                   </StyledExportDocumentClassCheckbox>
                   <StyledExportDocumentClassLabel

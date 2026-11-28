@@ -47,8 +47,9 @@ const theme = {
     white: "#fff",
     grey: "#C4C4C4",
     greyer: "#4a5568",
-    // a panel separator while hovered or dragged: a grey apart from the blue of the query lines
-    separatorActive: "#4a5568", // gray 700
+    // a panel separator while hovered or dragged: an azure apart from the indigo of the
+    // query lines
+    separatorActive: "#3182ce", // blue 600
     // notes and field labels that must sit below body text in both themes;
     // greyer lands one step from the dark page's text color and stops reading
     // as secondary there
@@ -103,6 +104,8 @@ const theme = {
     tableOpened: "#d8ddf5",
     tableSelection: "#c4caf0",
     tableSelectionHover: "#e4e7f8",
+    // a row ticked by its checkbox: a gentle fill that leaves the row readable as a plain row
+    tableCheckedRow: "#e6eafa", // blue 50
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 

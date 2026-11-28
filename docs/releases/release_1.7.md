@@ -1,4 +1,4 @@
-# What's changed [Nov 20, 2026]
+# What's changed [Nov 27, 2026]
 
 InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer searches, columns and stats return quicker, and Explorer stats count every matching Entity instead of the first 500.
 
@@ -28,19 +28,15 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - Hovering the closing tag of an asymmetrical anchor shows the Entity tag (#3435), and the full Entity tag shows on hover in XML mode
 - Highlighting and select-all are fast on large documents (select-all on a 6,400-paragraph document went from ~8.6 s to ~21 ms per frame)
 - Search terms are capped at 200 characters, so searching a whole selected document no longer crashes the page
-- Ctrl+Cmd shortcuts are left to macOS (e.g. Ctrl+Cmd+F full screen)
-- Document titles keep their end visible on the Documents page and in the document modal
 
 ## Statement Editor
 
 - New Detail section with the detail field, status, label language, Relations and metaprops of the Statement (#3315)
 - Suggesters list the Entities anchored around the Statement first, up to 10 per class (#2033)
-- Statement Anchors are paged, 5 per page
 - Fixed the language check reading an empty field, so every linked Entity got the language toast and the inferential elvl (#2033)
 - Re-linking an Entity in an existing actant row keeps its position (#3380)
-- Copying a section from another Statement confirms what was copied
 - New mood: accusation (#3388)
-- The reference and delete batch actions in the Statement list confirm with a toast, and rows no longer flicker at the scroller edge
+- The reference and delete batch actions in the Statement list confirm with a toast
 
 ## Geocoding (#3323)
 
@@ -73,6 +69,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 
 ## Other improvements and fixes
 
+- Admins can import Entities from JSON too, and one import holds up to 200 Entities for owners and 25 for admins (was 10 for owners) (#3273)
 - Label search treats quote marks and apostrophes as interchangeable, finds Czech accented letters from plain ones (`temer` finds `Teměř`) and reads typed regex characters literally (#3302)
 - The Templates filter matches like the Entity suggester (#3328)
 - Validation rules can apply only to Entities whose label or alternative label contains a given text (#3290)
@@ -83,7 +80,6 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 - Entity tooltip lists each anchored text once with its count, at most 5 texts
 - Relation graph: every direct identification in a cycle is listed, Entities sit at their shortest distance, dark mode, wheel scrolls and Ctrl+wheel zooms, resizable (#3377)
 - Error toasts say what failed (no response, timeout, server unavailable, or the server's error) and offer Copy details with a request id (#3381)
-- Stats: document audits filter by user, date range and type
 - A change of role, password or active state logs the user out, and a forced logout can no longer be undone by a request in flight (#3316)
 - Only owners and admins change user rights
 - Fixed removing one of several anchors of an Entity in Detail duplicating document text (#3443)
@@ -95,7 +91,7 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 ## Development (Technical)
 
 - Storage boundary with RethinkDB and PostgreSQL adapters, an API replay harness and a Playwright smoke suite, run on both adapters (#3256)
-- oxlint replaces ESLint and TSLint (#3300); pull requests are linted, typechecked and tested in CI (#3350)
+- oxlint replaces ESLint and TSLint (#3300); pull requests are linted, typechecked and tested in CI (#3350), with the server integration tests run on PostgreSQL (#3482)
 - Explorer columns are read once per page instead of once per row (100 rows, 6 columns: 362 database statements to 6) (#3412)
 - Tooltip anchors are grouped on the server (a Territory tooltip went from 379 KB to 10 KB); created / updated at filters, Territory validation ties and tooltip relations load in fewer queries (#3361, #3354, #3348)
 - New `GET /entities/:entityId/used-relations`, open to every logged-in user
@@ -118,7 +114,9 @@ InkVisitor now runs on PostgreSQL, which makes loading data faster: Explorer sea
 
 - Node 22.23.4 or newer is required (CVE-2026-111497); the Docker image builds on the official `node:22-alpine` (#3332)
 - docker-compose: the `database` service is renamed `rethinkdb` (container `inkvisitor-rethinkdb`), and a `postgres` service is added
+- After the deploy, run `cancelPasswordResetLinksJob` once on every environment (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is covered too
 - After the deploy, on every environment, rebuild the stored anchor trees: `ENV_FILE=<env> pnpm -C packages/server rebuild-anchors --dry-run`, then the same without `--dry-run` (#2033, #3451)
+- Once an instance runs a server with #3399, run `removeDeadUserOptionsJob` on it (`J` in the database app), with `--target=both` on an instance already on PostgreSQL so the RethinkDB copy kept for a rollback is cleaned too. An older server writes `hideStatementElementsOrderTable` again on every user it creates (#3399)
 - Switching an instance to PostgreSQL: run `fixDuplicateRowsJob` ahead of time, stop the API, run `pnpm -C packages/database migrate --db=<name> <env>` and check for `databases match`, then set `DB_ADAPTER=postgres` and the `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASS` block in the server env and start the API. RethinkDB is left untouched for a rollback.
 - `migrate --drop` is renamed `--replace`; the replaced database is kept as `<pg>_replaced_<timestamp>` until dropped by hand (#3402)
 - PostgreSQL backups run only once the `backup-pg.sh` cron line from the database README is added on each host (#3397)

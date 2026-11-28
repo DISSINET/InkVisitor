@@ -48,7 +48,7 @@
               "type": "Entity"
             }
           },
-          "id": "<uuid-12>",
+          "id": "<uuid-6>",
           "name": "Replay private",
           "ownerId": "3",
           "shared": false
@@ -92,7 +92,7 @@
               "type": "Entity"
             }
           },
-          "id": "<uuid-13>",
+          "id": "<uuid-7>",
           "name": "Replay shared",
           "ownerId": "3",
           "shared": true

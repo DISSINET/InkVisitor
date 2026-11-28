@@ -6,7 +6,7 @@ import { AuditDoesNotExist, TerritoryDoesNotExits } from "@inkvisitor/shared/typ
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { getAuthenticatedAgent } from "@modules/testAuth";
+import { getAuthenticatedAgent } from "../../test/testAuth";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/storage";
 import "ts-jest";

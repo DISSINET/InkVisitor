@@ -1,4 +1,4 @@
-import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQueryUser } from "@inkvisitor/shared/types";
 import { Tooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { useTheme } from "hooks";
@@ -13,14 +13,17 @@ import {
 
 export const CELL_DISPLAY_LIMIT = 2;
 
-type CellOverflowItem = IEntity | IUser | string | number;
+// twice the default EntityTag label cap (theme.space[30], 75px)
+const OVERFLOW_TAG_MAX_WIDTH = 150;
+
+type CellOverflowItem = IEntity | IResponseQueryUser | string | number;
 
 function isEntity(item: CellOverflowItem): item is IEntity {
   return typeof (item as IEntity)?.class !== "undefined";
 }
 
-function isUser(item: CellOverflowItem): item is IUser {
-  return typeof (item as IUser)?.email !== "undefined";
+function isUser(item: CellOverflowItem): item is IResponseQueryUser {
+  return typeof item === "object" && item !== null && !isEntity(item);
 }
 
 function getOverflowItemLabel(item: CellOverflowItem): string {
@@ -28,7 +31,7 @@ function getOverflowItemLabel(item: CellOverflowItem): string {
     return getEntityLabel(item);
   }
   if (isUser(item)) {
-    return item.email;
+    return item.name;
   }
   return String(item);
 }
@@ -61,6 +64,7 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
           key={entity.id ?? key}
           entity={entity}
           tooltipPosition="bottom"
+          tagMaxWidth={OVERFLOW_TAG_MAX_WIDTH}
           onDoubleClick={onEntityDoubleClick?.(entity)}
         />
       ))}

@@ -2,6 +2,11 @@ import { UserEnums } from "../enums";
 import { Query, Explore } from "./query";
 import { IEntity } from "./entity";
 import { IUser } from "./user";
+import { IAudit } from "./audit";
+import { Relation } from "./relation";
+
+/** a user in a query cell: its id and name */
+export type IResponseQueryUser = Pick<IUser, "id" | "name">;
 
 export interface IResponseQueryEntity {
   rowI?: number;
@@ -18,7 +23,14 @@ export interface IResponseQueryEntity {
   isSubordinate?: boolean;
   columnData: Record<
     string,
-    IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
+    | IEntity
+    | IEntity[]
+    | number
+    | number[]
+    | string
+    | string[]
+    | IResponseQueryUser
+    | IResponseQueryUser[]
   >;
 }
 
@@ -51,4 +63,15 @@ export interface IResponseQuery {
    * the client surfaces a warning.
    */
   statsEntityLimit?: number | null;
+}
+
+/**
+ * The Explorer JSON export of selected entities, as stored: every relation any
+ * of them is in, and the audits of the entities, of those relations and of the
+ * documents attached to selected Resources.
+ */
+export interface IResponseQueryExportJson {
+  entities: IEntity[];
+  relations: Relation.IRelation[];
+  audits: IAudit[];
 }

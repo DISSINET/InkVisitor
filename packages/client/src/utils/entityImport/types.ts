@@ -1,7 +1,9 @@
-import { RelationEnums } from "@inkvisitor/shared/enums";
+import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 
-export const MAX_IMPORT_ENTITIES = 10;
+/** How many entities one import may hold: 200 for an Owner, 25 for anyone else. */
+export const maxImportEntities = (role: UserEnums.Role): number =>
+  role === UserEnums.Role.Owner ? 200 : 25;
 
 /**
  * One line of feedback on the input. As an error it blocks the import; as a

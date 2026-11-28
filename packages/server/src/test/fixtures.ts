@@ -4,7 +4,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 /**
  * Canonical admin user seeded into the test DB by globalSetup, mirroring
  * packages/database/datasets/default/users.json. This is the row that
- * getAuthenticatedAgent (see @modules/testAuth) signs in against.
+ * getAuthenticatedAgent (see ./testAuth) signs in against.
  *
  * Load-bearing fields:
  * - id "1": the cookie session stores this id; the request pipeline re-fetches

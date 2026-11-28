@@ -77,7 +77,7 @@ import {
   IBatchAttributeChange,
   IBatchSetAttributeChanges,
 } from "./request-batch";
-import { IResponseQuery, IResponseQueryEntity } from "./response-query";
+import { IResponseQuery, IResponseQueryEntity, IResponseQueryUser } from "./response-query";
 import { ISavedQuery, ISavedQueryCreate, ISavedQueryData, ISavedQueryUpdate } from "./saved-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
@@ -140,6 +140,7 @@ export type {
   IResponsePermission,
   IResponseQuery,
   IResponseQueryEntity,
+  IResponseQueryUser,
   IResponseStatement,
   IResponseStats,
   IResponseStoredTerritory,
