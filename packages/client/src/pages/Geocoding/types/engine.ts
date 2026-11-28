@@ -279,7 +279,7 @@ export interface SuggestRequest {
   dedupeDiacritics?: boolean;
   /**
    * The rule for which match a suggestion's coordinate is taken from. Left off,
-   * the engine uses its own default (`place-first` since 0.8.0); an unknown
+   * the engine uses its own default (`place-first` since 0.7.0); an unknown
    * value is refused with 422.
    */
   representative?: GeocodingRepresentative;

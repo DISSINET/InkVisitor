@@ -131,7 +131,7 @@ A suggestion groups every record the engine found within its grouping radius
 records' own, `matches[representativeIndex]`: never a point between them. Which
 record is chosen is the engine's rule; Global geocoding can send another (place
 first, agreement, best score, medoid, densest), and sends none by default, leaving
-the engine's own, `place-first` since engine 0.8.0. The choice names each rule in
+the engine's own, `place-first` since engine 0.7.0. The choice names each rule in
 a word or two; "how the rules work" beside it opens, closed by default, one example
 drawn once per rule — a church on the edge of a town, searched by its own name, the
 town's records found by the town's name, and Pleiades' record of an ancient site with
