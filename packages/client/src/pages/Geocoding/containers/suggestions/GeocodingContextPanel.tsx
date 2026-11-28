@@ -1,10 +1,9 @@
 import { DEFAULT_CONTEXT_WEIGHTS, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
-import { useQuery } from "@tanstack/react-query";
+import { useEngineParameters } from "../../hooks/useGazetteerCatalogue";
 import { Button, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
-import { engineParameters } from "../../utils/engine/engine";
 import { ENGINE_LIMITS } from "../../utils/engine/engineLimits";
 import {
   QUERY_FIELDS,
@@ -182,14 +181,8 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
       return !current;
     });
 
-  // the engine owns these vocabularies; the same query key the context modal
-  // uses, so opening either costs one request between them
-  const { data: parameters } = useQuery({
-    queryKey: ["geocoding-parameters"],
-    queryFn: ({ signal }) => engineParameters(signal),
-    staleTime: 60 * 60 * 1000,
-    retry: false,
-  });
+  // the engine owns these vocabularies
+  const parameters = useEngineParameters();
 
   /** What a field holds, a drawn region standing as the one value of the region field. */
   const valuesOf = (field: QueryField) =>

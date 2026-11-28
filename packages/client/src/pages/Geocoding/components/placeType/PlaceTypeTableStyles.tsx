@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 /**
- * The project's kinds of place, one row each, laid out as a table that scrolls
+ * The project's location types, one row each, laid out as a table that scrolls
  * sideways where the modal is narrower than it.
  */
 export const StyledKindScroll = styled.div`
@@ -10,26 +10,67 @@ export const StyledKindScroll = styled.div`
   overflow-x: auto;
 `;
 
-const COLUMNS = "2.4rem 11rem 21rem 11rem 2.2rem 4.5rem minmax(14rem, 1fr) 2.2rem";
+const COLUMNS = "2.4rem 26rem 11rem 2.2rem 4.5rem minmax(14rem, 1fr) 2.2rem";
 
 export const StyledKindHeader = styled.div`
   display: grid;
   grid-template-columns: ${COLUMNS};
   gap: ${({ theme }) => theme.space[2]};
-  min-width: 70rem;
+  min-width: 65rem;
   padding-bottom: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
-export const StyledKindRow = styled.div`
+/** A column title with a help mark beside it. */
+export const StyledKindHeadHelp = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** The mark that opens the help: a button, so it can be reached and opened from the keyboard. */
+export const StyledHelpMark = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: help;
+`;
+
+/** What each gazetteer location type covers, set out in the tooltip of its column title. */
+export const StyledEngineTypeHelp = styled.div`
+  max-width: 28rem;
+  text-align: left;
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+    margin: ${({ theme }) => theme.space[2]} 0 0;
+  }
+
+  dt {
+    font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  }
+
+  dd {
+    margin: 0;
+  }
+`;
+
+export const StyledKindRow = styled.div<{ $inactive?: boolean }>`
   display: grid;
   grid-template-columns: ${COLUMNS};
   gap: ${({ theme }) => theme.space[2]};
   align-items: center;
-  min-width: 70rem;
+  min-width: 65rem;
   padding: ${({ theme }) => theme.space[1]} 0;
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  /* a deactivated Concept is kept in its place, paler, so the tree stays whole */
+  opacity: ${({ $inactive }) => ($inactive ? 0.55 : 1)};
 `;
 
 export const StyledKindCell = styled.div`
@@ -38,13 +79,72 @@ export const StyledKindCell = styled.div`
   min-width: 0;
 `;
 
-export const StyledKindCount = styled.div`
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color["black"]};
-  text-align: right;
+/** The Concept cell of a row: indented by its depth in the tree, the fold toggle and the tick before the tag. */
+export const StyledTreeCell = styled.div<{ $depth: number }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  min-width: 0;
+  padding-left: ${({ $depth }) => $depth * 1.4}rem;
 `;
 
-/** The mark a kind carries, as the button that opens the set to choose another. */
+/** Folds or unfolds the subclasses of a row; an empty slot of the same width where there are none. */
+export const StyledFoldToggle = styled.button<{ $open: boolean }>`
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  font-size: ${({ theme }) => theme.fontSize.base};
+  color: ${({ theme }) => theme.color["black"]};
+  background: none;
+  border: none;
+  cursor: pointer;
+  transform: rotate(${({ $open }) => ($open ? 90 : 0)}deg);
+  transition: transform 0.1s;
+`;
+
+export const StyledFoldSpacer = styled.span`
+  flex: 0 0 auto;
+  width: 1.4rem;
+`;
+
+/** The mark a subclass shares with the location type at its root, shown but not edited here. */
+export const StyledInheritedMark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The switches above the table. */
+export const StyledKindToolbar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledKindCount = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+/** How many of a count are only inferred, paler than the count itself. */
+export const StyledKindInferred = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The mark a location type carries, as the button that opens the set to choose another. */
 export const StyledIconButton = styled.button<{ $open: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -81,6 +181,9 @@ export const StyledIconPanel = styled.div<{ $top: number; $left: number }>`
   grid-template-columns: repeat(10, 2.2rem);
   gap: ${({ theme }) => theme.space[1]};
   margin-top: ${({ theme }) => theme.space[1]};
+  /* a window too short for every row scrolls the grid rather than hiding marks */
+  max-height: calc(100vh - ${({ $top }) => $top}px - 1rem);
+  overflow-y: auto;
   padding: ${({ theme }) => theme.space[2]};
   background: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
@@ -105,7 +208,7 @@ export const StyledIconChoice = styled.button<{ $current: boolean }>`
   }
 `;
 
-/** The favourite toggle: filled while this kind is the one offered first for its engine type. */
+/** The favourite toggle: filled while this location type is the one offered first for its gazetteer location type. */
 export const StyledFavorite = styled.button<{ $on: boolean }>`
   display: inline-flex;
   align-items: center;

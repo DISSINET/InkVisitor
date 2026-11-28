@@ -1,6 +1,6 @@
 import React from "react";
 import { EngineMatch, MatchType } from "../../types/engine";
-import { GazetteerHover } from "./GazetteerTag";
+import { MatchStanding } from "../../utils/suggestions/suggestionProvenance";
 import { StyledMatchTag, StyledMatchTagName, StyledMatchTagSource } from "./MatchTagStyles";
 
 /**
@@ -42,23 +42,52 @@ const EXPLAINS: Record<MatchType, string> = {
 
 interface MatchTag {
   match: EngineMatch;
+  /** Where the match stands for citing, and the citing distance it was judged by; absent where none is shown. */
+  standing?: MatchStanding;
+  withinKm?: number;
 }
 
-export const MatchTag: React.FC<MatchTag> = ({ match }) => {
+const km = (value: number) => `${value < 10 ? value.toFixed(1) : Math.round(value)} km`;
+
+/** The line the hint closes with: what the match counts for on a written coordinate. */
+const citingLine = (standing: MatchStanding, withinKm: number) => {
+  const where = standing.representative
+    ? "the coordinate is this record's"
+    : `${km(standing.distanceKm)} from the coordinate`;
+  if (standing.cited) {
+    return `${where}; cited`;
+  }
+  if (standing.match.source === "llm-coords") {
+    return `${where}; a model's guess is never cited`;
+  }
+  if (standing.unassigned) {
+    return `${where}; not cited, as no Resource is assigned to this gazetteer in Global geocoding`;
+  }
+  if (standing.beyond) {
+    return `${where}; not cited, beyond the ${km(withinKm)} a gazetteer is cited within`;
+  }
+  return `${where}; not cited, as its gazetteer is cited with another record`;
+};
+
+export const MatchTag: React.FC<MatchTag> = ({ match, standing, withinKm }) => {
   const border = BORDER[match.matchType] || BORDER.fuzzy;
   const label = match.label?.trim() || "unnamed";
+  const lines = [
+    `${match.source} · ${label}`,
+    EXPLAINS[match.matchType] || "",
+    `${match.lat.toFixed(4)}, ${match.lon.toFixed(4)}`,
+    standing && withinKm !== undefined ? citingLine(standing, withinKm) : "",
+  ];
   return (
     <StyledMatchTag
       $source={match.source}
       $borderStyle={border.style}
       $faded={border.opacity < 1}
-      data-hint={`${match.source} · ${label}\n${EXPLAINS[match.matchType] || ""}\n${match.lat.toFixed(
-        4,
-      )}, ${match.lon.toFixed(4)}`}
+      $lead={!!standing?.representative}
+      $beyond={!!standing?.beyond}
+      data-hint={lines.filter(Boolean).join("\n")}
     >
-      <GazetteerHover source={match.source}>
-        <StyledMatchTagSource $source={match.source}>{match.source}</StyledMatchTagSource>
-      </GazetteerHover>
+      <StyledMatchTagSource $source={match.source}>{match.source}</StyledMatchTagSource>
       <StyledMatchTagName>
         {match.sourceUrl ? (
           <a href={match.sourceUrl} target="_blank" rel="noreferrer">

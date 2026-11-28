@@ -126,7 +126,10 @@ export const StyledContextGrid = styled.div`
   /* the fields keep a usable width and a long value truncates inside its own
      field: below that the panel scrolls rather than squashing the row */
   grid-template-columns: auto minmax(14rem, 1fr) auto;
-  align-items: center;
+  /* a field can be taller than one control (the period takes a year range under
+     its list), so a row starts at its top and its label and slider sit on the
+     height of the first control */
+  align-items: start;
   gap: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   margin-top: ${({ theme }) => theme.space[3]};
 `;
@@ -172,6 +175,7 @@ export const StyledDepartureMark = styled.span`
 export const StyledWeightCell = styled.div`
   display: flex;
   align-items: center;
+  min-height: ${({ theme }) => theme.space[10]};
   gap: ${({ theme }) => theme.space[2]};
 `;
 
@@ -217,6 +221,7 @@ export const StyledWeightValue = styled.span<{ $moved: boolean; $off: boolean }>
 export const StyledContextLabel = styled.label<{ $overridden: boolean }>`
   display: inline-flex;
   align-items: center;
+  min-height: ${({ theme }) => theme.space[10]};
   gap: ${({ theme }) => theme.space[1]};
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize.xxs};

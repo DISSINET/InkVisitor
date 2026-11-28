@@ -13,6 +13,10 @@ import { StyledManualEntry, StyledMapFooter, StyledMapHint } from "./MapControls
  */
 interface MapFooterControls {
   selected: GeocodingLocation | undefined;
+  /** With nothing selected, a coordinate typed here starts a new Location. */
+  canPlaceNew: boolean;
+  /** Leaves nothing selected. */
+  onDeselect: () => void;
   manual: { lat: string; lon: string };
   onManualChange: React.Dispatch<React.SetStateAction<{ lat: string; lon: string }>>;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
@@ -20,6 +24,8 @@ interface MapFooterControls {
 
 export const MapFooterControls: React.FC<MapFooterControls> = ({
   selected,
+  canPlaceNew,
+  onDeselect,
   manual,
   onManualChange,
   onSubmit,
@@ -28,9 +34,11 @@ export const MapFooterControls: React.FC<MapFooterControls> = ({
     <StyledMapHint>
       {selected
         ? `click the map to set a coordinate for ${selected.entity.labels[0]}, or`
-        : "select a location to begin"}
+        : canPlaceNew
+          ? "click the map to start a new location, or select one, or"
+          : "select a location to begin"}
     </StyledMapHint>
-    {selected ? (
+    {selected || canPlaceNew ? (
       <StyledManualEntry onSubmit={onSubmit}>
         <Input
           value={manual.lat}
@@ -48,6 +56,15 @@ export const MapFooterControls: React.FC<MapFooterControls> = ({
         />
         <Button label="set" color="primary" onClick={() => undefined} />
       </StyledManualEntry>
+    ) : null}
+    {selected ? (
+      <Button
+        label="deselect"
+        color="greyer"
+        inverted
+        tooltipLabel="select nothing, so that a click on the map starts a new location instead"
+        onClick={onDeselect}
+      />
     ) : null}
   </StyledMapFooter>
 );

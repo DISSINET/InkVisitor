@@ -2,7 +2,7 @@ import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
 import { SuggestResponse, Suggestion } from "../../types/engine";
 import { splitLabel } from "./suggestionLabel";
 import { bandOf } from "./suggestionRank";
-import { scatterOf } from "./suggestionScatter";
+import { AccuracyMarks, scatterOf } from "./suggestionScatter";
 
 /**
  * Taking an answer without looking at it.
@@ -49,6 +49,8 @@ export interface QuickRules {
    * the place they agree on is one this corpus can contain.
    */
   takeOffRegion?: boolean;
+  /** The accuracies the project marked for sources that agree and for scattered ones. */
+  marks: AccuracyMarks;
 }
 
 /**
@@ -136,7 +138,7 @@ export const quickPick = (
   response: SuggestResponse | null,
   rules: QuickRules,
 ): QuickPick => {
-  const { strategy, takeOffRegion = false } = rules;
+  const { strategy, takeOffRegion = false, marks } = rules;
   const suggestions = response?.suggestions ?? [];
   const top = suggestions[0];
   if (!response || !top) {
@@ -148,7 +150,10 @@ export const quickPick = (
   if (top.offRegion && !takeOffRegion) {
     return { skip: "the best answer is outside the region the query asked about" };
   }
-  const accuracy = scatterOf(top, response.mergeRadiusKm).leadAccuracy;
+  const accuracy = scatterOf(top, response.mergeRadiusKm, marks).leadAccuracy;
+  if (!accuracy) {
+    return { skip: "no accuracy is marked in the settings for an answer like this one" };
+  }
   const taken = { take: top, index: 0, accuracy };
   if (strategy === "topScore" || suggestions.length === 1) {
     return taken;

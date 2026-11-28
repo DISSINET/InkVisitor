@@ -18,6 +18,8 @@ import {
   groupsOf,
 } from "../utils/context/geocodingGroups";
 import { GeocodingLocation, useGeocodingLocations } from "./useGeocodingLocations";
+import { PlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { Accuracies } from "./accuraciesContext";
 
 /**
  * The page's one collection, and the filters over it.
@@ -31,12 +33,34 @@ export const ANY = "any";
 
 export const anyOption: DropdownItem = { value: ANY, label: "any" };
 
-export const accuracyOptions: DropdownItem[] = [
-  anyOption,
-  ...Object.values(GeocodingAccuracy).map((value) => ({ value, label: value })),
-];
+/**
+ * The accuracies the list can be narrowed to: the project's, in the order the
+ * owner listed them, and then any Concept a Location still carries that the
+ * project has since taken off its list, so those Locations can be found.
+ */
+export const accuracyOptionsFor = (
+  locations: { accuracy: GeocodingAccuracy | null; accuracyLabel: string }[],
+  accuracies: Accuracies,
+  filtered: string = ANY,
+): DropdownItem[] => {
+  const listed = new Set(accuracies.entries.map((entry) => entry.conceptId));
+  const others = new Map<string, string>();
+  for (const location of locations) {
+    if (location.accuracy && !listed.has(location.accuracy)) {
+      others.set(location.accuracy, location.accuracyLabel || accuracies.labelOf(location.accuracy));
+    }
+  }
+  if (filtered !== ANY && !listed.has(filtered) && !others.has(filtered)) {
+    others.set(filtered, accuracies.labelOf(filtered));
+  }
+  return [
+    anyOption,
+    ...accuracies.entries.map((entry) => ({ value: entry.conceptId, label: entry.label || "…" })),
+    ...[...others].map(([value, label]) => ({ value, label })),
+  ];
+};
 
-/** Locations that state no kind of place. Not the same as "any". */
+/** Locations that state no location type. Not the same as "any". */
 export const NO_PLACE_TYPE = "__none";
 
 export interface GeocodingFilters {
@@ -73,7 +97,11 @@ export interface UseGeocodingBrowse {
    */
   geocoded: GeocodingLocation[];
   geocodedCount: number;
+  /** The labels of the Concepts the Locations' inferred location types come through, by id. */
+  viaLabels: Record<string, string>;
   isLoading: boolean;
+  /** What the Locations are classified under could not be read; see `useGeocodingLocations`. */
+  typesError: boolean;
   error: unknown;
   filters: GeocodingFilters;
   setFilter: <K extends keyof GeocodingFilters>(key: K, value: GeocodingFilters[K]) => void;
@@ -88,14 +116,16 @@ export interface UseGeocodingBrowse {
    */
   createdByOptions: DropdownItem[];
   /**
-   * The kinds of place actually present in what the server returned, plus a
+   * The location types actually present in what the server returned, plus a
    * choice for the Locations that state none.
    *
-   * Built from the data rather than from the vocabulary: a corpus where nothing
-   * has been typed yet would otherwise offer twelve choices that all empty the
-   * list, and the list would look broken rather than the corpus untyped.
+   * Built from the data rather than from the vocabulary: in a corpus where
+   * nothing has been typed yet, every location type of the vocabulary empties the
+   * list, which looks broken rather than untyped.
    */
   placeTypeOptions: DropdownItem[];
+  /** The accuracies the list can be narrowed to. */
+  accuracyOptions: DropdownItem[];
   /** How the list is arranged. Never changes which Locations it holds. */
   groupBy: GroupBy;
   setGroupBy: (groupBy: GroupBy) => void;
@@ -116,11 +146,15 @@ export interface UseGeocodingBrowse {
   clearFilters: () => void;
 }
 
+/** A location type's name, set in by its depth in the tree it belongs to. */
+export const indentedName = (placeType: IGeocodingPlaceType & { depth?: number }): string =>
+  `${"\u2003".repeat(placeType.depth ?? 0)}${placeType.name}`;
+
 /**
- * The kinds of place present in a collection, as filter options.
+ * The location types present in a collection, as filter options.
  *
- * Built from the data rather than from the vocabulary. A corpus where nothing
- * has been typed would otherwise offer twelve choices that each empty the list,
+ * Built from the data rather than from the vocabulary. In a corpus where
+ * nothing has been typed, every location type of the vocabulary empties the list,
  * which reads as the filter being broken rather than the corpus being untyped —
  * so with none present it says so and offers nothing to choose.
  */
@@ -144,20 +178,20 @@ export const placeTypeOptionsFor = (
   // reorder itself as places are typed
   const typed = placeTypes
     .filter((placeType) => present.has(placeType.id))
-    .map((placeType) => ({ value: placeType.id, label: placeType.name }));
+    .map((placeType) => ({ value: placeType.id, label: indentedName(placeType) }));
   if (!typed.length) {
-    return [{ value: ANY, label: "no kinds recorded yet" }];
+    return [{ value: ANY, label: "no location types recorded yet" }];
   }
   return [
     anyOption,
     ...typed,
-    ...(untyped ? [{ value: NO_PLACE_TYPE, label: "no kind recorded" }] : []),
+    ...(untyped ? [{ value: NO_PLACE_TYPE, label: "no location type recorded" }] : []),
   ];
 };
 
 /**
- * Whether a Location survives the place type filter, given every kind it has.
- * A Location with several kinds is found under each of them.
+ * Whether a Location survives the place type filter, given every location type it has.
+ * A Location with several location types is found under each of them.
  */
 export const matchesKinds = (kinds: string[], filter: string): boolean => {
   if (filter === ANY) {
@@ -169,7 +203,13 @@ export const matchesKinds = (kinds: string[], filter: string): boolean => {
   return kinds.includes(filter);
 };
 
-export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse => {
+export const useGeocodingBrowse = (
+  roles: IGeocodingRoles,
+  /** What the Locations are classified under, as the page read it. */
+  assignments: PlaceTypeAssignments,
+  /** The project's accuracies, as the page read them. */
+  accuracies: Accuracies,
+): UseGeocodingBrowse => {
   const [filters, setFilters] = useState<GeocodingFilters>({
     label: "",
     createdBy: ANY,
@@ -222,7 +262,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     [users],
   );
 
-  const { locations, geocodedCount, isLoading, error } = useGeocodingLocations(roles, {
+  const { locations, geocodedCount, viaLabels, isLoading, typesError, error } = useGeocodingLocations(roles, {
     // one character matches most of the corpus, which is not a search
     label: filters.label.length > 1 ? filters.label : undefined,
     createdBy: filters.createdBy === ANY ? undefined : filters.createdBy,
@@ -231,10 +271,10 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
       filters.territoryId !== ANY && filters.subTerritories === "included" ? true : undefined,
     language: filters.language === ANY ? undefined : (filters.language as EntityEnums.Language),
     status: filters.status === ANY ? undefined : (filters.status as EntityEnums.Status),
-  });
+  }, assignments);
 
   // everything except the place type filter, which is what its own options are
-  // drawn from: options taken from the whole collection would offer a kind the
+  // drawn from: options taken from the whole collection would offer a location type the
   // current view cannot contain, and options taken from the result would vanish
   // as soon as one was chosen
   const beforePlaceType = useMemo(
@@ -271,17 +311,22 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   /**
    * What each option of each client-side filter would leave.
    *
-   * Only accuracy and kind of place: language and status are asked of the
+   * Only accuracy and location type: language and status are asked of the
    * server, so the collection here has already been narrowed by them and a
    * count over it would say the same number for every option.
    */
+  const accuracyOptions = useMemo(
+    () => accuracyOptionsFor(locations, accuracies, filters.accuracy),
+    [locations, accuracies, filters.accuracy],
+  );
+
   const optionCounts = useMemo(() => {
     const counts: Record<string, Record<string, number>> = { accuracy: {}, placeType: {} };
     const underPlaceType = locations.filter((location) =>
       matchesKinds(location.placeTypes, filters.placeType),
     );
     counts.accuracy[ANY] = underPlaceType.length;
-    for (const accuracy of Object.values(GeocodingAccuracy)) {
+    for (const { value: accuracy } of accuracyOptions.filter((option) => option.value !== ANY)) {
       counts.accuracy[accuracy] = underPlaceType.filter(
         (location) => location.accuracy === accuracy,
       ).length;
@@ -299,7 +344,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
       ).length;
     }
     return counts;
-  }, [locations, filters.accuracy, filters.placeType, roles.placeTypes]);
+  }, [locations, filters.accuracy, filters.placeType, roles.placeTypes, accuracyOptions]);
 
   const clearFilters = useCallback(
     () =>
@@ -321,7 +366,9 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     visible,
     geocoded,
     geocodedCount,
+    viaLabels,
     isLoading,
+    typesError,
     error,
     filters,
     setFilter,
@@ -329,6 +376,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     statusOptions,
     createdByOptions,
     placeTypeOptions,
+    accuracyOptions,
     optionCounts,
     clearFilters,
     groupBy,

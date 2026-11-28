@@ -37,7 +37,7 @@ import { useGazetteerCatalogue } from "../../hooks/useGazetteerCatalogue";
  * A further column of the table, filled per source.
  *
  * Where the table is also the place a source's other properties are edited — the
- * project's resource and record URL — the switch and the figures stay as they are
+ * project's resource and record URL — the switch and the name stay as they are
  * and the extra cells sit to their right on the same row, so one source is one
  * line however many things are said about it.
  */
@@ -110,7 +110,7 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
                 ) : null}
                 {lockedHere ? (
                   <StyledGazetteerLocked>
-                    off for the whole project — an owner sets this
+                    off for the whole project — an owner can switch it on
                   </StyledGazetteerLocked>
                 ) : null}
               </StyledGazetteerName>

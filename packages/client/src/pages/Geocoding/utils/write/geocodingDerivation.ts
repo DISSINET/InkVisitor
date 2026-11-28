@@ -1,4 +1,4 @@
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { GeoJsonGeometry, geometryAnchor, parseGeometry } from "@inkvisitor/shared/types/geometry";
 import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 
@@ -23,11 +23,17 @@ export interface DerivedGeocoding {
   lon: number | null;
   /** Latitude of the anchor. */
   lat: number | null;
+  /** The Concept the accuracy prop is valued with, in the project's list or not. */
   accuracy: GeocodingAccuracy | null;
   /**
-   * The id of the project's kind of place, independent of `isGeocoded` — a kind
+   * That Concept's label, and "not in the accuracy list" beside it where the
+   * project no longer lists it; empty while it cannot be read.
+   */
+  accuracyLabel: string;
+  /**
+   * The id of the project's location type, independent of `isGeocoded` — a location type
    * says nothing about a coordinate. Not a prop, so it is not derived here: a
-   * Location has a kind by a Classification relation, which the collection of
+   * Location has a location type by a Classification relation, which the collection of
    * Locations joins in.
    */
   placeType: string | null;
@@ -45,45 +51,46 @@ const ungeocoded = (problem: string | null): DerivedGeocoding => ({
   lon: null,
   lat: null,
   accuracy: null,
+  accuracyLabel: "",
   placeType: null,
   problem,
 });
 
-/** The prop whose type is `conceptId`, ignoring nested children. */
+/** The top-level prop whose type is `conceptId`. */
 const propOfType = (entity: IEntity, conceptId: string) =>
   conceptId ? (entity.props || []).find((prop) => prop.type?.entityId === conceptId) : undefined;
 
 /**
- * Every entity id a Location's geocoding props point at.
+ * The accuracy prop of a Location: the subproperty of its geometry prop, or,
+ * where the Location was written before accuracy moved under the geometry, the
+ * prop beside it.
+ */
+const accuracyPropOf = (entity: IEntity, roles: IGeocodingRoles, geometryProp?: IProp) =>
+  (geometryProp?.children || []).find((child) => child.type?.entityId === roles.accuracy) ??
+  propOfType(entity, roles.accuracy);
+
+/**
+ * Every entity id a Location's geocoding props point at that has to be read.
  *
  * A search result carries only these ids — `IResponseEntity` bundles no entity
  * map, unlike the detail and statement responses — so the labels behind them
- * take a second, batched fetch.
+ * take a second, batched fetch: the geometry's, which is the coordinate, and the
+ * accuracy Concept's, which is what the accuracy is called.
  */
 export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles): string[] => {
-  const wanted = [roles.geometry, roles.accuracy].filter(Boolean);
   const ids = new Set<string>();
   for (const entity of entities) {
-    for (const conceptId of wanted) {
-      const valueId = propOfType(entity, conceptId)?.value?.entityId;
+    const geometryProp = propOfType(entity, roles.geometry);
+    for (const valueId of [
+      geometryProp?.value?.entityId,
+      roles.accuracy ? accuracyPropOf(entity, roles, geometryProp)?.value?.entityId : undefined,
+    ]) {
       if (valueId) {
         ids.add(valueId);
       }
     }
   }
   return [...ids];
-};
-
-/** Reverses a role map — stored as name → entity id, read here id → name. */
-const nameForEntity = <T extends string>(
-  map: Partial<Record<T, string>>,
-  entityId: string | undefined,
-): T | null => {
-  if (!entityId) {
-    return null;
-  }
-  const hit = Object.entries(map).find(([, id]) => id === entityId);
-  return hit ? (hit[0] as T) : null;
 };
 
 /**
@@ -103,7 +110,7 @@ export const deriveGeocoding = (
   }
 
   const geometryProp = propOfType(entity, roles.geometry);
-  const accuracyProp = propOfType(entity, roles.accuracy);
+  const accuracyProp = accuracyPropOf(entity, roles, geometryProp);
 
   if (!geometryProp && !accuracyProp) {
     return ungeocoded(null);
@@ -118,20 +125,33 @@ export const deriveGeocoding = (
   // is not GeoJSON, or a position outside the earth's range all mean ungeocoded
   // rather than a shape rendered somewhere wrong
   const geometry = parseGeometry(values[geometryProp!.value.entityId]?.labels?.[0]);
-  const accuracy = nameForEntity<GeocodingAccuracy>(
-    roles.accuracyValues,
-    accuracyProp!.value.entityId,
-  );
+  const accuracy = accuracyProp!.value?.entityId || null;
 
   if (!geometry) {
     return ungeocoded("geometry cannot be read");
   }
   if (!accuracy) {
-    return ungeocoded("accuracy is not one of the configured values");
+    return ungeocoded("accuracy has no value");
   }
 
+  // a Concept the project has since taken off its list still says how close the
+  // coordinate is, and the coordinate is kept: hiding it would hide every place
+  // coded with an accuracy the moment the owner tidied the list
+  const label = values[accuracy]?.labels?.[0] ?? "";
+  const accuracyLabel =
+    label && !roles.accuracies.includes(accuracy) ? `${label} (not in the accuracy list)` : label;
+
   const { lon, lat } = geometryAnchor(geometry);
-  return { isGeocoded: true, geometry, lon, lat, accuracy, placeType: null, problem: null };
+  return {
+    isGeocoded: true,
+    geometry,
+    lon,
+    lat,
+    accuracy,
+    accuracyLabel,
+    placeType: null,
+    problem: null,
+  };
 };
 
 /**

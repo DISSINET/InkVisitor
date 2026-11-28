@@ -8,17 +8,17 @@ import { sourceColor } from "./MatchTagStyles";
 import { useGazetteer } from "../../hooks/useGazetteerCatalogue";
 
 /**
- * A gazetteer, wherever the page names one.
+ * A gazetteer's name.
  *
- * Hovering or focusing it shows what the engine says about the source — what it
- * is, what it is good for, what it cannot do and on what terms its data may be
- * used. It is one component so the answer is the same in the settings table, on
- * a match, in the progress strip and on the map, and so a source added to the
- * engine is explained everywhere at once.
+ * `GazetteerHover` wraps a face the caller already draws and, on hover or focus,
+ * shows what the engine says about the source — what it is, what it is good
+ * for, its limitations and on what terms its data may be used. It is used only
+ * in the gazetteer tables of the settings, where a source is being chosen. Next
+ * to a result the card would cover the answer being judged, so there a source is
+ * a name and nothing more: `GazetteerTag` draws that name in the source's colour.
  *
- * `GazetteerHover` wraps a face the caller already draws; `GazetteerTag` draws
- * the standard one. Where the engine has not been reached, or does not know the
- * source, the face is shown without a card rather than with an empty one.
+ * Where the engine has not been reached, or does not know the source, the face
+ * is shown without a card rather than with an empty one.
  */
 
 /** How long the card waits after the pointer leaves, so the pointer can cross onto it. */
@@ -52,6 +52,7 @@ export const GazetteerHover: React.FC<GazetteerHover> = ({ source, children }) =
     <>
       <StyledGazetteerAnchor
         ref={setAnchor}
+        tabIndex={0}
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocus={show}
@@ -79,11 +80,5 @@ interface GazetteerTag {
 
 export const GazetteerTag: React.FC<GazetteerTag> = ({ source }) => {
   const theme = useTheme();
-  return (
-    <GazetteerHover source={source}>
-      <StyledGazetteerFace $color={sourceColor(theme, source)} tabIndex={0}>
-        {source}
-      </StyledGazetteerFace>
-    </GazetteerHover>
-  );
+  return <StyledGazetteerFace $color={sourceColor(theme, source)}>{source}</StyledGazetteerFace>;
 };

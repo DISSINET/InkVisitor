@@ -4,8 +4,9 @@ import styled from "styled-components";
  * The card a gazetteer's tag shows on hover.
  *
  * Drawn for the tooltip it sits in: dark, so the text inherits the tooltip's
- * colour and every border is the text's own, thinned. The one thing set apart is
- * what the source cannot do, because it is the part that changes a decision.
+ * colour and every border and rule is the text's own, thinned. The one thing set
+ * apart in colour is the source's limitations, because it is the part that
+ * changes a decision.
  */
 export const StyledGazetteerCard = styled.div`
   display: flex;
@@ -19,12 +20,46 @@ export const StyledGazetteerCard = styled.div`
   line-height: 1.5;
 `;
 
+/** The name, and on the same line whether the source is local records or an online service. */
+export const StyledCardHead = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 export const StyledCardTitle = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize.sm};
+`;
+
+export const StyledCardKind = styled.span`
+  flex: 0 0 auto;
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  opacity: 0.65;
+`;
+
+/** What the source covers, the first thing read: time · geography · topic. */
+export const StyledCardLead = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.4;
+`;
+
+/** A part of the card below the first, ruled off from what comes before it. */
+export const StyledCardSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+
+  &::before {
+    content: "";
+    height: 1px;
+    background: currentColor;
+    opacity: 0.25;
+  }
 `;
 
 export const StyledCardChips = styled.div`
@@ -63,7 +98,7 @@ export const StyledCardLabel = styled.span`
   opacity: 0.65;
 `;
 
-/** What the source cannot do, set apart because it is the part that changes a decision. */
+/** The source's limitations, set apart because they are the part that changes a decision. */
 export const StyledCardLimits = styled.div`
   padding-left: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["warningMessage"]};
@@ -108,6 +143,4 @@ export const StyledGazetteerMark = styled.span`
 export const StyledGazetteerFace = styled.span<{ $color: string }>`
   font-family: monospace;
   color: ${({ $color }) => $color};
-  cursor: help;
-  border-bottom: 1px dotted currentColor;
 `;

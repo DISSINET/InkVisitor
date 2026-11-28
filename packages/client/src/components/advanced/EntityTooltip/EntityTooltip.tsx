@@ -75,6 +75,8 @@ interface EntityTooltip {
   position?: Placement;
   color?: keyof ThemeColor;
   disabled?: boolean;
+  /** The pointer goes through the tooltip; see Tooltip's `passThrough`. */
+  passThrough?: boolean;
 
   tagHovered: boolean;
 
@@ -104,6 +106,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   position,
   color,
   disabled,
+  passThrough,
 
   tagHovered,
   //
@@ -494,6 +497,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         content={renderContent}
         position={position}
         color={color}
+        passThrough={passThrough}
       />
     </>
   );

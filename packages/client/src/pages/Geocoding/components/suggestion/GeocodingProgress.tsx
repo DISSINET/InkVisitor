@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { GazetteerHover } from "../gazetteer/GazetteerTag";
 import {
   StyledBoard,
   StyledBoardSlot,
@@ -24,6 +23,7 @@ import {
   readStage,
   sourceTally,
 } from "../../utils/engine/stageProgress";
+import { CandidateScopeMark } from "./CandidateScopeMark";
 
 /**
  * What a request looks like while it runs.
@@ -66,7 +66,7 @@ interface GeocodingProgress {
    * whether the engine understood the place, ten seconds before any coordinate
    * does.
    */
-  candidates: { name: string; nameFit: number }[];
+  candidates: { name: string; nameFit: number; scope?: "place" | "container" }[];
 }
 
 export const GeocodingProgress: React.FC<GeocodingProgress> = ({
@@ -122,6 +122,7 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
                     <StyledCandidateForm key={candidate.name}>
                       {candidate.name}
                       <StyledCandidateFit>{candidate.nameFit.toFixed(2)}</StyledCandidateFit>
+                      <CandidateScopeMark scope={candidate.scope} />
                     </StyledCandidateForm>
                   ))}
                 </StyledCandidateForms>
@@ -141,9 +142,7 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
                       $share={largest > 0 ? (count || 0) / largest : 0}
                       data-hint={reason || `${source}: ${count ?? "no answer yet"}`}
                     >
-                      <GazetteerHover source={source}>
-                        <StyledSourceName $source={source}>{source}</StyledSourceName>
-                      </GazetteerHover>
+                      <StyledSourceName $source={source}>{source}</StyledSourceName>
                       <StyledSourceCount $state={sourceState}>
                         {sourceState === "excluded"
                           ? "—"

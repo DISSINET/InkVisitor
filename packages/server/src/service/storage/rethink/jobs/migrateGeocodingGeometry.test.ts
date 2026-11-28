@@ -89,6 +89,17 @@ describe("migrate-geocoding-geometry", () => {
     expect(await geometryOf(plain)).toEqual({ type: "Point", coordinates: [10.5, 50.25] });
   });
 
+  it("dates the geometry Value as the coordinate it replaces, so the records written with it still match", async () => {
+    const written = new Date("2025-03-01T10:00:00Z");
+    await r.table("entities").get(uuid(10)).update({ createdAt: written }).run(conn);
+    await migrateGeocodingGeometryJob(conn);
+
+    const plain = await location(uuid(30));
+    const geometryProp = plain.props.find((p: any) => p.type.entityId === GEOMETRY);
+    const stored: any = await r.table("entities").get(geometryProp.value.entityId).run(conn);
+    expect(new Date(stored.createdAt).getTime()).toBe(written.getTime());
+  });
+
   it("reads decimal commas", async () => {
     await migrateGeocodingGeometryJob(conn);
     expect(await geometryOf(await location(uuid(31)))).toEqual({ type: "Point", coordinates: [11.5, 51.25] });

@@ -2,8 +2,8 @@ import {
   GEOCODING_SETTINGS_KEY,
   IGeocodingRoles,
   IGeocodingSettings,
+  normalizeGeocodingRoles,
   emptyGeocodingRoles,
-  normalizePlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import api from "api";
 
@@ -25,11 +25,7 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
     const response = await api.settingGet(GEOCODING_SETTINGS_KEY, { ignoreErrorToast: true });
     const stored = response.data?.data?.value as IGeocodingSettings | undefined;
     return {
-      roles: {
-        ...emptyGeocodingRoles(),
-        ...(stored?.roles || {}),
-        placeTypes: normalizePlaceTypes(stored?.roles?.placeTypes),
-      },
+      roles: normalizeGeocodingRoles(stored?.roles),
       context: stored?.context || {},
     };
   } catch (error) {
@@ -49,15 +45,15 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
  * Assigns some roles without disturbing the rest.
  *
  * Assignment replaces: a role holds one entity id, never a list, so two Concepts
- * can never both be live as `geo:geometry`. The keyed maps merge by key so assigning
- * one accuracy leaves the others alone; the list of place types is replaced whole.
+ * can never both be live as `geo:geometry`. The resources merge by key so assigning
+ * one leaves the others alone; the lists of place types and accuracies are replaced
+ * whole.
  */
 export const patchGeocodingRoles = async (partial: Partial<IGeocodingRoles>): Promise<void> => {
   const current = await readSettings();
   const roles: IGeocodingRoles = {
     ...current.roles,
     ...partial,
-    accuracyValues: { ...current.roles.accuracyValues, ...(partial.accuracyValues || {}) },
     placeTypes: partial.placeTypes ?? current.roles.placeTypes,
     resources: { ...current.roles.resources, ...(partial.resources || {}) },
   };

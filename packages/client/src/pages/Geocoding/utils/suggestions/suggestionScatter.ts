@@ -1,4 +1,4 @@
-import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import { Suggestion } from "../../types/engine";
 
 /**
@@ -58,8 +58,12 @@ export const spreadIsMeasured = (suggestion: Suggestion) => suggestion.matches.l
 
 
 
+/** The two accuracies the project marked for a suggestion whose sources agree, and for one whose are scattered. */
+export type AccuracyMarks = Pick<IGeocodingRoles, "accuracyWhenAgree" | "accuracyWhenScattered">;
+
 /**
- * Whether the matches are scattered, and which accuracy the card leads with.
+ * Whether the matches are scattered, and which accuracy the card leads with: the
+ * one the project marked for that case, or "" where it marked none.
  *
  * A scattered group can still be the right place, so every accuracy stays
  * available; what changes is which one the eye lands on first.
@@ -67,11 +71,12 @@ export const spreadIsMeasured = (suggestion: Suggestion) => suggestion.matches.l
 export const scatterOf = (
   suggestion: Suggestion,
   mergeRadiusKm: number | undefined,
+  marks: AccuracyMarks,
 ): { scattered: boolean; leadAccuracy: GeocodingAccuracy } => {
   const threshold = spreadWarningKm(mergeRadiusKm);
   const scattered = spreadIsMeasured(suggestion) && suggestion.spreadKm >= threshold;
   return {
     scattered,
-    leadAccuracy: scattered ? GeocodingAccuracy.Approximate : GeocodingAccuracy.Precise,
+    leadAccuracy: scattered ? marks.accuracyWhenScattered : marks.accuracyWhenAgree,
   };
 };

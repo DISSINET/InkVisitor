@@ -161,7 +161,7 @@ export const StyledEmpty = styled.div`
  * word stays available on hover for the cases the shape does not settle.
  */
 /**
- * The kind of place, as its mark and as the control that changes it. `$unset`
+ * The location type, as its mark and as the control that changes it. `$unset`
  * is the state most of the corpus is in, drawn faintly so a row that states
  * nothing does not read as a row stating something.
  */
@@ -189,6 +189,24 @@ export const StyledRowType = styled.button<{ $unset?: boolean }>`
     background-color: ${({ theme }) => theme.color["gray"][300]};
     color: ${({ theme }) => theme.color["primary"]};
   }
+`;
+
+/**
+ * One location type of a row. One a Location only comes under through a subclass
+ * or a synonym is drawn paler than one it is classified under itself, with the
+ * same shape.
+ */
+export const StyledRowTypeIcon = styled.span<{ $inferred?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  opacity: ${({ $inferred }) => ($inferred ? 0.5 : 1)};
+`;
+
+/** How many more location types a Location has than the marks its row shows. */
+export const StyledRowTypeMore = styled.span`
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-family: monospace;
 `;
 
 /**
@@ -233,6 +251,45 @@ export const StyledMarkedBar = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+/**
+ * What is selected, or that nothing is.
+ *
+ * Always drawn, in two looks that cannot be mistaken for each other: a filled bar
+ * with an accent edge for a Location, a dashed outline for none. The row's own
+ * highlight says which row; this says it where the list may be scrolled away from
+ * it, and it is the one place that also says when there is nothing to say.
+ */
+export const StyledSelectionBar = styled.div<{ $has: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  min-height: 2.4rem;
+  margin: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[GUTTER]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  ${({ theme, $has }) =>
+    $has
+      ? `
+    background-color: ${theme.color["tableOpened"]};
+    border: 1px solid ${theme.color["primary"]};
+    border-left-width: 4px;
+    color: ${theme.color["primary"]};
+  `
+      : `
+    background-color: transparent;
+    border: 1px dashed ${theme.color["gray"][500]};
+    color: ${theme.color["greyer"]};
+  `}
+`;
+
+export const StyledSelectionLabel = styled.span`
+  flex: 0 0 auto;
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+`;
+
 /** What the action can actually reach, where that is not the whole set. */
 export const StyledMarkedReach = styled.span`
   color: ${({ theme }) => theme.color["greyer"]};
@@ -258,26 +315,6 @@ export const StyledRowMark = styled.span<{ $state: "geocoded" | "problem" | "non
   border-style: ${({ $state }) => ($state === "problem" ? "dashed" : "solid")};
   background-color: ${({ theme, $state }) =>
     $state === "geocoded" ? theme.color["success"] : "transparent"};
-`;
-
-/**
- * The kind of place where nothing can be done about it.
- *
- * A write owns the coordinate roles as well as the kind, so a Location with no
- * coordinate has nothing to write the kind against — the mark is a label there,
- * and drawing it as a button offered a picker whose choice went nowhere.
- */
-export const StyledRowTypeStatic = styled.span<{ $unset?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-width: 2.2rem;
-  height: 2.2rem;
-  padding: 0 ${({ theme }) => theme.space[1]};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme, $unset }) =>
-    $unset ? theme.color["gray"][400] : theme.color["greyer"]};
 `;
 
 /**

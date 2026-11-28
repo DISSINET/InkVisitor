@@ -11,7 +11,7 @@ import {
 } from "./gazetteerDetails";
 
 describe("coverageGroups", () => {
-  it("turns slugs, language codes and engine types into words", () => {
+  it("turns slugs, language codes and gazetteer location types into words", () => {
     const groups = coverageGroups({
       regions: ["low-countries"],
       periods: ["late-medieval"],
@@ -22,13 +22,13 @@ describe("coverageGroups", () => {
       { title: "regions", items: ["low countries"] },
       { title: "periods", items: ["late medieval"] },
       { title: "languages", items: ["German"] },
-      { title: "kinds of place", items: ["religious house"] },
+      { title: "gazetteer location types", items: ["religious house"] },
     ]);
   });
 
   it("leaves out a dimension the source declares nothing for", () => {
     expect(coverageGroups({ placeTypes: ["port"] }).map((group) => group.title)).toEqual([
-      "kinds of place",
+      "gazetteer location types",
     ]);
     expect(coverageGroups({})).toEqual([]);
   });

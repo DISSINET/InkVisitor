@@ -228,7 +228,7 @@ export const StyledDrawClear = styled.button`
  * What a mark on the map is, shown where the pointer is.
  *
  * A Location this page holds is more than the coordinate its mark draws — it
- * has a name, a class, a kind of place and a claim about how precisely it is
+ * has a name, a class, a location type and a claim about how precisely it is
  * known — and the map is where a reader decides which of several nearby marks
  * they meant.
  *

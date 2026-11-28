@@ -1,4 +1,6 @@
 import { GEOCODING_PLACE_TYPES, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   PLACE_ICONS,
@@ -10,7 +12,7 @@ import {
 } from "./placeTypeIcons";
 
 /**
- * Most of the corpus states no kind of place, so the mark for "nobody has said"
+ * Most of the corpus states no location type, so the mark for "nobody has said"
  * is the one seen most often. An absent icon there would read as a rendering
  * fault rather than as the fact it is.
  */
@@ -24,7 +26,7 @@ describe("placeTypeInfo", () => {
       expect(info.description.length).toBeGreaterThan(10);
       seen.add(info.label);
     }
-    // twelve distinct labels: a repeated one would make two kinds indistinguishable
+    // distinct labels: a repeated one would make two kinds indistinguishable
     expect(seen.size).toBe(GEOCODING_PLACE_TYPES.length);
   });
 
@@ -56,6 +58,78 @@ describe("the icon set a project chooses from", () => {
       expect(PLACE_ICON_KEYS).toContain(kind.icon);
       expect(kindInfo(kind).icon).not.toBe(UNKNOWN_PLACE_TYPE.icon);
     }
+  });
+
+  it("has a church with a tower beside the one without, drawn in the stroke of the rest", () => {
+    expect(PLACE_ICONS.church).toBeDefined();
+    expect(PLACE_ICONS.church).not.toBe(PLACE_ICONS.religious);
+    // a filled or hairline mark would stand out in a list of outlined ones
+    const markup = renderToStaticMarkup(React.createElement(PLACE_ICONS.church));
+    expect(markup).toContain('fill="none"');
+    expect(markup).toContain('stroke="currentColor"');
+    expect(markup).toContain('stroke-width="2"');
+  });
+
+  it("offers marks for arms, buildings, food, water, travel and trades, each its own and none repeating an older one", () => {
+    const added = [
+      "sword", "axe", "bow", "helmet", "cottage", "estate", "tunnel", "fence", "stairs", "well",
+      "bread", "cheese", "meat", "grain", "seedling", "apple", "egg", "pig", "deer", "paw",
+      "mushroom", "flower", "fishHook", "bath", "pool", "wheel", "route", "roadSign", "bone",
+      "hourglass", "abacus", "scissors", "lamp", "trophy", "world", "sun", "diamond", "queen",
+    ];
+    for (const key of added) {
+      expect([key, placeIcon(key) !== UNKNOWN_PLACE_TYPE.icon]).toEqual([key, true]);
+    }
+    const older = PLACE_ICON_KEYS.filter((key) => !added.includes(key)).map((key) => PLACE_ICONS[key]);
+    expect(added.filter((key) => older.includes(PLACE_ICONS[key]))).toEqual([]);
+  });
+
+  it("offers marks for religious, historical, cultural and trade places, each its own", () => {
+    const added = [
+      "jewishStar",
+      "menorah",
+      "bible",
+      "prayer",
+      "candle",
+      "coffin",
+      "ankh",
+      "om",
+      "yinYang",
+      "rook",
+      "prison",
+      "court",
+      "archive",
+      "scriptorium",
+      "vineyard",
+      "theater",
+      "music",
+      "art",
+      "arena",
+      "ichthys",
+      "bishop",
+      "waysideCross",
+      "pilgrimage",
+      "pagoda",
+      "magic",
+      "royal",
+      "knight",
+      "laurel",
+      "seal",
+      "scales",
+      "mint",
+      "observatory",
+      "apothecary",
+      "smithy",
+      "cellar",
+      "textile",
+      "salt",
+      "farm",
+    ];
+    for (const key of added) {
+      expect(placeIcon(key)).not.toBe(UNKNOWN_PLACE_TYPE.icon);
+    }
+    // two keys drawing one mark would be indistinguishable in the list
+    expect(new Set(added.map((key) => PLACE_ICONS[key])).size).toBe(added.length);
   });
 
   it("falls back to the unknown mark for a key the set does not have", () => {

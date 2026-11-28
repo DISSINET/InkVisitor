@@ -11,7 +11,8 @@ import {
   collectGeoValueIds,
   deriveGeocoding,
 } from "../utils/write/geocodingDerivation";
-import { usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { LocationTypeEntry, PlaceTypeAssignments } from "./usePlaceTypeAssignments";
+import { entryApplies } from "../utils/context/placeTypeHierarchy";
 
 /**
  * The one collection the list, the map and every count read.
@@ -26,11 +27,17 @@ import { usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 export interface GeocodingLocation extends DerivedGeocoding {
   entity: IResponseEntity;
   /**
-   * Every kind of place the Location is classified under. `placeType` is the
-   * first of them, in the order the project lists its kinds — the one the page
-   * shows and edits while a Location is read as having a single kind.
+   * Every location type the Location comes under, for filtering and counting:
+   * the ones shown, and the nodes of the same trees above them, so that a
+   * Location classified as a highway is found under road and path too. A root
+   * another location type lies below is not among them.
    */
   placeTypes: string[];
+  /**
+   * The location types with how the Location comes under each, those shown
+   * first; the ones shown are those not shadowed.
+   */
+  typeEntries: LocationTypeEntry[];
 }
 
 /** Filters the server can answer. Geocoded state and accuracy cannot be asked of it. */
@@ -46,8 +53,15 @@ export interface GeocodingServerFilters {
 export interface UseGeocodingLocations {
   locations: GeocodingLocation[];
   geocodedCount: number;
+  /** The labels of the Concepts the Locations' inferred location types come through, by id. */
+  viaLabels: Record<string, string>;
   /** True while either fetch is outstanding. */
   isLoading: boolean;
+  /**
+   * The request for what the Locations are classified under failed, so that every
+   * Location reads as having no location type whether it has one or not.
+   */
+  typesError: boolean;
   /** The Locations request failed — the InkVisitor server, not the geocoding engine. */
   error: unknown;
 }
@@ -55,6 +69,12 @@ export interface UseGeocodingLocations {
 export const useGeocodingLocations = (
   roles: IGeocodingRoles,
   filters: GeocodingServerFilters,
+  /**
+   * What the Locations are classified under, read once by the page for the whole
+   * of it: the tree of every location type is worked out there, and a second read
+   * here would work it out again on every render of the list.
+   */
+  assignments: PlaceTypeAssignments,
 ): UseGeocodingLocations => {
   const {
     data: entities,
@@ -79,8 +99,6 @@ export const useGeocodingLocations = (
     [entities, roles],
   );
 
-  const assignments = usePlaceTypeAssignments(roles.placeTypes);
-
   const { data: values, isFetching: loadingValues } = useEntitiesQuery(
     "geocoding-values",
     valueIds,
@@ -98,7 +116,14 @@ export const useGeocodingLocations = (
      * keeps the Values it already has, so this only ever costs the first load.
      */
     if (!canDerive(valueIds, values)) {
-      return { locations: [], geocodedCount: 0, isLoading: true, error };
+      return {
+        locations: [],
+        geocodedCount: 0,
+        viaLabels: {},
+        isLoading: true,
+        typesError: !!assignments.error,
+        error,
+      };
     }
 
     const byId: Record<string, IResponseEntity> = {};
@@ -107,19 +132,23 @@ export const useGeocodingLocations = (
     }
 
     const locations: GeocodingLocation[] = (entities || []).map((entity) => {
-      const kinds = assignments.typesByLocation.get(entity.id) ?? [];
+      const entries = assignments.typesByLocation.get(entity.id) ?? [];
+      const shown = entries.filter((entry) => !entry.shadowed).map((entry) => entry.typeId);
       return {
         entity,
         ...deriveGeocoding(entity, roles, byId),
-        placeType: kinds[0] ?? null,
-        placeTypes: kinds,
+        placeType: shown[0] ?? null,
+        placeTypes: entries.filter(entryApplies).map((entry) => entry.typeId),
+        typeEntries: entries,
       };
     });
 
     return {
       locations,
       geocodedCount: locations.filter((location) => location.isGeocoded).length,
+      viaLabels: assignments.viaLabels,
       isLoading: loadingEntities || loadingValues || assignments.isLoading,
+      typesError: !!assignments.error,
       error,
     };
   }, [entities, values, valueIds, roles, loadingEntities, loadingValues, error, assignments]);

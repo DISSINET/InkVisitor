@@ -79,6 +79,11 @@ interface EntityTag {
   /** Leaves the browser's own menu in place on right click. */
   disableContextMenu?: boolean;
   tooltipPosition?: Placement;
+  /**
+   * The pointer goes through the tooltip to what lies under it. For a tag in a
+   * list of choices, whose tooltip falls over the next one.
+   */
+  tooltipPassThrough?: boolean;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
   statementsCount?: number;
@@ -117,6 +122,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   disableCopyToClipboard = false,
   disableContextMenu: disableContextMenuProp = false,
   tooltipPosition,
+  tooltipPassThrough,
   updateOrderFn,
   lvl,
   statementsCount,
@@ -405,6 +411,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
           partOfSpeech={entity.data.pos}
           itemsCount={statementsCount}
           position={tooltipPosition}
+          passThrough={tooltipPassThrough}
           disabled={(button !== null && (buttonHovered || elvlHovered)) || Boolean(isDragging)}
           tagHovered={tagHovered}
           referenceElement={referenceEl.current}
@@ -462,7 +469,7 @@ const EntityTagComponent: React.FC<EntityTag> = (props) => {
   return <EntityTagInner {...props} />;
 };
 
-function areEntityTagsEqual(
+export function areEntityTagsEqual(
   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
   next: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
 ) {
@@ -476,6 +483,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.tagMaxWidth !== next.tagMaxWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
+  if (prev.tooltipPassThrough !== next.tooltipPassThrough) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
   if (prev.disableContextMenu !== next.disableContextMenu) return false;
   if (prev.onDoubleClick !== next.onDoubleClick) return false;

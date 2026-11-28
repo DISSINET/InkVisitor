@@ -154,6 +154,7 @@ describe("Acl.validate", () => {
       "entities GET /:entityId/expansion",
       "entities GET /:entityId/tooltip",
       "entities GET /:entityId/used-relations",
+      "entities GET /classified-under",
       "entities POST /batch",
       "entities POST /query",
       "users GET /simplified",

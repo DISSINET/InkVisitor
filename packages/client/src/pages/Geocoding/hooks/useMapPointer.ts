@@ -2,7 +2,7 @@ import * as maplibregl from "maplibre-gl";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { Suggestion } from "../types/engine";
 import { hoverInfoAtPoint, pickMark } from "../utils/map/geocodingMapLayers";
-import { MapPending } from "../utils/map/mapAssign";
+import { MapPending, mayStartPick } from "../utils/map/mapAssign";
 import { GeocodingLocation } from "./useGeocodingLocations";
 
 /**
@@ -21,6 +21,11 @@ interface UseMapPointer {
   shapeOpenRef: MutableRefObject<boolean>;
   shownSuggestions: Suggestion[];
   selected: GeocodingLocation | undefined;
+  /**
+   * Whether a click with nothing selected may start a new Location. Read when the
+   * click arrives, so it can change without the listener being rebuilt.
+   */
+  canPlaceNew: boolean;
   onSelectLocation?: (entityId: string) => void;
   onHoverSuggestion?: (index: number | null, at: { left: number; top: number } | null) => void;
   /** Must be stable (a state setter): the click listener is rebuilt when it changes. */
@@ -45,10 +50,13 @@ export const useMapPointer = ({
   shapeOpenRef,
   shownSuggestions,
   selected,
+  canPlaceNew,
   onSelectLocation,
   onHoverSuggestion: onHoverSuggestionProp,
   setPending,
 }: UseMapPointer): MapPointer => {
+  const canPlaceNewRef = useRef(canPlaceNew);
+  canPlaceNewRef.current = canPlaceNew;
   const [hoveredLocation, setHoveredLocation] = useState<MapPointer["hoveredLocation"]>(null);
   const hoverRef = useRef<maplibregl.Popup | null>(null);
   useEffect(
@@ -123,7 +131,7 @@ export const useMapPointer = ({
         onSelectLocation?.(hit.id);
         return;
       }
-      if (hit.kind === "mark" || !selected) {
+      if (!mayStartPick(hit.kind === "mark", !!selected, canPlaceNewRef.current)) {
         return;
       }
       // a half-finished click is abandoned by the picker's own backdrop, which

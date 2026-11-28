@@ -1,9 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { useEngineParameters } from "../../hooks/useGazetteerCatalogue";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
-  GeocodingAccuracy,
   IGeocodingContext,
   IGeocodingRoles,
+  rolesShareAConcept,
 } from "@inkvisitor/shared/types/geocoding";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -48,6 +49,10 @@ import {
 import { GazetteerColumn, GazetteerPicker } from "../../components/gazetteer/GazetteerPicker";
 import { StyledGazetteerNote } from "../../components/gazetteer/GazetteerPickerStyles";
 import { PlaceTypeTable } from "../../components/placeType/PlaceTypeTable";
+import { AccuracyTable } from "../../components/placeType/AccuracyTable";
+import { CitingSettings } from "../../components/gazetteer/CitingSettings";
+import { ACCURACY_CONCEPTS_KEY } from "../../hooks/accuraciesContext";
+import { accuraciesToSave, repeatedAccuracy } from "../../utils/write/accuracyEdits";
 import {
   PLACE_TYPE_ASSIGNMENTS_KEY,
   usePlaceTypeAssignments,
@@ -56,13 +61,20 @@ import {
 /**
  * Assigning the entities that give a coordinate its meaning.
  *
- * Owner and admin only, because which Concept means `geo:geometry` decides what
+ * Owner only (the menu hides the entry from everyone else), because which Concept means
+ * `geo:geometry` decides what
  * "geocoded" means: if one user could point it elsewhere, the same Location
  * would read as geocoded for them and not for anyone else.
  *
  * Every field selects an existing entity or creates one, so a fresh deployment
  * needs no seeding job.
  */
+
+const SHARED_CONCEPT = "One Concept cannot be used for two of the coordinate roles.";
+const REPEATED_ACCURACY = "One Concept is listed twice among the accuracies.";
+// a location type is called by its Concept's label, and by its stored name only
+// until it has one; a row added here has neither until a Concept is assigned
+const UNNAMED_TYPE = "Assign a Concept to every location type added, or remove the row.";
 
 interface GeocodingSettingsModal {
   roles: IGeocodingRoles;
@@ -96,7 +108,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       [
         draft.geometry,
         draft.accuracy,
-        ...Object.values(draft.accuracyValues),
+        draft.epistemicSource,
+        ...draft.accuracies,
         ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
       ].filter((id): id is string => !!id),
@@ -114,6 +127,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     staleTime: 60_000,
   });
   const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
+
+  // the gazetteer location types a search can name, for the citing distances
+  const parameters = useEngineParameters();
 
   // every pick changes the id list and so the query key; the previous batch
   // keeps the other rows on screen while the new one loads
@@ -133,18 +149,60 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     return map;
   }, [assignedEntities, picked]);
 
+  /**
+   * The description of a location type or an accuracy is its Concept's detail.
+   * What is typed in the tables is held here and written to the Concepts by
+   * Save, with the rest of the window, and only for a Concept whose text was
+   * changed.
+   *
+   * A Concept's detail counts as read only once the Concept is: until then its
+   * field cannot be typed in, since text typed over a detail not yet shown would
+   * replace it unseen.
+   */
+  const [details, setDetails] = useState<Record<string, string>>({});
+  const readDetail = (conceptId: string): string | undefined => {
+    const entity = assignments.conceptEntities[conceptId] ?? byId[conceptId];
+    return typeof entity?.detail === "string" ? entity.detail : undefined;
+  };
+  const detailReady = (conceptId: string) => readDetail(conceptId) !== undefined;
+  const detailOf = (conceptId: string) =>
+    conceptId in details ? details[conceptId] : (readDetail(conceptId) ?? "");
+  // only Concepts still in the tables: a row removed or given another Concept
+  // after its text was typed takes the text with it
+  const changedDetails = () => {
+    const shown = new Set([
+      ...assignments.nodes.map((node) => node.conceptId),
+      ...draft.accuracies.filter(Boolean),
+    ]);
+    return Object.entries(details).filter(
+      ([conceptId, detail]) =>
+        shown.has(conceptId) && detailReady(conceptId) && detail !== readDetail(conceptId)
+    );
+  };
+
   const save = useMutation({
     mutationFn: async () => {
-      if (draft.placeTypes.some((one) => !one.name.trim())) {
-        throw new Error("Every kind of place needs a name.");
+      // the roles are told apart by their Concept, so one Concept in two of them
+      // would make the geometry and the accuracy under it the same thing
+      if (rolesShareAConcept(draft)) {
+        throw new Error(SHARED_CONCEPT);
+      }
+      if (repeatedAccuracy(draft)) {
+        throw new Error(REPEATED_ACCURACY);
+      }
+      if (draft.placeTypes.some((type) => !type.conceptId && !type.name.trim())) {
+        throw new Error(UNNAMED_TYPE);
       }
       // the draft holds every role, so a role the researcher unlinked is absent
       // from this object — it has to replace, not merge
-      await putGeocodingRoles(draft);
+      await putGeocodingRoles({ ...draft, ...accuraciesToSave(draft) });
       // after the roles, not beside them: both rewrite the one settings row, and
       // two writes in flight would leave only whichever landed last
       if (sourcesChanged) {
         await patchGeocodingContext({ disabledSources });
+      }
+      for (const [conceptId, detail] of changedDetails()) {
+        await api.entityUpdate(conceptId, { detail });
       }
       // a Resource created here carries no base url; the deep link needs one,
       // and only the entity detail form otherwise offers the field
@@ -164,11 +222,13 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       queryClient.invalidateQueries({ queryKey: ["geocoding-locations"] });
       queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
       queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["geocoding-type-concepts"] });
+      queryClient.invalidateQueries({ queryKey: [ACCURACY_CONCEPTS_KEY] });
       toast.success("Geocoding settings saved.");
       onClose();
     },
     onError: (error) => {
-      if (error instanceof Error && error.message === "Every kind of place needs a name.") {
+      if (error instanceof Error && [SHARED_CONCEPT, REPEATED_ACCURACY, UNNAMED_TYPE].includes(error.message)) {
         toast.error(error.message);
         return;
       }
@@ -207,6 +267,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       <EntityTag
         entity={entity}
         fullWidth
+        tooltipPassThrough
         unlinkButton={{ onClick: unlink, tooltipLabel: "unlink entity" }}
       />
     );
@@ -317,53 +378,78 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   return (
     <Modal showModal onClose={onClose} width={1300} fullHeight>
       <ModalHeader title="Global geocoding settings" onClose={onClose} />
-      {/* the sections are a fixed length — twelve place types and fifteen
-          gazetteers — so the body outgrows any viewport and scrolls inside
-          the card, which keeps the footer and its save button in reach */}
+      {/* the sections are long — the location types with their subclass trees,
+          and every gazetteer — so the body outgrows any viewport and scrolls
+          inside the card, which keeps the footer and its save button in reach */}
       <ModalContent column enableScroll>
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy.
-            Which Concept plays which role is set once for the project — it is what
-            &ldquo;geocoded&rdquo; means, so it cannot differ between users.
+            Choose (or create) the Concept holding geographic coordinates in GeoJSON format, the
+            Concept holding localisation accuracy, and the Concept holding the source of knowledge.
+            Without the last one the gazetteers are recorded as references only, and the
+            coordinate does not name them.
           </StyledSectionNote>
-          {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
+          {row("concept for referencing geocoding in GeoJSON format", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
           )}
-          {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
+          {row("concept for localisation accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" }))
+          )}
+          {row("concept for the source of knowledge", draft.epistemicSource, EntityEnums.Class.Concept, (id) =>
+            setDraft((d) => ({ ...d, epistemicSource: id ?? "" }))
           )}
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>
           <StyledSectionNote>
-            The four Concepts a researcher chooses between when accepting a coordinate.
+            The Concepts a researcher chooses between when accepting a coordinate, in the order
+            they are offered. Mark the one taken without asking when a suggestion&apos;s sources
+            agree on the spot, and the one taken when they are scattered: a suggestion&apos;s main
+            button and quick geocoding use them. The description is the Concept&apos;s detail,
+            saved to the Concept.
           </StyledSectionNote>
-          {Object.values(GeocodingAccuracy).map((accuracy) =>
-            row(accuracy, draft.accuracyValues[accuracy], EntityEnums.Class.Concept, (id) =>
-              setDraft((d) => ({
-                ...d,
-                accuracyValues: withEntry(d.accuracyValues, accuracy, id),
-              }))
-            )
-          )}
+          <StyledKindsRow>
+            <AccuracyTable
+              value={draft}
+              onChange={(next) => setDraft((d) => ({ ...d, ...next }))}
+              renderConcept={(conceptId, set) =>
+                picker(conceptId || undefined, EntityEnums.Class.Concept, set)
+              }
+              detailOf={detailOf}
+              detailReady={detailReady}
+              onDetailChange={(conceptId, detail) =>
+                setDetails((current) => ({ ...current, [conceptId]: detail }))
+              }
+            />
+          </StyledKindsRow>
 
-          <StyledSectionHeading>Place types</StyledSectionHeading>
+          <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s own kinds of place, free to define. A Location has a kind by being
-            classified under the kind&apos;s Concept, so assign one Concept per kind — picking a
-            Concept another kind holds moves it. The engine type connects a suggestion&apos;s own
-            type to your kinds: when several of yours answer to one, the starred one is offered
-            first. A kind with no Concept blocks the write rather than being dropped.
+            The project&apos;s location typology. The gazetteer location type select maps it onto the
+            gazetteers&apos; general typology, which is then used for prioritising the proper
+            category. A Concept must be assigned if you want to geocode that general type. Every
+            subclass of the Concept is a location type of its own, with the same mark and gazetteer
+            location type; untick one to stop offering it. The description is the Concept&apos;s detail,
+            saved to the Concept.
           </StyledSectionNote>
           <StyledKindsRow>
             <PlaceTypeTable
               value={draft.placeTypes}
               onChange={(placeTypes) => setDraft((d) => ({ ...d, placeTypes }))}
+              nodes={assignments.nodes}
+              concepts={assignments.conceptEntities}
+              detailOf={detailOf}
+              detailReady={detailReady}
+              onDetailChange={(conceptId, detail) =>
+                setDetails((current) => ({ ...current, [conceptId]: detail }))
+              }
               renderConcept={(conceptId, set) =>
                 picker(conceptId || undefined, EntityEnums.Class.Concept, set)
               }
               counts={assignments.countByType}
+              inferredCounts={assignments.inferredByType}
+              truncatedTypes={assignments.truncatedTypes}
+              pendingTypes={assignments.pendingTypes}
               countsLoading={assignments.isLoading || !locationIds}
               countsFailed={!!assignments.error}
             />
@@ -371,13 +457,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>
-            One row per source the engine can ask. Switched off, a source is never asked for this
-            project, so it costs nothing and returns nothing: use it for a source this corpus has no
-            use for, or one whose licence does not cover this work. A researcher can switch further
-            sources off for their own runs, but cannot switch these back on. The resource is the
-            entity a reference to the source points at, and the record URL plus the stored
-            identifier rebuilds a link back into it; a source whose record URL does not end in the
-            identifier is left blank.
+            Gazetteers not checked in the checkbox to the left are not searched. Resource: the
+            entity that stands for the gazetteer when its coordinates are cited. Record URL: the
+            beginning of the link to a record in the gazetteer, to which the record&apos;s identifier
+            is added; leave it empty where a gazetteer&apos;s links do not end in the identifier.
           </StyledSectionNote>
           <StyledScrollRow>
             <GazetteerPicker
@@ -394,6 +477,17 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
               </StyledUnsavedNote>
             </StyledFullRow>
           ) : null}
+
+          <StyledSectionHeading>Suggestions: coordinate and citing</StyledSectionHeading>
+          <StyledSectionNote>
+            What a suggestion gives the Location it is used on: a coordinate, always one gazetteer
+            record&apos;s own and never an average, and the gazetteers it cites.
+          </StyledSectionNote>
+          <CitingSettings
+            value={draft}
+            onChange={(next) => setDraft((current) => ({ ...current, ...next }))}
+            placeTypes={parameters?.placeTypes}
+          />
         </StyledSettingsGrid>
       </ModalContent>
       <ModalFooter>

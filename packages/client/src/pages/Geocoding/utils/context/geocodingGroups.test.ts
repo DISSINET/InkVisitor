@@ -33,7 +33,7 @@ const at = (id: string, over: Partial<GeocodingLocation> = {}): GeocodingLocatio
   }) as GeocodingLocation;
 
 const done = (id: string, over: Partial<GeocodingLocation> = {}) =>
-  at(id, { isGeocoded: true, accuracy: GeocodingAccuracy.Precise, ...over });
+  at(id, { isGeocoded: true, accuracy: "c-precise", ...over });
 
 const rowsOf = (groups: ReturnType<typeof groupsOf>) =>
   groups.flatMap((group) => group.rows.map((row) => row.entity.id));
@@ -121,7 +121,7 @@ describe("groupsOf, by a field a Location may not carry", () => {
 
   it("gives the Locations carrying no value a named group", () => {
     const groups = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes());
-    const missing = groups.find((group) => group.label === "no kind recorded");
+    const missing = groups.find((group) => group.label === "no location type recorded");
     expect(missing?.rows.map((row) => row.entity.id)).toEqual(["Aura", "Steinau"]);
   });
 
@@ -135,13 +135,13 @@ describe("groupsOf, by a field a Location may not carry", () => {
   });
 
   it("sorts that group last, because it is the one about absence", () => {
-    expect(groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes()).at(-1)?.label).toBe("no kind recorded");
+    expect(groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes()).at(-1)?.label).toBe("no location type recorded");
   });
 
   it("sorts the rest by name, so the arrangement does not move as values change", () => {
     const labels = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes())
       .map((group) => group.label)
-      .filter((label) => label !== "no kind recorded");
+      .filter((label) => label !== "no location type recorded");
     expect(labels).toEqual([...labels].sort());
   });
 

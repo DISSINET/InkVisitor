@@ -40,6 +40,10 @@ const OPEN_ROUTES = new Set([
   "entities GET :entityId/detail",
   "entities GET :entityId/used-relations",
   "entities GET :entityId/expansion",
+  // the Geocoding page asks which entities come under each of the project's
+  // location types; it reads classifications and the superclass and synonym
+  // links between Concepts, which any logged-in user sees in a Concept's detail
+  "entities GET classified-under",
 ]);
 
 class Acl {

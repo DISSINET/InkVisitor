@@ -11,11 +11,12 @@ import {
   serializeGeometry,
 } from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
+import { IconWithTooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppSelector } from "redux/hooks";
-import { IcoSelection } from "Theme/icons";
+import { IcoPlusBold, IcoSelection } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Position,
@@ -34,6 +35,7 @@ import {
   toMapZoom,
   pickerAnchorIn,
 } from "../../utils/map/mapView";
+import { StyledNewLocationToggle } from "../../components/map/MapControlsStyles";
 import { MapFooterControls } from "../../components/map/MapFooterControls";
 import { MapLayersPanel } from "../../components/map/MapLayersPanel";
 import { MapSearchBox } from "../../components/map/MapSearchBox";
@@ -48,6 +50,7 @@ import { useMapStyle } from "../../hooks/useMapStyle";
 import { useRegionDraw } from "../../hooks/useRegionDraw";
 import { AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
+import { defaultTypeFor } from "../../components/placeType/locationTypeText";
 import { engineSearch } from "../../utils/engine/engine";
 import { boxLabel } from "../../utils/map/regionBox";
 import { EngineSearchHit, Suggestion } from "../../types/engine";
@@ -63,11 +66,12 @@ import {
   StyledMarkCardAt,
   StyledMarkCardMeta,
 } from "./GeocodingMapStyles";
-import { MapPending, afterAccuracy, menuAnchorFor } from "../../utils/map/mapAssign";
+import { MapPending, afterAccuracy, menuAnchorFor, pendingNote } from "../../utils/map/mapAssign";
 import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
-import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { KindIcon } from "../../components/placeType/placeTypeIcons";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import { describeEntries } from "../../components/placeType/locationTypeText";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
 /**
@@ -162,7 +166,7 @@ interface GeocodingMap {
     geometry: GeoJsonGeometry,
     accuracy: GeocodingAccuracy,
     /**
-     * What kind of place to record. `undefined` leaves whatever the Location
+     * What location type to record. `undefined` leaves whatever the Location
      * already carries, which is the right answer for a geometry correction.
      */
     placeType?: string | null,
@@ -179,6 +183,17 @@ interface GeocodingMap {
    * two together are refused — belongs to whoever holds the context.
    */
   onRegionBox?: (box: GeocodingBbox | null) => void;
+  /**
+   * Whether, with nothing selected, a click, a drawn shape or a typed coordinate
+   * may start a new Location. The page decides: it needs the right to create one
+   * and a project whose coordinate roles are set, or the write that follows the
+   * dialog would be refused after the Location had been made.
+   */
+  canPlaceNew: boolean;
+  /** Opens the dialog for a new Location. Absent where the user may not make one. */
+  onNewLocation?: () => void;
+  /** Leaves nothing selected. */
+  onDeselect: () => void;
 }
 
 export const GeocodingMap: React.FC<GeocodingMap> = ({
@@ -199,15 +214,19 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   engineReachable,
   suggestions,
   onRegionBox,
+  canPlaceNew,
+  onNewLocation,
+  onDeselect,
 }) => {
   const placeTypes = usePlaceTypes();
+  const viaLabel = useViaLabel();
   const themeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
   const basemap = themeId === "dark" ? "dark" : "light";
   const [term, setTerm] = useState("");
   const [hits, setHits] = useState<EngineSearchHit[]>([]);
   /**
    * A coordinate waiting to be written, and how far through the two questions it
-   * is. `accuracy` set means the accuracy is chosen and the kind of place is
+   * is. `accuracy` set means the accuracy is chosen and the location type is
    * being asked for.
    */
   const [pending, setPending] = useState<MapPending | null>(null);
@@ -278,7 +297,9 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
 
   /* the selected Location's own coordinate stays the most prominent thing on
      the map, named with the accuracy it was recorded at */
-  const selectedName = selected ? `${selected.entity.labels[0]} · ${selected.accuracy}` : "";
+  const selectedName = selected
+    ? `${selected.entity.labels[0]}${selected.accuracyLabel ? ` · ${selected.accuracyLabel}` : ""}`
+    : "";
 
   useEffect(() => {
     if (!engineReachable || debouncedTerm.trim().length < 2) {
@@ -447,6 +468,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     shapeOpenRef,
     shownSuggestions,
     selected,
+    canPlaceNew,
     onSelectLocation,
     onHoverSuggestion: onHoverSuggestionProp,
     setPending,
@@ -500,14 +522,15 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         >
           <EntityTag
             entity={hoveredCard.location.entity}
+            tooltipPassThrough
             disableDrag
             disableDoubleClick
             disableCopyToClipboard
           />
           <StyledMarkCardMeta>
             <KindIcon kind={findPlaceType(placeTypes, hoveredCard.location.placeType)} />
-            {kindInfo(findPlaceType(placeTypes, hoveredCard.location.placeType)).label}
-            {hoveredCard.location.accuracy ? ` · ${hoveredCard.location.accuracy}` : ""}
+            {describeEntries(hoveredCard.location.typeEntries, placeTypes, viaLabel, ", ")}
+            {hoveredCard.location.accuracyLabel ? ` · ${hoveredCard.location.accuracyLabel}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>
             {hoveredCard.location.lat?.toFixed(5)}, {hoveredCard.location.lon?.toFixed(5)}
@@ -540,17 +563,13 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         <AccuracyPicker
           anchor={pickerAnchor(pending)}
           current={context.mapClickAccuracy}
-          note={
-            pending.suggestion
-              ? `${pending.suggestion.index + 1}. ${pending.suggestion.label}`
-              : `${pending.lat.toFixed(5)}, ${pending.lon.toFixed(5)}`
-          }
+          note={pendingNote(pending, !selected)}
           onChoose={(accuracy) => {
             const step = afterAccuracy(
               pending,
               accuracy,
               context.recordPlaceType,
-              context.defaultPlaceType,
+              defaultTypeFor(context, selected?.typeEntries ?? [], placeTypes),
             );
             if ("write" in step) {
               finish(pending, step.write.accuracy, step.write.placeType);
@@ -565,16 +584,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       {pending?.accuracy ? (
         <PlaceTypePicker
           anchor={pickerAnchor(pending)}
-          current={selected?.placeType}
-          clearLabel={
-            selected?.placeType ? `keep it as ${selected.placeType}` : "record no kind of place"
-          }
+          held={selected?.typeEntries}
+          note={pendingNote(pending, !selected)}
+          clearLabel={selected ? "leave the location type as it is" : "record no location type"}
           onChoose={(placeType) =>
-            finish(
-              pending,
-              pending.accuracy as GeocodingAccuracy,
-              placeType as string | null,
-            )
+            finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
           onClose={() => setPending(null)}
         />
@@ -640,7 +654,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           setDrawing(false);
           setShapeOpen((open) => !open);
         }}
-        disabled={!selected}
+        disabled={!selected && !canPlaceNew}
+        forNewLocation={!selected}
         draw={draw}
         stored={selected?.geometry ?? null}
         onSave={(geometry: GeoJsonGeometry) => {
@@ -658,6 +673,20 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
         }}
       />
 
+      {onNewLocation ? (
+        <StyledNewLocationToggle
+          type="button"
+          aria-label="make a new location"
+          onClick={onNewLocation}
+        >
+          <IconWithTooltip
+            icon={<IcoPlusBold />}
+            tooltipText="new location"
+            tooltipPosition="left"
+          />
+        </StyledNewLocationToggle>
+      ) : null}
+
       <MapLayersPanel
         open={showLayers}
         onToggleOpen={() => setShowLayers((open) => !open)}
@@ -672,13 +701,25 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           sentence and the fields belong in the same strip */}
       <MapFooterControls
         selected={selected}
+        canPlaceNew={canPlaceNew}
+        onDeselect={onDeselect}
         manual={manual}
         onManualChange={setManual}
         onSubmit={(event) => {
           event.preventDefault();
+          // an empty field is no coordinate, though Number("") is 0; a position
+          // off the earth is refused here too, before a Location is started for it
+          if (!manual.lat.trim() || !manual.lon.trim()) {
+            return;
+          }
           const lat = Number(manual.lat);
           const lon = Number(manual.lon);
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+          if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lon) ||
+            Math.abs(lat) > 90 ||
+            Math.abs(lon) > 180
+          ) {
             return;
           }
           // the same two questions the map click asks, anchored to the form

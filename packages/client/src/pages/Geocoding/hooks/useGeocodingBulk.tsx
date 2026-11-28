@@ -7,19 +7,20 @@ import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { defaultTypeFor } from "../components/placeType/locationTypeText";
 import { QuickGeocodeToast } from "../components/recent/QuickGeocodeToast";
 import { SuggestResponse, Suggestion } from "../types/engine";
 import { engineSuggestStream } from "../utils/engine/engine";
 import { buildSuggestQuery } from "../utils/engine/suggestQuery";
 import { isTaken, quickPick } from "../utils/suggestions/quickGeocode";
-import { provenanceOf } from "../utils/suggestions/suggestionProvenance";
+import { citingDistanceKm, provenanceOf } from "../utils/suggestions/suggestionProvenance";
 import { scatterOf } from "../utils/suggestions/suggestionScatter";
 import { BatchRun, BatchStep, batchStarting, choicesFrom, withStep } from "../utils/write/geocodingBatch";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { UseGeocodingWriter } from "./useGeocodingWriter";
 
 /**
- * The runs over many Locations: a kind of place across the marked set, a quick
+ * The runs over many Locations: a location type across the marked set, a quick
  * geocode of one row, and a batch geocode of the marked set.
  *
  * They share one rule about stopping and one way of deciding and writing, so
@@ -40,7 +41,7 @@ interface UseGeocodingBulkInput {
   marked: Set<string>;
   setMarked: Dispatch<SetStateAction<Set<string>>>;
   write: UseGeocodingWriter["write"];
-  /** Records a kind of place on one Location, leaving its geometry alone. */
+  /** Records a location type on one Location, leaving its geometry alone. */
   retype: (
     location: GeocodingLocation,
     placeType: string | null,
@@ -52,6 +53,8 @@ interface UseGeocodingBulkInput {
   clearSuggestions: () => void;
   onSelect: (location: GeocodingLocation) => void;
   onShowOnMap: (lat: number, lon: number) => void;
+  /** What an accuracy is called, for the notice a quick geocode leaves. */
+  accuracyLabelOf: (accuracy: GeocodingAccuracy) => string;
 }
 
 export interface UseGeocodingBulk {
@@ -84,6 +87,7 @@ export const useGeocodingBulk = ({
   clearSuggestions,
   onSelect,
   onShowOnMap,
+  accuracyLabelOf,
 }: UseGeocodingBulkInput): UseGeocodingBulk => {
   /** What a bulk write is doing, while it is doing it. */
   const [bulk, setBulk] = useState<string | undefined>(undefined);
@@ -105,7 +109,7 @@ export const useGeocodingBulk = ({
   };
 
   /**
-   * Records one kind of place across the marked set.
+   * Records one location type across the marked set.
    *
    * Sequential rather than parallel: each write is a read-modify-write of one
    * entity through the same path a single retype takes, and the first refusal
@@ -113,9 +117,7 @@ export const useGeocodingBulk = ({
    * Concept for it refuses all of them and forty toasts say it forty times.
    */
   const retypeMarked = async (placeType: string | null) => {
-    const targets = locations.filter(
-      (location) => marked.has(location.entity.id) && location.isGeocoded,
-    );
+    const targets = locations.filter((location) => marked.has(location.entity.id));
     cancelBulk.current = false;
     let done = 0;
     for (const location of targets) {
@@ -154,8 +156,8 @@ export const useGeocodingBulk = ({
     refresh();
     toast.success(
       done === 1
-        ? "Kind of place recorded on one Location."
-        : `Kind of place recorded on ${done} Locations.`,
+        ? "Location type recorded on one Location."
+        : `Location type recorded on ${done} Locations.`,
     );
   };
 
@@ -186,11 +188,23 @@ export const useGeocodingBulk = ({
      * afterwards is judged against the same distance the run judged it by.
      */
     mergeRadiusKm?: number;
-    taken?: { suggestion: Suggestion; accuracy: GeocodingAccuracy };
+    /** The citing distance of the same search, kept with the choices for the same reason. */
+    citingKm?: number;
+    /** What was written: the suggestion, its accuracy, and the gazetteers it cites. */
+    taken?: { suggestion: Suggestion; accuracy: GeocodingAccuracy; cited?: string[] };
   }> => {
     const name = location.entity.labels[0];
     if (!name || !user?.options) {
       return { written: false, skipped: "the Location has no name to search for" };
+    }
+    // the accuracy is taken from the marks, and an answer the engine gives is
+    // wasted if there is none to take; refused before the engine is asked
+    if (!roles.accuracyWhenAgree || !roles.accuracyWhenScattered) {
+      return {
+        written: false,
+        error:
+          "Quick geocoding needs an accuracy marked for sources that agree and one for scattered sources, in Global geocoding.",
+      };
     }
     // asked on its own request rather than through the panel's, so a Location
     // the researcher opens meanwhile cannot abort this one, and an engine that
@@ -200,7 +214,7 @@ export const useGeocodingBulk = ({
     let response: SuggestResponse;
     try {
       response = await engineSuggestStream(
-        buildSuggestQuery(name, context),
+        buildSuggestQuery(name, context, roles.representative),
         () => undefined,
         () => undefined,
         controller.signal,
@@ -216,9 +230,11 @@ export const useGeocodingBulk = ({
     } finally {
       inFlight.current.delete(controller);
     }
+    const citingKm = citingDistanceKm(roles.citeWithinKm, response.query?.criteria?.placeTypeIds);
     const pick = quickPick(response, {
       strategy: context.quickStrategy ?? "clearWinner",
       takeOffRegion: context.quickTakeOffRegion,
+      marks: roles,
     });
     if (!isTaken(pick)) {
       // handed back with the refusal, so the decision it declined to make can be
@@ -228,22 +244,23 @@ export const useGeocodingBulk = ({
         skipped: pick.skip,
         choices: choicesFrom(response.suggestions),
         // carried with the choices: a spread only means something against the
-        // distance the engine was willing to merge, which comes from the kind
-        // of place rather than from a constant
+        // distance the engine was willing to merge, which comes from the gazetteer
+        // location type rather than from a constant
         mergeRadiusKm: response.mergeRadiusKm,
+        citingKm,
       };
     }
+    const provenance = provenanceOf(pick.take, citingKm, roles.resources);
     const written = await write(
       {
         location: location.entity,
         roles,
         geometry: pointGeometry(pick.take.lon, pick.take.lat),
         accuracy: pick.accuracy,
-        // the same rule every other path follows: a kind is written only where
+        // the same rule every other path follows: a location type is written only where
         // the corpus named one to stand for all of them, and never guessed at
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
-        provenance: provenanceOf(pick.take),
+        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes),
+        provenance,
         current: location.geometry,
         userOptions: user.options,
       },
@@ -258,7 +275,14 @@ export const useGeocodingBulk = ({
       return { written: false, error: "the coordinate could not be saved" };
     }
     markWritten(location.entity.id);
-    return { written, taken: { suggestion: pick.take, accuracy: pick.accuracy } };
+    return {
+      written,
+      taken: {
+        suggestion: pick.take,
+        accuracy: pick.accuracy,
+        cited: provenance.map((claim) => claim.source),
+      },
+    };
   };
 
   /** The Location a quick geocode is running on, which its row draws as busy. */
@@ -291,7 +315,7 @@ export const useGeocodingBulk = ({
     setQuickBusy(null);
     clearSuggestions();
     if (result.written && result.taken) {
-      const { suggestion, accuracy } = result.taken;
+      const { suggestion, accuracy, cited } = result.taken;
       refresh();
       const show = () => {
         onShowOnMap(suggestion.lat, suggestion.lon);
@@ -303,7 +327,8 @@ export const useGeocodingBulk = ({
         <QuickGeocodeToast
           label={label}
           suggestion={suggestion}
-          accuracy={accuracy}
+          accuracy={accuracyLabelOf(accuracy)}
+          cited={cited}
           onShow={show}
         />,
         { toastId, autoClose: QUICK_TOAST_MS, onClick: show },
@@ -333,16 +358,26 @@ export const useGeocodingBulk = ({
     }
     // the same reading the card leads with and a quick geocode writes: how
     // precisely a coordinate locates is a fact about the sources
-    const accuracy = scatterOf(suggestion, step.mergeRadiusKm).leadAccuracy;
+    const { leadAccuracy: accuracy, scattered } = scatterOf(suggestion, step.mergeRadiusKm, roles);
+    if (!accuracy) {
+      toast.warn(
+        `No accuracy is marked for ${scattered ? "scattered sources" : "sources that agree"} in Global geocoding, so nothing was written.`,
+      );
+      return;
+    }
     const written = await write(
       {
         location: location.entity,
         roles,
         geometry: pointGeometry(suggestion.lon, suggestion.lat),
         accuracy,
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
-        provenance: provenanceOf(suggestion),
+        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes),
+        // the distance of the search that produced the choices
+        provenance: provenanceOf(
+          suggestion,
+          step.citingKm ?? citingDistanceKm(roles.citeWithinKm, undefined),
+          roles.resources,
+        ),
         current: location.geometry,
         userOptions: user.options,
       },
@@ -368,7 +403,7 @@ export const useGeocodingBulk = ({
   /**
    * Geocodes every marked Location.
    *
-   * Sequential, and stopped the same way the kind-of-place run is: one request
+   * Sequential, and stopped the same way the location-type run is: one request
    * is in flight at a time because the engine's own progress stream reports one,
    * and because a researcher watching a hundred of these wants to be able to
    * stop after the third.
@@ -410,6 +445,7 @@ export const useGeocodingBulk = ({
             note: result.skipped ?? result.error,
             choices: result.choices,
             mergeRadiusKm: result.mergeRadiusKm,
+            citingKm: result.citingKm,
           }),
         );
       }

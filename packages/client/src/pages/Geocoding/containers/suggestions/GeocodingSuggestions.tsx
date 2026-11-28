@@ -11,17 +11,39 @@ import React, { useEffect, useMemo, useState } from "react";
 import { CoordinateTag } from "../../components/coordinate/CoordinateTag";
 import { engineFeedback } from "../../utils/engine/engine";
 import { FeedbackReason, SuggestResponse, Suggestion } from "../../types/engine";
+import { ElapsedSeconds } from "../../components/suggestion/ElapsedSeconds";
 import { GeocodingProgress } from "../../components/suggestion/GeocodingProgress";
 import { GeocodingProvenance } from "../../utils/write/geocodingWrite";
 import { MatchTag } from "../../components/gazetteer/MatchTag";
-import { ACCURACY_ORDER, AccuracyPicker } from "../../components/placeType/AccuracyPicker";
+import { CandidateScopeMark } from "../../components/suggestion/CandidateScopeMark";
+import {
+  AccuracyHeading,
+  AccuracyPicker,
+  AccuracyTag,
+} from "../../components/placeType/AccuracyPicker";
+import { useAccuracies } from "../../hooks/accuraciesContext";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
-import { KindIcon, PlaceTypeIcon, kindInfo, placeTypeInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import {
+  KindIcon,
+  UNKNOWN_PLACE_TYPE,
+  kindInfo,
+  placeTypeInfo,
+} from "../../components/placeType/placeTypeIcons";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import {
+  defaultTypeFor,
+  describeEntry,
+  shownEntries,
+} from "../../components/placeType/locationTypeText";
+import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
 import { degradationsOf, problemsOf } from "../../utils/engine/suggestIntegrity";
 import { splitLabel } from "../../utils/suggestions/suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "../../utils/suggestions/suggestionRank";
-import { provenanceOf } from "../../utils/suggestions/suggestionProvenance";
+import {
+  citingDistanceKm,
+  provenanceOf,
+  standingsOf,
+} from "../../utils/suggestions/suggestionProvenance";
 import {
   DEFAULT_MERGE_RADIUS_KM,
   SPREAD_WARNING_FRACTION,
@@ -74,7 +96,7 @@ import {
   StyledTargetLine,
   StyledThumb,
   StyledHeadCoordinate,
-  StyledKind,
+  StyledGazetteerType,
   StyledMatchTags,
   StyledShowMatches,
   StyledRetype,
@@ -175,7 +197,7 @@ export const __testing = {
 type PendingAccept = {
   index: number;
   accuracy: GeocodingAccuracy | null;
-  /** Where the kind picker opens from — the control that chose the accuracy. */
+  /** Where the location type picker opens from — the control that chose the accuracy. */
   anchor?: { left: number; top: number; bottom: number };
 } | null;
 
@@ -186,12 +208,20 @@ interface SuggestionCard {
   /** The strongest score in the response this card belongs to. */
   topScore: number;
   mergeRadiusKm: number | undefined;
+  /**
+   * How close a gazetteer's record must lie to the coordinate to be cited, for
+   * the search this card came from; absent where nothing is about to be written
+   * from it, and no record is marked.
+   */
+  withinKm?: number;
+  /** The project's Resource per gazetteer: one without is never cited. */
+  resources?: Record<string, string>;
   band: ReturnType<typeof bandOf>;
   /** This card's own slice of `pending`, or null while it is not the one being accepted. */
   pendingHere: PendingAccept;
   accuracyMenuOpen: boolean;
   menuAnchor: { left: number; top: number; bottom: number } | null;
-  /** Whether every match is drawn rather than the strongest few. */
+  /** Whether every match is drawn rather than the nearest few. */
   allMatches: boolean;
   onToggleMatches: () => void;
   onShowOnMap: (lat: number, lon: number) => void;
@@ -199,13 +229,19 @@ interface SuggestionCard {
   onUseAs: (accuracy: GeocodingAccuracy, anchor: { left: number; top: number; bottom: number }) => void;
   onOpenAccuracyMenu: (anchor: { left: number; top: number; bottom: number }) => void;
   onCloseAccuracyMenu: () => void;
-  /** An accuracy picked in the card's own "how precisely is it known?" step. */
+  /** An accuracy picked in the card's own accuracy step. */
   onPickTypeStepAccuracy: (
     accuracy: GeocodingAccuracy,
     anchor: { left: number; top: number; bottom: number },
   ) => void;
   onCancelPending: () => void;
-  onChooseKind: (accuracy: GeocodingAccuracy, placeType: string | null) => void;
+  /**
+   * A location type chosen in the step after the accuracy, to be added to the
+   * Location's own, or none where it was left as it is.
+   */
+  onChooseKind: (accuracy: GeocodingAccuracy, placeType: string | undefined) => void;
+  /** How the Location being geocoded stands to the project's location types. */
+  held?: LocationTypeEntry[];
   /**
    * Drawn as evidence only, with nothing on it to press.
    *
@@ -240,6 +276,8 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
   total,
   topScore,
   mergeRadiusKm,
+  withinKm,
+  resources,
   band,
   pendingHere,
   accuracyMenuOpen,
@@ -253,13 +291,24 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
   onPickTypeStepAccuracy,
   onCancelPending,
   onChooseKind,
+  held,
   preview = false,
   highlighted = false,
   onHover,
 }) => {
   const { signals } = suggestion;
-  const { scattered, leadAccuracy } = scatterOf(suggestion, mergeRadiusKm);
+  const accuracies = useAccuracies();
+  const { scattered, leadAccuracy } = scatterOf(suggestion, mergeRadiusKm, {
+    accuracyWhenAgree: accuracies.whenAgree,
+    accuracyWhenScattered: accuracies.whenScattered,
+  });
   const tied = !showsScore(band, index);
+  // the coordinate's own record first, then the rest nearest first, so the few
+  // shown are the records about the spot the coordinate is on
+  const standings = useMemo(
+    () => standingsOf(suggestion, withinKm ?? Infinity, resources),
+    [suggestion, withinKm, resources],
+  );
   const { name: placeName, region } = splitLabel(suggestion.label);
 
   return (
@@ -308,12 +357,6 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         >
           {index + 1}
         </StyledRank>
-        {/* what kind of place it is, and nothing else. The same glyph opens
-            the kind-of-place picker on a list row, so a mark that also
-            travelled taught one symbol two jobs on one screen */}
-        <StyledKind data-hint={placeTypeInfo(suggestion.placeType).label}>
-          <PlaceTypeIcon placeType={suggestion.placeType} />
-        </StyledKind>
         <StyledCardLabel data-hint={suggestion.label}>
           {placeName}
           {/* where it is, never truncated: four suggestions called Breslau
@@ -380,6 +423,18 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
                 {suggestion.contextFit.toFixed(2)} <em>context</em>
               </StyledTrust>
             )}
+            {/* what the gazetteers think it is, as words and not as a mark: the
+                project's own location types are the marks on this page, and the
+                gazetteers' types are a different vocabulary, which is only
+                wanted at the moment a type is chosen for the Location, where the
+                picker says which of the project's answer to it. Said only where
+                a source said anything; "not recorded" would be a claim about
+                the Location */}
+            {suggestion.placeType && placeTypeInfo(suggestion.placeType) !== UNKNOWN_PLACE_TYPE ? (
+              <StyledGazetteerType data-hint={placeTypeInfo(suggestion.placeType).description}>
+                {placeTypeInfo(suggestion.placeType).label} <em>by the gazetteers</em>
+              </StyledGazetteerType>
+            ) : null}
           </StyledSignals>
 
           {/* a match is a gazetteer and the name it has for the place. Both
@@ -387,15 +442,18 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
               border, because that vocabulary is the engine's own and reads
               as a verdict when it is spelled out twenty times */}
           <StyledMatchTags>
-            {(allMatches ? suggestion.matches : suggestion.matches.slice(0, VISIBLE_MATCHES)).map(
-              (match, i) => (
-                <MatchTag key={`${match.source}-${match.sourceId}-${i}`} match={match} />
-              ),
-            )}
+            {(allMatches ? standings : standings.slice(0, VISIBLE_MATCHES)).map((standing) => (
+              <MatchTag
+                key={`${standing.match.source}-${standing.match.sourceId}-${standing.index}`}
+                match={standing.match}
+                standing={withinKm === undefined ? undefined : standing}
+                withinKm={withinKm}
+              />
+            ))}
             {suggestion.matches.length > VISIBLE_MATCHES ? (
               <StyledShowMatches type="button" onClick={onToggleMatches}>
                 {allMatches
-                  ? `show the strongest ${VISIBLE_MATCHES}`
+                  ? `show the nearest ${VISIBLE_MATCHES}`
                   : `show ${suggestion.matches.length - VISIBLE_MATCHES} more matches`}
               </StyledShowMatches>
             ) : null}
@@ -404,8 +462,9 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       </StyledCardBody>
 
       {/* the reason and the control are two halves of one sentence: the
-          button says "approximate" and this says why, close enough to be
-          read as one thing. The whole of it stays on the chip's tooltip */}
+          button names the accuracy marked for scattered sources and this says
+          why, close enough to be read as one thing. The whole of it stays on
+          the chip's tooltip */}
       {scattered ? (
         <StyledScatterNote>
           the sources place this {suggestion.spreadKm.toFixed(0)} km apart
@@ -414,17 +473,26 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
 
       {preview ? null : (
       <StyledCardActions>
-        {/* one button per card rather than four. The lead accuracy is the
-            answer in the ordinary case and stays one click away; the other
-            three are a caret away, which is where four times six buttons of
-            near-identical text went */}
+        {/* one button per card, not one per accuracy: six cards of
+            near-identical buttons read as a wall. The lead accuracy is the
+            answer in the ordinary case and stays one click away; the rest of
+            the list is a caret away */}
         <StyledUseAs>
           <StyledUseAsMain
             type="button"
-            $pending={pendingHere?.accuracy === leadAccuracy}
-            onClick={(event) => onUseAs(leadAccuracy, event.currentTarget.getBoundingClientRect())}
+            $pending={!!leadAccuracy && pendingHere?.accuracy === leadAccuracy}
+            onClick={(event) => {
+              const box = event.currentTarget.getBoundingClientRect();
+              // with no accuracy marked for a case like this one there is
+              // nothing to take without asking, so the button asks
+              if (!leadAccuracy) {
+                onOpenAccuracyMenu({ left: box.left, top: box.top, bottom: box.bottom });
+                return;
+              }
+              onUseAs(leadAccuracy, box);
+            }}
           >
-            use as {leadAccuracy}
+            {leadAccuracy ? `use as ${accuracies.labelOf(leadAccuracy)}` : "choose the accuracy"}
           </StyledUseAsMain>
           <StyledUseAsCaret
             type="button"
@@ -446,7 +514,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           </StyledUseAsCaret>
 
           {/* the same control the map asks this with, rather than a menu of
-              four bare words: the accuracy is written on every Location and
+              bare words: the accuracy is written on every Location and
               a list half the size of the one that follows it reads as the
               lesser of the two questions */}
           {accuracyMenuOpen && menuAnchor ? (
@@ -472,7 +540,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       {pendingHere && pendingHere.accuracy === null ? (
         <StyledTypeStep>
           <StyledTypeStepHead>
-            how precisely is it known?
+            <AccuracyHeading />
             <StyledTypeStepAside>
               {scattered
                 ? `its sources sit ${suggestion.spreadKm.toFixed(1)} km apart`
@@ -480,21 +548,21 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             </StyledTypeStepAside>
           </StyledTypeStepHead>
           <StyledTypeChoices>
-            {ACCURACY_ORDER.map((accuracy) => (
+            {accuracies.entries.map((entry) => (
               <StyledTypeChoice
-                key={accuracy}
+                key={entry.conceptId}
                 type="button"
-                $suggested={accuracy === leadAccuracy}
+                $suggested={entry.conceptId === leadAccuracy}
                 data-hint={
-                  accuracy === leadAccuracy
-                    ? `${accuracy} — what the spread of its sources argues for`
-                    : accuracy
+                  entry.conceptId === leadAccuracy
+                    ? `${entry.label} — what the spread of its sources argues for`
+                    : entry.detail || entry.label
                 }
                 onClick={(event) =>
-                  onPickTypeStepAccuracy(accuracy, event.currentTarget.getBoundingClientRect())
+                  onPickTypeStepAccuracy(entry.conceptId, event.currentTarget.getBoundingClientRect())
                 }
               >
-                <span>{accuracy}</span>
+                <AccuracyTag entry={entry} />
               </StyledTypeChoice>
             ))}
           </StyledTypeChoices>
@@ -504,20 +572,17 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         </StyledTypeStep>
       ) : null}
 
-      {/* the kind of place is asked with the same floating list the map
+      {/* the location type is asked with the same floating list the map
           asks it with, opened from the control that chose the accuracy —
           one control for one question, wherever the question comes up */}
       {pendingHere && pendingHere.accuracy !== null && pendingHere.anchor ? (
         <PlaceTypePicker
           anchor={pendingHere.anchor}
-          current={null}
+          held={held}
           suggested={suggestion.placeType}
-          clearLabel="record no kind of place"
+          clearLabel="leave the location type as it is"
           onChoose={(placeType) =>
-            onChooseKind(
-              pendingHere.accuracy as GeocodingAccuracy,
-              placeType as string | null,
-            )
+            onChooseKind(pendingHere.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
           onClose={onCancelPending}
         />
@@ -578,11 +643,11 @@ interface GeocodingSuggestions {
     accuracy: GeocodingAccuracy,
     provenance: GeocodingProvenance[],
     /**
-     * What kind of place to record.
+     * What location type to record.
      *
      * `null` and `undefined` are different answers, and the write acts on the
      * difference: `null` records that this Location states no kind, removing
-     * whatever it had; `undefined` says nothing about the kind and leaves it
+     * whatever it had; `undefined` says nothing about the location type and leaves it
      * standing. Accepting a suggestion where the question is switched off is
      * the second — a corrected coordinate is not a claim about what the place
      * is.
@@ -604,10 +669,11 @@ interface GeocodingSuggestions {
   /** Moves the map to a suggestion, without choosing it. */
   onShowOnMap: (lat: number, lon: number) => void;
   /**
-   * Records a kind of place on the selected Location without touching its
-   * coordinate. Absent while the Location has no coordinate to keep.
+   * Adds or removes one location type of the selected Location, as its own
+   * Classification, without touching its coordinate. Absent while nothing is
+   * selected. Resolves to whether it was written.
    */
-  onRetype: ((placeType: string | null) => void) | undefined;
+  onToggleType: ((placeType: string, on: boolean) => Promise<boolean>) | undefined;
 }
 
 export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
@@ -631,9 +697,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   hovered,
   onHoldHover,
   onShowOnMap,
-  onRetype,
+  onToggleType,
 }) => {
   const placeTypes = usePlaceTypes();
+  const viaLabel = useViaLabel();
 
   /** The cards showing every match rather than the strongest few. */
   const [expandedMatches, setAllMatches] = useState<Set<number>>(() => new Set());
@@ -646,7 +713,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
    * precisely it is known.
    *
    * The engine's own `placeType` is a starting point and not an answer: a
-   * suggestion often carries none, and the twelve are decided by what the
+   * suggestion often carries none, and the types are decided by what the
    * researcher knows the place to be rather than by what the sources called it.
    */
   const [pending, setPending] = useState<PendingAccept>(null);
@@ -673,7 +740,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   const [degradedAnchor, setDegradedAnchor] = useState<HTMLDivElement | null>(null);
   const [degradedHovered, setDegradedHovered] = useState(false);
 
-  const { isRunning, elapsedMs, stage, error, isProvisional } = suggest;
+  const { isRunning, startedAt, stage, error, isProvisional } = suggest;
   const name = selected?.entity.labels[0] || "";
   const locationId = selected?.entity.id;
 
@@ -728,8 +795,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     setDegradedHovered(false);
   }, [locationId, response]);
 
-  const seconds = (elapsedMs / 1000).toFixed(1);
-
   /**
    * What the sources did between them.
    *
@@ -780,6 +845,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     suggest.clear();
   };
 
+  // the citing distance of the search these suggestions came from, by the
+  // location types the engine resolved it to
+  const withinKm = citingDistanceKm(roles.citeWithinKm, response?.query?.criteria?.placeTypeIds);
+
   const accept = (
     suggestion: Suggestion,
     accuracy: GeocodingAccuracy,
@@ -797,15 +866,21 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             suggestions: response.suggestions,
           })
       : () => undefined;
-    onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType, feedback);
+    onAccept(
+      suggestion,
+      accuracy,
+      provenanceOf(suggestion, withinKm, roles.resources),
+      placeType,
+      feedback,
+    );
   };
 
   /**
-   * What choosing an accuracy leads to: the kind of place, or the write.
+   * What choosing an accuracy leads to: the location type, or the write.
    *
    * Every way of accepting a suggestion comes through here — the card's button,
    * the accuracy picker behind its caret, and the step a suggestion chosen off
-   * the map leads to. A project that records no kind of place has nothing to
+   * the map leads to. A project that records no location type has nothing to
    * ask, and that has to be true of all three: asking on one of them makes the
    * question appear only for suggestions picked a particular way.
    */
@@ -816,12 +891,16 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     anchor?: { left: number; top: number; bottom: number },
   ) => {
     if (context.recordPlaceType === false) {
-      // the kind named once for the whole corpus, or none where none was named
-      // undefined rather than null where no kind was named for the corpus: the
+      // the location type named once for the whole corpus, or none where none was named
+      // undefined rather than null where no location type was named for the corpus: the
       // question is switched off, which is not the same as answering "none" —
-      // answering it would strip the kind off every Location whose coordinate
+      // answering it would strip the location type off every Location whose coordinate
       // is corrected
-      accept(suggestion, accuracy, context.defaultPlaceType ?? undefined);
+      accept(
+        suggestion,
+        accuracy,
+        defaultTypeFor(context, selected?.typeEntries ?? [], roles.placeTypes),
+      );
       return;
     }
     setPending({ index, accuracy, anchor });
@@ -882,6 +961,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           total={response.suggestions.length}
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
+          withinKm={withinKm}
+          resources={roles.resources}
           band={band}
           pendingHere={null}
           accuracyMenuOpen={accuracyMenu === hovered.index}
@@ -956,6 +1037,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           total={response.suggestions.length}
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
+          withinKm={withinKm}
+          resources={roles.resources}
           band={band}
           pendingHere={pendingHere}
           highlighted={highlighted === index}
@@ -982,6 +1065,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           }
           onCancelPending={() => setPending(null)}
           onChooseKind={(accuracy, placeType) => accept(suggestion, accuracy, placeType)}
+          held={selected?.typeEntries}
         />
       );
     });
@@ -1021,7 +1105,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         onReset={onContextReset}
         onRegeocode={
           answerIsStale && selected
-            ? () => suggest.run(selected.entity.id, name, context)
+            ? () => suggest.run(selected.entity.id, name, context, roles.representative)
             : undefined
         }
       />
@@ -1039,9 +1123,9 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                     geometry={selected.geometry ?? undefined}
                     lat={selected.lat ?? undefined}
                     lon={selected.lon ?? undefined}
-                    accuracy={selected.accuracy ?? undefined}
+                    accuracy={selected.accuracyLabel || undefined}
                   />{" "}
-                  {selected.accuracy}
+                  {selected.accuracyLabel}
                 </>
               ) : (
                 "not geocoded"
@@ -1049,35 +1133,50 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             </StyledCurrent>
           </StyledTargetLine>
         ) : null}
-        {selected?.isGeocoded && onRetype ? (
+        {selected && onToggleType ? (
           <StyledRetype>
-            {/* the kind of place is corrected far more often than the coordinate
+            {/* the location type is corrected far more often than the coordinate
                 is, and re-running the engine to change one word would throw away
                 a coordinate somebody already judged */}
-            <StyledTypeStepAside>kind of place</StyledTypeStepAside>
-            <StyledRetypeButton
-              type="button"
-              $unset={!selected.placeType}
-              onClick={(event) => {
-                const box = event.currentTarget.getBoundingClientRect();
-                setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
-              }}
-            >
-              <KindIcon kind={findPlaceType(placeTypes, selected.placeType)} />
-              {kindInfo(findPlaceType(placeTypes, selected.placeType)).label}
-            </StyledRetypeButton>
+            <StyledTypeStepAside>location type</StyledTypeStepAside>
+            {/* every location type the Location comes under, side by side, the
+                ones it is classified under itself first and the inferred ones
+                paler, with where each comes from on hover */}
+            {(shownEntries(selected.typeEntries).length
+              ? shownEntries(selected.typeEntries)
+              : [null]
+            ).map((entry) => {
+              const kind = findPlaceType(placeTypes, entry?.typeId);
+              return (
+                <StyledRetypeButton
+                  key={entry?.typeId ?? "none"}
+                  type="button"
+                  $unset={!entry}
+                  $inferred={!!entry?.inferred}
+                  data-hint={entry ? describeEntry(entry, placeTypes, viaLabel) : undefined}
+                  aria-label={
+                    entry
+                      ? `location type: ${describeEntry(entry, placeTypes, viaLabel)}`
+                      : "no location type, choose one"
+                  }
+                  onClick={(event) => {
+                    const box = event.currentTarget.getBoundingClientRect();
+                    setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
+                  }}
+                >
+                  <KindIcon kind={kind} />
+                  {kindInfo(kind).label}
+                </StyledRetypeButton>
+              );
+            })}
           </StyledRetype>
         ) : null}
 
-        {pickingHead && onRetype ? (
+        {pickingHead && onToggleType ? (
           <PlaceTypePicker
             anchor={pickingHead}
-            current={selected?.placeType}
-            clearLabel="record no kind of place"
-            onChoose={(placeType) => {
-              onRetype(placeType as string | null);
-              setPickingHead(null);
-            }}
+            held={selected?.typeEntries}
+            onToggle={onToggleType}
             onClose={() => setPickingHead(null)}
           />
         ) : null}
@@ -1101,7 +1200,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                   : undefined
             }
             disabled={!engineReady || isRunningForThis}
-            onClick={() => suggest.run(selected.entity.id, name, context)}
+            onClick={() => suggest.run(selected.entity.id, name, context, roles.representative)}
           />
           {isRunningForThis ? (
             <Button label="cancel" color="danger" onClick={suggest.cancel} />
@@ -1109,7 +1208,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           <StyledRunFacts>
             <StyledProgress>
               {isRunningForThis
-                ? `${seconds}s`
+                ? startedAt !== null && <ElapsedSeconds since={startedAt} />
                 : response
                   ? `${response.suggestions.length} suggestions · margin ${
                       response.margin == null ? "—" : response.margin.toFixed(2)
@@ -1127,6 +1226,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                   <span key={`${candidate.name}-${index}`}>
                     {index ? ", " : ""}
                     <strong>{candidate.name}</strong> ({candidate.nameFit.toFixed(2)})
+                    <CandidateScopeMark scope={candidate.scope} />
                   </span>
                 ))}
               </StyledSearched>

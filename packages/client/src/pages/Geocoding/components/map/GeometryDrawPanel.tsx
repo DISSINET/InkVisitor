@@ -13,7 +13,8 @@ import {
 import { DrawTool, UseGeometryDraw } from "../../hooks/useGeometryDraw";
 
 /**
- * Drawing a point, a line or a polygon for the selected Location.
+ * Drawing a point, a line or a polygon for the selected Location, or, with none
+ * selected, to start a new one.
  *
  * The shapes live in the drawing tool; this only arms it, says what to do next,
  * and hands the one geometry they make to whoever asks the accuracy and kind of
@@ -23,8 +24,10 @@ import { DrawTool, UseGeometryDraw } from "../../hooks/useGeometryDraw";
 interface GeometryDrawPanel {
   open: boolean;
   onToggle: () => void;
-  /** Nothing to draw for until a Location is selected. */
+  /** Nothing to draw for until a Location is selected, or a new one may be started. */
   disabled: boolean;
+  /** Nothing is selected, so what is drawn starts a new Location. */
+  forNewLocation: boolean;
   draw: UseGeometryDraw;
   /** The geometry the selected Location already carries, to be edited. */
   stored: GeoJsonGeometry | null;
@@ -54,6 +57,7 @@ export const GeometryDrawPanel: React.FC<GeometryDrawPanel> = ({
   open,
   onToggle,
   disabled,
+  forNewLocation,
   draw,
   stored,
   onSave,
@@ -65,7 +69,11 @@ export const GeometryDrawPanel: React.FC<GeometryDrawPanel> = ({
     <>
       <StyledShapeToggle
         type="button"
-        aria-label="draw a geometry for the selected location"
+        aria-label={
+          forNewLocation
+            ? "draw a geometry to start a new location"
+            : "draw a geometry for the selected location"
+        }
         aria-pressed={open}
         $armed={open}
         disabled={disabled}
@@ -81,7 +89,11 @@ export const GeometryDrawPanel: React.FC<GeometryDrawPanel> = ({
         ) : (
           <IconWithTooltip
             icon={<IcoDrawShape />}
-            tooltipText="draw a point, line or polygon for the selected location"
+            tooltipText={
+              forNewLocation
+                ? "draw a point, line or polygon to start a new location"
+                : "draw a point, line or polygon for the selected location"
+            }
             tooltipPosition="left"
           />
         )}

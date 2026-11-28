@@ -37,6 +37,13 @@ interface Tooltip {
   disabled?: boolean;
   disableAutoPosition?: boolean;
   onMouseLeave?: () => void;
+  /**
+   * The pointer goes through the tooltip to what lies under it. For a tooltip
+   * its owner closes when the pointer leaves the reference, as EntityTag does,
+   * drawn over the next row of a list: it would catch the pointer on its way to
+   * that row.
+   */
+  passThrough?: boolean;
   /** Portal root. #page-content is overflow:hidden and starts below the header,
    * so anything anchored outside it needs a wider root such as #page. */
   portalId?: string;
@@ -60,6 +67,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   disabled = false,
   disableAutoPosition = false,
   onMouseLeave = () => {},
+  passThrough = false,
   portalId = "page-content",
 }) => {
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
@@ -121,6 +129,7 @@ export const Tooltip: React.FC<Tooltip> = ({
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}
               $color={color}
+              $passThrough={passThrough}
               onMouseLeave={() => {
                 onMouseLeave();
                 setTooltipHovered(false);

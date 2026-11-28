@@ -68,17 +68,94 @@ import {
   IcoPlaceCompass,
   IcoPlacePin,
   IcoPlaceFire,
+  IcoPlaceChurchTower,
+  IcoPlaceJewishStar,
+  IcoPlaceMenorah,
+  IcoPlaceBible,
+  IcoPlacePrayer,
+  IcoPlaceCandle,
+  IcoPlaceCoffin,
+  IcoPlaceAnkh,
+  IcoPlaceOm,
+  IcoPlaceYinYang,
+  IcoPlaceRook,
+  IcoPlacePrison,
+  IcoPlaceCourt,
+  IcoPlaceArchive,
+  IcoPlaceScriptorium,
+  IcoPlaceVineyard,
+  IcoPlaceTheater,
+  IcoPlaceMusic,
+  IcoPlaceArt,
+  IcoPlaceArena,
+  IcoPlaceIchthys,
+  IcoPlaceBishop,
+  IcoPlaceWaysideCross,
+  IcoPlacePilgrimage,
+  IcoPlacePagoda,
+  IcoPlaceMagic,
+  IcoPlaceRoyal,
+  IcoPlaceKnight,
+  IcoPlaceLaurel,
+  IcoPlaceSeal,
+  IcoPlaceScales,
+  IcoPlaceMint,
+  IcoPlaceObservatory,
+  IcoPlaceApothecary,
+  IcoPlaceSmithy,
+  IcoPlaceCellar,
+  IcoPlaceTextile,
+  IcoPlaceSalt,
+  IcoPlaceFarm,
+  IcoPlaceSword,
+  IcoPlaceAxe,
+  IcoPlaceBow,
+  IcoPlaceHelmet,
+  IcoPlaceCottage,
+  IcoPlaceEstate,
+  IcoPlaceTunnel,
+  IcoPlaceFence,
+  IcoPlaceStairs,
+  IcoPlaceWell,
+  IcoPlaceBread,
+  IcoPlaceCheese,
+  IcoPlaceMeat,
+  IcoPlaceGrain,
+  IcoPlaceSeedling,
+  IcoPlaceApple,
+  IcoPlaceEgg,
+  IcoPlacePig,
+  IcoPlaceDeer,
+  IcoPlacePaw,
+  IcoPlaceMushroom,
+  IcoPlaceFlower,
+  IcoPlaceFishHook,
+  IcoPlaceBath,
+  IcoPlacePool,
+  IcoPlaceWheel,
+  IcoPlaceRoute,
+  IcoPlaceRoadSign,
+  IcoPlaceBone,
+  IcoPlaceHourglass,
+  IcoPlaceAbacus,
+  IcoPlaceScissors,
+  IcoPlaceLamp,
+  IcoPlaceTrophy,
+  IcoPlaceWorld,
+  IcoPlaceSun,
+  IcoPlaceDiamond,
+  IcoPlaceQueen,
 } from "Theme/icons";
 
 /**
- * One mark per kind of place, all from the same drawn set.
+ * One mark per location type, all from the same drawn set.
  *
- * A kind of place is read at a glance, in a list where every other row differs
+ * A location type is read at a glance, in a list where every other row differs
  * only by its name — so the marks have to be distinguishable from each other at
  * one size, which is a property of the set rather than of any one icon.
  *
- * Two vocabularies use it. The engine's twelve types name what a suggestion is,
- * and the project's own kinds name what a Location is; a project kind carries
+ * Two vocabularies use it. The engine's types name what a suggestion is,
+ * and the project's own location types name what a Location is; a project location type carries
  * the key of the mark it wants.
  */
 
@@ -146,6 +223,85 @@ export const PLACE_ICONS: Record<string, React.ComponentType> = {
   compass: IcoPlaceCompass,
   pin: IcoPlacePin,
   fire: IcoPlaceFire,
+  church: IcoPlaceChurchTower,
+  // religion, history, culture and trades
+  jewishStar: IcoPlaceJewishStar,
+  menorah: IcoPlaceMenorah,
+  bible: IcoPlaceBible,
+  prayer: IcoPlacePrayer,
+  candle: IcoPlaceCandle,
+  coffin: IcoPlaceCoffin,
+  ankh: IcoPlaceAnkh,
+  om: IcoPlaceOm,
+  yinYang: IcoPlaceYinYang,
+  rook: IcoPlaceRook,
+  prison: IcoPlacePrison,
+  court: IcoPlaceCourt,
+  archive: IcoPlaceArchive,
+  scriptorium: IcoPlaceScriptorium,
+  vineyard: IcoPlaceVineyard,
+  theater: IcoPlaceTheater,
+  music: IcoPlaceMusic,
+  art: IcoPlaceArt,
+  arena: IcoPlaceArena,
+  ichthys: IcoPlaceIchthys,
+  bishop: IcoPlaceBishop,
+  waysideCross: IcoPlaceWaysideCross,
+  pilgrimage: IcoPlacePilgrimage,
+  pagoda: IcoPlacePagoda,
+  magic: IcoPlaceMagic,
+  royal: IcoPlaceRoyal,
+  knight: IcoPlaceKnight,
+  laurel: IcoPlaceLaurel,
+  seal: IcoPlaceSeal,
+  scales: IcoPlaceScales,
+  mint: IcoPlaceMint,
+  observatory: IcoPlaceObservatory,
+  apothecary: IcoPlaceApothecary,
+  smithy: IcoPlaceSmithy,
+  cellar: IcoPlaceCellar,
+  textile: IcoPlaceTextile,
+  salt: IcoPlaceSalt,
+  farm: IcoPlaceFarm,
+  // arms, buildings, food and farming, water and travel, trades and things
+  sword: IcoPlaceSword,
+  axe: IcoPlaceAxe,
+  bow: IcoPlaceBow,
+  helmet: IcoPlaceHelmet,
+  cottage: IcoPlaceCottage,
+  estate: IcoPlaceEstate,
+  tunnel: IcoPlaceTunnel,
+  fence: IcoPlaceFence,
+  stairs: IcoPlaceStairs,
+  well: IcoPlaceWell,
+  bread: IcoPlaceBread,
+  cheese: IcoPlaceCheese,
+  meat: IcoPlaceMeat,
+  grain: IcoPlaceGrain,
+  seedling: IcoPlaceSeedling,
+  apple: IcoPlaceApple,
+  egg: IcoPlaceEgg,
+  pig: IcoPlacePig,
+  deer: IcoPlaceDeer,
+  paw: IcoPlacePaw,
+  mushroom: IcoPlaceMushroom,
+  flower: IcoPlaceFlower,
+  fishHook: IcoPlaceFishHook,
+  bath: IcoPlaceBath,
+  pool: IcoPlacePool,
+  wheel: IcoPlaceWheel,
+  route: IcoPlaceRoute,
+  roadSign: IcoPlaceRoadSign,
+  bone: IcoPlaceBone,
+  hourglass: IcoPlaceHourglass,
+  abacus: IcoPlaceAbacus,
+  scissors: IcoPlaceScissors,
+  lamp: IcoPlaceLamp,
+  trophy: IcoPlaceTrophy,
+  world: IcoPlaceWorld,
+  sun: IcoPlaceSun,
+  diamond: IcoPlaceDiamond,
+  queen: IcoPlaceQueen,
 };
 
 export const PLACE_ICON_KEYS = Object.keys(PLACE_ICONS);
@@ -162,11 +318,11 @@ export interface PlaceTypeInfo {
 
 export const UNKNOWN_PLACE_TYPE: PlaceTypeInfo = {
   icon: IcoPlaceUnknown,
-  label: "kind not recorded",
-  description: "Nothing on this Location says what kind of place it is.",
+  label: "location type not recorded",
+  description: "No location type is recorded for this Location.",
 };
 
-/** What an engine type is called and covers, or the unknown mark for anything else. */
+/** What a gazetteer location type is called and covers, or the unknown mark for anything else. */
 export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeInfo => {
   const known = placeType && ENGINE_PLACE_TYPE_INFO[placeType as GeocodingPlaceType];
   return known
@@ -174,22 +330,12 @@ export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeIn
     : UNKNOWN_PLACE_TYPE;
 };
 
-/**
- * The mark for an engine type. A type the engine has added since, or none at
- * all, draws the unknown mark rather than nothing — an absent icon reads as a
- * rendering fault, and "nobody has said" is a fact worth showing.
- */
-export const PlaceTypeIcon: React.FC<{ placeType: string | null | undefined }> = ({
-  placeType,
-}) => {
-  const Icon = placeTypeInfo(placeType).icon;
-  return <Icon />;
-};
-
-/** What a project's kind is called and covers; the unknown mark where it has none. */
-export const kindInfo = (kind: IGeocodingPlaceType | null | undefined): PlaceTypeInfo =>
+/** What a project's location type is called and covers; the unknown mark where it has none. */
+export const kindInfo = (
+  kind: (IGeocodingPlaceType & { description?: string }) | null | undefined,
+): PlaceTypeInfo =>
   kind
-    ? { icon: placeIcon(kind.icon), label: kind.name, description: kind.description }
+    ? { icon: placeIcon(kind.icon), label: kind.name, description: kind.description ?? "" }
     : UNKNOWN_PLACE_TYPE;
 
 /** The mark for a project's kind, or the unknown mark for none. */

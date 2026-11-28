@@ -1,0 +1,73 @@
+import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
+import { LocationTypeEntry, PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
+import { findPlaceType } from "../../hooks/placeTypesContext";
+import { kindInfo } from "./placeTypeIcons";
+
+/**
+ * The words that say what location types a Location has and how.
+ *
+ * One place for them, so that a list row, the panel head and the map's card say
+ * the same of the same Location.
+ */
+
+/** The entries that are shown: those another location type does not lie below. */
+export const shownEntries = (entries: LocationTypeEntry[]): LocationTypeEntry[] =>
+  entries.filter((entry) => !entry.shadowed);
+
+/**
+ * One location type of a Location, as a line: its name, where it comes from
+ * when the Location is not classified under it directly, and that it is not
+ * offered for a new assignment where the project deactivated it.
+ */
+export const describeEntry = (
+  entry: LocationTypeEntry,
+  placeTypes: PlaceTypeNode[],
+  viaLabel: (conceptId: string) => string,
+): string => {
+  const kind = findPlaceType(placeTypes, entry.typeId);
+  const name = kindInfo(kind).label;
+  const how = entry.inferred ? `${name} — inferred from ${viaLabel(entry.via)}` : name;
+  return kind && !kind.active ? `${how} (deactivated for new assignments)` : how;
+};
+
+/** Every shown location type of a Location, one per line unless told otherwise, or the words for none. */
+export const describeEntries = (
+  entries: LocationTypeEntry[],
+  placeTypes: PlaceTypeNode[],
+  viaLabel: (conceptId: string) => string,
+  separator = "\n",
+): string => {
+  const shown = shownEntries(entries);
+  return shown.length
+    ? shown.map((entry) => describeEntry(entry, placeTypes, viaLabel)).join(separator)
+    : kindInfo(undefined).label;
+};
+
+/**
+ * The location type a coordinate written without asking is to carry: the one the
+ * corpus named for all of its Locations, or none when the project asks for each,
+ * none was named, or the Location already comes under it. A Location classified
+ * under a subclass or a synonym of the type's Concept comes under it, and a
+ * second Classification would only repeat what the first implies.
+ */
+export const defaultTypeFor = (
+  context: { recordPlaceType?: boolean; defaultPlaceType?: string | null },
+  entries: LocationTypeEntry[],
+  /**
+   * The location types, the stored list or its tree nodes; a default the
+   * project has since deactivated is not written.
+   */
+  placeTypes: IGeocodingPlaceType[],
+): string | undefined => {
+  if (context.recordPlaceType !== false || !context.defaultPlaceType) {
+    return undefined;
+  }
+  // a node shares its root's `inactive` list, so this reads both the same way
+  const named = findPlaceType(placeTypes, context.defaultPlaceType);
+  if (named && named.inactive.includes(named.conceptId)) {
+    return undefined;
+  }
+  return entries.some((entry) => entry.typeId === context.defaultPlaceType)
+    ? undefined
+    : context.defaultPlaceType;
+};

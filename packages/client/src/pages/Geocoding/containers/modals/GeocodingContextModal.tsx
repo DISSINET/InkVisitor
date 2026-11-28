@@ -1,8 +1,4 @@
-import {
-  GeocodingAccuracy,
-  IGeocodingContext,
-  IGeocodingPlaceType,
-} from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -20,6 +16,9 @@ import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
 import React, { useState } from "react";
 import { usePlaceTypes } from "../../hooks/placeTypesContext";
+import { useAccuracies } from "../../hooks/accuraciesContext";
+import { indentedName } from "../../hooks/useGeocodingBrowse";
+import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { toast } from "react-toastify";
 import {
   StyledFullRow,
@@ -36,7 +35,7 @@ import { QuickStrategy } from "../../utils/suggestions/quickGeocode";
 /**
  * How this researcher works, as opposed to what they ask.
  *
- * The question itself — region, period, language, kind of place — is edited in
+ * The question itself — region, period, language, gazetteer location type — is edited in
  * the Suggestions panel, where the answer it produced is on screen; these four
  * are settings about the page rather than about a place, and none of them can
  * make an answer stale.
@@ -45,11 +44,6 @@ import { QuickStrategy } from "../../utils/suggestions/quickGeocode";
  * project, because it decides what "geocoded" means — were it overridable here,
  * the same Location would read as geocoded for one person and not for another.
  */
-
-const accuracyOptions = Object.values(GeocodingAccuracy).map((value) => ({
-  value,
-  label: value,
-}));
 
 const taskCategoryOptions = [
   { value: "quick", label: "quick — fastest provider" },
@@ -70,9 +64,12 @@ const yesNoOptions = [
  */
 const NO_DEFAULT_PLACE_TYPE = "none";
 
-const defaultPlaceTypeOptions = (placeTypes: IGeocodingPlaceType[]) => [
+/** The location types a quick geocode can record: the ones offered for a new assignment. */
+const defaultPlaceTypeOptions = (placeTypes: PlaceTypeNode[]) => [
   { value: NO_DEFAULT_PLACE_TYPE, label: "nothing — leave each one alone" },
-  ...placeTypes.map((placeType) => ({ value: placeType.id, label: placeType.name })),
+  ...placeTypes
+    .filter((placeType) => placeType.active)
+    .map((placeType) => ({ value: placeType.id, label: indentedName(placeType) })),
 ];
 
 /** The keys this modal owns. The query fields belong to the panel, and writing
@@ -116,6 +113,13 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  // the project's accuracies; a stored value that is none of them (a legacy
+  // word, a Concept taken off the list) reads as nothing marked
+  const accuracies = useAccuracies();
+  const accuracyOptions = [
+    { value: "", label: "nothing marked" },
+    ...accuracies.entries.map((entry) => ({ value: entry.conceptId, label: entry.label || "…" })),
+  ];
   const placeTypes = usePlaceTypes();
   /**
    * The preferences as they will be written, which is this researcher's layer
@@ -188,7 +192,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           <StyledSectionHeading>Working preferences</StyledSectionHeading>
           <StyledSectionNote>
             How this page behaves while you work. What the engine is asked — region, period,
-            language, kind of place — is edited in the Suggestions panel, beside the answer it
+            language, gazetteer location type — is edited in the Suggestions panel, beside the answer it
             produced.
           </StyledSectionNote>
           {row(
@@ -205,15 +209,21 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           )}
           {row(
             "map click",
-            "The accuracy recorded when you set a coordinate by clicking the map. Accepting " +
-              "a suggestion asks each time instead, because there the sources say how far " +
-              "apart they are.",
+            "The accuracy marked first in the menu a click on the map opens; you still " +
+              "choose. Accepting a suggestion marks what its sources argue for instead, " +
+              "because there the sources say how far apart they are.",
             <Dropdown.Single.Basic
               width="full"
               options={accuracyOptions}
-              value={draft.mapClickAccuracy ?? GeocodingAccuracy.Approximate}
+              value={
+                accuracies.entries.some((entry) => entry.conceptId === draft.mapClickAccuracy)
+                  ? (draft.mapClickAccuracy as GeocodingAccuracy)
+                  : ""
+              }
               onChange={(value) =>
-                setDraft((d) => ({ ...d, mapClickAccuracy: value as GeocodingAccuracy }))
+                // "" clears the mark: the stored preferences are merged into,
+                // and a key left out keeps the value stored under it
+                setDraft((d) => ({ ...d, mapClickAccuracy: (value as GeocodingAccuracy) || "" }))
               }
             />
           )}
@@ -222,10 +232,10 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
             What a coordinate carries beside itself, on every path that records one.
           </StyledSectionNote>
           {row(
-            "kind of place",
-            "Whether writing a coordinate also asks what kind of place it is — settlement, " +
+            "location type",
+            "Whether writing a coordinate also asks which location type it is — settlement, " +
               "fortress, river and so on. Turn it off where the project has no Concepts for " +
-              "those kinds, or where nobody is recording them.",
+              "those location types, or where nobody is recording them.",
             <Dropdown.Single.Basic
               width="full"
               options={yesNoOptions}
@@ -239,9 +249,10 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           {draft.recordPlaceType === false &&
             row(
               "code all as",
-              "With the question above off, this kind is written on every Location instead " +
-                "of asking. Right for a corpus that is all of one kind — a register of " +
-                "parishes, a list of monasteries. Leave it at nothing to record no kind at all.",
+              "With the question above off, this location type is written on every Location " +
+                "instead of asking. Right for a corpus that is all of one kind — a register of " +
+                "parishes, a list of monasteries. Leave it at nothing to record no location " +
+                "type at all.",
               <Dropdown.Single.Basic
                 width="full"
                 options={defaultPlaceTypeOptions(placeTypes)}
@@ -297,9 +308,9 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           </StyledFullRow>
           <StyledFullRow>
             <StyledSectionNote>
-              A source switched off here is never asked on your own runs — it costs nothing and
-              returns nothing. Sources the project has switched off are held down: an owner sets
-              those.
+              Gazetteers not checked here are not searched on your own runs. A gazetteer shown as
+              off for the whole project can be switched on only in the global settings, by an
+              owner.
             </StyledSectionNote>
           </StyledFullRow>
           <StyledFullRow>

@@ -7,7 +7,7 @@ import {
 } from "../../hooks/useGeocodingBrowse";
 
 /**
- * The corpus does not state what kind of place a Location is; a type appears
+ * The corpus does not state what location type a Location is; a type appears
  * only once one has been geocoded through this page. So the filter's job on most
  * of the corpus is to say that plainly rather than to silently empty the list.
  */
@@ -22,7 +22,7 @@ describe("placeTypeOptionsFor", () => {
   it("says nothing has been typed, and offers nothing to choose, on an untyped corpus", () => {
     const options = placeTypeOptionsFor([at(null), at(null)], kinds);
     expect(options).toHaveLength(1);
-    expect(options[0].label).toBe("no kinds recorded yet");
+    expect(options[0].label).toBe("no location types recorded yet");
   });
 
   it("offers only the kinds actually present", () => {

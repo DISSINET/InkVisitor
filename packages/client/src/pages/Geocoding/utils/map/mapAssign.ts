@@ -47,10 +47,10 @@ export type MapAssignStep =
  * A project that records no place type has nothing to ask, and asking anyway
  * would put a step in front of every map click that can only be dismissed.
  *
- * Not asking is not the same as having no answer. Where one kind has been named
- * to stand for the whole corpus, that kind is written — the question is settled
+ * Not asking is not the same as having no answer. Where one location type has been named
+ * to stand for the whole corpus, that location type is written — the question is settled
  * once rather than left open, which is what the setting is for. Without one the
- * write carries no kind at all and each Location keeps whatever it had.
+ * write carries no location type at all and each Location keeps whatever it had.
  */
 export const afterAccuracy = (
   pending: MapPending,
@@ -79,3 +79,33 @@ export const menuAnchorFor = (
   x: form.left - (container?.left ?? 0),
   y: form.top - (container?.top ?? 0) - MANUAL_MENU_LIFT,
 });
+
+/**
+ * Whether a click on the map starts a pick.
+ *
+ * A click on a mark never does: it is a click on the place the mark draws. Past
+ * that, a Location has to be selected to give the coordinate somewhere to go,
+ * unless the page is ready to make a new Location out of it.
+ */
+export const mayStartPick = (
+  onMark: boolean,
+  hasSelection: boolean,
+  canPlaceNew: boolean,
+): boolean => !onMark && (hasSelection || canPlaceNew);
+
+/**
+ * What the two questions say about the pick they are asking about: which
+ * suggestion it is, or where on the map, so that the answer is never given to a
+ * place the reader cannot see.
+ *
+ * With nothing selected the pick makes a new Location, and says so.
+ */
+export const pendingNote = (pending: MapPending, forNewLocation: boolean): string => {
+  const where = `${pending.lat.toFixed(5)}, ${pending.lon.toFixed(5)}`;
+  const what = pending.suggestion
+    ? `${pending.suggestion.index + 1}. ${pending.suggestion.label}`
+    : pending.geometry && pending.geometry.type !== "Point"
+      ? `${pending.geometry.type} near ${where}`
+      : where;
+  return forNewLocation ? `new location · ${what}` : what;
+};

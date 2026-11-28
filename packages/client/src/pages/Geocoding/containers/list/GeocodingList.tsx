@@ -1,8 +1,8 @@
 import {
 } from "@inkvisitor/shared/types/geocoding";
 import { Button, Input, Loader } from "components";
-import Dropdown from "components/advanced";
-import { IcoListTree, IcoSearch } from "Theme/icons";
+import Dropdown, { EntityTag } from "components/advanced";
+import { IcoClose, IcoListTree, IcoPlusBold, IcoSearch } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
 import {
@@ -18,12 +18,14 @@ import {
   StyledMarkedSpacer,
   StyledParked,
   StyledParkedHead,
+  StyledSelectionBar,
+  StyledSelectionLabel,
 } from "./GeocodingListStyles";
 import { GeocodingFilterChips } from "./GeocodingFilterChips";
 import { GeocodingListRow, GeocodingListRowProps, GroupHeading } from "./GeocodingListRow";
 import { GeocodingTerritoryFilter, useTerritoryLabel } from "./GeocodingTerritoryFilter";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
-import { ANY, UseGeocodingBrowse, accuracyOptions } from "../../hooks/useGeocodingBrowse";
+import { ANY, UseGeocodingBrowse } from "../../hooks/useGeocodingBrowse";
 import { GroupBy, ListItem, flatten, groupByOptions, idsInRange } from "../../utils/context/geocodingGroups";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 import { useGeocodingListScroll } from "../../hooks/useGeocodingListScroll";
@@ -42,10 +44,18 @@ const HEADER_HEIGHT = HEADING_HEIGHT;
 
 interface GeocodingList {
   browse: UseGeocodingBrowse;
-  selectedId: string | undefined;
+  /** The selected Location, which may be one the filters leave out of the list. */
+  selected: GeocodingLocation | undefined;
   onSelect: (location: GeocodingLocation) => void;
-  /** Records a kind of place on a Location without touching its coordinate. */
-  onRetype: (location: GeocodingLocation, placeType: string | null) => void;
+  /** Leaves nothing selected. */
+  onDeselect: () => void;
+  /** With nothing selected, the map starts a new Location, which the bar says. */
+  canPlaceNew: boolean;
+  /**
+   * Adds or removes one location type of a Location, as its own Classification,
+   * without touching its coordinate. Resolves to whether it was written.
+   */
+  onToggleType: (location: GeocodingLocation, placeType: string, on: boolean) => Promise<boolean>;
   /** Moves the map to a Location that already has a coordinate. */
   onShowOnMap: (location: GeocodingLocation) => void;
   /** Selects a Location and runs the engine on it. */
@@ -60,7 +70,8 @@ interface GeocodingList {
   onMark: (ids: string[], on: boolean) => void;
   onClearMarks: () => void;
   /**
-   * Records one kind of place across the marked set.
+   * Adds one location type across the marked set, or removes the ones the page
+   * can where told there is none.
    *
    * Absent while a bulk write is in flight, which is what stops a second one
    * being started over the first.
@@ -93,13 +104,20 @@ interface GeocodingList {
   batch: BatchRun | null;
   onShowBatch: () => void;
   onDismissBatch: () => void;
+  /**
+   * Opens the dialog that makes a new Location. Absent for someone who may not
+   * create one, which leaves the button out rather than drawn and refused.
+   */
+  onCreate?: () => void;
 }
 
 export const GeocodingList: React.FC<GeocodingList> = ({
   browse,
-  selectedId,
+  selected,
   onSelect,
-  onRetype,
+  onDeselect,
+  canPlaceNew,
+  onToggleType,
   onShowOnMap,
   onGeocode,
   engineReady,
@@ -117,7 +135,9 @@ export const GeocodingList: React.FC<GeocodingList> = ({
   batch,
   onShowBatch,
   onDismissBatch,
+  onCreate,
 }) => {
+  const selectedId = selected?.entity.id;
   const { all, visible, isLoading, error, filters, setFilter } = browse;
 
   // the chip states the territory by name, which needs the entity the id points
@@ -180,19 +200,13 @@ export const GeocodingList: React.FC<GeocodingList> = ({
     onMark(idsInRange(items, from, index), on);
   };
 
-  /** Where the marked set's own kind-of-place picker opens. */
+  /** Where the marked set's own location-type picker opens. */
   const [pickingMarked, setPickingMarked] = useState<{
     left: number;
     top: number;
     bottom: number;
   } | null>(null);
 
-  /**
-   * How many of the marked Locations a kind-of-place write can reach.
-   *
-   * Only those with a coordinate: the write owns the coordinate roles too, so
-   * there is nothing to record a kind against without one.
-   */
   /**
    * How many of the marked Locations a geocode would replace rather than fill.
    *
@@ -205,12 +219,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
     [all, marked],
   );
 
-  const reachable = useMemo(
-    () => all.filter((location) => marked.has(location.entity.id) && location.isGeocoded).length,
-    [all, marked],
-  );
-
-  /** The row whose kind of place is being chosen, and where its mark sits. */
+  /** The row whose location type is being chosen, and where its mark sits. */
   const [picking, setPicking] = useState<{
     location: GeocodingLocation;
     anchor: { left: number; top: number; bottom: number };
@@ -295,12 +304,10 @@ export const GeocodingList: React.FC<GeocodingList> = ({
       {picking ? (
         <PlaceTypePicker
           anchor={picking.anchor}
-          current={picking.location.placeType}
-          clearLabel="record no kind of place"
-          onChoose={(placeType) => {
-            onRetype(picking.location, placeType as string | null);
-            setPicking(null);
-          }}
+          // read from the collection and not from the row clicked, which would
+          // still show the types it had before the first tick
+          held={(all.find((one) => one.entity.id === picking.location.entity.id) ?? picking.location).typeEntries}
+          onToggle={(placeType, on) => onToggleType(picking.location, placeType, on)}
           onClose={() => setPicking(null)}
         />
       ) : null}
@@ -319,6 +326,16 @@ export const GeocodingList: React.FC<GeocodingList> = ({
             width="full"
             clearable
           />
+          {onCreate ? (
+            <Button
+              tooltipLabel="new location"
+              icon={<IcoPlusBold />}
+              onClick={onCreate}
+              noBackground
+              noBorder
+              inverted
+            />
+          ) : null}
           <StyledArrangeIcon data-hint="how the list is grouped">
             <IcoListTree />
           </StyledArrangeIcon>
@@ -357,9 +374,9 @@ export const GeocodingList: React.FC<GeocodingList> = ({
               ),
             },
             { key: "createdBy", label: "created by", options: browse.createdByOptions },
-            { key: "accuracy", label: "accuracy", options: accuracyOptions,
+            { key: "accuracy", label: "accuracy", options: browse.accuracyOptions,
               counts: browse.optionCounts.accuracy },
-            { key: "placeType", label: "kind", options: browse.placeTypeOptions,
+            { key: "placeType", label: "location type", options: browse.placeTypeOptions,
               counts: browse.optionCounts.placeType },
             { key: "language", label: "language", options: browse.languageOptions },
             { key: "status", label: "status", options: browse.statusOptions },
@@ -370,18 +387,43 @@ export const GeocodingList: React.FC<GeocodingList> = ({
         />
       </StyledFilters>
 
+      <StyledSelectionBar $has={!!selected} data-selection-bar aria-label="selection" aria-live="polite">
+        {selected ? (
+          <>
+            <StyledSelectionLabel>selected</StyledSelectionLabel>
+            <EntityTag
+              entity={selected.entity}
+              tooltipPassThrough
+              disableDrag
+              disableDoubleClick
+              disableCopyToClipboard
+            />
+            <StyledMarkedSpacer />
+            <Button
+              tooltipLabel="clear the selection, so that nothing is selected"
+              icon={<IcoClose />}
+              onClick={onDeselect}
+              noBackground
+              noBorder
+              inverted
+            />
+          </>
+        ) : (
+          <span>
+            nothing selected ·{" "}
+            {canPlaceNew
+              ? "pick a row, or click the map to start a new location"
+              : "pick a row to geocode it"}
+          </span>
+        )}
+      </StyledSelectionBar>
+
       {marked.size || batch ? (
         <StyledMarkedBar>
           {marked.size ? <span>{marked.size} marked</span> : null}
           {/* the run's own line, which replaces the marks as the thing the bar
               is about once the marks it was started from have been written */}
           {batch ? <StyledMarkedReach>{batchSummary(batch)}</StyledMarkedReach> : null}
-          {/* a write owns the coordinate roles as well as the kind, so a
-              Location with no coordinate is out of this action's reach and the
-              count has to say so before the action is pressed */}
-          {reachable < marked.size ? (
-            <StyledMarkedReach>{reachable} with a coordinate</StyledMarkedReach>
-          ) : null}
           {toReplace ? (
             <StyledMarkedReach>
               {toReplace} would be replaced
@@ -404,14 +446,9 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           ) : marked.size ? (
             <>
               <Button
-                label="set kind of place"
+                label="add location type"
                 color="primary"
-                disabled={!reachable}
-                tooltipLabel={
-                  reachable
-                    ? undefined
-                    : "none of the marked Locations has a coordinate to record a kind against"
-                }
+                tooltipLabel="adds one location type to each of the marked Locations and leaves the ones they have"
                 onClick={(event: React.MouseEvent<HTMLElement>) => {
                   const box = event.currentTarget.getBoundingClientRect();
                   setPickingMarked({ left: box.left, top: box.top, bottom: box.bottom });
@@ -443,8 +480,8 @@ export const GeocodingList: React.FC<GeocodingList> = ({
       {pickingMarked && onMarkedRetype ? (
         <PlaceTypePicker
           anchor={pickingMarked}
-          current={undefined}
-          clearLabel={`record no kind of place on ${reachable}`}
+          clearLabel={`remove the location types of the ${marked.size} marked`}
+          clearDescription="Removes the classifications under the Concepts of the project's location types, and no others."
           onChoose={(placeType) => {
             onMarkedRetype(placeType as string | null);
             setPickingMarked(null);

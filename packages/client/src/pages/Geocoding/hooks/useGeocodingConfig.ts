@@ -4,9 +4,8 @@ import {
   IGeocodingContextWeights,
   IGeocodingRoles,
   IGeocodingSettings,
+  normalizeGeocodingRoles,
   defaultGeocodingContext,
-  emptyGeocodingRoles,
-  normalizePlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
@@ -120,20 +119,21 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
   // there reaches this without a second fetch
   const { data: user, isFetching: loadingUser } = useUserQuery();
 
+  // the roles and the project's context come from the settings row alone, so a
+  // refetch of the user, which every context save and window focus starts,
+  // leaves them and everything derived from them as they are
+  const { roles, projectContext } = useMemo(
+    () => ({
+      roles: normalizeGeocodingRoles(stored?.roles),
+      projectContext: layerGeocodingContext<IGeocodingContext>(
+        defaultGeocodingContext(),
+        stored?.context && withListFields(stored.context),
+      ),
+    }),
+    [stored],
+  );
+
   return useMemo(() => {
-    const roles: IGeocodingRoles = {
-      ...emptyGeocodingRoles(),
-      ...(stored?.roles || {}),
-      // a row from before the list existed holds a map, which this turns into
-      // the default list with its Concepts
-      placeTypes: normalizePlaceTypes(stored?.roles?.placeTypes),
-    };
-
-    const projectContext = layerGeocodingContext<IGeocodingContext>(
-      defaultGeocodingContext(),
-      stored?.context && withListFields(stored.context),
-    );
-
     const personal = user?.options?.geocoding?.context;
     const context: IGeocodingContext = {
       ...layerGeocodingContext<IGeocodingContext>(
@@ -159,5 +159,5 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
       missingRoles,
       isLoading: loadingSettings || loadingUser,
     };
-  }, [stored, user, loadingSettings, loadingUser]);
+  }, [roles, projectContext, user, loadingSettings, loadingUser]);
 };

@@ -1,4 +1,3 @@
-import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
 import { describe, expect, it } from "vitest";
 import { Suggestion } from "../../types/engine";
 import { __testing } from "../../containers/suggestions/GeocodingSuggestions";
@@ -57,44 +56,53 @@ describe("spreadWarningKm", () => {
   });
 });
 
+/** The two accuracies a project marked, by what they stand for. */
+const MARKS = { accuracyWhenAgree: "c-agree", accuracyWhenScattered: "c-scattered" };
+
 describe("scatterOf", () => {
   it("does not call a single match scattered, whatever its spread reads as", () => {
     // one match at 30 km would otherwise be flagged on a number that was never
     // measured, and the sole match is the tightest evidence there is
-    expect(scatterOf(suggestion(30, 1), SETTLEMENT).scattered).toBe(false);
+    expect(scatterOf(suggestion(30, 1), SETTLEMENT, MARKS).scattered).toBe(false);
   });
 
-  it("leads with precise while the matches agree", () => {
-    expect(scatterOf(suggestion(2, 6), SETTLEMENT).leadAccuracy).toBe(GeocodingAccuracy.Precise);
+  it("leads with the accuracy marked for sources that agree while the matches agree", () => {
+    expect(scatterOf(suggestion(2, 6), SETTLEMENT, MARKS).leadAccuracy).toBe("c-agree");
   });
 
-  it("leads with approximate once the matches are scattered", () => {
-    const result = scatterOf(suggestion(15, 4), SETTLEMENT);
+  it("leads with the accuracy marked for scattered sources once the matches are scattered", () => {
+    const result = scatterOf(suggestion(15, 4), SETTLEMENT, MARKS);
     expect(result.scattered).toBe(true);
-    expect(result.leadAccuracy).toBe(GeocodingAccuracy.Approximate);
+    expect(result.leadAccuracy).toBe("c-scattered");
+  });
+
+  it("leads with nothing where the project marked no accuracy for the case", () => {
+    const unmarked = { accuracyWhenAgree: "c-agree", accuracyWhenScattered: "" };
+    expect(scatterOf(suggestion(15, 4), SETTLEMENT, unmarked).leadAccuracy).toBe("");
+    expect(scatterOf(suggestion(2, 6), SETTLEMENT, unmarked).leadAccuracy).toBe("c-agree");
   });
 
   it("treats the threshold itself as scattered and the step below it as not", () => {
-    expect(scatterOf(suggestion(14.9, 4), SETTLEMENT).scattered).toBe(false);
-    expect(scatterOf(suggestion(15, 4), SETTLEMENT).scattered).toBe(true);
+    expect(scatterOf(suggestion(14.9, 4), SETTLEMENT, MARKS).scattered).toBe(false);
+    expect(scatterOf(suggestion(15, 4), SETTLEMENT, MARKS).scattered).toBe(true);
   });
 
   it("flags a church at a spread a settlement would carry without comment", () => {
     // 5 km across a church's matches is two different buildings; across a
     // settlement's it is one town's outskirts
-    expect(scatterOf(suggestion(5, 4), CHURCH).scattered).toBe(true);
-    expect(scatterOf(suggestion(5, 4), SETTLEMENT).scattered).toBe(false);
+    expect(scatterOf(suggestion(5, 4), CHURCH, MARKS).scattered).toBe(true);
+    expect(scatterOf(suggestion(5, 4), SETTLEMENT, MARKS).scattered).toBe(false);
   });
 
   it("judges against the fallback radius where the engine published none", () => {
-    expect(scatterOf(suggestion(100, 4), undefined).scattered).toBe(true);
-    expect(scatterOf(suggestion(6, 4), undefined).scattered).toBe(true);
-    expect(scatterOf(suggestion(5.9, 4), undefined).scattered).toBe(false);
+    expect(scatterOf(suggestion(100, 4), undefined, MARKS).scattered).toBe(true);
+    expect(scatterOf(suggestion(6, 4), undefined, MARKS).scattered).toBe(true);
+    expect(scatterOf(suggestion(5.9, 4), undefined, MARKS).scattered).toBe(false);
   });
 
   it("still calls a single match unscattered under the fallback", () => {
     // the fallback changes what the number is measured against, not whether the
     // number was measured at all
-    expect(scatterOf(suggestion(100, 1), undefined).scattered).toBe(false);
+    expect(scatterOf(suggestion(100, 1), undefined, MARKS).scattered).toBe(false);
   });
 });
