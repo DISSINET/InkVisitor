@@ -131,7 +131,17 @@ A suggestion groups every record the engine found within its grouping radius
 records' own, `matches[representativeIndex]`: never a point between them. Which
 record is chosen is the engine's rule; Global geocoding can send another (place
 first, agreement, best score, medoid, densest), and sends none by default, leaving
-the engine's own, `place-first` since engine 0.8.0. A record at the edge of the
+the engine's own, `place-first` since engine 0.8.0. The choice names each rule in
+a word or two; "how the rules work" beside it opens, closed by default, one example
+drawn once per rule — a church on the edge of a town, searched by its own name, the
+town's records found by the town's name, and Pleiades' record of an ancient site with
+a similar name about 6 km off, found by a doubtful name form — on a small map with
+the page's own marks for a church, a settlement and an archaeological site and a
+1 km scale, with the record each rule picks ringed, and then the citing distance
+applied to the default rule's pick. A test works the picks out again from
+the example's records with engine 0.8.0's definitions and point precisions, so
+moving a record that changes a pick fails it; a change to the engine's rules does
+not. A record at the edge of the
 group did not say the place is where the coordinate is, so a gazetteer is cited
 only where one of its records lies within the citing distance of the written
 coordinate. The distance is set per gazetteer location type in Global geocoding

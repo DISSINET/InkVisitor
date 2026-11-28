@@ -6,14 +6,18 @@ import {
 } from "@inkvisitor/shared/types/geocoding";
 import Dropdown from "components/advanced";
 import { Input } from "components";
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
+import { IcoChevronDown } from "Theme/icons";
 import {
   StyledCitingDistance,
   StyledCitingDistances,
+  StyledCitingExplanation,
   StyledCitingLabel,
   StyledCitingRule,
+  StyledCitingToggle,
   StyledCitingUnit,
 } from "./CitingSettingsStyles";
+import { RepresentativeRules } from "./RepresentativeRules";
 
 /**
  * How a suggestion's coordinate is chosen, and which gazetteers it cites.
@@ -32,26 +36,17 @@ interface CitingSettings {
   placeTypes?: { id: string; label: string }[];
 }
 
-/** The rules the engine takes, in its own words shortened, the engine's own default first. */
-const RULES: { value: GeocodingRepresentative | ""; label: string }[] = [
-  { value: "", label: "the engine's default (place first)" },
-  {
-    value: "place-first",
-    label: "place first: the record most sources agree on, among those found by the place's own name",
-  },
-  { value: "agreement", label: "agreement: the record most sources agree on" },
-  {
-    value: "best-score",
-    label: "best score: the record with the highest match score, the engine's rule before 0.8",
-  },
-  {
-    value: "medoid",
-    label: "medoid: the record with the smallest total distance to the other gazetteers' records",
-  },
-  {
-    value: "densest",
-    label: "densest: the record with the most other gazetteers' records close around it",
-  },
+/**
+ * The rules the engine takes, by name only, the engine's own default first. What
+ * each does is drawn in `RepresentativeRules`, opened beside the choice.
+ */
+export const RULES: { value: GeocodingRepresentative | ""; label: string }[] = [
+  { value: "", label: "engine's default (place first)" },
+  { value: "place-first", label: "place first" },
+  { value: "agreement", label: "agreement" },
+  { value: "best-score", label: "best score" },
+  { value: "medoid", label: "medoid" },
+  { value: "densest", label: "densest" },
 ];
 
 const ANY_LABEL = "none, or any";
@@ -72,6 +67,8 @@ export const CitingSettings: React.FC<CitingSettings> = ({ value, onChange, plac
   // holds rather than the text: the field keeps what was typed while the value
   // it is given stays the same
   const [refused, setRefused] = useState<Record<string, number>>({});
+  const [explaining, setExplaining] = useState(false);
+  const explanation = useId();
 
   const setDistance = (type: string, typed: string) => {
     const km = Number(typed.trim().replace(",", "."));
@@ -101,7 +98,22 @@ export const CitingSettings: React.FC<CitingSettings> = ({ value, onChange, plac
             onChange({ ...value, representative: rule as GeocodingRepresentative | "" })
           }
         />
+        <StyledCitingToggle
+          type="button"
+          aria-expanded={explaining}
+          aria-controls={explanation}
+          $open={explaining}
+          onClick={() => setExplaining((open) => !open)}
+        >
+          how the rules work
+          <IcoChevronDown aria-hidden />
+        </StyledCitingToggle>
       </StyledCitingRule>
+      <StyledCitingExplanation id={explanation} hidden={!explaining}>
+        {explaining ? (
+          <RepresentativeRules selected={value.representative || "place-first"} />
+        ) : null}
+      </StyledCitingExplanation>
       <StyledCitingDistances>
         {types.map((type) => (
           <StyledCitingDistance key={type.id || "any"}>
