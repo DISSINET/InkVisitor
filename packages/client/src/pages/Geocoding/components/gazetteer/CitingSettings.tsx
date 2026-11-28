@@ -109,10 +109,9 @@ export const CitingSettings: React.FC<CitingSettings> = ({ value, onChange, plac
           <IcoChevronDown aria-hidden />
         </StyledCitingToggle>
       </StyledCitingRule>
+      {/* kept while hidden, so the case shown survives closing and opening it */}
       <StyledCitingExplanation id={explanation} hidden={!explaining}>
-        {explaining ? (
-          <RepresentativeRules selected={value.representative || "place-first"} />
-        ) : null}
+        <RepresentativeRules selected={value.representative || "place-first"} />
       </StyledCitingExplanation>
       <StyledCitingDistances>
         {types.map((type) => (

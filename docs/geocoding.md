@@ -126,34 +126,39 @@ how one accepted suggestion writes them; a reference added by hand later, or lef
 behind when the coordinate was moved, is not credited, and a Location whose Values
 carry no creation time is left alone.
 
-A suggestion groups every record the engine found within its grouping radius
-(7.5 km for a church, 150 km for a region), and its coordinate is one of those
-records' own, `matches[representativeIndex]`: never a point between them. Which
-record is chosen is the engine's rule; Global geocoding can send another (place
-first, agreement, best score, medoid, densest), and sends none by default, leaving
-the engine's own, `place-first` since engine 0.7.0. The choice names each rule in
-a word or two; "how the rules work" beside it opens, closed by default, one example
-drawn once per rule — a church on the edge of a town, searched by its own name, the
-town's records found by the town's name, and Pleiades' record of an ancient site with
-a similar name about 6 km off, found by a doubtful name form — on a small map with
-the page's own marks for a church, a settlement and an archaeological site and a
-1 km scale, with the record each rule picks ringed, and then the citing distance
-applied to the default rule's pick. A test works the picks out again from
-the example's records with engine 0.8.0's definitions and point precisions, so
-moving a record that changes a pick fails it; a change to the engine's rules does
-not. A record at the edge of the
-group did not say the place is where the coordinate is, so a gazetteer is cited
-only where one of its records lies within the citing distance of the written
-coordinate. The distance is set per gazetteer location type in Global geocoding
-("Citing gazetteers"), and the one applied is that of the type the engine resolved
-the search to — the largest of several, the "none, or any" row for none — the same
-type that set the grouping radius, so it is known as soon as the suggestions
-arrive. The defaults are half the engine's τ per type: 1.5 km for a religious house
-or an archaeological site, 5 km for a settlement, 30 km for a region. The record
-the coordinate is taken from is always cited; every other gazetteer is cited with
-its best-matched record within the distance, the nearer of two; one with none
-within is not cited. A card draws its records with the coordinate's own first and
-the rest nearest first, and dims the ones too far to be cited.
+A suggestion groups every record the engine found within its grouping radius (7.5 km
+for a church, 150 km for a region), and its coordinate is one of those records' own,
+`matches[representativeIndex]`: never a point between them. Which record is chosen
+is the engine's rule; Global geocoding can send another (place first, agreement,
+best score, medoid, densest), and sends none by default, leaving the engine's own,
+`place-first` since engine 0.7.0. The choice names each rule in a word or two; "how
+the rules work" beside it opens, closed by default, four cases to switch between — a
+church in a town, one exact match against a crowd of loose ones, a region named
+after its capital, a village and its municipality — each one suggestion, drawn once
+per rule on a small map with the page's own marks and a km scale, the record each
+rule picks ringed and marked as finding the place or not. Choosing between
+suggestions is the researcher's, so every case is one suggestion: its records lie
+within the grouping radius. One case alone would make some rules look strictly
+better than others; across the four, every rule finds the place in one case and
+misses it in another. Below the figures a table says, per rule, what it picks, what
+it is good for and what misleads it. Each record's score is the one engine 0.8.0
+gives its gazetteer's weight, confidence and match type, and a test works every pick
+out again with the engine's definitions and point precisions, checks each match type
+is one its gazetteer returns and that no pick rests on equal scores, so moving a
+record that changes a pick fails it; a change to the engine's rules does not. A
+record at the edge of the group did not say the place is where the coordinate is, so
+a gazetteer is cited only where one of its records lies within the citing distance
+of the written coordinate. The distance is set per gazetteer location type in Global
+geocoding ("Citing gazetteers"), and the one applied is that of the type the engine
+resolved the search to — the largest of several, the "none, or any" row for none —
+the same type that set the grouping radius, so it is known as soon as the
+suggestions arrive. The defaults are half the engine's τ per type: 1.5 km for a
+religious house or an archaeological site, 5 km for a settlement, 30 km for a
+region. The record the coordinate is taken from is always cited; every other
+gazetteer is cited with its best-matched record within the distance, the nearer of
+two; one with none within is not cited. A card draws its records with the
+coordinate's own first and the rest nearest first, and dims the ones too far to be
+cited.
 
 The panel lists the name forms the engine searched, during the run and after it,
 and marks "around it" each form engine 0.8.0 judged to name a larger place around

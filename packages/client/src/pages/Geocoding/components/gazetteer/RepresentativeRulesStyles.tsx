@@ -4,12 +4,14 @@ import styled from "styled-components";
  * The explanation of the coordinate rules, drawn below the rule's choice.
  *
  * The figures are drawn at one SVG unit to one CSS pixel, so their text takes the
- * theme's font sizes as everywhere else in the window.
+ * theme's font sizes as everywhere else in the window. Measured as a container,
+ * so the guide below lays itself out by the window's width, not the screen's.
  */
 export const StyledRules = styled.div`
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.space[3]};
+  gap: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[3]};
   padding: ${({ theme }) => theme.space[3]};
   border: 1px solid ${({ theme }) => theme.color["gray"][300]};
@@ -22,6 +24,38 @@ export const StyledRulesIntro = styled.p`
   margin: 0;
   max-width: 80rem;
   line-height: 1.5;
+`;
+
+/** The cases to switch between, wrapping on a narrow window. */
+export const StyledCaseSwitch = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** One case; the case shown is filled. */
+export const StyledCaseButton = styled.button<{ $current: boolean }>`
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border: 1px solid ${({ theme }) => theme.color["primary"]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  background-color: ${({ theme, $current }) => ($current ? theme.color["primary"] : "transparent")};
+  color: ${({ theme, $current }) => ($current ? theme.color["white"] : theme.color["primary"])};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color["primary"]};
+    outline-offset: 2px;
+  }
+`;
+
+/** What the case is, in a sentence, above its figures. */
+export const StyledCaseStory = styled.p`
+  margin: 0;
+  max-width: 80rem;
+  line-height: 1.45;
+  font-style: italic;
 `;
 
 /** What the dots, rings and colours of every figure mean, said once above them. */
@@ -40,10 +74,11 @@ export const StyledRulesLegendItem = styled.span`
   gap: ${({ theme }) => theme.space[1]};
 `;
 
+/** The figures, as many to a row as fit; one to a row on a narrow window. */
 export const StyledRulesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(32rem, 1fr));
-  gap: ${({ theme }) => theme.space[4]};
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 34rem), 1fr));
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
 /** One rule's figure and text; the rule the settings hold is set on a tinted ground. */
@@ -52,7 +87,7 @@ export const StyledRule = styled.figure<{ $selected: boolean }>`
   flex-direction: column;
   gap: ${({ theme }) => theme.space[1]};
   margin: 0;
-  padding: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[1]};
   border: 1px solid
     ${({ theme, $selected }) => ($selected ? theme.color["primary"] : "transparent")};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -71,14 +106,17 @@ export const StyledRuleDefault = styled.span`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
-export const StyledRuleText = styled.figcaption`
-  line-height: 1.45;
-  color: ${({ theme }) => theme.color["greyer"]};
+/** Whether the rule found the place searched. */
+export const StyledVerdict = styled.figcaption<{ $found: boolean }>`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme, $found }) => ($found ? theme.color["primary"] : theme.color["danger"])};
 `;
 
+/** A figure, drawn at its pixel size and scaled down, never up, to a narrow column. */
 export const StyledRuleFigure = styled.svg`
   display: block;
   max-width: 100%;
+  height: auto;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
@@ -116,7 +154,7 @@ export const StyledDistanceLine = styled.line`
   opacity: 0.7;
 `;
 
-/** A radius a rule counts within, or the citing distance. */
+/** The radius densest counts within. */
 export const StyledRadius = styled.circle`
   fill: none;
   stroke: ${({ theme }) => theme.color["primary"]};
@@ -143,8 +181,8 @@ export const StyledFigureScore = styled.text<{ $best: boolean }>`
   font-weight: ${({ theme, $best }) => ($best ? theme.fontWeight.bold : theme.fontWeight.normal)};
 `;
 
-/** The built-up area of the example's town, under its records. */
-export const StyledTownArea = styled.ellipse`
+/** The extent of a town or a region in a case, under its records. */
+export const StyledArea = styled.ellipse`
   fill: ${({ theme }) => theme.color["gray"][300]};
 `;
 
@@ -167,4 +205,46 @@ export const StyledScaleBar = styled.g`
 /** A legend's sample dot, drawn as the figures draw one. */
 export const StyledLegendSwatch = styled.svg`
   flex: 0 0 auto;
+`;
+
+/** What each rule does, where it suits and what misleads it: one row per rule. */
+export const StyledGuide = styled.div`
+  display: grid;
+  grid-template-columns: max-content minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
+  gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
+  margin-top: ${({ theme }) => theme.space[2]};
+  line-height: 1.4;
+
+  /* in a narrow window each rule is a stack: its name, what it picks, then its
+     two lists, each saying which it is as the column heads no longer show */
+  @container (max-width: 70rem) {
+    grid-template-columns: minmax(0, 1fr);
+
+    > :nth-child(-n + 4) {
+      display: none;
+    }
+
+    > [data-label]::before {
+      content: attr(data-label);
+      font-style: italic;
+    }
+  }
+`;
+
+export const StyledGuideHead = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
+`;
+
+export const StyledGuideRule = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+
+  @container (max-width: 70rem) {
+    margin-top: ${({ theme }) => theme.space[2]};
+  }
+`;
+
+export const StyledGuideCell = styled.span`
+  color: ${({ theme }) => theme.color["greyer"]};
 `;
