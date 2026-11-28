@@ -469,7 +469,7 @@ const EntityTagComponent: React.FC<EntityTag> = (props) => {
   return <EntityTagInner {...props} />;
 };
 
-function areEntityTagsEqual(
+export function areEntityTagsEqual(
   prev: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
   next: Readonly<React.ComponentProps<typeof EntityTagComponent>>,
 ) {
@@ -483,6 +483,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.tagMaxWidth !== next.tagMaxWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
+  if (prev.tooltipPassThrough !== next.tooltipPassThrough) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
   if (prev.disableContextMenu !== next.disableContextMenu) return false;
   if (prev.onDoubleClick !== next.onDoubleClick) return false;
