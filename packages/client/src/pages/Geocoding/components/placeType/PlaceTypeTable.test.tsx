@@ -43,7 +43,7 @@ const tree = {
 };
 
 describe("PlaceTypeTable", () => {
-  it("says what each gazetteer type covers, on the column title", async () => {
+  it("says what each gazetteer location type covers, on the column title", async () => {
     view = render(
       <PlaceTypeTable
         value={defaultPlaceTypes()}
@@ -57,7 +57,7 @@ describe("PlaceTypeTable", () => {
     );
     expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
 
-    const help = view.container.querySelector("button[aria-label*='gazetteer type']")!;
+    const help = view.container.querySelector("button[aria-label*='gazetteer location type']")!;
     await act(async () => {
       // React derives mouseenter from mouseover
       help.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
@@ -84,7 +84,7 @@ describe("PlaceTypeTable", () => {
         countsFailed={false}
       />
     );
-    const help = view.container.querySelector("button[aria-label*='gazetteer type']")!;
+    const help = view.container.querySelector("button[aria-label*='gazetteer location type']")!;
     await act(async () => {
       // React derives focus from focusin
       help.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
@@ -188,11 +188,11 @@ describe("PlaceTypeTable, with the subclass tree of each location type", () => {
     expect(indent("road")).not.toBe(indent("highway"));
   });
 
-  it("keeps the mark and the gazetteer type to the root: a subclass row offers neither", () => {
+  it("keeps the mark and the gazetteer location type to the root: a subclass row offers neither", () => {
     mountTree([{ ...ways, engineType: "port" }]);
     const root = rowOf("root tag");
     expect(root.querySelector("button[aria-label^='mark for']")).not.toBeNull();
-    // the gazetteer type dropdown shows its value as text
+    // the gazetteer location type dropdown shows its value as text
     expect(root.textContent).toContain("port");
     for (const label of ["for carts", "between towns", "in a town"]) {
       expect(rowOf(label).querySelector("button[aria-label^='mark for']")).toBeNull();
@@ -325,9 +325,9 @@ describe("PlaceTypeTable, with the subclass tree of each location type", () => {
     expect(tagRenders.byEntity["c-street"]).toBe(before["c-street"]);
   });
 
-  it("names the column of gazetteer types as such", () => {
+  it("calls the column by the team's full term, gazetteer location type", () => {
     mountTree();
-    expect(view!.container.textContent).toContain("gazetteer type");
-    expect(view!.container.textContent).not.toContain("gazetteer location type");
+    expect(view!.container.textContent).toContain("gazetteer location type");
+    expect(view!.container.textContent).not.toContain("gazetteer type");
   });
 });

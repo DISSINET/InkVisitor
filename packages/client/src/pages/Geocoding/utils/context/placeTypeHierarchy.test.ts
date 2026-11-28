@@ -91,7 +91,7 @@ describe("expandPlaceTypes", () => {
     expect(nodes.find((node) => node.conceptId === "road")!.parentIds).toEqual(["ways"]);
   });
 
-  it("gives a subclass the mark and gazetteer type of its root, and no star of its own", () => {
+  it("gives a subclass the mark and gazetteer location type of its root, and no star of its own", () => {
     const nodes = expandPlaceTypes([paths], { path: pathTree }, concepts);
     const motorway = nodes.find((node) => node.conceptId === "motorway")!;
     expect(motorway).toMatchObject({

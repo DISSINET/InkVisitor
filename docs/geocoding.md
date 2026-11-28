@@ -149,7 +149,7 @@ record that changes a pick fails it; a change to the engine's rules does not. A
 record at the edge of the group did not say the place is where the coordinate is, so
 a gazetteer is cited only where one of its records lies within the citing distance
 of the written coordinate. The distance is set per gazetteer location type in Global
-geocoding ("Citing gazetteers"), and the one applied is that of the type the engine
+geocoding ("Suggestions: coordinate and citing"), and the one applied is that of the type the engine
 resolved the search to — the largest of several, the "none, or any" row for none —
 the same type that set the grouping radius, so it is known as soon as the
 suggestions arrive. The defaults are half the engine's τ per type: 1.5 km for a
@@ -733,7 +733,7 @@ place regardless. What they cannot do is notice this by looking at the list.
 A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — the Concept a Location is
 classified under, whose label is what the location type is called, a mark chosen
-from the set of marks and, optionally, the gazetteer type it answers to. Its description is the Concept's own detail, edited
+from the set of marks and, optionally, the gazetteer location type it answers to. Its description is the Concept's own detail, edited
 in the same table and written to the Concept when the window is saved. The gazetteer location
 types, the engine's twelve, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The
@@ -800,8 +800,8 @@ Concept with two superclasses in the tree is one location type shown under both.
 Concept that is another location type's own Concept is left out of the tree, since
 it is that location type.
 
-The mark, the gazetteer type and the favourite are set on the location type at
-the root and shared by its whole tree; a gazetteer type points at the roots only.
+The mark, the gazetteer location type and the favourite are set on the location type at
+the root and shared by its whole tree; a gazetteer location type points at the roots only.
 Any Concept of the tree, the root's own included, can be unticked. An unticked
 Concept is not offered for a new assignment anywhere (it stays in a picker only as
 the way to subclasses that are offered), and a Location already classified under

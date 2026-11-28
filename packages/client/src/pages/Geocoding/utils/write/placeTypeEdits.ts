@@ -70,7 +70,7 @@ export const makeFavorite = (
 /**
  * Which of the project's location types a suggestion's gazetteer location type
  * points at, the favourite first: the ones the project set up, not the Concepts
- * of their trees, which share the gazetteer type of their root, and not one that
+ * of their trees, which share the gazetteer location type of their root, and not one that
  * is deactivated.
  */
 export const kindsForEngineType = <T extends IGeocodingPlaceType>(

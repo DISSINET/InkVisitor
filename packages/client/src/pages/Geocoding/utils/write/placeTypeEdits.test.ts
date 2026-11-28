@@ -97,7 +97,7 @@ describe("location types with subclass trees", () => {
     },
   };
 
-  it("points a gazetteer type at the location types the project set up, not at the subclasses that share it", () => {
+  it("points a gazetteer location type at the location types the project set up, not at the subclasses that share it", () => {
     const nodes = expandPlaceTypes(
       [kind("ways", { conceptId: "c-path", engineType: "road", favorite: true })],
       tree,
@@ -107,7 +107,7 @@ describe("location types with subclass trees", () => {
     expect(kindsForEngineType(nodes, "road").map((one) => one.id)).toEqual(["ways"]);
   });
 
-  it("does not point a gazetteer type at a location type whose own Concept is deactivated", () => {
+  it("does not point a gazetteer location type at a location type whose own Concept is deactivated", () => {
     const off = kind("ways", {
       conceptId: "c-path",
       engineType: "road",

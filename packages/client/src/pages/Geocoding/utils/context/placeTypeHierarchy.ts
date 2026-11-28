@@ -5,11 +5,11 @@ import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
  * A project's location types with the subclass tree of each.
  *
  * The settings store one entry per location type: its Concept, mark, gazetteer
- * type and the Concepts of its tree that are deactivated. The tree itself is
+ * location type and the Concepts of its tree that are deactivated. The tree itself is
  * read from the superclass relations every time, so a subclass added later is
  * a location type of its own without anyone editing the settings. Every Concept
  * of a tree becomes a node: a location type that shares the mark, gazetteer
- * type and favourite of the one at its root.
+ * location type and favourite of the one at its root.
  */
 
 /** One location type: the one a project set up, or a Concept of its subclass tree. */

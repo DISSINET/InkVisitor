@@ -52,12 +52,12 @@ import { ButtonSize } from "types";
  * The project's own location types, each with the subclass tree of its Concept.
  *
  * Free to define on a location type: the Concept a Location is classified
- * under, whose label is what the type is called, a mark, and the gazetteer type
- * it answers to. The gazetteer
+ * under, whose label is what the type is called, a mark, and the gazetteer location type
+ * it answers to. The gazetteer location
  * type is what connects a suggestion's own type to the project's vocabulary, and
  * the star marks the location type offered first where several answer to the
- * same gazetteer type. Every subclass of the Concept, at every depth, is a
- * location type of its own that shares the mark and the gazetteer type of the
+ * same gazetteer location type. Every subclass of the Concept, at every depth, is a
+ * location type of its own that shares the mark and the gazetteer location type of the
  * one at its root; any row can be deactivated, which keeps it out of the
  * pickers. The description is the Concept's own detail.
  */
@@ -95,7 +95,7 @@ const PANEL_HEIGHT = 230;
 const NO_ENGINE_TYPE = "none";
 
 const engineOptions = [
-  { value: NO_ENGINE_TYPE, label: "no gazetteer type" },
+  { value: NO_ENGINE_TYPE, label: "no gazetteer location type" },
   ...GEOCODING_PLACE_TYPES.map((engineType) => ({
     value: engineType,
     label: ENGINE_PLACE_TYPE_INFO[engineType].label,
@@ -117,7 +117,7 @@ const EngineTypeHelp: React.FC = () => {
       <StyledHelpMark
         type="button"
         ref={setAnchor}
-        aria-label="what each gazetteer type covers"
+        aria-label="what each gazetteer location type covers"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
@@ -483,7 +483,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         <span />
         <span>Concept a Location is classified under</span>
         <StyledKindHeadHelp>
-          <span>gazetteer type</span>
+          <span>gazetteer location type</span>
           <EngineTypeHelp />
         </StyledKindHeadHelp>
         <span />
@@ -612,8 +612,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                   disabled={!kind.engineType}
                   aria-label={
                     kind.favorite
-                      ? "favourite for its gazetteer type"
-                      : "make this the favourite for its gazetteer type"
+                      ? "favourite for its gazetteer location type"
+                      : "make this the favourite for its gazetteer location type"
                   }
                   aria-pressed={kind.favorite}
                   onClick={() => onChange(makeFavorite(value, kind.id))}
@@ -622,8 +622,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                     icon={kind.favorite ? <IcoStarFilled /> : <IcoStarOutline />}
                     tooltipText={
                       kind.engineType
-                        ? "the favourite is the location type offered first when a suggestion has this gazetteer type"
-                        : "choose a gazetteer type to make this a favourite"
+                        ? "the favourite is the location type offered first when a suggestion has this gazetteer location type"
+                        : "choose a gazetteer location type to make this a favourite"
                     }
                     tooltipPosition="top"
                   />

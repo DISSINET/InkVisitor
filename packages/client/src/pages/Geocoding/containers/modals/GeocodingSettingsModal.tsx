@@ -431,11 +431,11 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s location typology. The gazetteer type select maps it onto the
+            The project&apos;s location typology. The gazetteer location type select maps it onto the
             gazetteers&apos; general typology, which is then used for prioritising the proper
             category. A Concept must be assigned if you want to geocode that general type. Every
             subclass of the Concept is a location type of its own, with the same mark and gazetteer
-            type; untick one to stop offering it. The description is the Concept&apos;s detail,
+            location type; untick one to stop offering it. The description is the Concept&apos;s detail,
             saved to the Concept.
           </StyledSectionNote>
           <StyledKindsRow>
@@ -484,7 +484,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             </StyledFullRow>
           ) : null}
 
-          <StyledSectionHeading>Citing gazetteers</StyledSectionHeading>
+          <StyledSectionHeading>Suggestions: coordinate and citing</StyledSectionHeading>
           <StyledSectionNote>
             A suggestion&apos;s coordinate is one gazetteer record&apos;s own; the first choice says
             which record the engine takes it from. A Location given a suggestion&apos;s coordinate
