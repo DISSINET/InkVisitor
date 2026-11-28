@@ -89,8 +89,12 @@ interface PlaceTypeTable {
   countsFailed: boolean;
 }
 
-/** The icon grid is about this tall; it opens upward where there is no room below the button. */
-const PANEL_HEIGHT = 230;
+/**
+ * How tall the grid of marks is, in pixels: rows of ten 2.2rem marks with
+ * 0.25rem gaps and its padding, at the app's 10px rem. It opens upward where it
+ * does not fit below the button, and never above the window's top edge.
+ */
+const PANEL_HEIGHT = Math.ceil(PLACE_ICON_KEYS.length / 10) * 24.5 + 16;
 
 const NO_ENGINE_TYPE = "none";
 
@@ -105,8 +109,9 @@ const engineOptions = [
 /**
  * What each gazetteer location type covers, from the mark on the column title.
  *
- * A location type such as "church" is paired with one of twelve names that mean
- * more than they say, and "religious house" is the one that covers it. Opened by
+ * A location type such as "church" is paired with a gazetteer location type,
+ * whose names mean more than they say, and "religious house" is the one that
+ * covers it. Opened by
  * hover or by focus, so it can be read from the keyboard.
  */
 const EngineTypeHelp: React.FC = () => {
@@ -131,7 +136,7 @@ const EngineTypeHelp: React.FC = () => {
         position="bottom"
         content={
           <StyledEngineTypeHelp>
-            <p>The twelve types the gazetteers use. Choose the one that covers your location type:</p>
+            <p>The types the gazetteers use. Choose the one that covers your location type:</p>
             <dl>
               {GEOCODING_PLACE_TYPES.map((engineType) => (
                 <React.Fragment key={engineType}>
@@ -527,7 +532,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                               id: kind.id,
                               top:
                                 box.bottom + PANEL_HEIGHT > window.innerHeight
-                                  ? box.top - PANEL_HEIGHT
+                                  ? Math.max(0, box.top - PANEL_HEIGHT)
                                   : box.bottom,
                               left: box.left,
                             }

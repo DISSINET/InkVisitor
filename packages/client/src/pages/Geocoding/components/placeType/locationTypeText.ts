@@ -1,3 +1,4 @@
+import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
 import { LocationTypeEntry, PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { findPlaceType } from "../../hooks/placeTypesContext";
 import { kindInfo } from "./placeTypeIcons";
@@ -29,15 +30,16 @@ export const describeEntry = (
   return kind && !kind.active ? `${how} (deactivated for new assignments)` : how;
 };
 
-/** Every shown location type of a Location, one per line, or the words for none. */
+/** Every shown location type of a Location, one per line unless told otherwise, or the words for none. */
 export const describeEntries = (
   entries: LocationTypeEntry[],
   placeTypes: PlaceTypeNode[],
   viaLabel: (conceptId: string) => string,
+  separator = "\n",
 ): string => {
   const shown = shownEntries(entries);
   return shown.length
-    ? shown.map((entry) => describeEntry(entry, placeTypes, viaLabel)).join("\n")
+    ? shown.map((entry) => describeEntry(entry, placeTypes, viaLabel)).join(separator)
     : kindInfo(undefined).label;
 };
 
@@ -51,13 +53,18 @@ export const describeEntries = (
 export const defaultTypeFor = (
   context: { recordPlaceType?: boolean; defaultPlaceType?: string | null },
   entries: LocationTypeEntry[],
-  /** The location types; a default the project has since deactivated is not written. */
-  placeTypes: PlaceTypeNode[],
+  /**
+   * The location types, the stored list or its tree nodes; a default the
+   * project has since deactivated is not written.
+   */
+  placeTypes: IGeocodingPlaceType[],
 ): string | undefined => {
   if (context.recordPlaceType !== false || !context.defaultPlaceType) {
     return undefined;
   }
-  if (findPlaceType(placeTypes, context.defaultPlaceType)?.active === false) {
+  // a node shares its root's `inactive` list, so this reads both the same way
+  const named = findPlaceType(placeTypes, context.defaultPlaceType);
+  if (named && named.inactive.includes(named.conceptId)) {
     return undefined;
   }
   return entries.some((entry) => entry.typeId === context.defaultPlaceType)

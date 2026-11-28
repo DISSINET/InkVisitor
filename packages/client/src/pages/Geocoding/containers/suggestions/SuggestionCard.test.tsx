@@ -9,7 +9,7 @@ import { render, Rendered } from "../../utils/test/renderForTest";
 import { SuggestionCard } from "./GeocodingSuggestions";
 
 /**
- * The gazetteers' twelve location types are another vocabulary from the
+ * The gazetteers' location types are another vocabulary from the
  * project's own, and the marks on the page belong to the project's. A card says
  * what the gazetteers call a place in words, among its other facts.
  */

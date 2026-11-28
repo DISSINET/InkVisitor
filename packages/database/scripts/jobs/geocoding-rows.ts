@@ -47,7 +47,8 @@ export const rethinkGeocodingRows = (db: Connection): GeocodingRows => ({
           .and(
             entity("props")
               .default([])
-              .contains((prop: any) => prop("type")("entityId").eq(typeId))
+              // a prop without a type is skipped, not the whole Location
+              .contains((prop: any) => prop("type")("entityId").default(null).eq(typeId))
           )
       )
       .run(db),

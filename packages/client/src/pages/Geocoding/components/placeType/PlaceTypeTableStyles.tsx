@@ -181,6 +181,9 @@ export const StyledIconPanel = styled.div<{ $top: number; $left: number }>`
   grid-template-columns: repeat(10, 2.2rem);
   gap: ${({ theme }) => theme.space[1]};
   margin-top: ${({ theme }) => theme.space[1]};
+  /* a window too short for every row scrolls the grid rather than hiding marks */
+  max-height: calc(100vh - ${({ $top }) => $top}px - 1rem);
+  overflow-y: auto;
   padding: ${({ theme }) => theme.space[2]};
   background: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};

@@ -24,7 +24,7 @@ import {
   StyledRowTypeMore,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "../../utils/context/geocodingGroups";
-import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
+import { KindIcon } from "../../components/placeType/placeTypeIcons";
 import { describeEntries, shownEntries } from "../../components/placeType/locationTypeText";
 import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
 import { QUICK_STRATEGY_MEANING, QuickStrategy } from "../../utils/suggestions/quickGeocode";

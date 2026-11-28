@@ -64,28 +64,39 @@ export const useAccuracyList = (
     () => (roles.accuracy && !ids.includes(roles.accuracy) ? [...ids, roles.accuracy] : ids),
     [ids, roles.accuracy],
   );
-  const { data } = useEntitiesQuery(ACCURACY_CONCEPTS_KEY, fetched, {
+  const { data, isFetching, isPlaceholderData } = useEntitiesQuery(ACCURACY_CONCEPTS_KEY, fetched, {
     keepPrevious: true,
     staleTime: 60_000,
   });
+  // the Concepts of this list are still on their way: none read yet, or the
+  // previous list's held while a changed one is read. A read that failed is not
+  // loading, so its accuracies say they cannot be read
+  const loading = isFetching && (data === undefined || isPlaceholderData);
   const { accuracy, accuracies, accuracyWhenAgree, accuracyWhenScattered } = roles;
   return useMemo(
     () =>
       accuraciesOf(
         { accuracy, accuracies, accuracyWhenAgree, accuracyWhenScattered },
         data ?? [],
+        loading,
       ),
-    [data, accuracy, accuracies, accuracyWhenAgree, accuracyWhenScattered],
+    [data, loading, accuracy, accuracies, accuracyWhenAgree, accuracyWhenScattered],
   );
 };
 
-/** The accuracies out of the settings and the Concepts read for them. */
+/**
+ * The accuracies out of the settings and the Concepts read for them. While
+ * `loading`, a listed accuracy whose Concept has not arrived is called nothing
+ * rather than unreadable: the recent strip keeps the name it is given, so a name
+ * taken then is kept for good.
+ */
 export const accuraciesOf = (
   roles: Pick<
     IGeocodingRoles,
     "accuracy" | "accuracies" | "accuracyWhenAgree" | "accuracyWhenScattered"
   >,
   concepts: IResponseEntity[],
+  loading = false,
 ): Accuracies => {
   const byId = new Map(concepts.map((entity) => [entity.id, entity]));
   const entries = roles.accuracies.filter(Boolean).map((conceptId) => {
@@ -108,7 +119,7 @@ export const accuraciesOf = (
         ? ""
         : !labels.has(accuracy)
           ? "an accuracy not in the project's list"
-          : labels.get(accuracy) || "an accuracy whose Concept cannot be read",
+          : labels.get(accuracy) || (loading ? "" : "an accuracy whose Concept cannot be read"),
   };
 };
 

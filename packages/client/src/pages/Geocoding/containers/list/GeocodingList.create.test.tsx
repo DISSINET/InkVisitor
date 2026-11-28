@@ -57,7 +57,6 @@ let view: Rendered | null = null;
 const mount = (onCreate?: () => void) => {
   const props = {
     browse,
-    selectedId: undefined,
     onSelect: vi.fn(),
     onToggleType: vi.fn(),
     onShowOnMap: vi.fn(),

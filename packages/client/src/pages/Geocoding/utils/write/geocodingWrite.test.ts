@@ -190,6 +190,15 @@ describe("planGeocodingWrite", () => {
     expect(plan.references).toHaveLength(0);
   });
 
+  it("refuses a location type the settings deactivated, read from the stored list as from the tree", () => {
+    const stored = {
+      ...roles,
+      placeTypes: [{ ...roles.placeTypes[0], inactive: ["v-settlement"] }, roles.placeTypes[1]],
+    };
+    const result = planGeocodingWrite({ ...baseInput, roles: stored, placeType: "settlement" });
+    expect(isBlocked(result) && result.blocked).toContain("deactivated");
+  });
+
   it("refuses a place type with no Concept, naming it, rather than dropping it", () => {
     const result = planGeocodingWrite({ ...baseInput, placeType: "fortress" });
     expect(isBlocked(result)).toBe(true);
@@ -465,6 +474,28 @@ describe("planGeocodingWrite, the accuracy under the geometry", () => {
       location: location([prop("c-geo", "v-geo"), beside]),
     });
     expect(isBlocked(result) && result.blocked).toContain("notes under notes");
+  });
+
+  it("refuses, rather than drop its notes, a second accuracy beside a geometry that has one under it", () => {
+    const under = withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")]);
+    const beside = withChildren(prop("c-acc", "v-older"), [prop("c-n1", "v1")]);
+    const result = planGeocodingWrite({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([under, beside]),
+    });
+    expect(isBlocked(result) && result.blocked).toContain("second accuracy");
+  });
+
+  it("keeps the accuracy prop and its notes when the coordinate moves", () => {
+    const accuracy = withChildren(prop("c-acc", "v-old"), [prop("c-note", "v-note")]);
+    const old = withChildren(prop("c-geo", "old-geo"), [accuracy]);
+    const plan = planOf({ ...baseInput, geometry: pointGeometry(1, 2), current: same, location: location([old]) });
+    const [child] = childrenOf(plan);
+    expect(child.id).toBe(accuracy.id);
+    expect(child.value.entityId).toBe("v-precise");
+    expect(child.children.map((c) => c.type.entityId)).toEqual(["c-note"]);
   });
 
   it("moves an accuracy prop beside the geometry that has notes of one level, whole", () => {

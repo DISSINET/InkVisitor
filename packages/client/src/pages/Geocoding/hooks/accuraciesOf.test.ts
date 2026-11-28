@@ -33,6 +33,12 @@ describe("accuraciesOf", () => {
     expect(read.labelOf(null)).toBe("");
   });
 
+  it("calls a listed accuracy nothing while its Concept is still being read, so no name taken then says it cannot be read", () => {
+    const loading = accuraciesOf(roles, [], true);
+    expect(loading.labelOf("c-street")).toBe("");
+    expect(loading.labelOf("c-elsewhere")).toBe("an accuracy not in the project's list");
+  });
+
   it("carries the marks and the Concept the accuracy is recorded under", () => {
     expect(read.whenAgree).toBe("c-street");
     expect(read.whenScattered).toBe("c-gone");

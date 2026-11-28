@@ -26,7 +26,7 @@ describe("placeTypeInfo", () => {
       expect(info.description.length).toBeGreaterThan(10);
       seen.add(info.label);
     }
-    // twelve distinct labels: a repeated one would make two kinds indistinguishable
+    // distinct labels: a repeated one would make two kinds indistinguishable
     expect(seen.size).toBe(GEOCODING_PLACE_TYPES.length);
   });
 
@@ -68,6 +68,20 @@ describe("the icon set a project chooses from", () => {
     expect(markup).toContain('fill="none"');
     expect(markup).toContain('stroke="currentColor"');
     expect(markup).toContain('stroke-width="2"');
+  });
+
+  it("offers marks for arms, buildings, food, water, travel and trades, each its own and none repeating an older one", () => {
+    const added = [
+      "sword", "axe", "bow", "helmet", "cottage", "estate", "tunnel", "fence", "stairs", "well",
+      "bread", "cheese", "meat", "grain", "seedling", "apple", "egg", "pig", "deer", "paw",
+      "mushroom", "flower", "fishHook", "bath", "pool", "wheel", "route", "roadSign", "bone",
+      "hourglass", "abacus", "scissors", "lamp", "trophy", "world", "sun", "diamond", "queen",
+    ];
+    for (const key of added) {
+      expect([key, placeIcon(key) !== UNKNOWN_PLACE_TYPE.icon]).toEqual([key, true]);
+    }
+    const older = PLACE_ICON_KEYS.filter((key) => !added.includes(key)).map((key) => PLACE_ICONS[key]);
+    expect(added.filter((key) => older.includes(PLACE_ICONS[key]))).toEqual([]);
   });
 
   it("offers marks for religious, historical, cultural and trade places, each its own", () => {

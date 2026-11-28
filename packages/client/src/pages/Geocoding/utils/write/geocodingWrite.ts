@@ -201,6 +201,16 @@ export const planGeocodingWrite = (
         "The accuracy of this location has notes under notes, which writing it under the coordinate would lose. Move or remove them in Detail first.",
     };
   }
+  // with an accuracy already under the geometry, the one beside it is a repeat the
+  // write drops; its notes would go with it
+  const geometryNow = (location.props || []).find((prop) => prop.type?.entityId === roles.geometry);
+  const accuracyUnder = geometryNow?.children?.find((child) => child.type?.entityId === roles.accuracy);
+  if (accuracyUnder && accuracyBeside?.children?.length) {
+    return {
+      blocked:
+        "This location has a second accuracy beside the coordinate, with notes the write would drop. Move or remove them in Detail first.",
+    };
+  }
 
   /**
    * `null` and `undefined` are different answers. `null` is "this Location
@@ -218,7 +228,7 @@ export const planGeocodingWrite = (
       return { blocked: `No Concept is assigned for the location type "${kind.name}".` };
     }
     // a choice offers only active location types; a default named earlier may not be
-    if ((kind as { active?: boolean }).active === false) {
+    if (kind.inactive.includes(kind.conceptId)) {
       return { blocked: `The location type "${kind.name}" is deactivated in the settings.` };
     }
     kindConceptId = kind.conceptId;
@@ -305,7 +315,7 @@ export const planGeocodingWrite = (
     const carried = (replaced?.children || []).filter((child) => !owned.includes(child.type?.entityId));
     geometryProp = {
       ...propFor(roles.geometry, geometryValue!.id),
-      children: [accuracyOf(undefined), ...carried, ...sourceChildren([])],
+      children: [accuracyOf(accuracyUnder ?? accuracyBeside), ...carried, ...sourceChildren([])],
     };
   }
 

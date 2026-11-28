@@ -46,7 +46,6 @@ interface GeocodingList {
   browse: UseGeocodingBrowse;
   /** The selected Location, which may be one the filters leave out of the list. */
   selected: GeocodingLocation | undefined;
-  selectedId: string | undefined;
   onSelect: (location: GeocodingLocation) => void;
   /** Leaves nothing selected. */
   onDeselect: () => void;
@@ -115,7 +114,6 @@ interface GeocodingList {
 export const GeocodingList: React.FC<GeocodingList> = ({
   browse,
   selected,
-  selectedId,
   onSelect,
   onDeselect,
   canPlaceNew,
@@ -139,6 +137,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
   onDismissBatch,
   onCreate,
 }) => {
+  const selectedId = selected?.entity.id;
   const { all, visible, isLoading, error, filters, setFilter } = browse;
 
   // the chip states the territory by name, which needs the entity the id points
@@ -208,12 +207,6 @@ export const GeocodingList: React.FC<GeocodingList> = ({
     bottom: number;
   } | null>(null);
 
-  /**
-   * How many of the marked Locations a location-type write can reach.
-   *
-   * Only those with a coordinate: the write owns the coordinate roles too, so
-   * there is nothing to record a location type against without one.
-   */
   /**
    * How many of the marked Locations a geocode would replace rather than fill.
    *

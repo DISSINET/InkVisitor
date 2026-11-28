@@ -22,7 +22,7 @@ vi.mock("components/advanced", async (importOriginal) => ({
 
 /**
  * A researcher adding a location type such as "church" has to pair it with one
- * of the fourteen gazetteer location types, whose names mean more than they say.
+ * of the gazetteer location types, whose names mean more than they say.
  */
 
 let view: Rendered | null = null;
@@ -55,7 +55,7 @@ describe("PlaceTypeTable", () => {
         countsFailed={false}
       />
     );
-    expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
+    expect(document.body.textContent).not.toContain("The types the gazetteers use");
 
     const help = view.container.querySelector("button[aria-label*='gazetteer location type']")!;
     await act(async () => {
@@ -64,7 +64,7 @@ describe("PlaceTypeTable", () => {
     });
 
     const text = document.body.textContent ?? "";
-    expect(text).toContain("The twelve types the gazetteers use");
+    expect(text).toContain("The types the gazetteers use");
     for (const type of GEOCODING_PLACE_TYPES) {
       expect(text).toContain(ENGINE_PLACE_TYPE_INFO[type].description);
     }
@@ -89,11 +89,11 @@ describe("PlaceTypeTable", () => {
       // React derives focus from focusin
       help.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     });
-    expect(document.body.textContent).toContain("The twelve types the gazetteers use");
+    expect(document.body.textContent).toContain("The types the gazetteers use");
     await act(async () => {
       help.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
     });
-    expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
+    expect(document.body.textContent).not.toContain("The types the gazetteers use");
   });
 
   it("shows an unknown count for a location type whose Concept is not yet answered, not zero", () => {

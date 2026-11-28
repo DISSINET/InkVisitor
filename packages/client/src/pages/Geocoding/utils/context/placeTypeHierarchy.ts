@@ -12,6 +12,16 @@ import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
  * location type and favourite of the one at its root.
  */
 
+/** Appends to the list a map keeps under `key`, starting it where there is none. */
+const append = <K, V>(map: Map<K, V[]>, key: K, value: V): void => {
+  const list = map.get(key);
+  if (list) {
+    list.push(value);
+  } else {
+    map.set(key, [value]);
+  }
+};
+
 /** One location type: the one a project set up, or a Concept of its subclass tree. */
 export interface PlaceTypeNode extends IGeocodingPlaceType {
   /** The id of the location type the project set up, which is this node's own id for a root. */
@@ -84,7 +94,7 @@ export const expandPlaceTypes = (
     const children = new Map<string, string[]>();
     for (const node of tree.nodes) {
       for (const parent of node.parents) {
-        children.set(parent, [...(children.get(parent) ?? []), node.id]);
+        append(children, parent, node.id);
       }
     }
     const label = (id: string) => concepts[id]?.label ?? "";
@@ -144,7 +154,7 @@ export const childrenOf = (nodes: PlaceTypeNode[]): Map<string, PlaceTypeNode[]>
   const map = new Map<string, PlaceTypeNode[]>();
   for (const node of nodes) {
     for (const parent of node.parentIds) {
-      map.set(parent, [...(map.get(parent) ?? []), node]);
+      append(map, parent, node);
     }
   }
   map.forEach((children) =>
@@ -198,7 +208,7 @@ export const deriveTypeEntries = (
   const roots = rootsOf(nodes);
   const byRoot = new Map<string, PlaceTypeNode[]>();
   for (const node of nodes) {
-    byRoot.set(node.rootId, [...(byRoot.get(node.rootId) ?? []), node]);
+    append(byRoot, node.rootId, node);
   }
   const order = new Map(nodes.map((node, index) => [node.id, index]));
   const result = new Map<string, LocationTypeEntry[]>();

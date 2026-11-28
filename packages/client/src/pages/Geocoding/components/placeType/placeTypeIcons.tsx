@@ -107,6 +107,44 @@ import {
   IcoPlaceTextile,
   IcoPlaceSalt,
   IcoPlaceFarm,
+  IcoPlaceSword,
+  IcoPlaceAxe,
+  IcoPlaceBow,
+  IcoPlaceHelmet,
+  IcoPlaceCottage,
+  IcoPlaceEstate,
+  IcoPlaceTunnel,
+  IcoPlaceFence,
+  IcoPlaceStairs,
+  IcoPlaceWell,
+  IcoPlaceBread,
+  IcoPlaceCheese,
+  IcoPlaceMeat,
+  IcoPlaceGrain,
+  IcoPlaceSeedling,
+  IcoPlaceApple,
+  IcoPlaceEgg,
+  IcoPlacePig,
+  IcoPlaceDeer,
+  IcoPlacePaw,
+  IcoPlaceMushroom,
+  IcoPlaceFlower,
+  IcoPlaceFishHook,
+  IcoPlaceBath,
+  IcoPlacePool,
+  IcoPlaceWheel,
+  IcoPlaceRoute,
+  IcoPlaceRoadSign,
+  IcoPlaceBone,
+  IcoPlaceHourglass,
+  IcoPlaceAbacus,
+  IcoPlaceScissors,
+  IcoPlaceLamp,
+  IcoPlaceTrophy,
+  IcoPlaceWorld,
+  IcoPlaceSun,
+  IcoPlaceDiamond,
+  IcoPlaceQueen,
 } from "Theme/icons";
 
 /**
@@ -116,7 +154,7 @@ import {
  * only by its name — so the marks have to be distinguishable from each other at
  * one size, which is a property of the set rather than of any one icon.
  *
- * Two vocabularies use it. The engine's twelve types name what a suggestion is,
+ * Two vocabularies use it. The engine's types name what a suggestion is,
  * and the project's own location types name what a Location is; a project location type carries
  * the key of the mark it wants.
  */
@@ -225,6 +263,45 @@ export const PLACE_ICONS: Record<string, React.ComponentType> = {
   textile: IcoPlaceTextile,
   salt: IcoPlaceSalt,
   farm: IcoPlaceFarm,
+  // arms, buildings, food and farming, water and travel, trades and things
+  sword: IcoPlaceSword,
+  axe: IcoPlaceAxe,
+  bow: IcoPlaceBow,
+  helmet: IcoPlaceHelmet,
+  cottage: IcoPlaceCottage,
+  estate: IcoPlaceEstate,
+  tunnel: IcoPlaceTunnel,
+  fence: IcoPlaceFence,
+  stairs: IcoPlaceStairs,
+  well: IcoPlaceWell,
+  bread: IcoPlaceBread,
+  cheese: IcoPlaceCheese,
+  meat: IcoPlaceMeat,
+  grain: IcoPlaceGrain,
+  seedling: IcoPlaceSeedling,
+  apple: IcoPlaceApple,
+  egg: IcoPlaceEgg,
+  pig: IcoPlacePig,
+  deer: IcoPlaceDeer,
+  paw: IcoPlacePaw,
+  mushroom: IcoPlaceMushroom,
+  flower: IcoPlaceFlower,
+  fishHook: IcoPlaceFishHook,
+  bath: IcoPlaceBath,
+  pool: IcoPlacePool,
+  wheel: IcoPlaceWheel,
+  route: IcoPlaceRoute,
+  roadSign: IcoPlaceRoadSign,
+  bone: IcoPlaceBone,
+  hourglass: IcoPlaceHourglass,
+  abacus: IcoPlaceAbacus,
+  scissors: IcoPlaceScissors,
+  lamp: IcoPlaceLamp,
+  trophy: IcoPlaceTrophy,
+  world: IcoPlaceWorld,
+  sun: IcoPlaceSun,
+  diamond: IcoPlaceDiamond,
+  queen: IcoPlaceQueen,
 };
 
 export const PLACE_ICON_KEYS = Object.keys(PLACE_ICONS);
@@ -251,18 +328,6 @@ export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeIn
   return known
     ? { icon: placeIcon(known.icon), label: known.label, description: known.description }
     : UNKNOWN_PLACE_TYPE;
-};
-
-/**
- * The mark for a gazetteer location type. A type the engine has added since, or none at
- * all, draws the unknown mark rather than nothing — an absent icon reads as a
- * rendering fault, and "nobody has said" is a fact worth showing.
- */
-export const PlaceTypeIcon: React.FC<{ placeType: string | null | undefined }> = ({
-  placeType,
-}) => {
-  const Icon = placeTypeInfo(placeType).icon;
-  return <Icon />;
 };
 
 /** What a project's location type is called and covers; the unknown mark where it has none. */

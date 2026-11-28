@@ -69,9 +69,9 @@ import {
 import { MapPending, afterAccuracy, menuAnchorFor, pendingNote } from "../../utils/map/mapAssign";
 import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
-import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
+import { KindIcon } from "../../components/placeType/placeTypeIcons";
 import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
-import { describeEntry, shownEntries } from "../../components/placeType/locationTypeText";
+import { describeEntries } from "../../components/placeType/locationTypeText";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
 /**
@@ -529,11 +529,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           />
           <StyledMarkCardMeta>
             <KindIcon kind={findPlaceType(placeTypes, hoveredCard.location.placeType)} />
-            {shownEntries(hoveredCard.location.typeEntries).length
-              ? shownEntries(hoveredCard.location.typeEntries)
-                  .map((entry) => describeEntry(entry, placeTypes, viaLabel))
-                  .join(", ")
-              : kindInfo(undefined).label}
+            {describeEntries(hoveredCard.location.typeEntries, placeTypes, viaLabel, ", ")}
             {hoveredCard.location.accuracyLabel ? ` · ${hoveredCard.location.accuracyLabel}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>

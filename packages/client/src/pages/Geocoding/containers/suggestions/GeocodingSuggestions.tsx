@@ -36,7 +36,6 @@ import {
   shownEntries,
 } from "../../components/placeType/locationTypeText";
 import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
-import { PlaceTypeNode } from "../../utils/context/placeTypeHierarchy";
 import { degradationsOf, problemsOf } from "../../utils/engine/suggestIntegrity";
 import { splitLabel } from "../../utils/suggestions/suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "../../utils/suggestions/suggestionRank";
@@ -426,7 +425,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             )}
             {/* what the gazetteers think it is, as words and not as a mark: the
                 project's own location types are the marks on this page, and the
-                gazetteers' twelve are a different vocabulary, which is only
+                gazetteers' types are a different vocabulary, which is only
                 wanted at the moment a type is chosen for the Location, where the
                 picker says which of the project's answer to it. Said only where
                 a source said anything; "not recorded" would be a claim about
@@ -714,7 +713,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
    * precisely it is known.
    *
    * The engine's own `placeType` is a starting point and not an answer: a
-   * suggestion often carries none, and the twelve are decided by what the
+   * suggestion often carries none, and the types are decided by what the
    * researcher knows the place to be rather than by what the sources called it.
    */
   const [pending, setPending] = useState<PendingAccept>(null);
@@ -900,7 +899,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
       accept(
         suggestion,
         accuracy,
-        defaultTypeFor(context, selected?.typeEntries ?? [], roles.placeTypes as PlaceTypeNode[]),
+        defaultTypeFor(context, selected?.typeEntries ?? [], roles.placeTypes),
       );
       return;
     }

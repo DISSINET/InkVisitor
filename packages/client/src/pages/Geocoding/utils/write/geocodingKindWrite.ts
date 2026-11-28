@@ -81,25 +81,6 @@ export const planKindEdit = (
   };
 };
 
-/**
- * What choosing one location type, or none, needs doing.
- *
- * A Concept adds that location type and leaves the others alone; `null` removes
- * every one the page can, which only the control that says so does.
- */
-export const planKindChange = (
-  locationId: string,
-  placeTypes: IGeocodingPlaceType[],
-  existing: Relation.IRelation[],
-  conceptId: string | null,
-): KindChange =>
-  planKindEdit(
-    locationId,
-    placeTypes,
-    existing,
-    conceptId ? { add: [conceptId] } : { removeAll: true },
-  );
-
 /** The calls a location type change needs, named so a test can supply them without a server. */
 export interface KindGateway {
   readClassifications: (locationId: string) => Promise<Relation.IRelation[]>;

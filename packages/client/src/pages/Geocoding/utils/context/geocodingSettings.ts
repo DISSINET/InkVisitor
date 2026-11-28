@@ -2,10 +2,8 @@ import {
   GEOCODING_SETTINGS_KEY,
   IGeocodingRoles,
   IGeocodingSettings,
+  normalizeGeocodingRoles,
   emptyGeocodingRoles,
-  normalizeAccuracyRoles,
-  normalizeCitingRoles,
-  normalizePlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import api from "api";
 
@@ -27,13 +25,7 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
     const response = await api.settingGet(GEOCODING_SETTINGS_KEY, { ignoreErrorToast: true });
     const stored = response.data?.data?.value as IGeocodingSettings | undefined;
     return {
-      roles: {
-        ...emptyGeocodingRoles(),
-        ...(stored?.roles || {}),
-        placeTypes: normalizePlaceTypes(stored?.roles?.placeTypes),
-        ...normalizeAccuracyRoles(stored?.roles),
-        ...normalizeCitingRoles(stored?.roles),
-      },
+      roles: normalizeGeocodingRoles(stored?.roles),
       context: stored?.context || {},
     };
   } catch (error) {

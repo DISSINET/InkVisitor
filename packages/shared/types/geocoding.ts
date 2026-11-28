@@ -517,7 +517,7 @@ export interface IGeocodingContext {
   /**
    * Whether accepting a coordinate also records what location type it is.
    *
-   * A project that has not mapped the engine's twelve types onto its own
+   * A project that has not mapped the engine's types onto its own
    * Concepts has nothing to write, and a suggestion often has no single type of
    * its own, so the type is asked for rather than inferred. Off means the
    * coordinate is written and the place's location type is left alone.
@@ -605,6 +605,21 @@ export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   resources: {},
   representative: "",
   citeWithinKm: defaultCiteWithinKm(),
+});
+
+/**
+ * The roles a stored settings row stands for: the empty roles under what the row
+ * holds, each part read by its own normaliser, so a row saved before a part
+ * existed reads as its default.
+ */
+export const normalizeGeocodingRoles = (stored: Partial<IGeocodingRoles> | undefined): IGeocodingRoles => ({
+  ...emptyGeocodingRoles(),
+  ...(stored || {}),
+  // a row from before the list existed holds a map, which this turns into the
+  // default list with its Concepts
+  placeTypes: normalizePlaceTypes(stored?.placeTypes),
+  ...normalizeAccuracyRoles(stored),
+  ...normalizeCitingRoles(stored),
 });
 
 export const defaultGeocodingContext = (): IGeocodingContext => ({

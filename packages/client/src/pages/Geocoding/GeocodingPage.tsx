@@ -81,6 +81,7 @@ const HOVER_GRACE_MS = 260;
 
 /** The one message about location types that could not be read, kept single by its id. */
 const TYPES_UNREADABLE_TOAST = "geocoding-types-unreadable";
+const TYPES_PENDING_TOAST = "geocoding-types-pending";
 
 export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
@@ -503,6 +504,24 @@ export const GeocodingPage: React.FC = () => {
   const advanceTo = useRef<GeocodingLocation | undefined>(undefined);
 
   /**
+   * Whether the location types cannot be edited yet: their subclass trees failed
+   * to load, or have not arrived, so a Location's Classifications under a subclass
+   * are not known and an edit would leave them behind.
+   */
+  const typesUnsettled = (): boolean => {
+    if (browse.typesError) {
+      return true;
+    }
+    if (typeHierarchy.pendingTypes.length) {
+      toast.info("The location types are still being read. Try again in a moment.", {
+        toastId: TYPES_PENDING_TOAST,
+      });
+      return true;
+    }
+    return false;
+  };
+
+  /**
    * Adds a location type to a Location, or removes every one the page can where
    * told there is none, leaving its coordinate alone.
    *
@@ -515,7 +534,7 @@ export const GeocodingPage: React.FC = () => {
     placeType: string | null,
     options?: { quiet?: boolean },
   ): Promise<boolean> =>
-    browse.typesError
+    typesUnsettled()
       ? Promise.resolve(false)
       : editTypes(location.entity, placeType ? { add: [placeType] } : { clear: true }, options);
 
@@ -525,7 +544,7 @@ export const GeocodingPage: React.FC = () => {
     placeType: string,
     on: boolean,
   ): Promise<boolean> =>
-    browse.typesError
+    typesUnsettled()
       ? Promise.resolve(false)
       : editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
 
@@ -736,7 +755,6 @@ export const GeocodingPage: React.FC = () => {
           <GeocodingList
             browse={browse}
             selected={selected}
-            selectedId={selected?.entity.id}
             onSelect={setSelected}
             onDeselect={deselect}
             canPlaceNew={canPlaceNew}
@@ -963,7 +981,7 @@ export const GeocodingPage: React.FC = () => {
                   geometry: pointGeometry(suggestion.lon, suggestion.lat),
                   accuracy,
                   // the researcher's answer, not the engine's: a suggestion often
-                  // carries no type, and the fourteen are a judgement about the
+                  // carries no type, and a location type is a judgement about the
                   // place rather than a summary of what the sources called it
                   placeType,
                   provenance,

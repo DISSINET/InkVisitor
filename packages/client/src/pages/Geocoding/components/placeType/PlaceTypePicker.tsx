@@ -214,6 +214,34 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
   );
 };
 
+interface ChoiceTag {
+  entity: IResponseEntity;
+  fullWidth?: boolean;
+  /** Drawn selected. */
+  highlighted?: boolean;
+  /** The entity's own tooltip on hover. */
+  withTooltip?: boolean;
+}
+
+/**
+ * A Concept's tag inside a control that does the choosing or heads a list of
+ * choices: its own click, drag, copy and menu are off, so a click reaches the
+ * control.
+ */
+export const ChoiceTag: React.FC<ChoiceTag> = ({ entity, fullWidth, highlighted, withTooltip }) => (
+  <EntityTag
+    entity={entity}
+    fullWidth={fullWidth}
+    isSelected={highlighted}
+    disableTooltip={!withTooltip}
+    tooltipPassThrough
+    disableDrag
+    disableCopyToClipboard
+    disableDoubleClick
+    disableContextMenu
+  />
+);
+
 interface PickerHeader {
   /** What is asked, as a caption. */
   caption: string;
@@ -507,16 +535,7 @@ const PickerRow: React.FC<{ kind: PlaceTypeNode; level: number; ctx: RowContext 
         <StyledPickerLabel>
           <StyledPickerHead>
             {concept ? (
-              <EntityTag
-                entity={concept}
-                fullWidth
-                isSelected={highlighted && clickable}
-                tooltipPassThrough
-                disableDrag
-                disableCopyToClipboard
-                disableDoubleClick
-                disableContextMenu
-              />
+              <ChoiceTag entity={concept} fullWidth highlighted={highlighted && clickable} withTooltip />
             ) : (
               info.label
             )}

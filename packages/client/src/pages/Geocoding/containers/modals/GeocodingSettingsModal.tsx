@@ -1,4 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { useEngineParameters } from "../../hooks/useGazetteerCatalogue";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
   IGeocodingContext,
@@ -50,7 +51,6 @@ import { StyledGazetteerNote } from "../../components/gazetteer/GazetteerPickerS
 import { PlaceTypeTable } from "../../components/placeType/PlaceTypeTable";
 import { AccuracyTable } from "../../components/placeType/AccuracyTable";
 import { CitingSettings } from "../../components/gazetteer/CitingSettings";
-import { engineParameters } from "../../utils/engine/engine";
 import { ACCURACY_CONCEPTS_KEY } from "../../hooks/accuraciesContext";
 import { accuraciesToSave, repeatedAccuracy } from "../../utils/write/accuracyEdits";
 import {
@@ -128,14 +128,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   });
   const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
 
-  // the gazetteer location types a search can name, for the citing distances; the
-  // same query key the query panel uses, so the two cost one request
-  const { data: parameters } = useQuery({
-    queryKey: ["geocoding-parameters"],
-    queryFn: ({ signal }) => engineParameters(signal),
-    staleTime: 60 * 60 * 1000,
-    retry: false,
-  });
+  // the gazetteer location types a search can name, for the citing distances
+  const parameters = useEngineParameters();
 
   // every pick changes the id list and so the query key; the previous batch
   // keeps the other rows on screen while the new one loads
@@ -384,9 +378,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   return (
     <Modal showModal onClose={onClose} width={1300} fullHeight>
       <ModalHeader title="Global geocoding settings" onClose={onClose} />
-      {/* the sections are a fixed length — twelve location types and fifteen
-          gazetteers — so the body outgrows any viewport and scrolls inside
-          the card, which keeps the footer and its save button in reach */}
+      {/* the sections are long — the location types with their subclass trees,
+          and every gazetteer — so the body outgrows any viewport and scrolls
+          inside the card, which keeps the footer and its save button in reach */}
       <ModalContent column enableScroll>
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
@@ -486,12 +480,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Suggestions: coordinate and citing</StyledSectionHeading>
           <StyledSectionNote>
-            A suggestion&apos;s coordinate is one gazetteer record&apos;s own; the first choice says
-            which record the engine takes it from. A Location given a suggestion&apos;s coordinate
-            cites each gazetteer that has a record within the distance below of it, by the
-            gazetteer location type of the search: a record further away was grouped with the
-            others but does not place the Location there. A new write from a suggestion replaces
-            the gazetteer references an earlier one left; a coordinate set on the map changes none.
+            What a suggestion gives the Location it is used on: a coordinate, always one gazetteer
+            record&apos;s own and never an average, and the gazetteers it cites.
           </StyledSectionNote>
           <CitingSettings
             value={draft}

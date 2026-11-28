@@ -5,11 +5,13 @@ import React from "react";
  * the Tabler marks beside it (`TbBuildingChurch` is the church with no tower), so
  * it reads at the same size and weight in a list of location types.
  */
-export const IcoPlaceChurchTower: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+export const IcoPlaceChurchTower: React.FC<
+  React.SVGProps<SVGSVGElement> & { size?: number | string }
+> = ({ size = "1em", ...props }) => (
   <svg
     viewBox="0 0 24 24"
-    width="1em"
-    height="1em"
+    width={size}
+    height={size}
     fill="none"
     stroke="currentColor"
     strokeWidth={2}

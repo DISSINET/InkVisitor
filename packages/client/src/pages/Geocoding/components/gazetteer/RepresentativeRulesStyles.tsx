@@ -1,29 +1,30 @@
 import styled from "styled-components";
 
 /**
- * The explanation of the coordinate rules, drawn below the rule's choice.
+ * The guide to the coordinate rules, opened below the rule's choice.
  *
- * The figures are drawn at one SVG unit to one CSS pixel, so their text takes the
- * theme's font sizes as everywhere else in the window. Measured as a container,
- * so the guide below lays itself out by the window's width, not the screen's.
+ * Set apart from the settings as a tinted panel with an accent bar, so it reads
+ * as advice rather than as more settings. The figures are drawn at one SVG unit
+ * to one CSS pixel, so their text takes the theme's font sizes as everywhere else
+ * in the window. Measured as a container, so the table lays itself out by the
+ * window's width, not the screen's.
  */
-export const StyledRules = styled.div`
+export const StyledGuide = styled.div`
   container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[3]};
-  padding: ${({ theme }) => theme.space[3]};
-  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  margin-top: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  border-left: 3px solid ${({ theme }) => theme.color["primary"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  background-color: ${({ theme }) => theme.color["blue"][50]};
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color["black"]};
 `;
 
-export const StyledRulesIntro = styled.p`
-  margin: 0;
-  max-width: 80rem;
-  line-height: 1.5;
+export const StyledGuideQuestion = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
 `;
 
 /** The cases to switch between, wrapping on a narrow window. */
@@ -55,10 +56,16 @@ export const StyledCaseStory = styled.p`
   margin: 0;
   max-width: 80rem;
   line-height: 1.45;
-  font-style: italic;
 `;
 
-/** What the dots, rings and colours of every figure mean, said once above them. */
+/** Which rules find the place of the case shown, and which miss it. */
+export const StyledCaseFit = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[4]};
+`;
+
+/** What the dots, rings and marks of every figure mean, said once above them. */
 export const StyledRulesLegend = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -74,17 +81,18 @@ export const StyledRulesLegendItem = styled.span`
   gap: ${({ theme }) => theme.space[1]};
 `;
 
-/** The figures, as many to a row as fit; one to a row on a narrow window. */
+/** The figures, five to a row in the settings window; one to a row on a narrow one. */
 export const StyledRulesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 34rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   gap: ${({ theme }) => theme.space[2]};
 `;
 
-/** One rule's figure and text; the rule the settings hold is set on a tinted ground. */
+/** One rule's figure and verdict; the rule the settings hold is outlined. */
 export const StyledRule = styled.figure<{ $selected: boolean }>`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   margin: 0;
   padding: ${({ theme }) => theme.space[1]};
@@ -108,7 +116,8 @@ export const StyledRuleDefault = styled.span`
 
 /** Whether the rule found the place searched. */
 export const StyledVerdict = styled.figcaption<{ $found: boolean }>`
-  font-size: ${({ theme }) => theme.fontSize.xxs};
+  text-align: center;
+  font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme, $found }) => ($found ? theme.color["primary"] : theme.color["danger"])};
 `;
 
@@ -117,20 +126,19 @@ export const StyledRuleFigure = styled.svg`
   display: block;
   max-width: 100%;
   height: auto;
-  background-color: ${({ theme }) => theme.color["gray"][100]};
+  background-color: ${({ theme }) => theme.color["white"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 
 /**
  * One gazetteer record, in its gazetteer's colour: filled where it was found by
  * the place's own name, a ring where it was found by the name of a place around
- * it. A faded record takes no part in what the figure shows.
+ * it.
  */
-export const StyledRecordDot = styled.circle<{ $color: string; $around: boolean; $faded: boolean }>`
+export const StyledRecordDot = styled.circle<{ $color: string; $around: boolean }>`
   fill: ${({ $color, $around }) => ($around ? "none" : $color)};
   stroke: ${({ $color }) => $color};
   stroke-width: 1.5;
-  opacity: ${({ $faded }) => ($faded ? 0.3 : 1)};
 `;
 
 /** The ring around the record a rule chooses. */
@@ -140,50 +148,15 @@ export const StyledChosenRing = styled.circle`
   stroke-width: 1.5;
 `;
 
-/** A record's vote for the record chosen, in the voter's colour; its width, the vote's strength, is set per line. */
-export const StyledVoteLine = styled.line<{ $color: string }>`
-  stroke: ${({ $color }) => $color};
-  stroke-linecap: round;
-  opacity: 0.45;
-`;
-
-/** A distance a rule adds up. */
-export const StyledDistanceLine = styled.line`
-  stroke: ${({ theme }) => theme.color["greyer"]};
-  stroke-width: 0.75;
-  opacity: 0.7;
-`;
-
-/** The radius densest counts within. */
-export const StyledRadius = styled.circle`
-  fill: none;
-  stroke: ${({ theme }) => theme.color["primary"]};
-  stroke-width: 1;
-  stroke-dasharray: 3 2;
-`;
-
 export const StyledFigureLabel = styled.text`
   fill: ${({ theme }) => theme.color["greyer"]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-style: italic;
 `;
 
-/** The chosen record's gazetteer, named beside its ring in the gazetteer's colour. */
-export const StyledFigureName = styled.text<{ $color: string }>`
-  fill: ${({ $color }) => $color};
-  font-family: monospace;
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-`;
-
-export const StyledFigureScore = styled.text<{ $best: boolean }>`
-  fill: ${({ theme }) => theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  font-weight: ${({ theme, $best }) => ($best ? theme.fontWeight.bold : theme.fontWeight.normal)};
-`;
-
 /** The extent of a town or a region in a case, under its records. */
 export const StyledArea = styled.ellipse`
-  fill: ${({ theme }) => theme.color["gray"][300]};
+  fill: ${({ theme }) => theme.color["gray"][200]};
 `;
 
 /** The marks of the example's places, in the figures and in the legend. */
@@ -207,44 +180,126 @@ export const StyledLegendSwatch = styled.svg`
   flex: 0 0 auto;
 `;
 
-/** What each rule does, where it suits and what misleads it: one row per rule. */
-export const StyledGuide = styled.div`
-  display: grid;
-  grid-template-columns: max-content minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
-  gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
+/**
+ * When to choose each rule and when not, one row per rule. In a narrow window
+ * each row is a stack, every cell saying which column it is, as the column heads
+ * no longer show.
+ */
+export const StyledTable = styled.table`
+  width: 100%;
   margin-top: ${({ theme }) => theme.space[2]};
+  border-collapse: collapse;
   line-height: 1.4;
 
-  /* in a narrow window each rule is a stack: its name, what it picks, then its
-     two lists, each saying which it is as the column heads no longer show */
-  @container (max-width: 70rem) {
-    grid-template-columns: minmax(0, 1fr);
+  th,
+  td {
+    padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+    text-align: left;
+    vertical-align: top;
+  }
 
-    > :nth-child(-n + 4) {
+  thead th {
+    font-size: ${({ theme }) => theme.fontSize.xxs};
+    font-weight: ${({ theme }) => theme.fontWeight.normal};
+    color: ${({ theme }) => theme.color["greyer"]};
+    border-bottom: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  }
+
+  tbody th {
+    white-space: nowrap;
+    font-weight: ${({ theme }) => theme.fontWeight.bold};
+  }
+
+  tbody tr + tr > * {
+    border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  }
+
+  td:nth-child(2) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  @container (max-width: 70rem) {
+    thead {
       display: none;
     }
 
-    > [data-label]::before {
+    tr,
+    th,
+    td {
+      display: block;
+    }
+
+    tbody tr + tr > * {
+      border-top: none;
+    }
+
+    tbody tr + tr {
+      border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+    }
+
+    td:nth-child(2) {
+      text-align: left;
+    }
+
+    td::before {
       content: attr(data-label);
       font-style: italic;
+      color: ${({ theme }) => theme.color["greyer"]};
     }
   }
 `;
 
-export const StyledGuideHead = styled.span`
+/** What the numbers are, under the table. */
+export const StyledTableCaption = styled.caption`
+  caption-side: bottom;
+  padding-top: ${({ theme }) => theme.space[1]};
+  text-align: left;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["greyer"]};
-  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
 `;
 
-export const StyledGuideRule = styled.span`
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
+/** Opens and closes the footnote on how the rules pick, which starts closed. */
+export const StyledHowToggle = styled.button<{ $open: boolean }>`
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["primary"]};
 
-  @container (max-width: 70rem) {
-    margin-top: ${({ theme }) => theme.space[2]};
+  svg {
+    font-size: ${({ theme }) => theme.fontSize.xxs};
+    transform: rotate(${({ $open }) => ($open ? "0deg" : "-90deg")});
+    transition: transform 0.15s;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color["primary"]};
+    outline-offset: 2px;
   }
 `;
 
-export const StyledGuideCell = styled.span`
+export const StyledHow = styled.div`
+  max-width: 80rem;
+  line-height: 1.5;
   color: ${({ theme }) => theme.color["greyer"]};
+
+  p {
+    margin: 0 0 ${({ theme }) => theme.space[1]};
+  }
+`;
+
+export const StyledHowList = styled.ul`
+  margin: 0;
+  padding-left: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledHowRule = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color["black"]};
 `;

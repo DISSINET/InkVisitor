@@ -51,24 +51,29 @@ const sourceProp = (sourceType: string, resourceId: string) => ({
  * of the coordinate only where the Value holding its record id was created
  * together with the Value holding the geometry, as one write does; where either
  * Value has no creation time, nothing is credited.
+ *
+ * `predating` says that nothing was credited because every reference is older
+ * than the geometry: the coordinate was moved since, or rewritten by a
+ * migration, which this job cannot tell apart.
  */
 const gazetteersOfCurrentCoordinate = async (
   rows: GeocodingRows,
   location: any,
   geometryValueId: string | undefined,
   gazetteers: Set<string>
-): Promise<string[]> => {
+): Promise<{ credited: string[]; predating: boolean }> => {
+  const none = { credited: [], predating: false };
   const references: any[] = (location.references || []).filter(
     (reference: any) => reference?.resource && gazetteers.has(reference.resource) && reference.value
   );
   if (!geometryValueId || !references.length) {
-    return [];
+    return none;
   }
   const ids = [...new Set<string>([geometryValueId, ...references.map((one) => one.value)])];
   const createdAt = await rows.createdAt(ids);
   const geometryAt = createdAt.get(geometryValueId);
   if (geometryAt === undefined) {
-    return [];
+    return none;
   }
   const credited: string[] = [];
   for (const reference of references) {
@@ -82,14 +87,21 @@ const gazetteersOfCurrentCoordinate = async (
       credited.push(reference.resource);
     }
   }
-  return credited;
+  const predating =
+    !credited.length &&
+    references.every((reference) => {
+      const at = createdAt.get(reference.value);
+      return at !== undefined && at < geometryAt;
+    });
+  return { credited, predating };
 };
 
 /**
  * Names the gazetteers one Location cites as subproperties of its geometry prop.
  *
  * Returns how many it added, or why the Location was left alone: it has no
- * geometry prop or several, or its props changed since they were read.
+ * geometry prop or several, its references all predate its coordinate, or its
+ * props changed since they were read.
  */
 export const nameSourcesOf = async (
   rows: GeocodingRows,
@@ -110,9 +122,18 @@ export const nameSourcesOf = async (
       .filter((child) => child.type?.entityId === sourceType)
       .map((child) => child.value?.entityId)
   );
-  const missing = (
-    await gazetteersOfCurrentCoordinate(rows, location, geometryProp.value?.entityId, gazetteers)
-  ).filter((resource) => !named.has(resource));
+  const { credited, predating } = await gazetteersOfCurrentCoordinate(
+    rows,
+    location,
+    geometryProp.value?.entityId,
+    gazetteers
+  );
+  if (predating && !named.size) {
+    return {
+      left: "its gazetteer references are older than its coordinate, which was moved or migrated since",
+    };
+  }
+  const missing = credited.filter((resource) => !named.has(resource));
   if (!missing.length) {
     return 0;
   }

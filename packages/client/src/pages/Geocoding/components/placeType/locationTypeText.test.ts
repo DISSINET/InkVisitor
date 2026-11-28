@@ -48,6 +48,16 @@ describe("describeEntries", () => {
     expect(text).toBe("fortress\nsettlement — inferred from city");
   });
 
+  it("joins them with the separator given, for a card that has one line for them", () => {
+    const text = describeEntries(
+      [entry("fortress"), entry("settlement", { inferred: true, via: "c-city" })],
+      types,
+      label,
+      ", ",
+    );
+    expect(text).toBe("fortress, settlement — inferred from city");
+  });
+
   it("leaves out a type that another lies below, which is not shown", () => {
     const entries = [entry("fortress"), entry("settlement", { shadowed: true })];
     expect(shownEntries(entries).map((one) => one.typeId)).toEqual(["fortress"]);
@@ -87,9 +97,14 @@ describe("defaultTypeFor", () => {
     expect(defaultTypeFor(corpus, [entry("fortress")], types)).toBe("settlement");
   });
 
-  it("is none where the project has since deactivated the type it named", () => {
-    const off = types.map((one) => (one.id === "settlement" ? { ...one, active: false } : one));
-    expect(defaultTypeFor(corpus, [], off)).toBeUndefined();
+  it("is none where the project has since deactivated the type it named, read from the tree or the stored list", () => {
+    const stored = defaultPlaceTypes().map((one) => ({
+      ...one,
+      conceptId: `c-${one.id}`,
+      inactive: one.id === "settlement" ? ["c-settlement"] : [],
+    }));
+    expect(defaultTypeFor(corpus, [], expandPlaceTypes(stored, {}, {}))).toBeUndefined();
+    expect(defaultTypeFor(corpus, [], stored)).toBeUndefined();
   });
 
   it("is none where the project asks for the location type each time, or named none", () => {

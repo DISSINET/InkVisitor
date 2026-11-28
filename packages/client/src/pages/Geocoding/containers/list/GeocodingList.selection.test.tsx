@@ -61,7 +61,6 @@ const mount = (over: { selected?: GeocodingLocation; canPlaceNew?: boolean } = {
   const props = {
     browse,
     selected: over.selected,
-    selectedId: over.selected?.entity.id,
     onSelect: vi.fn(),
     onDeselect,
     canPlaceNew: over.canPlaceNew ?? true,

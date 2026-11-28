@@ -131,21 +131,28 @@ for a church, 150 km for a region), and its coordinate is one of those records' 
 `matches[representativeIndex]`: never a point between them. Which record is chosen
 is the engine's rule; Global geocoding can send another (place first, agreement,
 best score, medoid, densest), and sends none by default, leaving the engine's own,
-`place-first` since engine 0.7.0. The choice names each rule in a word or two; "how
-the rules work" beside it opens, closed by default, four cases to switch between — a
-church in a town, one exact match against a crowd of loose ones, a region named
-after its capital, a village and its municipality — each one suggestion, drawn once
-per rule on a small map with the page's own marks and a km scale, the record each
-rule picks ringed and marked as finding the place or not. Choosing between
-suggestions is the researcher's, so every case is one suggestion: its records lie
-within the grouping radius. One case alone would make some rules look strictly
-better than others; across the four, every rule finds the place in one case and
-misses it in another. Below the figures a table says, per rule, what it picks, what
-it is good for and what misleads it. Each record's score is the one engine 0.8.0
-gives its gazetteer's weight, confidence and match type, and a test works every pick
-out again with the engine's definitions and point precisions, checks each match type
-is one its gazetteer returns and that no pick rests on equal scores, so moving a
-record that changes a pick fails it; a change to the engine's rules does not. A
+`place-first` since engine 0.7.0. The choice names each rule in a word or two, with
+a sentence beside it saying what the rule chosen picks. "Guide: which rule suits your
+project?" below it opens, closed by default, a guide set apart as a tinted panel: it
+asks what the project geocodes most and switches between four cases —
+buildings in towns, towns and villages, regions named after a town, deserted
+villages — each one suggestion, drawn once per rule on a small map with the page's own
+marks and a km scale, the record each rule picks ringed and marked as finding the
+place or not, with the rules that find it and those that miss it listed above.
+Choosing between suggestions is the researcher's, so every case is one suggestion:
+its records lie within the grouping radius. No rule finds the place in every case,
+and best score in none: it follows the best-matched name wherever it lies, and where
+TGN and Wikidata score the same the engine settles the tie by record id, which hands
+it to TGN, whose point is often minute-rounded or a former province's (the towns
+case). A table says per rule how often it found the place in the engine's tests —
+the first read's pooled rates, and place first against agreement, measured later —
+and which projects should choose it and which should not, naming the cases; how each
+rule picks, with the grouping radius and τ, sits in a footnote, closed. Each record's score is the
+one engine 0.8.0 gives its gazetteer's weight, confidence and match type, and a test
+works every pick out again with the engine's definitions, point precisions and tie
+order, checks each match type is one its gazetteer returns and that no pick rests on
+equal scores other than TGN's and Wikidata's, whose id forms fix their order, so
+moving a record that changes a pick fails it; a change to the engine's rules does not. A
 record at the edge of the group did not say the place is where the coordinate is, so
 a gazetteer is cited only where one of its records lies within the citing distance
 of the written coordinate. The distance is set per gazetteer location type in Global

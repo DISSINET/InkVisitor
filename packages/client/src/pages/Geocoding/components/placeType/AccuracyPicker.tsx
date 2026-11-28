@@ -1,8 +1,8 @@
 import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
-import { EntityTag } from "components/advanced";
 import React, { useRef } from "react";
 import { AccuracyEntry, useAccuracies } from "../../hooks/accuraciesContext";
 import {
+  ChoiceTag,
   FloatingPicker,
   FloatingPickerAnchor,
   PickerHeader,
@@ -116,34 +116,6 @@ const AccuracyOption: React.FC<AccuracyOption> = ({ entry, current, suggested, o
     </StyledPickerOption>
   );
 };
-
-interface ChoiceTag {
-  entity: NonNullable<AccuracyEntry["entity"]>;
-  fullWidth?: boolean;
-  /** Drawn selected. */
-  highlighted?: boolean;
-  /** The entity's own tooltip on hover. */
-  withTooltip?: boolean;
-}
-
-/**
- * A Concept's tag inside a control that does the choosing or heads a list of
- * choices: its own click, drag, copy and menu are off, so a click reaches the
- * control.
- */
-const ChoiceTag: React.FC<ChoiceTag> = ({ entity, fullWidth, highlighted, withTooltip }) => (
-  <EntityTag
-    entity={entity}
-    fullWidth={fullWidth}
-    isSelected={highlighted}
-    disableTooltip={!withTooltip}
-    tooltipPassThrough
-    disableDrag
-    disableCopyToClipboard
-    disableDoubleClick
-    disableContextMenu
-  />
-);
 
 interface AccuracyTag {
   entry: AccuracyEntry;

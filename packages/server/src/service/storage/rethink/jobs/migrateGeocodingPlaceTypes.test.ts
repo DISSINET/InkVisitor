@@ -1,4 +1,5 @@
 import { Connection, r } from "rethinkdb-ts";
+import { GEOCODING_PLACE_TYPES } from "@inkvisitor/shared/types/geocoding";
 import { getTestDbName } from "../../../../test/db";
 import migrateGeocodingPlaceTypesJob from "../../../../../../database/scripts/jobs/migrate-geocoding-place-types";
 
@@ -119,7 +120,7 @@ describe("migrate-geocoding-place-types", () => {
     await migrateGeocodingPlaceTypesJob(conn);
     const roles = ((await r.table("settings").get("geocoding").run(conn)) as any).value.roles;
     expect(Array.isArray(roles.placeTypes)).toBe(true);
-    expect(roles.placeTypes).toHaveLength(12);
+    expect(roles.placeTypes).toHaveLength(GEOCODING_PLACE_TYPES.length);
     expect(roles.placeTypes.find((one: any) => one.id === "settlement").conceptId).toBe(VILLAGE);
     expect(roles.placeTypes.find((one: any) => one.id === "fortress").conceptId).toBe(CASTLE);
   });

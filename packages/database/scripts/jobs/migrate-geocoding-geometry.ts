@@ -132,11 +132,13 @@ const migrateGeocodingGeometryJob = async (db: Connection): Promise<void> => {
       continue;
     }
 
+    // dated as the coordinate it carries over, so the gazetteer references
+    // written with that coordinate still read as written with this one
     const value = {
       ...xValue,
       id: uuidv4(),
       labels: [serializeGeometry(pointGeometry(lon as number, lat as number))],
-      createdAt: new Date(),
+      createdAt: xValue?.createdAt ?? new Date(),
     };
     await r.table("entities").insert(value).run(db);
     const geometryProp = {

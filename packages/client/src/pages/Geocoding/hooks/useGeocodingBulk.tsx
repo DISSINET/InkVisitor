@@ -18,7 +18,6 @@ import { scatterOf } from "../utils/suggestions/suggestionScatter";
 import { BatchRun, BatchStep, batchStarting, choicesFrom, withStep } from "../utils/write/geocodingBatch";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { UseGeocodingWriter } from "./useGeocodingWriter";
-import { PlaceTypeNode } from "../utils/context/placeTypeHierarchy";
 
 /**
  * The runs over many Locations: a location type across the marked set, a quick
@@ -260,7 +259,7 @@ export const useGeocodingBulk = ({
         accuracy: pick.accuracy,
         // the same rule every other path follows: a location type is written only where
         // the corpus named one to stand for all of them, and never guessed at
-        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes as PlaceTypeNode[]),
+        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes),
         provenance,
         current: location.geometry,
         userOptions: user.options,
@@ -372,7 +371,7 @@ export const useGeocodingBulk = ({
         roles,
         geometry: pointGeometry(suggestion.lon, suggestion.lat),
         accuracy,
-        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes as PlaceTypeNode[]),
+        placeType: defaultTypeFor(context, location.typeEntries, roles.placeTypes),
         // the distance of the search that produced the choices
         provenance: provenanceOf(
           suggestion,

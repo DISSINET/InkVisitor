@@ -119,9 +119,9 @@ export interface UseGeocodingBrowse {
    * The location types actually present in what the server returned, plus a
    * choice for the Locations that state none.
    *
-   * Built from the data rather than from the vocabulary: a corpus where nothing
-   * has been typed yet would otherwise offer twelve choices that all empty the
-   * list, and the list would look broken rather than the corpus untyped.
+   * Built from the data rather than from the vocabulary: in a corpus where
+   * nothing has been typed yet, every location type of the vocabulary empties the
+   * list, which looks broken rather than untyped.
    */
   placeTypeOptions: DropdownItem[];
   /** The accuracies the list can be narrowed to. */
@@ -153,8 +153,8 @@ export const indentedName = (placeType: IGeocodingPlaceType & { depth?: number }
 /**
  * The location types present in a collection, as filter options.
  *
- * Built from the data rather than from the vocabulary. A corpus where nothing
- * has been typed would otherwise offer twelve choices that each empty the list,
+ * Built from the data rather than from the vocabulary. In a corpus where
+ * nothing has been typed, every location type of the vocabulary empties the list,
  * which reads as the filter being broken rather than the corpus being untyped —
  * so with none present it says so and offers nothing to choose.
  */

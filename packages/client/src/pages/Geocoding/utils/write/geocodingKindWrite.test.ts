@@ -6,7 +6,6 @@ import {
   KindGateway,
   executeKindChange,
   executeKindEdit,
-  planKindChange,
   planKindEdit,
 } from "./geocodingKindWrite";
 
@@ -30,7 +29,15 @@ const classification = (id: string, subject: string, concept: string): Relation.
   entityIds: [subject, concept],
 });
 
-describe("planKindChange", () => {
+/** Choosing one location type adds it and leaves the others; choosing none removes every one. */
+const planKindChange = (
+  locationId: string,
+  placeTypes: IGeocodingPlaceType[],
+  existing: Relation.IRelation[],
+  conceptId: string | null,
+) => planKindEdit(locationId, placeTypes, existing, conceptId ? { add: [conceptId] } : { removeAll: true });
+
+describe("planKindEdit, choosing one location type or none", () => {
   it("creates a Classification to the location type's Concept for a Location with none", () => {
     const change = planKindChange("L1", kinds, [], "C-village");
     expect(change.creates).toHaveLength(1);
