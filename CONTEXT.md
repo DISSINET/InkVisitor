@@ -249,7 +249,7 @@ One of the place categories a project uses for its Locations ("settlement", "for
 _Avoid_: kind of place, engine type
 
 **Gazetteer location type**:
-One of the twelve general place categories the gazetteers (the external geographic name indexes the geocoder searches, such as GeoNames) use. Each location type is mapped onto one of them, which is how the category a gazetteer gives a suggestion finds the project's own location types.
+One of the fourteen general place categories the gazetteers (the external geographic name indexes the geocoder searches, such as GeoNames) use. Each location type is mapped onto one of them, which is how the category a gazetteer gives a suggestion finds the project's own location types.
 _Avoid_: engine type, and location type alone (that is the project's own list)
 
 ## Screens

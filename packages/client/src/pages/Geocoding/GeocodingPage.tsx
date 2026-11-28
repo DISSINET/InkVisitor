@@ -963,7 +963,7 @@ export const GeocodingPage: React.FC = () => {
                   geometry: pointGeometry(suggestion.lon, suggestion.lat),
                   accuracy,
                   // the researcher's answer, not the engine's: a suggestion often
-                  // carries no type, and the twelve are a judgement about the
+                  // carries no type, and the fourteen are a judgement about the
                   // place rather than a summary of what the sources called it
                   placeType,
                   provenance,

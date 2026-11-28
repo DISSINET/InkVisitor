@@ -1,10 +1,14 @@
-import { defaultPlaceTypes, normalizePlaceTypes } from "@inkvisitor/shared/types/geocoding";
+import {
+  GEOCODING_PLACE_TYPES,
+  defaultPlaceTypes,
+  normalizePlaceTypes,
+} from "@inkvisitor/shared/types/geocoding";
 import { describe, expect, it } from "vitest";
 
 describe("normalizePlaceTypes", () => {
-  it("starts a project from the engine's twelve, each answering to its own", () => {
+  it("starts a project from the engine's types, each answering to its own", () => {
     const kinds = normalizePlaceTypes(undefined);
-    expect(kinds).toHaveLength(12);
+    expect(kinds).toHaveLength(GEOCODING_PLACE_TYPES.length);
     expect(kinds.every((one) => one.engineType === one.id && one.favorite && !one.conceptId)).toBe(true);
   });
 

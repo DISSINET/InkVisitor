@@ -46,13 +46,15 @@ export const GEOCODING_PLACE_TYPES = [
   "archaeological",
   "battlefield",
   "port",
+  "diocese",
+  "ecclesiastical-province",
 ] as const;
 
 export type GeocodingPlaceType = (typeof GEOCODING_PLACE_TYPES)[number];
 
 /**
  * What each gazetteer location type is called and covers. Words rather than a code because
- * the twelve are the engine's vocabulary: "religious" covers a chapel and a
+ * these are the engine's vocabulary: "religious" covers a chapel and a
  * monastery, and nobody guesses that from the word. `icon` is a key into the
  * client's icon set.
  */
@@ -77,7 +79,7 @@ export const ENGINE_PLACE_TYPE_INFO: Record<
   },
   region: {
     label: "region",
-    description: "An area rather than a point: a province, duchy, diocese or district.",
+    description: "An area rather than a point: a province, duchy or district.",
     icon: "region",
   },
   river: {
@@ -120,12 +122,22 @@ export const ENGINE_PLACE_TYPE_INFO: Record<
     description: "A harbour, quay or landing place.",
     icon: "port",
   },
+  diocese: {
+    label: "diocese",
+    description: "The area under a bishop, as a bounded territory.",
+    icon: "cross",
+  },
+  "ecclesiastical-province": {
+    label: "ecclesiastical province",
+    description: "A group of dioceses under an archbishop, as a bounded territory.",
+    icon: "region",
+  },
 };
 
 /**
  * A location type as the project defines it.
  *
- * Distinct from the engine's twelve: the engine's types say what to ask the
+ * Distinct from the engine's types: the engine's types say what to ask the
  * gazetteers for, and these say what the project calls a Location. A Location
  * has a location type by being the subject of a Classification relation to `conceptId`.
  */

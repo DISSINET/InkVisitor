@@ -735,7 +735,7 @@ defines its own list in the global settings — the Concept a Location is
 classified under, whose label is what the location type is called, a mark chosen
 from the set of marks and, optionally, the gazetteer location type it answers to. Its description is the Concept's own detail, edited
 in the same table and written to the Concept when the window is saved. The gazetteer location
-types, the engine's twelve, are a separate vocabulary: they say what to ask the
+types, the engine's fourteen, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The
 default list is one location type per gazetteer location type. When several
 location types answer to one gazetteer location type, the starred favourite is
@@ -825,7 +825,7 @@ Three things follow from the vocabulary being the project's own:
   the reason on it. Hiding it would misrepresent the vocabulary; offering it and
   refusing the write afterwards wastes the decision.
 - "location type" in the personal context turns the second step off. A
-  project that has not mapped the twelve has nothing to write, and the coordinate
+  project that has not mapped the fourteen has nothing to write, and the coordinate
   is worth recording without them.
 - The accuracy prop points at a Concept, not at a Value this page owns. A write
   never offers a previous accuracy for deletion: that Concept belongs to the
@@ -872,7 +872,7 @@ other filters leave rather than from the vocabulary. That matters because the
 corpus does not state what a place is: a type appears only once a Location has
 been geocoded through this page, so on the ungeocoded view — the page's default —
 the control reads "no location types recorded yet" and offers nothing, rather than
-offering twelve location types that each empty the list. Options taken from its own result
+offering fourteen location types that each empty the list. Options taken from its own result
 would instead vanish the moment one was chosen.
 
 Each location type carries a mark from one uniform-stroke set drawn for interface sizes.
@@ -881,7 +881,7 @@ village of nine small roofs is a village at 48px and a grey blur in a list. The
 mark is the control: in the
 list, in the panel head, on a suggestion card and in the map's menu, clicking it
 opens the same picker. Every option there carries its mark, its name and a line
-saying what it covers, because the twelve are the engine's vocabulary rather than
+saying what it covers, because the fourteen are the engine's vocabulary rather than
 ordinary English — "religious" covers a chapel and a monastery, and nobody
 guesses that from the word.
 
@@ -1007,7 +1007,7 @@ its name, its coordinate at the end where it is read last — nobody scans a lis
 places by latitude — and a framed control that moves the map to it. What the
 gazetteers call it is not a mark on that line but words among the card's other
 facts, "settlement by the gazetteers": the marks on this page are the project's own
-location types, and the gazetteers' twelve are another vocabulary that is only
+location types, and the gazetteers' fourteen are another vocabulary that is only
 wanted when a location type is chosen for the Location, where the picker says
 which of the project's answer to it. Nothing is said where no source named a type,
 since "not recorded" would be a claim about the Location. A glyph alone reads as

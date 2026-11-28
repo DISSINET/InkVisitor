@@ -22,7 +22,7 @@ vi.mock("components/advanced", async (importOriginal) => ({
 
 /**
  * A researcher adding a location type such as "church" has to pair it with one
- * of the twelve gazetteer location types, whose names mean more than they say.
+ * of the fourteen gazetteer location types, whose names mean more than they say.
  */
 
 let view: Rendered | null = null;

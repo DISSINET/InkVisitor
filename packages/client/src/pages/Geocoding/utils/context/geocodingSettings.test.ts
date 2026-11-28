@@ -1,4 +1,5 @@
 import {
+  GEOCODING_PLACE_TYPES,
   GEOCODING_SETTINGS_KEY,
   GeocodingAccuracy,
   IGeocodingRoles,
@@ -161,7 +162,7 @@ describe("patchGeocodingRoles", () => {
     });
     await patchGeocodingRoles({ geometry: "c-geo-2" });
     const kinds = written().placeTypes;
-    expect(kinds).toHaveLength(12);
+    expect(kinds).toHaveLength(GEOCODING_PLACE_TYPES.length);
     expect(kinds.find((one) => one.id === "settlement")?.conceptId).toBe("old-settlement");
     expect(kinds.find((one) => one.id === "river")?.conceptId).toBe("old-river");
     expect(kinds.find((one) => one.id === "lake")?.conceptId).toBe("");
